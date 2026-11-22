@@ -3,7 +3,7 @@
 // oder Längengrenzen, weil Anthropic sie nicht unterstützt. Die Grenzen prüft danach das Mapping
 // in capture/domain (map-recognition.ts, map-best-before-recognition.ts).
 import { z } from 'zod'
-import { AI_CONFIDENCE_LEVELS, CONTAINER_KEYS } from '@/shared/config/constants'
+import { AI_CONFIDENCE_LEVELS, CONTAINER_KEYS, PHOTO_ROLES } from '@/shared/config/constants'
 
 const confidence = z.enum(AI_CONFIDENCE_LEVELS).describe('Wie sicher die Werte lesbar waren')
 
@@ -80,6 +80,21 @@ export const bestBeforeAnswerSchema = z.strictObject({
     .enum(['mhd', 'verbrauchen_bis', 'unbekannt'])
     .describe('Mindesthaltbarkeitsdatum oder „zu verbrauchen bis“'),
   sicherheit: confidence,
+})
+
+/** Query von `POST /api/photos?rolle=…&entwurf=…`. Der Body ist das rohe Bild. */
+export const photoUploadQuerySchema = z.object({
+  rolle: z.enum(PHOTO_ROLES),
+  entwurf: z.uuid().optional(),
+})
+
+/** `GET /api/photos/[id]?variante=vorschau`. Ohne Variante kommt das verkleinerte Bild. */
+export const photoRequestSchema = z.object({
+  id: z.uuid(),
+  variante: z
+    .enum(['bild', 'vorschau'])
+    .default('bild')
+    .transform((variant) => (variant === 'vorschau' ? 'thumbnail' : 'full')),
 })
 
 export type PackagingAnswer = z.infer<ReturnType<typeof packagingAnswerSchema>>
