@@ -32,6 +32,7 @@ describe('parseCalendarDay', () => {
     ['2027-09-30T12:00', 'mit Uhrzeit'],
     ['', 'leer'],
     ['0000-01-01', 'Jahr 0'],
+    ['0050-02-28', 'Jahr unter 1000'],
   ])('lehnt %s ab (%s)', (text) => {
     expect(parseCalendarDay(text)).toBeNull()
   })
