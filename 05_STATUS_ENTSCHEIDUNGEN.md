@@ -26,6 +26,7 @@ Der Maintainer hat am 2026-11-22 auf Rückfrage ausdrücklich bestätigt: Die dr
 | Design | **d6 „Glas-Cockpit“** (Mix aus d2 Kontrollzentrum + d3 Glas & Bento), **hell als Standard**, dunkel optional. **Animation ohne GSAP** (CSS bzw. Motion, MIT), damit jede Lizenzwahl offen bleibt | prototypes/, design.html |
 | Code-Qualität | Dateien ≤ 200 Zeilen (max. 300), Schichten, Migrationen, Tests, TS strict, kein toter Code | CLAUDE.md |
 | Name | **Preposaurus** (entschieden 2026-11-22). Ersetzt den früheren Arbeitstitel (Markenkollision, Name steht in research/25) | research/25 |
+| Arbeitsweise | PRs werden vom Agenten gemergt (Rebase), sobald die CI grün ist und ein zweiter Agent sie geprüft hat, auch in unbeaufsichtigten Durchläufen (Maintainer-Entscheidung 2026-11-22) | UMSETZUNG.md |
 | Lizenz | **AGPL-3.0-or-later** (Entscheidung des Maintainers 2026-11-22). Abhängigkeiten müssen AGPL-kompatibel sein | technik.html, FAKTEN.md |
 | Repo | github.com/polygonhunter/preposaurus, **öffentlich** (Open Source, AGPL-3.0-or-later). `prototypes/` ist ausgenommen (eigener Lizenzhinweis wegen GSAP), `research/` und `docs/konzept/` sind eigene Zusammenfassungen mit Rechten der zitierten Quellen bei den Herausgebern | README.md, THIRD_PARTY_NOTICES.md |
 
