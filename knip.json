@@ -4,7 +4,9 @@
     "src/server/db/migrate.ts!",
     "src/server/db/schema/*.ts!",
     "db/seeds/index.ts!",
-    "src/server/storage/sharp-photo-processor.ts!"
+    "src/server/storage/sharp-photo-processor.ts!",
+    "src/features/auth/actions/*.ts!",
+    "src/server/auth/guards.ts!"
   ],
   "project": [
     "src/**/*.{ts,tsx,css}!",
