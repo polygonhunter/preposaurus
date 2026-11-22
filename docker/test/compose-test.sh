@@ -24,6 +24,9 @@ echo "/api/health: $(curl -fsS http://127.0.0.1:3000/api/health)"
 [ "$(docker compose ps -a --format '{{.ExitCode}}' migrate)" = "0" ] || fail "migrate ist nicht sauber beendet"
 [ "$(docker compose port web 3000)" = "127.0.0.1:3000" ] || fail "Port 3000 hängt nicht nur an 127.0.0.1"
 [ "$(docker compose exec -T web id -u)" != "0" ] || fail "web läuft als root"
+# Die CI startet web unter der Nutzer-ID des Runners (nicht 1000), wie ein NAS mit eigener ID.
+docker compose exec -T web sh -c 'touch .next/cache/probe && rm .next/cache/probe' ||
+  fail ".next/cache ist für PREPOSAURUS_UID nicht schreibbar"
 [ "$(psql_value 'select count(*) from kategorie')" -gt 0 ] || fail "Stammdaten fehlen"
 
 if docker compose exec -T web node scripts/admin.mjs passwort-zuruecksetzen niemand; then
