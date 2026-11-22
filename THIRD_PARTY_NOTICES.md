@@ -8,6 +8,7 @@ Preposaurus selbst steht unter der [AGPL-3.0-or-later](LICENSE). Diese Datei nen
 |---|---|---|
 | libvips (`@img/sharp-libvips-*`, über sharp) | LGPL-3.0-or-later | dynamisch gelinkte Bibliothek für die Bildverarbeitung, mit der AGPL vereinbar |
 | caniuse-lite | CC-BY-4.0 | Browser-Daten, die Next.js zur Build-Zeit liest. © Alexis Deveria und Beitragende, <https://github.com/browserslist/caniuse-lite> |
+| lightningcss (über vite und vitest, optionale Peer-Abhängigkeit von better-auth) | MPL-2.0 | nur Werkzeug, läuft nicht zur Laufzeit. MPL-2.0 § 3.3 erlaubt die Kombination mit der AGPL-3.0 |
 | web-push (geplant) | MPL-2.0 | MPL-2.0 § 3.3 erlaubt die Kombination mit der AGPL-3.0 |
 
 ## Weitere Bestandteile
