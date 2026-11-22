@@ -30,6 +30,7 @@ const envSchema = z
     AI_MODEL_PACKAGING: z.string().min(1).default(AI_ROLE_DEFAULT_MODELS.verpackung),
     AI_MODEL_NUTRITION: z.string().min(1).default(AI_ROLE_DEFAULT_MODELS.naehrwerte),
     AI_MODEL_BEST_BEFORE: z.string().min(1).default(AI_ROLE_DEFAULT_MODELS.mhd),
+    PHOTO_STORAGE_DIR: z.string().min(1).default('./.data/fotos'),
   })
   .refine((env) => env.AI_PROVIDER !== 'anthropic' || env.ANTHROPIC_API_KEY !== undefined, {
     path: ['ANTHROPIC_API_KEY'],

@@ -2,7 +2,7 @@
   {
     "package": "@img/sharp-libvips-*",
     "license": "LGPL-3.0-or-later",
-    "reason": "libvips kommt mit sharp (optionale Abhängigkeit von next für Bildoptimierung). Dynamisch gelinkte Bibliothek, mit MIT, GPL und AGPL vereinbar (FAKTEN F9). [USER] U2."
+    "reason": "libvips kommt mit sharp (Fotoverarbeitung M6-01, außerdem optionale Abhängigkeit von next). Dynamisch gelinkte Bibliothek, mit MIT, GPL und AGPL vereinbar (FAKTEN F9). [USER] U2."
   },
   {
     "package": "caniuse-lite",

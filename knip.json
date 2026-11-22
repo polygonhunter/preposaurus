@@ -1,10 +1,17 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["src/server/db/migrate.ts!", "src/server/db/schema/*.ts!", "db/seeds/index.ts!"],
+  "entry": [
+    "src/server/db/migrate.ts!",
+    "src/server/db/schema/*.ts!",
+    "db/seeds/index.ts!",
+    "src/server/storage/sharp-photo-processor.ts!"
+  ],
   "project": [
     "src/**/*.{ts,tsx,css}!",
     "!src/features/*/domain/**!",
     "!src/shared/lib/{dates,quantities,slug,stock-unit}.ts!",
+    "!src/server/{ai,storage}/**!",
+    "!src/features/capture/{application/**,schemas.ts}!",
     "db/**/*.ts!",
     "!db/seeds/{demo*,factories}.ts!",
     "tests/**/*.{ts,tsx}",
