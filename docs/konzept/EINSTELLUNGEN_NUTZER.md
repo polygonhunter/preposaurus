@@ -251,6 +251,10 @@ Die Zähler liegen in der DB (`anmelde_sperre`, §6), damit ein Neustart sie nic
 | Admin-Plugin | `createUser` (verlangt E-Mail), `setUserPassword`, `setRole`, `banUser` (beendet Sitzungen), `removeUser` (**löscht hart**), `impersonateUser`. Eigene Rollen über Access Control | **Empfehlung: nicht verwenden.** Seine Routen kennen die Regel „letzter Admin“ nicht, bringen hartes Löschen und Imitieren mit und doppeln `aktiv` durch `banned`. Stattdessen fünf kleine eigene Use-Cases, die Hash und Sitzungen über den Server-Kontext von Better Auth setzen. Vor M3-01 an einem Probelauf bestätigen (Frage 10) |
 | Deaktivierte Nutzer | Ohne Admin-Plugin keine eingebaute Sperre | Prüfung im Anmelde-Use-Case und zusätzlich in einem Datenbank-Hook vor dem Anlegen einer Sitzung |
 
+**Betrieb (Sicherheits-Review #138, gilt für Compose-Datei und Einrichtungsanleitung #1):**
+- Den App-Port 3000 **nie ins LAN freigeben**. Die App läuft nur hinter dem Tailscale-Sidecar (`network_mode: service:tailscale`) oder höchstens mit `127.0.0.1:3000:3000`. Grund: Next übernimmt einen `X-Forwarded-For`, den das Gerät selbst mitschickt. Wer den Port direkt erreicht, kann sich je Anfrage eine neue Adresse ausdenken und die Bremse je Adresse umgehen oder ein fremdes Gerät aussperren. Tailscale Serve ersetzt den Header dagegen. Die Bremsen je Name und `global` wirken in beiden Fällen.
+- In Produktion (`NODE_ENV=production`) geht die Anmeldung **nur über HTTPS**. Das Sitzungs-Cookie ist `Secure`, über reines http verwirft der Browser es. Das ist gewollt und kein Fehler, `useSecureCookies` bleibt an.
+
 ## 5. Rechte-Matrix
 
 ✓ erlaubt · – nicht erlaubt · „liest“ = sichtbar, Felder gesperrt mit „Das ändert ein Admin“.
