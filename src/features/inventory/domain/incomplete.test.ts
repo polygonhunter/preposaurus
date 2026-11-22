@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
 import { findIncomplete, isMissingBestBefore, nutritionGapOf } from './incomplete'
 import {
-  isNutritionUnconfirmed,
-  type NutritionSource,
+  isEstimateUnconfirmed,
   type ProductNutrition,
+  type StoredNutritionSource,
 } from './nutrition-source'
 import type { StockUnit, UnitStatus } from './unit'
 
@@ -19,8 +19,11 @@ const unit = (id: string, withDate: boolean, status: UnitStatus = 'stock') =>
     'id' | 'status' | 'bestBefore'
   >
 
+const REFERENCE = { kcal: 340, protein: 11, carbs: 68, fat: 2 }
+const none = { kcal: null, protein: null, carbs: null, fat: null }
+
 const nutrition = (
-  source: NutritionSource,
+  source: StoredNutritionSource,
   options: { confirmed?: boolean; kcal?: number | null } = {},
 ): ProductNutrition => ({
   values: { ...values, kcal: options.kcal === undefined ? values.kcal : options.kcal },
@@ -28,17 +31,16 @@ const nutrition = (
   confirmedAt: options.confirmed === true ? confirmedAt : null,
 })
 
-describe('isNutritionUnconfirmed', () => {
-  it('Etikett und Handeingabe gelten ohne gesonderte Bestätigung', () => {
-    expect(isNutritionUnconfirmed(nutrition('label'))).toBe(false)
-    expect(isNutritionUnconfirmed(nutrition('manual'))).toBe(false)
+describe('isEstimateUnconfirmed', () => {
+  it('Etikett und Handeingabe brauchen keine gesonderte Bestätigung', () => {
+    expect(isEstimateUnconfirmed(nutrition('label'))).toBe(false)
+    expect(isEstimateUnconfirmed(nutrition('manual'))).toBe(false)
+    expect(isEstimateUnconfirmed({ source: null, confirmedAt: null })).toBe(false)
   })
 
-  it('Richtwert und KI-Schätzung sind bis zur Bestätigung unbestätigt', () => {
-    expect(isNutritionUnconfirmed(nutrition('reference'))).toBe(true)
-    expect(isNutritionUnconfirmed(nutrition('ai-estimate'))).toBe(true)
-    expect(isNutritionUnconfirmed(nutrition('reference', { confirmed: true }))).toBe(false)
-    expect(isNutritionUnconfirmed(nutrition('ai-estimate', { confirmed: true }))).toBe(false)
+  it('eine KI-Schätzung ist bis zur Bestätigung unbestätigt', () => {
+    expect(isEstimateUnconfirmed(nutrition('ai-estimate'))).toBe(true)
+    expect(isEstimateUnconfirmed(nutrition('ai-estimate', { confirmed: true }))).toBe(false)
   })
 })
 
@@ -55,24 +57,39 @@ describe('isMissingBestBefore', () => {
 })
 
 describe('nutritionGapOf', () => {
-  it('meldet fehlende kcal vor einer fehlenden Bestätigung', () => {
-    expect(nutritionGapOf(nutrition('reference', { kcal: null }))).toBe('missing')
-    expect(nutritionGapOf(nutrition('label', { kcal: null }))).toBe('missing')
+  const noOwnValues: ProductNutrition = { values: none, source: null, confirmedAt: null }
+
+  it('meldet fehlende kcal, wenn auch kein Richtwert hilft', () => {
+    expect(nutritionGapOf(noOwnValues, null)).toBe('missing')
+    expect(nutritionGapOf(nutrition('label', { kcal: null }), null)).toBe('missing')
+    expect(nutritionGapOf(nutrition('ai-estimate', { kcal: null }), { ...none })).toBe('missing')
   })
 
-  it('meldet unbestätigte Richtwerte und Schätzungen', () => {
-    expect(nutritionGapOf(nutrition('reference'))).toBe('unconfirmed')
-    expect(nutritionGapOf(nutrition('ai-estimate'))).toBe('unconfirmed')
+  it('meldet ein Produkt ohne eigene Werte, für das der Richtwert zählt', () => {
+    expect(nutritionGapOf(noOwnValues, REFERENCE)).toBe('no-label')
   })
 
-  it('meldet nichts bei Etikett, Handeingabe oder bestätigtem Richtwert', () => {
-    expect(nutritionGapOf(nutrition('label'))).toBeNull()
-    expect(nutritionGapOf(nutrition('manual'))).toBeNull()
-    expect(nutritionGapOf(nutrition('reference', { confirmed: true }))).toBeNull()
+  it('meldet eine unbestätigte KI-Schätzung', () => {
+    expect(nutritionGapOf(nutrition('ai-estimate'), REFERENCE)).toBe('unconfirmed')
+  })
+
+  it('meldet nichts bei Etikett, Handeingabe oder bestätigter Schätzung', () => {
+    expect(nutritionGapOf(nutrition('label'), null)).toBeNull()
+    expect(nutritionGapOf(nutrition('manual'), null)).toBeNull()
+    expect(nutritionGapOf(nutrition('ai-estimate', { confirmed: true }), null)).toBeNull()
+  })
+
+  it('meldet nichts, wenn das Etikett nur teilweise ergänzt wird', () => {
+    const partial: ProductNutrition = {
+      values: { ...none, kcal: 359 },
+      source: 'label',
+      confirmedAt: null,
+    }
+    expect(nutritionGapOf(partial, REFERENCE)).toBeNull()
   })
 
   it('behandelt 0 kcal als Wert, nicht als Lücke', () => {
-    expect(nutritionGapOf(nutrition('label', { kcal: 0 }))).toBeNull()
+    expect(nutritionGapOf(nutrition('label', { kcal: 0 }), null)).toBeNull()
   })
 })
 
@@ -85,15 +102,21 @@ describe('findIncomplete', () => {
       unit('d', false, 'consumed'),
     ]
     const products = [
-      { id: 'etikett', nutrition: nutrition('label') },
-      { id: 'richtwert', nutrition: nutrition('reference') },
-      { id: 'ohne-kcal', nutrition: nutrition('manual', { kcal: null }) },
+      { id: 'etikett', nutrition: nutrition('label'), foodTypeReference: REFERENCE },
+      { id: 'schaetzung', nutrition: nutrition('ai-estimate'), foodTypeReference: null },
+      {
+        id: 'richtwert',
+        nutrition: { values: none, source: null, confirmedAt: null },
+        foodTypeReference: REFERENCE,
+      },
+      { id: 'ohne-kcal', nutrition: nutrition('manual', { kcal: null }), foodTypeReference: null },
     ]
     const result = findIncomplete({ units, products })
 
     expect(result.units.map((entry) => entry.id)).toEqual(['a', 'c'])
     expect(result.products.map(({ product, gap }) => [product.id, gap])).toEqual([
-      ['richtwert', 'unconfirmed'],
+      ['schaetzung', 'unconfirmed'],
+      ['richtwert', 'no-label'],
       ['ohne-kcal', 'missing'],
     ])
   })
@@ -102,7 +125,7 @@ describe('findIncomplete', () => {
     expect(findIncomplete({ units: [], products: [] })).toEqual({ units: [], products: [] })
     const complete = findIncomplete({
       units: [unit('a', true)],
-      products: [{ nutrition: nutrition('label') }],
+      products: [{ nutrition: nutrition('label'), foodTypeReference: null }],
     })
     expect(complete).toEqual({ units: [], products: [] })
   })

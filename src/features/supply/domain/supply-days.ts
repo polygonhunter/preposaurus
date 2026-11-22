@@ -8,7 +8,7 @@ import { isCountedOn, roundDownDays, type ReferenceDay } from './supply-rules'
 export interface SupplyUnit extends Pick<StockUnit, 'id' | 'status' | 'bestBefore' | 'checkedAt'> {
   /** kcal dieser Packung (Inhalt × kcal je 100 ÷ 100) */
   kcal: number
-  /** kcal aus Richtwert bzw. KI-Schätzung, noch nicht bestätigt (#115) */
+  /** kcal stammen aus Richtwert oder KI-Schätzung (`hasEstimatedKcal`), bestätigt oder nicht (E-5) */
   isKcalEstimated: boolean
   /** Inhalt in ml, nur bei Einheiten der Warengruppe Wasser, sonst 0 */
   waterMl: number
