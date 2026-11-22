@@ -14,6 +14,7 @@ docker compose -f compose.yaml -f compose.tailscale.yaml config --quiet 2> /dev/
   fail "Die Tailscale-Überlagerung muss ohne TS_HOSTNAME abbrechen"
 TS_HOSTNAME=test docker compose -f compose.yaml -f compose.tailscale.yaml config > tailscale.yaml
 grep -q 'network_mode: service:tailscale' tailscale.yaml || fail "web hängt nicht am Sidecar"
+grep -q 'HOSTNAME: 127.0.0.1' tailscale.yaml || fail "web lauscht hinter dem Sidecar nicht nur auf 127.0.0.1"
 grep -q 'published:' tailscale.yaml && fail "Mit Sidecar darf kein Port auf dem NAS offen sein"
 
 docker compose up -d
