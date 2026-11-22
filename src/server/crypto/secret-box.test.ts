@@ -70,6 +70,16 @@ describe('encryptSecret und decryptSecret', () => {
     expect(decryptSecret(tampered, CONTEXT)).toEqual({ ok: false, error: 'undecryptable' })
   })
 
+  it('lehnt einen IV mit falscher Länge ab', () => {
+    const encrypted = encryptSecret(PLAINTEXT, CONTEXT)
+    const shortIv = Buffer.from(encrypted.iv, 'base64').subarray(0, 8).toString('base64')
+
+    expect(decryptSecret({ ...encrypted, iv: shortIv }, CONTEXT)).toEqual({
+      ok: false,
+      error: 'undecryptable',
+    })
+  })
+
   it('erkennt eine fremde Version', () => {
     const encrypted = encryptSecret(PLAINTEXT, CONTEXT)
 
