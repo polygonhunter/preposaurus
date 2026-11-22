@@ -15,6 +15,7 @@ describe('loadEnv', () => {
       AI_MODEL_PACKAGING: 'claude-haiku-5-5',
       AI_MODEL_NUTRITION: 'claude-haiku-5-5',
       AI_MODEL_BEST_BEFORE: 'claude-haiku-5-5',
+      PHOTO_STORAGE_DIR: './.data/fotos',
     })
   })
 
