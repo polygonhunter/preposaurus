@@ -89,19 +89,19 @@ describe('validateAmpelThresholds', () => {
 describe('unitStateFor ohne Datum', () => {
   it('liefert den eigenen Zustand „Datum fehlt“ statt einer Ampelfarbe', () => {
     expect(unitStateFor({ bestBefore: null, today, thresholds: DEFAULT_AMPEL_THRESHOLDS })).toBe(
-      'date-missing',
+      'no-date',
     )
   })
 
   it('bleibt auch mit Schwellen 0 bei „Datum fehlt“', () => {
     const zero = { soonDays: 0, urgentDays: 0 }
-    expect(unitStateFor({ bestBefore: null, today, thresholds: zero })).toBe('date-missing')
+    expect(unitStateFor({ bestBefore: null, today, thresholds: zero })).toBe('no-date')
   })
 })
 
 describe('canConfirmStillGood', () => {
   it('bietet „Noch gut“ nur bei abgelaufenem MHD an', () => {
-    expect(canConfirmStillGood('date-missing', 'best-before')).toBe(false)
+    expect(canConfirmStillGood('no-date', 'best-before')).toBe(false)
     expect(canConfirmStillGood('expired', 'best-before')).toBe(true)
     expect(canConfirmStillGood('expired', 'use-by')).toBe(false)
     expect(canConfirmStillGood('urgent', 'best-before')).toBe(false)
