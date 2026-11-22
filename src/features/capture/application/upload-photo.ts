@@ -8,15 +8,10 @@ import { MAX_UPLOAD_BYTES, type PhotoRejection } from '@/server/storage/photo-pr
 import type { PhotoRole } from '@/shared/config/constants'
 import { readLimitedBody } from '@/shared/lib/read-limited-body'
 import { err, ok, type Result } from '@/shared/lib/result'
-import {
-  findLatestDraftId,
-  insertDraft,
-  isOwnDraft,
-  lockDraftOwner,
-} from '../data/draft-repository'
 import { insertDraftPhoto } from '../data/photo-repository'
 import type { CaptureActor } from './capture-actor'
 import type { CaptureDeps } from './capture-deps'
+import { resolveOwnDraftId } from './own-draft'
 import { deletePhotoFiles, photoKeysFor } from './photo-files'
 
 export interface UploadPhotoInput {
@@ -37,16 +32,6 @@ export type UploadPhotoError = PhotoRejection | { kind: 'draft-not-found' }
 
 type Database = CaptureDeps['db']
 
-async function resolveDraftId(
-  tx: Database,
-  actor: CaptureActor,
-  draftId: string | null,
-): Promise<string | null> {
-  await lockDraftOwner(tx, actor)
-  if (draftId !== null) return (await isOwnDraft(tx, actor, draftId)) ? draftId : null
-  return (await findLatestDraftId(tx, actor)) ?? insertDraft(tx, actor)
-}
-
 interface PhotoRow {
   input: UploadPhotoInput
   photoId: string
@@ -58,7 +43,7 @@ interface PhotoRow {
 function insertRow(db: Database, row: PhotoRow): Promise<string | null> {
   const { actor, role } = row.input
   return db.transaction(async (tx) => {
-    const draftId = await resolveDraftId(tx, actor, row.input.draftId)
+    const draftId = await resolveOwnDraftId(tx, actor, row.input.draftId)
     if (draftId === null) return null
     const { photoId: id, path, mimeType } = row
     await insertDraftPhoto(tx, { id, ...actor, draftId, role, path, mimeType })
