@@ -12,7 +12,7 @@ type SheetProps = Readonly<{
 }>
 
 // Blatt von unten als modaler <dialog>: Fokusfalle, Escape und Hintergrund-Sperre liefert der Browser.
-// Ab „breit“ ein zentrierter Dialog.
+// Ein Tippen auf den abgedunkelten Hintergrund schließt es ebenfalls. Ab „breit“ ein zentrierter Dialog.
 export function Sheet({ isOpen, onClose, title, children, actions }: SheetProps) {
   const ref = useRef<HTMLDialogElement>(null)
   const titleId = useId()
@@ -23,6 +23,19 @@ export function Sheet({ isOpen, onClose, title, children, actions }: SheetProps)
     if (isOpen && !dialog.open) dialog.showModal()
     if (!isOpen && dialog.open) dialog.close()
   }, [isOpen])
+
+  useEffect(() => {
+    const dialog = ref.current
+    if (!dialog) return
+    // Der Inhalt füllt den Dialog ganz aus, ein Klick direkt auf <dialog> trifft also nur den Hintergrund.
+    const closeOnBackdrop = (event: MouseEvent) => {
+      if (event.target === dialog) dialog.close()
+    }
+    dialog.addEventListener('click', closeOnBackdrop)
+    return () => {
+      dialog.removeEventListener('click', closeOnBackdrop)
+    }
+  }, [])
 
   return (
     <dialog
