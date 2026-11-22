@@ -3,6 +3,7 @@
 import type { Database } from '../../src/server/db/connection'
 import { users } from '../../src/server/db/schema/account'
 import { categories, containers, storageLocations } from '../../src/server/db/schema/catalog'
+import { foodTypes } from '../../src/server/db/schema/food-types'
 import { householdSettings, households, members } from '../../src/server/db/schema/household'
 import { products, units } from '../../src/server/db/schema/inventory'
 import { goals } from '../../src/server/db/schema/recommendation'
@@ -25,6 +26,7 @@ import { DEMO_MEMBERS, DEMO_PRODUCTS, DEMO_USERS, type DemoProduct } from './dem
 type Lookups = Readonly<{
   categoryIds: Map<string, string>
   containerIds: Map<string, string>
+  foodTypeIds: Map<string, string>
   locationIds: Map<string, string>
 }>
 
@@ -42,7 +44,9 @@ function requireId(ids: Map<string, string>, key: string): string {
 async function loadMasterDataIds(db: Database) {
   const categoryRows = await db.select({ id: categories.id, key: categories.key }).from(categories)
   const containerRows = await db.select({ id: containers.id, key: containers.key }).from(containers)
+  const foodTypeRows = await db.select({ id: foodTypes.id, key: foodTypes.key }).from(foodTypes)
   return {
+    foodTypeIds: new Map(foodTypeRows.map((row) => [row.key ?? '', row.id])),
     categoryIds: new Map(categoryRows.map((row) => [row.key ?? '', row.id])),
     containerIds: new Map(containerRows.map((row) => [row.key, row.id])),
   }
@@ -68,12 +72,13 @@ async function insertLocations(db: Database, householdId: string) {
 }
 
 function buildDemoProduct(item: DemoProduct, householdId: string, lookups: Lookups) {
-  const { units: stages, category, container, location, ...fields } = item
+  const { units: stages, category, foodType, container, location, ...fields } = item
   return {
     product: buildProduct({
       householdId,
       ...fields,
       categoryId: requireId(lookups.categoryIds, category),
+      foodTypeId: foodType === undefined ? null : requireId(lookups.foodTypeIds, foodType),
       containerId: requireId(lookups.containerIds, container),
       storageLocationId: requireId(lookups.locationIds, location),
     }),

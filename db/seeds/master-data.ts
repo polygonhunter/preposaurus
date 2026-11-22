@@ -4,9 +4,11 @@
 import { sql } from 'drizzle-orm'
 import type { Database } from '../../src/server/db/connection'
 import { categories, containers } from '../../src/server/db/schema/catalog'
+import { foodTypes } from '../../src/server/db/schema/food-types'
 import { productGroups } from '../../src/server/db/schema/recommendation'
 import { CONTAINERS } from './stammdaten/behaelter'
 import { SYSTEM_CATEGORIES } from './stammdaten/kategorien'
+import { SYSTEM_FOOD_TYPES } from './stammdaten/lebensmittelarten'
 import { PRODUCT_GROUPS } from './stammdaten/warengruppen'
 
 const SORT_STEP = 10
@@ -27,20 +29,23 @@ async function seedProductGroups(db: Database): Promise<Map<string, string>> {
   return new Map(rows.map((row) => [row.key, row.id]))
 }
 
-function requireGroupId(groupIds: Map<string, string>, key: string): string {
-  const groupId = groupIds.get(key)
-  if (groupId === undefined) throw new Error(`Warengruppe ${key} fehlt im Seed`)
-  return groupId
+function requireId(ids: Map<string, string>, key: string): string {
+  const found = ids.get(key)
+  if (found === undefined) throw new Error(`Schlüssel ${key} fehlt im Seed`)
+  return found
 }
 
-async function seedSystemCategories(db: Database, groupIds: Map<string, string>): Promise<void> {
-  await db
+async function seedSystemCategories(
+  db: Database,
+  groupIds: Map<string, string>,
+): Promise<Map<string, string>> {
+  const rows = await db
     .insert(categories)
     .values(
       SYSTEM_CATEGORIES.map(({ productGroup, ...category }, index) => ({
         ...category,
         isSystem: true,
-        productGroupId: requireGroupId(groupIds, productGroup),
+        productGroupId: requireId(groupIds, productGroup),
         sortOrder: sortOrderOf(index),
       })),
     )
@@ -50,6 +55,30 @@ async function seedSystemCategories(db: Database, groupIds: Map<string, string>)
         name: fromExcluded('name'),
         pictogram: fromExcluded('piktogramm'),
         productGroupId: fromExcluded('warengruppe_id'),
+        sortOrder: fromExcluded('sortierung'),
+      },
+    })
+    .returning({ id: categories.id, key: categories.key })
+  return new Map(rows.map((row) => [row.key ?? '', row.id]))
+}
+
+// Wandert eine Art in eine andere Kategorie, ziehen ihre Produkte per ON UPDATE CASCADE mit.
+async function seedSystemFoodTypes(db: Database, categoryIds: Map<string, string>): Promise<void> {
+  await db
+    .insert(foodTypes)
+    .values(
+      SYSTEM_FOOD_TYPES.map(({ category, ...foodType }, index) => ({
+        ...foodType,
+        isSystem: true,
+        categoryId: requireId(categoryIds, category),
+        sortOrder: sortOrderOf(index),
+      })),
+    )
+    .onConflictDoUpdate({
+      target: foodTypes.key,
+      set: {
+        name: fromExcluded('name'),
+        categoryId: fromExcluded('kategorie_id'),
         sortOrder: fromExcluded('sortierung'),
       },
     })
@@ -68,7 +97,8 @@ async function seedContainers(db: Database): Promise<void> {
 export async function seedMasterData(db: Database): Promise<void> {
   await db.transaction(async (tx) => {
     const groupIds = await seedProductGroups(tx)
-    await seedSystemCategories(tx, groupIds)
+    const categoryIds = await seedSystemCategories(tx, groupIds)
+    await seedSystemFoodTypes(tx, categoryIds)
     await seedContainers(tx)
   })
 }

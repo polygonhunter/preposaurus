@@ -43,6 +43,13 @@
       "when": 1795352274867,
       "tag": "0005_ki_einstellung",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795352732950,
+      "tag": "0006_lebensmittelart",
+      "breakpoints": true
     }
   ]
 }
