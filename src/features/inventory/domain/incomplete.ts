@@ -1,3 +1,4 @@
+import { isInStockWithoutDate } from '@/shared/lib/stock-unit'
 import {
   isEstimateUnconfirmed,
   type NutritionValues,
@@ -15,11 +16,6 @@ import type { StockUnit } from './unit'
  * (es zählt der Richtwert), oder eine KI-Schätzung ist noch unbestätigt.
  */
 export type NutritionGap = 'missing' | 'no-label' | 'unconfirmed'
-
-/** Eine Packung im Vorrat ohne Datum. Verbrauchte und entsorgte brauchen kein Datum mehr. */
-export function isMissingBestBefore(unit: Pick<StockUnit, 'status' | 'bestBefore'>): boolean {
-  return unit.status === 'stock' && unit.bestBefore === null
-}
 
 /** Fehlende kcal wiegen am schwersten, denn dann zählt das Produkt mit 0. */
 export function nutritionGapOf(
@@ -53,5 +49,5 @@ export function findIncomplete<
     const gap = nutritionGapOf(product.nutrition, product.foodTypeReference)
     if (gap !== null) incompleteProducts.push({ product, gap })
   }
-  return { units: units.filter(isMissingBestBefore), products: incompleteProducts }
+  return { units: units.filter(isInStockWithoutDate), products: incompleteProducts }
 }

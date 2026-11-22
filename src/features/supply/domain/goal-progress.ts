@@ -1,4 +1,5 @@
 import type { CalendarDay } from '@/shared/lib/dates'
+import { isInStockWithoutDate } from '@/shared/lib/stock-unit'
 import { err, ok, type Result } from '@/shared/lib/result'
 import {
   calculateSupplyDays,
@@ -69,6 +70,6 @@ export function calculateGoalProgress<T extends SupplyUnit>(
     goalDays: goal.days,
     isGoalReached: atTarget.value.days >= goal.days,
     expiringBeforeTarget: unitsExpiringBefore(input.units, { today, targetDay: goal.targetDay }),
-    withoutDate: input.units.filter((unit) => unit.status === 'stock' && unit.bestBefore === null),
+    withoutDate: input.units.filter(isInStockWithoutDate),
   })
 }

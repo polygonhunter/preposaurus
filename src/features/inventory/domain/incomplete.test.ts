@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
-import { findIncomplete, isMissingBestBefore, nutritionGapOf } from './incomplete'
+import { findIncomplete, nutritionGapOf } from './incomplete'
 import {
   isEstimateUnconfirmed,
   type ProductNutrition,
@@ -41,18 +41,6 @@ describe('isEstimateUnconfirmed', () => {
   it('eine KI-Schätzung ist bis zur Bestätigung unbestätigt', () => {
     expect(isEstimateUnconfirmed(nutrition('ai-estimate'))).toBe(true)
     expect(isEstimateUnconfirmed(nutrition('ai-estimate', { confirmed: true }))).toBe(false)
-  })
-})
-
-describe('isMissingBestBefore', () => {
-  it('erkennt Packungen im Vorrat ohne Datum', () => {
-    expect(isMissingBestBefore(unit('a', false))).toBe(true)
-    expect(isMissingBestBefore(unit('b', true))).toBe(false)
-  })
-
-  it('übergeht verbrauchte und entsorgte Packungen ohne Datum', () => {
-    expect(isMissingBestBefore(unit('a', false, 'consumed'))).toBe(false)
-    expect(isMissingBestBefore(unit('b', false, 'discarded'))).toBe(false)
   })
 })
 

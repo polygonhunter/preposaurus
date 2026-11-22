@@ -4,7 +4,7 @@
   "project": [
     "src/**/*.{ts,tsx,css}!",
     "!src/features/*/domain/**!",
-    "!src/shared/lib/{dates,quantities,slug}.ts!",
+    "!src/shared/lib/{dates,quantities,slug,stock-unit}.ts!",
     "db/**/*.ts!",
     "!db/seeds/{demo*,factories}.ts!",
     "tests/**/*.{ts,tsx}",
