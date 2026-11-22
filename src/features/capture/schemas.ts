@@ -3,11 +3,9 @@
 // oder Längengrenzen, weil Anthropic sie nicht unterstützt. Die Grenzen prüft danach das Mapping
 // in capture/domain (map-recognition.ts, map-best-before-recognition.ts).
 import { z } from 'zod'
-import { CONTAINER_KEYS } from '@/shared/config/constants'
+import { AI_CONFIDENCE_LEVELS, CONTAINER_KEYS } from '@/shared/config/constants'
 
-const confidence = z
-  .enum(['hoch', 'mittel', 'niedrig'])
-  .describe('Wie sicher die Werte lesbar waren')
+const confidence = z.enum(AI_CONFIDENCE_LEVELS).describe('Wie sicher die Werte lesbar waren')
 
 const nullableNumber = (description: string) => z.number().nullable().describe(description)
 

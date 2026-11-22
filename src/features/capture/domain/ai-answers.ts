@@ -3,9 +3,9 @@
 // einmal. Ein Typtest (src/server/ai/schema-types.test.ts) hält beide deckungsgleich.
 // Die Feldnamen sind deutsch, weil sie im Schema an die KI gehen (technik.html#api-ki).
 
-import type { ContainerKey } from '@/shared/config/constants'
+import type { AI_CONFIDENCE_LEVELS, ContainerKey } from '@/shared/config/constants'
 
-export type AiConfidence = 'hoch' | 'mittel' | 'niedrig'
+export type AiConfidence = (typeof AI_CONFIDENCE_LEVELS)[number]
 
 /** Schema A · Verpackung */
 export interface AiPackagingAnswer {
