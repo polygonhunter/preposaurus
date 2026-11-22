@@ -1,12 +1,9 @@
-// Gemeinsame Antworten der Foto-Routen, wenn Sitzung oder Haushalt fehlen.
+// Gemeinsame Antworten der Foto-Routen, wenn Sitzung oder Haushalt fehlen. Texte wie in den Actions.
+import { accessMessage } from '@/features/capture/actions/action-messages'
 import type { CaptureAccessError } from '@/features/capture/application/capture-actor'
 import { errorResponse } from '@/shared/lib/http'
 
 export function accessErrorResponse(error: CaptureAccessError): Response {
-  switch (error.kind) {
-    case 'unauthenticated':
-      return errorResponse(401, 'Bitte melde dich an.')
-    case 'forbidden':
-      return errorResponse(403, 'Dafür gehört dein Konto zu keinem Haushalt.')
-  }
+  const status = error.kind === 'unauthenticated' ? 401 : 403
+  return errorResponse(status, accessMessage(error))
 }

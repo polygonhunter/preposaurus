@@ -1,11 +1,25 @@
+// Schemas der Erfassung: KI-Antworten, Foto-Routen und Entwurf.
 // KI-Schemas der Foto-Erkennung (technik.html#api-ki). Einzige Quelle für Structured Output und
 // für die Prüfung der Antwort. Bewusst schlank: alle Felder Pflicht und nullable, keine Zahlen-
 // oder Längengrenzen, weil Anthropic sie nicht unterstützt. Die Grenzen prüft danach das Mapping
 // in capture/domain (map-recognition.ts, map-best-before-recognition.ts).
-// Dazu am Ende die Eingabe des Speicherns (#51), gleich für Foto und manuell.
+// Dazu am Ende die Eingabe des Speicherns (#51), gleich für Foto und manuell, und das manuelle
+// Formular (#52), das auf dem Gerät in genau diese Eingabe übersetzt und mit ihr geprüft wird.
 import { z } from 'zod'
-import { AI_CONFIDENCE_LEVELS, CONTAINER_KEYS, PHOTO_ROLES } from '@/shared/config/constants'
+import {
+  AI_CONFIDENCE_LEVELS,
+  BEST_BEFORE_KINDS,
+  BEST_BEFORE_PRECISIONS,
+  CAPTURE_METHODS,
+  CONTAINER_KEYS,
+  PHOTO_ROLES,
+} from '@/shared/config/constants'
 import { parseCalendarDay } from '@/shared/lib/dates'
+import {
+  parseContentQuantity,
+  parseGermanNumber,
+  type ContentParseError,
+} from '@/shared/lib/quantities'
 
 const confidence = z.enum(AI_CONFIDENCE_LEVELS).describe('Wie sicher die Werte lesbar waren')
 
@@ -113,6 +127,66 @@ export const photoRequestSchema = z.object({
     .transform((variant) => (variant === 'vorschau' ? 'thumbnail' : 'full')),
 })
 
+/** Body von `POST /api/recognize`. Nur Lesen, Schätzungen laufen getrennt (#124). */
+export const recognizeRequestSchema = z.strictObject({ fotoId: z.uuid() })
+
+// Entwurf der Erfassung (M6-03): der Stand der Maske, gesichert bei jedem Schrittwechsel.
+// Vorläufig, bis die Schritte (M6-08 bis M6-11) stehen: alles optional, aber mit festen Grenzen,
+// damit kein beliebiges JSON in `erfassung_entwurf.daten` landet. Fotos hängen über
+// `foto.entwurf_id` am Entwurf und stehen deshalb nicht hier.
+const DRAFT_STEPS = ['verpackung', 'naehrwerte', 'mhd', 'zusammenfassung'] as const
+const MAX_DRAFT_AMOUNT = 1_000_000
+const MAX_DRAFT_DATES = 200
+const MAX_UNITS_PER_DATE = 999
+
+const draftAmount = z.number().nonnegative().max(MAX_DRAFT_AMOUNT).nullable().optional()
+const draftId = z.uuid().nullable().optional()
+
+const draftPackagingSchema = z.strictObject({
+  bezeichnung: z.string().trim().max(120).nullable().optional(),
+  kategorieId: draftId,
+  lebensmittelartId: draftId,
+  behaelter: z.enum(CONTAINER_KEYS).nullable().optional(),
+  inhaltWert: draftAmount,
+  inhaltEinheit: z.enum(['g', 'ml']).nullable().optional(),
+  abtropfgewichtG: draftAmount,
+})
+
+const draftNutritionSchema = z.strictObject({
+  kcal: draftAmount,
+  eiweissG: draftAmount,
+  kohlenhydrateG: draftAmount,
+  fettG: draftAmount,
+  geschaetzt: z.boolean().optional(),
+})
+
+/** Ein Datums-Chip der MHD-Serie. Ohne Datum bleibt `datum` null, nie erfunden. */
+const draftBestBeforeSchema = z.strictObject({
+  datum: z.iso.date().nullable(),
+  genauigkeit: z.enum(BEST_BEFORE_PRECISIONS).nullable().optional(),
+  art: z.enum(BEST_BEFORE_KINDS).nullable().optional(),
+  anzahl: z.int().min(1).max(MAX_UNITS_PER_DATE),
+  fotoId: draftId,
+  ohneDatum: z.boolean().optional(),
+})
+
+export const captureDraftDataSchema = z.strictObject({
+  schritt: z.enum(DRAFT_STEPS).optional(),
+  weg: z.enum(CAPTURE_METHODS).optional(),
+  verpackung: draftPackagingSchema.optional(),
+  naehrwerte: draftNutritionSchema.optional(),
+  mhd: z.array(draftBestBeforeSchema).max(MAX_DRAFT_DATES).optional(),
+})
+
+/** `saveDraftAction`: ohne `entwurfId` der neueste Entwurf des Nutzers, sonst ein neuer. */
+export const saveDraftInputSchema = z.strictObject({
+  entwurfId: z.uuid().optional(),
+  daten: captureDraftDataSchema,
+})
+
+export const discardDraftInputSchema = z.strictObject({ entwurfId: z.uuid() })
+
+export type CaptureDraftData = z.infer<typeof captureDraftDataSchema>
 export type PackagingAnswer = z.infer<ReturnType<typeof packagingAnswerSchema>>
 export type NutritionAnswer = z.infer<typeof nutritionAnswerSchema>
 export type NutritionEstimateAnswer = z.infer<typeof nutritionEstimateAnswerSchema>
@@ -127,7 +201,7 @@ const MAX_CONTENT = 9_999_999
 const MAX_PER_100 = 9_999
 const MAX_NAME_LENGTH = 120
 /** Schnellzahlen gehen bis 12, hochzählen darf weiter. Mehr in einem Chip ist ein Tippfehler. */
-const MAX_COUNT_PER_DATE = 99
+export const MAX_COUNT_PER_DATE = 99
 const MAX_DATES_PER_CAPTURE = 30
 
 const calendarDay = z.string().transform((text, context) => {
@@ -198,3 +272,94 @@ export const productMatchQuerySchema = z.object({
 })
 
 export type ProductMatchQuery = z.infer<typeof productMatchQuerySchema>
+
+// ---------- Manuelles Formular (#52, #53) ----------
+// Rohwerte des Formulars mit Meldungen je Feld. Die Umwandlung liefert die Eingabe des Speicherns,
+// und createStockSchema prüft sie gleich danach noch einmal: auf dem Gerät hier, auf dem Server in
+// createStockAction. Nährwerte sind eigene Angaben (`manual`), ohne einen Wert gilt der Richtwert.
+
+const CONTENT_MESSAGES: Record<ContentParseError['kind'], string> = {
+  empty: 'Bitte gib den Inhalt einer Packung an, z. B. 500 g.',
+  'invalid-number': 'Bitte als Zahl mit Einheit angeben, z. B. 500 g oder 1,5 l.',
+  'unknown-unit': 'Bitte mit g, kg, ml oder l angeben, z. B. 500 g.',
+  'not-positive': 'Der Inhalt muss größer als 0 sein.',
+  'fractional-pieces': 'Bitte den Inhalt in g oder ml angeben.',
+  'piece-not-content':
+    'Stück zählt als Anzahl der Packungen. Bitte hier den Inhalt in g oder ml angeben.',
+}
+
+const contentText = z.string().transform((text, context) => {
+  const parsed = parseContentQuantity(text)
+  if (parsed.ok) return parsed.value
+  context.addIssue({ code: 'custom', message: CONTENT_MESSAGES[parsed.error.kind] })
+  return z.NEVER
+})
+
+const per100Text = z.string().transform((text, context) => {
+  if (text.trim() === '') return null
+  const value = parseGermanNumber(text)
+  if (value !== null && value >= 0 && value <= MAX_PER_100) return value
+  context.addIssue({
+    code: 'custom',
+    message: 'Bitte eine Zahl ab 0 eingeben, z. B. 359 oder 12,5.',
+  })
+  return z.NEVER
+})
+
+const formUnitSchema = z.object({
+  bestBefore: z
+    .object({ date: z.string(), precision: z.enum(['day', 'month', 'year']) })
+    .nullable(),
+  count: z
+    .int()
+    .min(1)
+    .max(MAX_COUNT_PER_DATE, `Höchstens ${String(MAX_COUNT_PER_DATE)} Packungen je Datum.`),
+})
+
+const optionalChoice = z.uuid().nullable()
+
+const manualCaptureFormSchema = z.object({
+  captureId: z.uuid(),
+  foodTypeId: z.uuid({ error: 'Bitte wähle eine Lebensmittelart.' }),
+  content: contentText,
+  containerId: optionalChoice,
+  storageLocationId: optionalChoice,
+  /** Gesetzt, wenn „Zu <Produkt> hinzufügen“ gewählt ist (UX §1 „Wiedererkennen“) */
+  existingProductId: optionalChoice,
+  nutrition: z.object({
+    kcal: per100Text,
+    protein: per100Text,
+    carbs: per100Text,
+    fat: per100Text,
+  }),
+  units: z
+    .array(formUnitSchema)
+    .min(1, 'Bitte gib ein MHD ein oder wähle „Datum fehlt“.')
+    .max(MAX_DATES_PER_CAPTURE, `Höchstens ${String(MAX_DATES_PER_CAPTURE)} Daten je Erfassung.`),
+})
+
+type ParsedForm = z.output<typeof manualCaptureFormSchema>
+
+function toNutrition({ nutrition }: ParsedForm) {
+  const hasValue = Object.values(nutrition).some((value) => value !== null)
+  return hasValue ? { ...nutrition, source: 'manual' as const } : null
+}
+
+function toProduct(form: ParsedForm) {
+  if (form.existingProductId !== null) {
+    return { kind: 'existing' as const, productId: form.existingProductId }
+  }
+  const { foodTypeId, content, containerId, storageLocationId } = form
+  const nutrition = toNutrition(form)
+  return { kind: 'new' as const, foodTypeId, content, containerId, storageLocationId, nutrition }
+}
+
+/** Formular → Eingabe des Speicherns, geprüft mit demselben Schema wie auf dem Server. */
+export const manualCaptureSchema = manualCaptureFormSchema
+  .transform((form): z.input<typeof createStockSchema> => ({
+    captureId: form.captureId,
+    method: 'manual' as const,
+    product: toProduct(form),
+    units: form.units,
+  }))
+  .pipe(createStockSchema)

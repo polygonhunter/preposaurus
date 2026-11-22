@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { errorResponse, isCrossSiteRequest, noStoreJson } from './http'
+import { errorResponse, isCrossSiteRequest, noStoreJson, readJsonBody } from './http'
 
 describe('noStoreJson und errorResponse', () => {
   it('antwortet mit JSON, Status und ohne Cache', async () => {
@@ -15,6 +15,31 @@ describe('noStoreJson und errorResponse', () => {
 
     expect(response.status).toBe(404)
     expect(await response.json()).toEqual({ fehler: 'Nicht gefunden.' })
+  })
+})
+
+describe('errorResponse mit Grund', () => {
+  it('gibt den Grund für die Oberfläche mit', async () => {
+    expect(await errorResponse(503, 'Aus.', 'ai-disabled').json()).toEqual({
+      fehler: 'Aus.',
+      grund: 'ai-disabled',
+    })
+  })
+})
+
+describe('readJsonBody', () => {
+  const post = (body: string) => new Request('https://app.test/api', { method: 'POST', body })
+
+  it('liest kleines JSON', async () => {
+    expect(await readJsonBody(post('{"a":1}'), 100)).toEqual({ a: 1 })
+  })
+
+  it('ergibt undefined bei kaputtem JSON', async () => {
+    expect(await readJsonBody(post('{a:'), 100)).toBeUndefined()
+  })
+
+  it('ergibt undefined, wenn der Body zu groß ist', async () => {
+    expect(await readJsonBody(post(`"${'x'.repeat(200)}"`), 100)).toBeUndefined()
   })
 })
 

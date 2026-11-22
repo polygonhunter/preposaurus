@@ -22,28 +22,40 @@ export async function lockDraftOwner(tx: Database, owner: DraftOwner): Promise<v
   await tx.select({ id: users.id }).from(users).where(eq(users.id, owner.userId)).for('update')
 }
 
-/** Neuester Entwurf des Nutzers, oder null. */
-export async function findLatestDraftId(db: Database, owner: DraftOwner): Promise<string | null> {
-  const [row] = await db
-    .select({ id: captureDrafts.id })
-    .from(captureDrafts)
-    .where(ownedBy(owner))
-    .orderBy(desc(captureDrafts.createdAt))
-    .limit(1)
-  return row?.id ?? null
+export interface StoredDraft {
+  id: string
+  /** Rohes JSON aus `daten`, geprüft wird im Use-Case */
+  data: unknown
+  updatedAt: Date
 }
 
-/** true, wenn der Entwurf existiert und dem Nutzer gehört. */
-export async function isOwnDraft(
+/** Ein bestimmter oder der neueste Entwurf des Nutzers, oder null. */
+export async function findDraft(
+  db: Database,
+  owner: DraftOwner,
+  draftId: string | null,
+): Promise<StoredDraft | null> {
+  const byId = draftId === null ? undefined : eq(captureDrafts.id, draftId)
+  const [row] = await db
+    .select({ id: captureDrafts.id, data: captureDrafts.data, updatedAt: captureDrafts.updatedAt })
+    .from(captureDrafts)
+    .where(and(ownedBy(owner), byId))
+    .orderBy(desc(captureDrafts.createdAt))
+    .limit(1)
+  return row ?? null
+}
+
+export async function updateDraftData(db: Database, draftId: string, data: unknown): Promise<void> {
+  await db.update(captureDrafts).set({ data }).where(eq(captureDrafts.id, draftId))
+}
+
+/** Löscht den Entwurf, aber nur, wenn er dem Nutzer gehört. */
+export async function deleteOwnDraft(
   db: Database,
   owner: DraftOwner,
   draftId: string,
-): Promise<boolean> {
-  const [row] = await db
-    .select({ id: captureDrafts.id })
-    .from(captureDrafts)
-    .where(and(eq(captureDrafts.id, draftId), ownedBy(owner)))
-  return row !== undefined
+): Promise<void> {
+  await db.delete(captureDrafts).where(and(eq(captureDrafts.id, draftId), ownedBy(owner)))
 }
 
 export async function insertDraft(db: Database, owner: DraftOwner): Promise<string> {

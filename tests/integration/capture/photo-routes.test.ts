@@ -12,7 +12,14 @@ import type { Result } from '../../../src/shared/lib/result'
 import { insertBasics } from '../../helpers/db-fixtures'
 import { createMemoryPhotoStorage } from '../../helpers/memory-photo-storage'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
-import { insertUser, photoRequest, sessionUser, testJpeg, uploadRequest } from './photo-fixtures'
+import {
+  FAKE_AI_ENV,
+  insertUser,
+  photoRequest,
+  sessionUser,
+  testJpeg,
+  uploadRequest,
+} from './photo-fixtures'
 
 const state = vi.hoisted(() => ({
   session: null as Result<SessionUser, AccessError> | null,
@@ -63,6 +70,7 @@ describe('Foto-Routen', () => {
       db: testDb.db,
       storage: createMemoryPhotoStorage(),
       processor: createSharpPhotoProcessor(),
+      env: FAKE_AI_ENV,
     }
     signIn(owner)
   })
@@ -215,7 +223,12 @@ describe('Foto-Routen', () => {
   it('räumt beide Dateien weg, wenn die DB-Zeile scheitert', async () => {
     const storage = createMemoryPhotoStorage()
     const failingDb = { transaction: () => Promise.reject(new Error('DB weg')) }
-    state.deps = { db: failingDb as never, storage, processor: createSharpPhotoProcessor() }
+    state.deps = {
+      db: failingDb as never,
+      storage,
+      processor: createSharpPhotoProcessor(),
+      env: FAKE_AI_ENV,
+    }
 
     await expect(POST(uploadRequest(jpeg, { rolle: 'mhd' }))).rejects.toThrow('DB weg')
     expect(await storage.list()).toEqual([])
