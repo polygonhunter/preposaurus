@@ -104,6 +104,11 @@ const policies = [
   },
 ]
 
+const testRunnerPolicy = {
+  from: element(['ui', 'actions', 'application', 'domain', 'data', 'server', 'shared', 'worker']),
+  allow: to({ module: { origin: 'external', source: 'vitest' } }),
+}
+
 export const boundariesConfig = [
   {
     files: ['**/*.{ts,tsx,mts,cts}'],
@@ -116,6 +121,16 @@ export const boundariesConfig = [
       'boundaries/dependencies': [
         'error',
         { default: 'disallow', checkAllOrigins: true, policies },
+      ],
+    },
+  },
+  {
+    // Tests neben dem Code (z. B. domain/*.test.ts) brauchen vitest, der Code selbst nicht.
+    files: ['src/**/*.test.{ts,tsx}', 'tests/lint/fixtures/boundaries/src/**/*.test.{ts,tsx}'],
+    rules: {
+      'boundaries/dependencies': [
+        'error',
+        { default: 'disallow', checkAllOrigins: true, policies: [...policies, testRunnerPolicy] },
       ],
     },
   },
