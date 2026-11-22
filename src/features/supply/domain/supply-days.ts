@@ -1,5 +1,6 @@
 import type { StockUnit } from '@/features/inventory/domain/unit'
 import { err, ok, type Result } from '@/shared/lib/result'
+import { estimatedKcalShare } from './approximation'
 import type { DailyNeed } from './daily-need'
 import { isCountedOn, roundDownDays, type ReferenceDay } from './supply-rules'
 
@@ -7,6 +8,7 @@ import { isCountedOn, roundDownDays, type ReferenceDay } from './supply-rules'
 export interface SupplyUnit extends Pick<StockUnit, 'id' | 'status' | 'bestBefore' | 'checkedAt'> {
   /** kcal dieser Packung (Inhalt × kcal je 100 ÷ 100) */
   kcal: number
+  /** kcal aus Richtwert bzw. KI-Schätzung, noch nicht bestätigt (#115) */
   isKcalEstimated: boolean
   /** Inhalt in ml, nur bei Einheiten der Warengruppe Wasser, sonst 0 */
   waterMl: number
@@ -22,6 +24,8 @@ export interface SupplyDays {
   bottleneck: Bottleneck
   /** Mindestens eine gezählte Einheit hat geschätzte kcal oder ein geschätztes MHD */
   containsEstimates: boolean
+  /** Anteil der kcal aus Richtwerten bzw. unbestätigten Schätzungen, Grundlage für „ca.“ */
+  estimatedKcalShare: number
   kcal: number
   waterMl: number
 }
@@ -56,6 +60,7 @@ export function calculateSupplyDays(input: SupplyInput): Result<SupplyDays, Supp
     days: roundDownDays(Math.min(energyDays, waterDays)),
     bottleneck: waterDays <= energyDays ? 'water' : 'energy',
     containsEstimates: counted.some(isEstimate),
+    estimatedKcalShare: estimatedKcalShare(counted),
     kcal,
     waterMl,
   })
