@@ -7,7 +7,8 @@ interface DueItemOptions {
   unitCount?: number
   precision?: DueItem['bestBefore']['precision']
   isEstimated?: boolean
-  latestAddedOn?: string
+  /** ISO-Zeitpunkt */
+  latestAddedAt?: string
 }
 
 export function dueItem(label: string, date: string, options: DueItemOptions = {}): DueItem {
@@ -20,6 +21,6 @@ export function dueItem(label: string, date: string, options: DueItemOptions = {
       isEstimated: options.isEstimated ?? false,
     },
     unitCount: options.unitCount ?? 1,
-    latestAddedOn: toCalendarDay(options.latestAddedOn ?? '2026-10-01'),
+    latestAddedAt: new Date(options.latestAddedAt ?? '2026-10-01T10:00:00Z'),
   }
 }

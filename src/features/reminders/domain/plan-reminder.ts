@@ -41,8 +41,7 @@ function planWeeklySummary(input: ReminderInput): ReminderPlan | null {
 }
 
 function planUrgent({ now, lastSent, stock }: ReminderInput): ReminderPlan | null {
-  const lastSentDay = lastSent.urgent === null ? null : todayInBerlin(lastSent.urgent)
-  const items = selectNewUrgentItems(stock.dueItems, { lastSentDay })
+  const items = selectNewUrgentItems(stock.dueItems, { lastSentAt: lastSent.urgent })
   const message = buildUrgentMessage(items, todayInBerlin(now))
   return message === null ? null : { message, marks: ['urgent'] }
 }

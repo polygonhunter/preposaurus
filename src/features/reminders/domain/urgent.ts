@@ -1,4 +1,4 @@
-import { addDays, type CalendarDay } from '@/shared/lib/dates'
+import { addDays, todayInBerlin, type CalendarDay } from '@/shared/lib/dates'
 import {
   countWithNoun,
   describeDue,
@@ -21,18 +21,19 @@ import {
 export const URGENT_WINDOW_DAYS = 7
 
 interface NewSinceInput {
-  /** Berliner Kalendertag des letzten Versands, null, wenn noch nie gesendet */
-  lastSentDay: CalendarDay | null
+  /** Zeitpunkt des letzten Versands, null, wenn noch nie gesendet */
+  lastSentAt: Date | null
 }
 
 /**
  * Neu ist ein Eintrag, wenn er beim letzten Versand noch nicht in „Diese Woche“ lag oder seither
- * eine Packung dazukam.
+ * eine Packung dazukam. Der Zeitpunkt statt des Tages zählt, damit eine Packung, die am Tag des
+ * Versands erst danach erfasst wurde, nicht verloren geht.
  */
-function isNewSince(item: DueItem, { lastSentDay }: NewSinceInput): boolean {
-  if (lastSentDay === null) return true
-  const lastWindowEnd = addDays(lastSentDay, URGENT_WINDOW_DAYS)
-  return item.bestBefore.date > lastWindowEnd || item.latestAddedOn > lastSentDay
+function isNewSince(item: DueItem, { lastSentAt }: NewSinceInput): boolean {
+  if (lastSentAt === null) return true
+  const lastWindowEnd = addDays(todayInBerlin(lastSentAt), URGENT_WINDOW_DAYS)
+  return item.bestBefore.date > lastWindowEnd || item.latestAddedAt > lastSentAt
 }
 
 /** Einträge für „Dringend“: nur „Diese Woche“ und nur Neues seit dem letzten Versand. */
