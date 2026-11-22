@@ -1,47 +1,82 @@
 # Eine Sicherung (UMSETZUNG M13-03, technik.html „Backups“):
 # - Datenbank mit pg_dump -Fc (Version 18 wie die Datenbank)
 # - Fotos versioniert: Jeder Stand ist ein vollständiger Ordner. Unveränderte Dateien sind feste
-#   Links auf den Vortag und kosten keinen Platz. Ein gelöschtes Foto bleibt in älteren Ständen.
-# Ein Stand entsteht erst unter .laufend-… und wird erst am Ende umbenannt. Ein abgebrochener
-# Lauf hinterlässt also nie einen halben Stand.
+#   Links auf den jeweils neuesten Stand jeder Art und kosten keinen Platz. Ein gelöschtes Foto
+#   bleibt in älteren Ständen.
+# Dump und Fotos entstehen nacheinander, nicht im selben Augenblick. Ein Foto, das genau dazwischen
+# gelöscht wird, fehlt im Stand. Nachts ist das vertretbar.
+# Ein Stand entsteht unter .laufend-… und wird erst am Ende umbenannt. Reste abgebrochener Läufe
+# räumt der nächste Lauf weg. Nach dem Lauf steht der Name in LAST_STAND.
 
 run_backup() {
-  today=$(date +%F)
-  work="$DAILY_DIR/.laufend-$today"
-  mkdir -p "$DAILY_DIR" "$WEEKLY_DIR"
-  rm -rf "$work"
+  kind=$1
+  kind_dir="$BACKUP_DIR/$kind"
+  name=$(new_stand_name)
+  work="$kind_dir/.laufend-$name"
+  remove_unfinished
   mkdir -p "$work"
-  log "Sicherung startet: taeglich/$today"
+  log "Sicherung startet: $kind/$name"
 
   pg_dump --format=custom --file="$work/$DUMP_FILE"
+  # shellcheck disable=SC2046 # die Optionen sollen einzeln ankommen, Pfade ohne Leerzeichen
+  rsync -a --delete $(link_dest_options) "$PHOTO_DIR/" "$work/fotos/"
 
-  previous=$(latest_daily)
-  if [ -n "$previous" ]; then
-    rsync -a --delete --link-dest="$DAILY_DIR/$previous/fotos" "$PHOTO_DIR/" "$work/fotos/"
-  else
-    rsync -a --delete "$PHOTO_DIR/" "$work/fotos/"
-  fi
-
-  rm -rf "${DAILY_DIR:?}/$today"
-  mv "$work" "$DAILY_DIR/$today"
-  keep_weekly_copy "$today"
-  prune_old "$DAILY_DIR" "$KEEP_DAILY"
-  prune_old "$WEEKLY_DIR" "$KEEP_WEEKLY"
+  mv "$work" "$kind_dir/$name"
+  LAST_STAND="$kind/$name"
+  [ "$kind" != taeglich ] || keep_weekly_copy "$kind_dir/$name"
+  apply_retention
   hand_over_ownership
-  log "Sicherung fertig: taeglich/$today ($(du -sh "$DAILY_DIR/$today" | cut -f1))"
+  write_status ok "$LAST_STAND"
+  log "Sicherung fertig: $LAST_STAND ($(du -sh "$kind_dir/$name" | cut -f1))"
+}
+
+remove_unfinished() {
+  find "$BACKUP_DIR" -mindepth 2 -maxdepth 2 -name '.laufend-*' -exec rm -rf {} +
+}
+
+link_dest_options() {
+  for link_kind in $STAND_KINDS; do
+    newest=$(newest_in "$BACKUP_DIR/$link_kind")
+    [ -z "$newest" ] || printf -- '--link-dest=%s ' "$BACKUP_DIR/$link_kind/$newest/fotos"
+  done
 }
 
 # Am Stichtag wird der Tagesstand zusätzlich als Wochenstand behalten (feste Links, kein Platz).
 keep_weekly_copy() {
   [ "$(date +%u)" = "$WEEKLY_DAY" ] || return 0
   week=$(date +%G-W%V)
-  rm -rf "${WEEKLY_DIR:?}/$week"
-  cp -al "$DAILY_DIR/$1" "$WEEKLY_DIR/$week"
+  mkdir -p "$BACKUP_DIR/woechentlich"
+  rm -rf "$BACKUP_DIR/woechentlich/$week"
+  cp -al "$1" "$BACKUP_DIR/woechentlich/$week"
   log "Wochenstand behalten: woechentlich/$week"
+}
+
+# vor-update fehlt hier mit Absicht: Diese Stände löscht nur der Mensch.
+apply_retention() {
+  prune_old "$BACKUP_DIR/taeglich" "$KEEP_DAILY"
+  prune_old "$BACKUP_DIR/woechentlich" "$KEEP_WEEKLY"
+  prune_old "$BACKUP_DIR/manuell" "$KEEP_MANUAL"
+  prune_old "$BACKUP_DIR/vor-wiederherstellung" "$KEEP_BEFORE_RESTORE"
 }
 
 # Die Stände sollen dem Nutzer gehören, dem auch fotos gehört, damit er sie am NAS öffnen kann.
 hand_over_ownership() {
   [ -n "${BACKUP_OWNER:-}" ] || return 0
-  chown -R "$BACKUP_OWNER" "$DAILY_DIR" "$WEEKLY_DIR"
+  for owned_kind in $STAND_KINDS; do
+    [ ! -d "$BACKUP_DIR/$owned_kind" ] || chown -R "$BACKUP_OWNER" "$BACKUP_DIR/$owned_kind"
+  done
+}
+
+# Für den Healthcheck: krank nach einem Fehlschlag oder wenn die letzte Sicherung über 26 Stunden
+# alt ist. Ohne bisherigen Lauf (frisch eingerichtet) gilt der Container als gesund.
+check_health() {
+  [ -f "$STATUS_FILE" ] || return 0
+  if [ "$(cut -d ' ' -f 1 "$STATUS_FILE")" != ok ]; then
+    cat "$STATUS_FILE"
+    return 1
+  fi
+  if [ -n "$(find "$STATUS_FILE" -mmin +1560)" ]; then
+    echo "Die letzte Sicherung ist älter als 26 Stunden: $(cat "$STATUS_FILE")"
+    return 1
+  fi
 }
