@@ -34,13 +34,12 @@ describe('compareOutcomes', () => {
     entry('discarded', '2026-01-01', { value: 400, unit: 'g' }),
     entry('discarded', '2025-12-31', { value: 1000, unit: 'g' }),
     entry('consumed', '2027-01-01', { value: 500, unit: 'g' }),
-    entry('consumed', '2026-06-01', { value: 4, unit: 'piece' }),
   ]
 
   it('vergleicht verbraucht und entsorgt im Zeitraum, beide Grenztage eingeschlossen', () => {
     expect(compareOutcomes(history, year2026)).toEqual({
-      consumed: { count: 3, amounts: { g: 500, ml: 1500, piece: 4 } },
-      discarded: { count: 1, amounts: { g: 400, ml: 0, piece: 0 } },
+      consumed: { count: 2, amounts: { g: 500, ml: 1500 } },
+      discarded: { count: 1, amounts: { g: 400, ml: 0 } },
     })
   })
 

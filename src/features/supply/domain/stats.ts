@@ -1,5 +1,5 @@
 import type { CalendarDay } from '@/shared/lib/dates'
-import type { Quantity, QuantityUnit } from '@/shared/lib/quantities'
+import type { ContentQuantity, ContentUnit } from '@/shared/lib/quantities'
 
 type FulfillmentBasis = 'goal-duration' | 'source-standard'
 
@@ -30,7 +30,7 @@ export type UnitOutcome = 'consumed' | 'discarded'
 export interface HistoryEntry {
   outcome: UnitOutcome
   date: CalendarDay
-  amount: Quantity
+  amount: ContentQuantity
 }
 
 export interface Period {
@@ -40,10 +40,10 @@ export interface Period {
 
 export interface OutcomeTotals {
   count: number
-  amounts: Record<QuantityUnit, number>
+  amounts: Record<ContentUnit, number>
 }
 
-const emptyTotals = (): OutcomeTotals => ({ count: 0, amounts: { g: 0, ml: 0, piece: 0 } })
+const emptyTotals = (): OutcomeTotals => ({ count: 0, amounts: { g: 0, ml: 0 } })
 
 const isInPeriod = (date: CalendarDay, { from, to }: Period) => date >= from && date <= to
 

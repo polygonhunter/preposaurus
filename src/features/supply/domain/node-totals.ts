@@ -1,6 +1,6 @@
 import type { BestBefore } from '@/features/inventory/domain/unit'
 import type { CalendarDay } from '@/shared/lib/dates'
-import type { Quantity, QuantityUnit } from '@/shared/lib/quantities'
+import type { ContentQuantity, ContentUnit } from '@/shared/lib/quantities'
 import { isInStockWithoutDate } from '@/shared/lib/stock-unit'
 import { estimatedKcalShare, isApproximate } from './approximation'
 import type { SupplyInput, SupplyUnit } from './supply-days'
@@ -29,7 +29,7 @@ interface Macros {
 /** Eine Packung mit Pfad, Inhalt und Makros je Packung (fehlende Makros zählen als 0). */
 export interface NodeUnit extends SupplyUnit {
   path: TreePath
-  content: Quantity
+  content: ContentQuantity
   macros: Macros
 }
 
@@ -39,7 +39,7 @@ export interface NodeTotals {
   packages: number
   /** Im Vorrat, am Stichtag aber nicht gezählt: abgelaufen, oder am Zieldatum ohne Datum */
   uncountedPackages: number
-  amounts: Record<QuantityUnit, number>
+  amounts: Record<ContentUnit, number>
   kcal: number
   macros: Macros
   /** Beitrag in Tagen, gerechnet wie „versorgt“ (M2-07). Ohne Bedarf null, der Rest zählt weiter */
@@ -61,8 +61,8 @@ interface NodeTotalsInput extends Omit<SupplyInput, 'units'> {
 
 const isInNode = (unit: NodeUnit, node: TreeNode) => unit.path[node.level] === node.key
 
-function sumContent(units: readonly NodeUnit[]): Record<QuantityUnit, number> {
-  const amounts = { g: 0, ml: 0, piece: 0 }
+function sumContent(units: readonly NodeUnit[]): Record<ContentUnit, number> {
+  const amounts = { g: 0, ml: 0 }
   for (const { content } of units) amounts[content.unit] += content.value
   return amounts
 }
