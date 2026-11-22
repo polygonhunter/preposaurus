@@ -8,5 +8,10 @@
     "package": "caniuse-lite",
     "license": "CC-BY-4.0",
     "reason": "Browser-Daten, die next zur Build-Zeit für Browserslist liest. Reine Daten, keine Software, Namensnennung durch die Lizenzdatei im Paket. [USER] U2."
+  },
+  {
+    "package": "lightningcss*",
+    "license": "MPL-2.0",
+    "reason": "CSS-Werkzeug von vite. Fällt nur über vitest, eine optionale Peer-Abhängigkeit von better-auth (#32), in den Produktionsbaum. Läuft nie zur Laufzeit und landet nicht im Standalone-Image. MPL-2.0 gilt je Datei, unverändert genutzt, mit AGPL vereinbar. Freigabe durch den Maintainer offen."
   }
 ]
