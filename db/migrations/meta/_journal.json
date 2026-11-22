@@ -15,6 +15,13 @@
       "when": 1795358170950,
       "tag": "0001_ampel_orange_mindestens_7",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795359640186,
+      "tag": "0002_anmelde_sperre_global",
+      "breakpoints": true
     }
   ]
 }

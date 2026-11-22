@@ -8,7 +8,15 @@ import { APIError } from 'better-auth/api'
 import type { Auth } from '@/server/auth/auth'
 import { err, ok, type Result } from '@/shared/lib/result'
 import type { BrakeRequest, SignInLockRepository } from '../data/sign-in-lock-repository'
-import { IP_RULE, NAME_RULE, ipLockKey, minutesUntil, nameLockKey } from '../domain/sign-in-brake'
+import {
+  GLOBAL_LOCK_KEY,
+  GLOBAL_RULE,
+  IP_RULE,
+  NAME_RULE,
+  ipLockKey,
+  minutesUntil,
+  nameLockKey,
+} from '../domain/sign-in-brake'
 import type { SignInInput } from '../schemas'
 
 export type SignInError = { kind: 'invalid-credentials' } | { kind: 'throttled'; minutes: number }
@@ -35,9 +43,13 @@ async function tryBetterAuth(deps: SignInDeps, input: SignInInput): Promise<stri
   }
 }
 
+// Der Name steht vorne, siehe releaseAfterSuccess. Ohne Adresse zählt ip:unbekannt für alle.
 function brakeRequests(deps: SignInDeps, input: SignInInput): BrakeRequest[] {
-  const name = { key: nameLockKey(input.username), rule: NAME_RULE }
-  return deps.clientIp === null ? [name] : [name, { key: ipLockKey(deps.clientIp), rule: IP_RULE }]
+  return [
+    { key: nameLockKey(input.username), rule: NAME_RULE },
+    { key: ipLockKey(deps.clientIp), rule: IP_RULE },
+    { key: GLOBAL_LOCK_KEY, rule: GLOBAL_RULE },
+  ]
 }
 
 // Ein Erfolg setzt die Bremse des Namens zurück. Die übrigen Zähler bleiben, nur dieser eine

@@ -68,12 +68,13 @@ describe('Anmelden mit Bremse', () => {
     expect(account?.password).not.toContain(PASSWORD)
   })
 
-  it('lehnt ein falsches Passwort ab und zählt Name und Adresse', async () => {
+  it('lehnt ein falsches Passwort ab und zählt Name, Adresse und global', async () => {
     const result = await attempt('falsch-falsch')
 
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } })
     const locks = await testDb.db.select().from(signInLocks)
     expect(locks.map((lock) => [lock.key, lock.failedAttempts]).sort()).toEqual([
+      ['global', 1],
       ['ip:100.64.0.7', 1],
       ['name:alex', 1],
     ])
@@ -84,8 +85,10 @@ describe('Anmelden mit Bremse', () => {
     const result = await attempt(PASSWORD, 'niemand', null)
 
     expect(result).toEqual({ ok: false, error: { kind: 'invalid-credentials' } })
-    const [lock] = await testDb.db.select().from(signInLocks)
-    expect(lock).toMatchObject({ key: 'name:niemand', failedAttempts: 1 })
+    const locks = await testDb.db.select().from(signInLocks)
+    expect(locks).toContainEqual(
+      expect.objectContaining({ key: 'name:niemand', failedAttempts: 1 }),
+    )
   })
 
   it('bremst den Namen nach 5 Fehlversuchen, auch mit richtigem Passwort', async () => {
@@ -106,12 +109,15 @@ describe('Anmelden mit Bremse', () => {
     expect(result).toEqual({ ok: false, error: { kind: 'throttled', minutes: 10 } })
   })
 
-  it('setzt die Bremse des Namens nach einem Erfolg zurück', async () => {
+  it('setzt nach einem Erfolg den Namen zurück und zählt nur den Fehlversuch weiter', async () => {
     await attempt('falsch-falsch')
     await attempt(PASSWORD)
 
-    const keys = (await testDb.db.select().from(signInLocks)).map((lock) => lock.key)
-    expect(keys).toEqual(['ip:100.64.0.7'])
+    const locks = await testDb.db.select().from(signInLocks)
+    expect(locks.map((lock) => [lock.key, lock.failedAttempts]).sort()).toEqual([
+      ['global', 1],
+      ['ip:100.64.0.7', 1],
+    ])
   })
 
   it('lässt einen deaktivierten Nutzer nicht an und antwortet wie bei falschem Passwort', async () => {

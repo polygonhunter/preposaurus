@@ -38,4 +38,13 @@ describe('Schema Anmeldebremse', () => {
       'anmelde_sperre_schluessel_check',
     )
   })
+
+  it('nimmt den Schlüssel global an, aber nichts, das nur damit beginnt', async () => {
+    await testDb.db.insert(signInLocks).values({ key: 'global' })
+
+    await expectConstraintViolation(
+      testDb.db.insert(signInLocks).values({ key: 'globalx' }),
+      'anmelde_sperre_schluessel_check',
+    )
+  })
 })
