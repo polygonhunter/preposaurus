@@ -1,7 +1,7 @@
 // Zeilen der Tabelle foto. Die Datei liegt im Foto-Volume, hier steht nur die Referenz.
 // Sichtbar ist ein Foto nur im eigenen Haushalt, ein Entwurfsfoto nur dem Nutzer seines Entwurfs.
 import 'server-only'
-import { and, eq, or } from 'drizzle-orm'
+import { and, asc, eq, or } from 'drizzle-orm'
 import type { PhotoRole } from '@/shared/config/constants'
 import type { Database } from '@/server/db/connection'
 import { captureDrafts, photos } from '@/server/db/schema/capture'
@@ -19,6 +19,28 @@ export interface NewDraftPhoto {
 
 export async function insertDraftPhoto(db: Database, photo: NewDraftPhoto): Promise<void> {
   await db.insert(photos).values({ ...photo, status: 'entwurf' })
+}
+
+export interface DraftPhoto {
+  id: string
+  householdId: string
+  role: PhotoRole
+}
+
+const isDraftPhotoOf = (draftId: string) =>
+  and(eq(photos.draftId, draftId), eq(photos.status, 'entwurf'))
+
+/** Fotos im Status „entwurf“ eines Entwurfs, älteste zuerst. Feste Fotos gehören zum Produkt. */
+export async function listDraftPhotos(db: Database, draftId: string): Promise<DraftPhoto[]> {
+  return db
+    .select({ id: photos.id, householdId: photos.householdId, role: photos.role })
+    .from(photos)
+    .where(isDraftPhotoOf(draftId))
+    .orderBy(asc(photos.createdAt))
+}
+
+export async function deleteDraftPhotos(db: Database, draftId: string): Promise<void> {
+  await db.delete(photos).where(isDraftPhotoOf(draftId))
 }
 
 export interface VisiblePhoto {
