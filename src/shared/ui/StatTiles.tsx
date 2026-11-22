@@ -9,9 +9,10 @@ export function StatTiles({ tiles }: StatTilesProps) {
       {tiles.map((tile) => (
         <div
           key={tile.label}
-          className="flex min-w-0 flex-1 flex-col-reverse px-3 py-2.5 not-first:border-l not-first:border-line"
+          className="flex min-w-0 flex-1 flex-col-reverse px-2.5 py-2.5 not-first:border-l not-first:border-line"
         >
-          <dt className="truncate text-footnote text-fg2">{tile.label}</dt>
+          {/* Umbrechen statt abschneiden: Vier Kacheln auf 375 px („diese Woche“, #70) */}
+          <dt className="text-footnote hyphens-auto text-fg2">{tile.label}</dt>
           <dd className="text-title2">{tile.value}</dd>
         </div>
       ))}

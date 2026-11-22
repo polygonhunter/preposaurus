@@ -121,3 +121,12 @@ export function formatDayWithPrecision({
   if (precision === 'month') return `${pad(month, 2)}/${String(year)}`
   return `${pad(day, 2)}.${pad(month, 2)}.${String(year)}`
 }
+
+/** Tage bis zum Datum: „heute“, „morgen“, „in 12 Tagen“, „seit gestern“, „seit 3 Tagen“. */
+export function formatDaysLeft(daysLeft: number): string {
+  if (daysLeft === 0) return 'heute'
+  if (daysLeft === 1) return 'morgen'
+  if (daysLeft === -1) return 'seit gestern'
+  if (daysLeft < 0) return `seit ${String(-daysLeft)} Tagen`
+  return `in ${String(daysLeft)} Tagen`
+}

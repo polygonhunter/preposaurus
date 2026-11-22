@@ -21,6 +21,8 @@ const startServer = isCi ? 'npm run start:standalone' : `npm run dev -- -p ${Str
 
 export default defineConfig({
   testDir: 'tests/e2e',
+  // Tests mit Beispielvorrat brauchen eine eigene Datenbank (playwright.beispiel.config.ts)
+  testIgnore: '**/beispiel/**',
   fullyParallel: true,
   forbidOnly: isCi,
   retries: isCi ? 1 : 0,

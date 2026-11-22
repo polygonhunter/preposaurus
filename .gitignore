@@ -23,6 +23,7 @@ next-env.d.ts
 # Testberichte
 coverage/
 playwright-report/
+playwright-report-beispiel/
 test-results/
 
 # Lokale Daten (PGlite, Fotos)

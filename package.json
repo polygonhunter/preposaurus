@@ -21,7 +21,7 @@
     "test": "vitest run --coverage",
     "test:perf": "PERF=1 vitest run --no-file-parallelism perf.test",
     "knip": "knip && knip --production",
-    "e2e": "playwright test",
+    "e2e": "playwright test && playwright test -c playwright.beispiel.config.ts",
     "licenses": "node scripts/check-licenses.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx --env-file-if-exists=.env --conditions=react-server src/server/db/migrate.ts",
