@@ -10,6 +10,13 @@ import type { Result } from '../../../src/shared/lib/result'
 
 const ORIGIN = 'https://preposaurus.test'
 
+/** KI in Tests immer als Fake (UMSETZUNG Grundentscheidung 12). */
+export const FAKE_AI_ENV = {
+  APP_SECRET: 'test-nur-zum-testen-kein-geheimnis-0000',
+  AI_PROVIDER: 'fake',
+  ANTHROPIC_API_KEY: undefined,
+} as const
+
 type Session = Result<SessionUser, AccessError> | null
 
 /** Ersatz für server/auth/guards: Sitzung aus dem Test, Haushaltsprüfung wie im Original. */
