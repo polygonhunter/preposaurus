@@ -77,4 +77,19 @@ describe('Seed Stammdaten', () => {
       .where(eq(categories.key, 'getraenke'))
     expect(drinks?.isHidden).toBe(true)
   })
+
+  it('übernimmt Richtwerte auch beim Aktualisieren aus den Seed-Dateien', async () => {
+    await testDb.db
+      .update(categories)
+      .set({ averageKcalPer100: '999.0', typicalShelfLifeMonths: 99 })
+      .where(eq(categories.key, 'getreide'))
+
+    await seedMasterData(testDb.db)
+
+    const [cereal] = await testDb.db
+      .select({ kcal: categories.averageKcalPer100, months: categories.typicalShelfLifeMonths })
+      .from(categories)
+      .where(eq(categories.key, 'getreide'))
+    expect(cereal).toEqual({ kcal: null, months: null })
+  })
 })

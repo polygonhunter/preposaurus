@@ -1,6 +1,7 @@
 // Spielt die Stammdaten per Upsert ein (UMSETZUNG M1-07). Beliebig oft wiederholbar: Jede Zeile
 // wird über ihren festen Schlüssel gefunden und nur aktualisiert. Was der Haushalt selbst
-// einstellt (ausgeblendet), bleibt beim erneuten Seed erhalten.
+// einstellt (ausgeblendet), bleibt beim erneuten Seed erhalten. Richtwerte (kcal, übliche
+// Haltbarkeit) übernimmt der Seed auch beim Aktualisieren: Die Quelle dafür sind die Seed-Dateien.
 import { sql } from 'drizzle-orm'
 import type { Database } from '../../src/server/db/connection'
 import { categories, containers } from '../../src/server/db/schema/catalog'
@@ -44,6 +45,8 @@ async function seedSystemCategories(
     .values(
       SYSTEM_CATEGORIES.map(({ productGroup, ...category }, index) => ({
         ...category,
+        averageKcalPer100: category.averageKcalPer100 ?? null,
+        typicalShelfLifeMonths: category.typicalShelfLifeMonths ?? null,
         isSystem: true,
         productGroupId: requireId(groupIds, productGroup),
         sortOrder: sortOrderOf(index),
@@ -56,6 +59,8 @@ async function seedSystemCategories(
         pictogram: fromExcluded('piktogramm'),
         productGroupId: fromExcluded('warengruppe_id'),
         sortOrder: fromExcluded('sortierung'),
+        averageKcalPer100: fromExcluded('kcal_durchschnitt_100'),
+        typicalShelfLifeMonths: fromExcluded('uebliche_haltbarkeit_monate'),
       },
     })
     .returning({ id: categories.id, key: categories.key })
@@ -69,6 +74,8 @@ async function seedSystemFoodTypes(db: Database, categoryIds: Map<string, string
     .values(
       SYSTEM_FOOD_TYPES.map(({ category, ...foodType }, index) => ({
         ...foodType,
+        kcalPer100: foodType.kcalPer100 ?? null,
+        typicalShelfLifeMonths: foodType.typicalShelfLifeMonths ?? null,
         isSystem: true,
         categoryId: requireId(categoryIds, category),
         sortOrder: sortOrderOf(index),
@@ -82,6 +89,8 @@ async function seedSystemFoodTypes(db: Database, categoryIds: Map<string, string
         name: fromExcluded('name'),
         categoryId: fromExcluded('kategorie_id'),
         sortOrder: fromExcluded('sortierung'),
+        kcalPer100: fromExcluded('kcal_100'),
+        typicalShelfLifeMonths: fromExcluded('uebliche_haltbarkeit_monate'),
       },
     })
 }
