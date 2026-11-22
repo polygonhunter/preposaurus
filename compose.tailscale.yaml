@@ -1,0 +1,31 @@
+# Überlagerung für den Tailscale-Sidecar (UMSETZUNG M13-02, technik.html „Tailscale“).
+#   docker compose -f compose.yaml -f compose.tailscale.yaml up -d
+# Der Container ist ein eigenes Gerät im Tailnet. Tailscale Serve stellt die App dort unter
+# https://<TS_HOSTNAME>.<tailnet>.ts.net bereit. Funnel bleibt aus: Die App ist nur im Tailnet
+# erreichbar, nie im offenen Internet.
+
+services:
+  tailscale:
+    image: tailscale/tailscale:v1.104.7
+    hostname: ${TS_HOSTNAME:?TS_HOSTNAME fehlt in .env}
+    environment:
+      # Nur für die erste Anmeldung nötig, danach steht der Zustand im Ordner tailscale.
+      TS_AUTHKEY: ${TS_AUTHKEY:-}
+      TS_HOSTNAME: ${TS_HOSTNAME:?TS_HOSTNAME fehlt in .env}
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_SERVE_CONFIG: /config/serve.json
+      # Ohne TUN-Gerät, läuft deshalb auch auf NAS-Systemen ohne /dev/net/tun.
+      TS_USERSPACE: 'true'
+    volumes:
+      - ./tailscale:/var/lib/tailscale
+      - ./docker/tailscale/serve.json:/config/serve.json:ro
+    restart: unless-stopped
+
+  # web teilt das Netz des Sidecars. Serve leitet auf 127.0.0.1:3000 in diesem Netz weiter und
+  # setzt X-Forwarded-For auf die echte Tailnet-Adresse. Ein Port auf dem NAS entfällt ganz.
+  web:
+    network_mode: service:tailscale
+    ports: !reset []
+    depends_on:
+      tailscale:
+        condition: service_started

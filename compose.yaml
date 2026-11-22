@@ -1,0 +1,82 @@
+# Preposaurus auf dem NAS (UMSETZUNG M13-02). Schritt für Schritt: docs/INSTALLATION.md
+#   Start ohne Tailscale-Container:  docker compose up -d
+#   Start mit Tailscale-Container:   docker compose -f compose.yaml -f compose.tailscale.yaml up -d
+# Die Werte stehen in der Datei .env im selben Ordner (Vorlage: docker/compose.env.example).
+# Die Ordner db, fotos und backups liegen sichtbar neben dieser Datei, damit Snapshots und
+# Sicherungen des NAS sie mit erfassen.
+# Den App-Port 3000 nie ins LAN freigeben: Er hängt nur an 127.0.0.1 (EINSTELLUNGEN_NUTZER §4.5).
+
+name: preposaurus
+
+x-app: &app
+  image: ghcr.io/polygonhunter/preposaurus:${PREPOSAURUS_VERSION:?PREPOSAURUS_VERSION fehlt in .env}
+  # Nutzer-ID, der der Ordner fotos gehört (Standard 1000 = Nutzer node im Image)
+  user: '${PREPOSAURUS_UID:-1000}:${PREPOSAURUS_GID:-1000}'
+  environment:
+    NODE_ENV: production
+    LOG_LEVEL: ${LOG_LEVEL:-info}
+    DATABASE_URL: postgres://preposaurus:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD fehlt in .env}@db:5432/preposaurus
+    APP_SECRET: ${APP_SECRET:?APP_SECRET fehlt in .env}
+    # Tailscale Serve setzt diesen Header und ersetzt dabei einen Wert vom Gerät.
+    CLIENT_IP_HEADER: x-forwarded-for
+    # anthropic: echte Foto-Erkennung, Schlüssel in der App oder als ANTHROPIC_API_KEY (#108)
+    AI_PROVIDER: ${AI_PROVIDER:-anthropic}
+    ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    PHOTO_STORAGE_DIR: /data/fotos
+  volumes:
+    - ./fotos:/data/fotos
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgres:18.7-trixie
+    environment:
+      POSTGRES_USER: preposaurus
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD fehlt in .env}
+      POSTGRES_DB: preposaurus
+    # Ab PostgreSQL 18 liegt das Volume eine Ebene höher als bei 17 (Daten in 18/docker).
+    volumes:
+      - ./db:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U preposaurus -d preposaurus']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  # Spielt Migrationen und Stammdaten ein und beendet sich dann.
+  migrate:
+    <<: *app
+    command: migrate
+    volumes: []
+    restart: 'no'
+    healthcheck:
+      disable: true
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    <<: *app
+    command: web
+    ports:
+      - '127.0.0.1:3000:3000'
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  # Erinnerungen, Mails und Aufräumen. Kommt mit M11-01, bis dahin startet er nicht mit.
+  worker:
+    <<: *app
+    command: worker
+    profiles: [worker]
+    healthcheck:
+      disable: true
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
