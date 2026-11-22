@@ -10,6 +10,16 @@ export interface Quantity {
   unit: QuantityUnit
 }
 
+/**
+ * Inhalt eines Lebensmittels und alle Lebensmittel-Summen: nur g und ml. Stück gibt es nur fürs
+ * Nachkaufen (DATENKATALOG §5 Nr. 20), sonst stünden 6 Stück unbemerkt neben 500 g.
+ */
+export type ContentUnit = Exclude<QuantityUnit, 'piece'>
+
+export interface ContentQuantity extends Quantity {
+  unit: ContentUnit
+}
+
 export type QuantityParseError =
   | { kind: 'empty' }
   | { kind: 'invalid-number' }

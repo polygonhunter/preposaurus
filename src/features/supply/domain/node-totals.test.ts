@@ -21,7 +21,7 @@ describe('calculateNodeTotals', () => {
     expect(totalsOf([unit({ path: reis })], { level: 'foodType', key: 'spaghetti' })).toEqual({
       packages: 0,
       uncountedPackages: 0,
-      amounts: { g: 0, ml: 0, piece: 0 },
+      amounts: { g: 0, ml: 0 },
       kcal: 0,
       macros: { protein: 0, carbs: 0, fat: 0 },
       energyDays: 0,
@@ -65,18 +65,9 @@ describe('calculateNodeTotals', () => {
     ]
     const totals = totalsOf(units, { level: 'group', key: 'wasser' })
 
-    expect(totals.amounts).toEqual({ g: 0, ml: 3000, piece: 0 })
+    expect(totals.amounts).toEqual({ g: 0, ml: 3000 })
     expect(totals.waterDays).toBe(1.5)
     expect(totals.energyDays).toBe(0)
-  })
-
-  it('führt Stückzahlen getrennt von g und ml', () => {
-    const units = [unit({ content: { value: 6, unit: 'piece' } }), unit()]
-    expect(totalsOf(units, { level: 'product', key: 'spaghetti-500' }).amounts).toEqual({
-      g: 500,
-      ml: 0,
-      piece: 6,
-    })
   })
 
   it('zählt abgelaufene, verbrauchte und entsorgte Packungen nicht', () => {
@@ -104,7 +95,7 @@ describe('calculateNodeTotals', () => {
     })
     expect(totals).toMatchObject({
       packages: 1,
-      amounts: { g: 500, ml: 0, piece: 0 },
+      amounts: { g: 500, ml: 0 },
       kcal: 1795,
       macros: { protein: 65, carbs: 355, fat: 7.5 },
       energyDays: null,

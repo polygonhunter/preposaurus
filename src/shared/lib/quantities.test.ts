@@ -1,9 +1,12 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, expectTypeOf, it } from 'vitest'
 import {
   formatGermanNumber,
   formatQuantity,
   parseGermanNumber,
   parseQuantity,
+  type ContentQuantity,
+  type ContentUnit,
+  type Quantity,
   type QuantityParseError,
 } from './quantities'
 
@@ -83,6 +86,13 @@ describe('formatGermanNumber', () => {
     expect(formatGermanNumber(6.25)).toBe('6,3')
     expect(formatGermanNumber(6.25, 2)).toBe('6,25')
     expect(formatGermanNumber(0)).toBe('0')
+  })
+})
+
+describe('ContentUnit', () => {
+  it('kennt für Lebensmittel nur g und ml, Stück bleibt dem Nachkaufen vorbehalten', () => {
+    expectTypeOf<ContentUnit>().toEqualTypeOf<'g' | 'ml'>()
+    expectTypeOf<ContentQuantity>().toExtend<Quantity>()
   })
 })
 

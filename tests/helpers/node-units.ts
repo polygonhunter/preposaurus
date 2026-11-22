@@ -1,7 +1,7 @@
 import type { NodeUnit, TreePath } from '@/features/supply/domain/node-totals'
 import type { ReferenceDay } from '@/features/supply/domain/supply-rules'
 import { toCalendarDay } from '@/shared/lib/dates'
-import type { Quantity } from '@/shared/lib/quantities'
+import type { ContentQuantity } from '@/shared/lib/quantities'
 import { supplyUnit } from './supply-units'
 
 // Gemeinsame Testdaten für die Summen je Baumknoten. Alle Zahlen sind frei gewählte Testwerte.
@@ -38,7 +38,7 @@ interface UnitOptions {
   bestBefore?: string | null
   kcal?: number
   estimated?: boolean
-  content?: Quantity
+  content?: ContentQuantity
   status?: NodeUnit['status']
   waterMl?: number
   checkedAt?: string
