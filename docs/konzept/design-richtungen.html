@@ -1,0 +1,1067 @@
+<title>Preposaurus Design-Richtungen</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap">
+<style>
+/* ===== Rahmen der Seite: neutral, nur Träger der drei Richtungen ===== */
+:root{
+  --page-bg:#f3f3f2; --page-card:#ffffff; --page-ink:#1c1c1c; --page-muted:#555555; --page-line:#d6d6d4; --page-link:#1f4fa8; --page-chip:#e8e8e6;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--page-bg:#121212; --page-card:#1b1b1b; --page-ink:#ececec; --page-muted:#a8a8a8; --page-line:#333333; --page-link:#8db4ff; --page-chip:#262626; color-scheme:dark}
+  :root:not([data-theme="light"]) .dir-a{--a-paper:#1c1813; --a-card:#26201a; --a-ink:#f2e9d8; --a-muted:#bcad94; --a-line:#463c30; --a-kraft:#33291f; --a-tomato:#ec8a63; --a-on-tomato:#1c1813; --a-herb:#9dc68e; --a-water:#8fbbe0; --a-amber:#e3b25a}
+  :root:not([data-theme="light"]) .dir-b{--b-bg:#0c0f13; --b-panel:#151a20; --b-ink:#edf1f5; --b-muted:#a2acb7; --b-line:#2b333c; --b-blue:#74a9ff; --b-head:#11305a; --b-on-head:#ffffff; --b-yellow:#ffd23f; --b-on-yellow:#101418; --b-red:#ff8f85; --b-stripe:#1a2027}
+  :root:not([data-theme="light"]) .dir-c{--c-bg:#131916; --c-card:#1b231f; --c-ink:#e6eee8; --c-muted:#a3b2a9; --c-line:#2d3832; --c-sage:#86cba5; --c-on-sage:#10201a; --c-soft:#21332a; --c-peach:#4a3324; --c-clay:#f2a27f; --c-sky:#8ec5ea; --c-sun:#e9c46a}
+}
+:root[data-theme="dark"]{--page-bg:#121212; --page-card:#1b1b1b; --page-ink:#ececec; --page-muted:#a8a8a8; --page-line:#333333; --page-link:#8db4ff; --page-chip:#262626; color-scheme:dark}
+:root[data-theme="dark"] .dir-a{--a-paper:#1c1813; --a-card:#26201a; --a-ink:#f2e9d8; --a-muted:#bcad94; --a-line:#463c30; --a-kraft:#33291f; --a-tomato:#ec8a63; --a-on-tomato:#1c1813; --a-herb:#9dc68e; --a-water:#8fbbe0; --a-amber:#e3b25a}
+:root[data-theme="dark"] .dir-b{--b-bg:#0c0f13; --b-panel:#151a20; --b-ink:#edf1f5; --b-muted:#a2acb7; --b-line:#2b333c; --b-blue:#74a9ff; --b-head:#11305a; --b-on-head:#ffffff; --b-yellow:#ffd23f; --b-on-yellow:#101418; --b-red:#ff8f85; --b-stripe:#1a2027}
+:root[data-theme="dark"] .dir-c{--c-bg:#131916; --c-card:#1b231f; --c-ink:#e6eee8; --c-muted:#a3b2a9; --c-line:#2d3832; --c-sage:#86cba5; --c-on-sage:#10201a; --c-soft:#21332a; --c-peach:#4a3324; --c-clay:#f2a27f; --c-sky:#8ec5ea; --c-sun:#e9c46a}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page-bg);color:var(--page-ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums;overflow-x:hidden}
+.wrap{max-width:1320px;margin:0 auto;padding-top:24px;padding-bottom:64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:var(--page-link)}
+h1{font-size:28px;line-height:1.2;margin:0 0 8px;letter-spacing:-.01em}
+.lead{max-width:68ch;color:var(--page-muted);margin:0 0 16px}
+.jump{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px;padding:0;list-style:none}
+.jump a{display:inline-block;padding:8px 14px;border-radius:999px;background:var(--page-card);border:1px solid var(--page-line);text-decoration:none;color:var(--page-ink);font-weight:600;font-size:14px}
+.theme{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--page-muted);margin-top:12px}
+.theme button{font:inherit;color:var(--page-ink);background:var(--page-chip);border:1px solid var(--page-line);border-radius:8px;padding:5px 10px;cursor:pointer}
+.theme button[aria-pressed="true"]{background:var(--page-ink);color:var(--page-bg)}
+.dir{margin-top:48px;padding-top:24px;border-top:1px solid var(--page-line);scroll-margin-top:12px}
+.dir-head h2{font-size:24px;margin:0 0 6px}
+.dir-head .kicker{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--page-muted)}
+.dir-head p{max-width:72ch;margin:6px 0 0}
+.specs{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));margin:18px 0 24px}
+.spec{background:var(--page-card);border:1px solid var(--page-line);border-radius:12px;padding:14px;min-width:0}
+.spec h3{font-size:13px;margin:0 0 8px;color:var(--page-muted);text-transform:uppercase;letter-spacing:.06em}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.sw{font-size:11px;line-height:1.3;color:var(--page-muted)}
+.sw i{display:block;height:34px;border-radius:6px;border:1px solid var(--page-line);margin-bottom:4px}
+.sw b{display:block;color:var(--page-ink);font-size:12px}
+.fontline{margin:0 0 6px}
+.screens{display:grid;gap:24px;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),390px));justify-content:start}
+.cap{font-size:13px;font-weight:600;color:var(--page-muted);margin:0 0 6px}
+.phone{width:100%;max-width:390px;border-radius:28px;overflow:hidden;border:1px solid var(--page-line);box-shadow:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06);position:relative}
+.sb{display:flex;justify-content:space-between;align-items:center;padding:10px 22px 4px;font-size:13px;font-weight:600}
+.pc-cap{margin:28px 0 6px}
+.pc-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--page-line);border-radius:14px;max-width:100%}
+.pc{width:1100px;display:grid;grid-template-columns:220px 1fr;min-height:560px}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ic.s{width:16px;height:16px}
+.ic.l{width:24px;height:24px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.hscroll{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.hscroll::-webkit-scrollbar{display:none}
+.hscroll>*{flex:none}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--page-line);border-radius:12px;background:var(--page-card)}
+.cmp{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
+.cmp th,.cmp td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--page-line)}
+.cmp thead th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--page-muted)}
+.cmp tbody th{white-space:nowrap}
+.reco{background:var(--page-card);border:1px solid var(--page-line);border-radius:12px;padding:16px 18px;margin-top:20px;max-width:80ch}
+.reco h3{margin:0 0 8px}
+.note{font-size:13px;color:var(--page-muted)}
+
+/* ===== Richtung A · Vorratskammer ===== */
+.dir-a{--a-paper:#f4eee2; --a-card:#fffaf1; --a-ink:#2b241c; --a-muted:#665947; --a-line:#d8cbb3; --a-kraft:#ebdfc8; --a-tomato:#a33f1f; --a-on-tomato:#ffffff; --a-herb:#3b6a34; --a-water:#2c5d85; --a-amber:#9a6a12}
+.dir-a .phone,.dir-a .pc{background:var(--a-paper);color:var(--a-ink);font-family:"Source Sans 3",system-ui,sans-serif;font-size:15px;line-height:1.45}
+.a-in{padding:6px 16px 16px}
+.a-top{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;margin:4px 0 14px}
+.a-top h4{font:600 28px/1.1 "Fraunces",Georgia,serif;margin:0;letter-spacing:-.01em}
+.a-top small{display:block;font-size:12px;color:var(--a-muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.a-gear{color:var(--a-muted);padding:6px}
+.a-sc{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--a-muted)}
+.a-label{background:var(--a-card);border:1.5px solid var(--a-ink);border-radius:14px;padding:16px;position:relative;box-shadow:3px 3px 0 var(--a-kraft)}
+.a-label::before{content:"";position:absolute;top:12px;right:14px;width:10px;height:10px;border-radius:50%;border:1.5px solid var(--a-ink);background:var(--a-paper)}
+.a-say{font:500 21px/1.25 "Fraunces",Georgia,serif;margin:6px 0 14px}
+.a-say b{display:block;font-weight:700;font-size:54px;line-height:1;letter-spacing:-.02em;margin-top:4px}
+.a-row{display:grid;grid-template-columns:62px 1fr;gap:4px 10px;align-items:center;margin-top:10px}
+.a-row .n{font-weight:600}
+.a-row .v{grid-column:2;font-size:13px;color:var(--a-muted);display:flex;gap:8px;align-items:center}
+.a-track{position:relative;height:16px;border:1.5px solid var(--a-ink);border-radius:4px;background:repeating-linear-gradient(90deg,transparent 0 calc(100%/12 - 1px),var(--a-line) calc(100%/12 - 1px) calc(100%/12))}
+.a-track>i{position:absolute;inset:0 auto 0 0;background:var(--a-herb);border-radius:2px 0 0 2px}
+.a-track.w>i{background:var(--a-water)}
+.a-track>b{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--a-tomato)}
+.a-scale{display:flex;justify-content:space-between;font-size:11px;color:var(--a-muted);margin:4px 0 0 72px}
+.a-stamp{display:inline-block;border:1.5px solid var(--a-tomato);color:var(--a-tomato);border-radius:4px;padding:0 6px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;transform:rotate(-2deg)}
+.a-goal{margin-top:14px;padding-top:12px;border-top:1.5px dashed var(--a-line);font-size:14px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.a-next{margin-top:12px;display:flex;gap:12px;align-items:center;background:var(--a-kraft);border-radius:10px;padding:12px;color:var(--a-ink);text-decoration:none}
+.a-next span{flex:1;font-size:15px}
+.a-next em{display:block;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--a-tomato)}
+.a-h{display:flex;justify-content:space-between;align-items:baseline;margin:22px 0 8px}
+.a-h h5{font:600 20px/1.2 "Fraunces",Georgia,serif;margin:0}
+.a-h a{color:var(--a-tomato);font-weight:600;font-size:14px;text-decoration:none}
+.a-counts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.a-tag{display:inline-flex;align-items:center;gap:6px;background:var(--a-card);border:1px solid var(--a-line);border-radius:4px 12px 12px 4px;padding:2px 10px 2px 8px;font-size:13px;position:relative}
+.a-tag::before{content:"";width:6px;height:6px;border-radius:50%;border:1.5px solid var(--a-muted)}
+.a-tag.on{background:var(--a-ink);color:var(--a-paper);border-color:var(--a-ink)}
+.a-tag.on::before{border-color:var(--a-paper)}
+.a-list{background:var(--a-card);border:1px solid var(--a-line);border-radius:12px}
+.a-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-top:1px solid var(--a-line)}
+.a-item:first-child{border-top:0}
+.a-date{font:600 14px/1.1 "Fraunces",Georgia,serif;text-align:center;border:1.5px solid var(--a-ink);border-radius:6px;padding:5px 4px;min-width:52px;background:var(--a-paper)}
+.a-date small{display:block;font:600 10px/1.2 "Source Sans 3",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--a-muted);margin-top:2px}
+.a-date.x{border-color:var(--a-tomato);color:var(--a-tomato)}
+.a-date.x small{color:var(--a-tomato)}
+.a-t b{display:block;font-weight:600}
+.a-t span{font-size:13px;color:var(--a-muted)}
+.a-btn{font:600 13px "Source Sans 3",sans-serif;color:var(--a-ink);background:var(--a-paper);border:1.5px solid var(--a-ink);border-radius:999px;padding:6px 12px;white-space:nowrap}
+.a-btn.p{background:var(--a-tomato);color:var(--a-on-tomato);border-color:var(--a-tomato)}
+.a-macros{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.a-macros div{background:var(--a-card);border:1px solid var(--a-line);border-radius:10px;padding:8px 10px}
+.a-macros b{display:block;font:600 17px "Fraunces",Georgia,serif}
+.a-macros span{font-size:12px;color:var(--a-muted)}
+.a-kcal{font-size:14px;color:var(--a-muted)}
+.a-kcal b{font:600 22px "Fraunces",Georgia,serif;color:var(--a-ink)}
+.a-dock{display:grid;grid-template-columns:repeat(5,1fr);align-items:end;border-top:1.5px solid var(--a-ink);background:var(--a-card);padding:8px 6px 14px;font-size:11px;font-weight:600;text-align:center;color:var(--a-muted)}
+.a-dock div{display:grid;justify-items:center;gap:2px}
+.a-dock .on{color:var(--a-ink)}
+.a-dock .on::after{content:"";width:18px;height:2px;background:var(--a-tomato);margin-top:2px}
+.a-plus{width:50px;height:50px;border-radius:50%;background:var(--a-tomato);color:var(--a-on-tomato);display:grid;place-items:center;margin-top:-22px;border:3px solid var(--a-paper)}
+.a-back{display:inline-flex;align-items:center;gap:2px;color:var(--a-tomato);font-weight:600;font-size:15px;margin:2px 0 6px}
+.a-grp{margin-top:18px}
+.a-grp h5{font:600 18px/1.2 "Fraunces",Georgia,serif;margin:0;display:flex;justify-content:space-between;align-items:baseline}
+.a-grp h5 small{font:600 13px "Source Sans 3",sans-serif;color:var(--a-muted)}
+.a-grp p{margin:2px 0 8px;font-size:13px;color:var(--a-muted)}
+.a-hint{font-size:13px;border-left:3px solid var(--a-amber);background:var(--a-card);padding:8px 10px;border-radius:0 8px 8px 0;margin:6px 0 8px}
+.a-acts{grid-column:2/4;display:flex;gap:6px;justify-content:flex-end}
+.a-search{display:flex;align-items:center;gap:8px;background:var(--a-card);border:1.5px solid var(--a-ink);border-radius:10px;padding:9px 12px;color:var(--a-muted);font-size:15px}
+.a-chips{margin:10px 0 14px}
+.a-shelf{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.a-jar{background:var(--a-card);border:1.5px solid var(--a-ink);border-radius:10px;overflow:hidden;min-width:0}
+.a-jar header{background:var(--a-kraft);padding:8px 10px;display:flex;gap:8px;align-items:center;border-bottom:1.5px solid var(--a-ink)}
+.a-jar header b{font:600 15px/1.15 "Fraunces",Georgia,serif}
+.a-jar div{padding:8px 10px 10px;font-size:13px}
+.a-jar .q{color:var(--a-muted)}
+.a-mini{position:relative;height:8px;border:1px solid var(--a-ink);border-radius:3px;margin:6px 0 4px}
+.a-mini i{position:absolute;inset:0 auto 0 0;background:var(--a-herb)}
+.a-mini b{position:absolute;top:-4px;bottom:-4px;left:76.9%;width:2px;background:var(--a-tomato)}
+.a-jar.low header{background:var(--a-card)}
+.a-jar.low .lowtxt{color:var(--a-tomato);font-weight:700}
+.a-path{font-size:13px;color:var(--a-muted);margin-bottom:2px}
+.a-path b{color:var(--a-tomato);font-weight:600}
+.a-cat{display:flex;justify-content:space-between;align-items:baseline;margin:16px 0 6px;padding-bottom:4px;border-bottom:1.5px solid var(--a-ink)}
+.a-cat h5{font:600 17px "Fraunces",Georgia,serif;margin:0}
+.a-cat span{font-size:12px;color:var(--a-muted)}
+.a-minus{font:700 15px "Source Sans 3",sans-serif;width:44px;height:36px;border-radius:8px;border:1.5px solid var(--a-ink);background:var(--a-paper);color:var(--a-ink)}
+.a-state{font-weight:600}
+.a-state.bad{color:var(--a-tomato)} .a-state.soon{color:var(--a-amber)} .a-state.ok{color:var(--a-herb)}
+/* A · PC */
+.a-side{background:var(--a-card);border-right:1.5px solid var(--a-ink);padding:18px 14px;display:flex;flex-direction:column;gap:4px}
+.a-brand{font:700 20px "Fraunces",Georgia,serif;margin-bottom:12px}
+.a-new{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--a-tomato);color:var(--a-on-tomato);border-radius:999px;padding:9px;font-weight:700;margin-bottom:14px}
+.a-nav{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:var(--a-muted);font-weight:600}
+.a-nav.on{background:var(--a-kraft);color:var(--a-ink)}
+.a-nav.sub{padding-left:40px;font-size:14px}
+.a-nav .ct{margin-left:auto;font-size:12px}
+.a-pcmain{padding:24px 28px;display:grid;grid-template-columns:1.25fr 1fr;gap:20px;align-content:start}
+.a-pcmain .a-h{margin-top:0}
+.a-cov{display:grid;grid-template-columns:150px 1fr 74px;gap:8px 12px;align-items:center;font-size:14px}
+.a-cov .a-mini{margin:0}
+
+/* ===== Richtung B · Fahrplan ===== */
+.dir-b{--b-bg:#eef0ee; --b-panel:#ffffff; --b-ink:#101418; --b-muted:#4c5560; --b-line:#c7ccd1; --b-blue:#0a4b9c; --b-head:#0a4b9c; --b-on-head:#ffffff; --b-yellow:#ffcc00; --b-on-yellow:#101418; --b-red:#b0261d; --b-stripe:#f6f7f6}
+.dir-b .phone,.dir-b .pc{background:var(--b-bg);color:var(--b-ink);font-family:"Barlow",system-ui,sans-serif;font-size:15px;line-height:1.4}
+.dir-b .sb{background:var(--b-head);color:var(--b-on-head)}
+.b-bar{background:var(--b-head);color:var(--b-on-head);padding:6px 16px 14px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.b-bar h4{font:700 26px/1 "Barlow Condensed",sans-serif;margin:0;letter-spacing:.01em;text-transform:uppercase}
+.b-bar small{display:block;font-size:12px;font-weight:500;opacity:.9;margin-bottom:4px}
+.b-in{padding:14px 16px 16px}
+.b-panel{background:var(--b-panel);border:1px solid var(--b-line);border-radius:4px}
+.b-lbl{font:600 13px "Barlow Condensed",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--b-muted)}
+.b-say{font:600 20px/1.25 "Barlow",sans-serif;margin:4px 0 12px}
+.b-num{display:inline-block;background:var(--b-yellow);color:var(--b-on-yellow);font:700 30px/1 "Barlow Condensed",sans-serif;padding:3px 8px 2px;border-radius:3px;vertical-align:-3px}
+.b-axis{position:relative;margin:6px 0 4px;padding-left:64px}
+.b-line{position:relative;height:30px;display:flex;align-items:center}
+.b-line .nm{position:absolute;left:-64px;font-weight:600;font-size:14px}
+.b-line .rail{position:absolute;left:0;right:0;height:2px;background:var(--b-line)}
+.b-line .run{position:absolute;left:0;height:6px;border-radius:3px;background:var(--b-ink)}
+.b-line .run::after{content:"";position:absolute;right:-6px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--b-panel);border:3px solid currentColor;color:var(--b-ink)}
+.b-line.w .run{background:var(--b-blue)}
+.b-line.w .run::after{color:var(--b-blue)}
+.b-goal{position:absolute;top:-6px;bottom:18px;left:calc(64px + (100% - 64px) * .8333);border-left:2px dashed var(--b-red)}
+.b-goal span{position:absolute;bottom:-18px;left:-20px;font:600 12px "Barlow Condensed",sans-serif;color:var(--b-red);white-space:nowrap}
+.b-ticks{display:flex;justify-content:space-between;font:500 12px "Barlow Condensed",sans-serif;color:var(--b-muted);margin-left:64px;border-top:1px solid var(--b-line);padding-top:3px}
+.b-vals{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--b-line);margin-top:18px}
+.b-vals div{padding:8px 0}
+.b-vals div+div{border-left:1px solid var(--b-line);padding-left:12px}
+.b-vals b{font:700 22px "Barlow Condensed",sans-serif}
+.b-limit{display:inline-block;font:700 11px "Barlow",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--b-blue);border:1.5px solid var(--b-blue);padding:0 5px;border-radius:2px;margin-left:4px;vertical-align:2px}
+.b-trow{display:grid;grid-template-columns:72px 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-top:1px solid var(--b-line);color:inherit;text-decoration:none}
+.b-trow .k{font:600 13px "Barlow Condensed",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--b-muted)}
+.b-trow.next{border-left:6px solid var(--b-yellow);padding-left:6px}
+.b-sect{display:flex;justify-content:space-between;align-items:baseline;margin:20px 0 6px}
+.b-sect h5{font:700 20px "Barlow Condensed",sans-serif;text-transform:uppercase;margin:0;letter-spacing:.02em}
+.b-sect a{font-weight:600;color:var(--b-blue);text-decoration:none;font-size:14px}
+.b-board{background:var(--b-panel);border:1px solid var(--b-line);border-radius:4px;overflow:hidden}
+.b-bh{display:grid;grid-template-columns:62px 1fr 64px;gap:10px;padding:6px 12px;background:var(--b-ink);color:var(--b-panel);font:600 12px "Barlow Condensed",sans-serif;letter-spacing:.08em;text-transform:uppercase}
+.b-br{display:grid;grid-template-columns:62px 1fr 64px;gap:10px;padding:9px 12px;border-top:1px solid var(--b-line);align-items:center}
+.b-br:nth-child(odd){background:var(--b-stripe)}
+.b-d{font:700 18px/1 "Barlow Condensed",sans-serif}
+.b-d small{display:block;font:500 12px "Barlow",sans-serif;color:var(--b-muted);margin-top:2px}
+.b-d.x{color:var(--b-red)} .b-d.x small{color:var(--b-red)}
+.b-br .o{font-size:13px;color:var(--b-muted)}
+.b-nut{display:grid;grid-template-columns:repeat(4,1fr);background:var(--b-panel);border:1px solid var(--b-line);border-radius:4px}
+.b-nut div{padding:8px 10px}
+.b-nut div+div{border-left:1px solid var(--b-line)}
+.b-nut b{display:block;font:700 18px "Barlow Condensed",sans-serif}
+.b-nut span{font-size:12px;color:var(--b-muted)}
+.b-dock{display:grid;grid-template-columns:repeat(5,1fr);border-top:2px solid var(--b-ink);background:var(--b-panel);padding:8px 4px 14px;text-align:center;font:600 12px "Barlow Condensed",sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--b-muted);align-items:end}
+.b-dock div{display:grid;justify-items:center;gap:3px}
+.b-dock .on{color:var(--b-blue)}
+.b-plus{width:48px;height:42px;border-radius:4px;background:var(--b-yellow);color:var(--b-on-yellow);display:grid;place-items:center}
+.b-plus+span{color:var(--b-ink)}
+.b-back{display:flex;align-items:center;gap:2px;font-weight:600;font-size:14px;opacity:.95}
+.b-tabs{display:grid;grid-template-columns:repeat(4,1fr);background:var(--b-panel);border-bottom:1px solid var(--b-line)}
+.b-tabs a{padding:8px 4px;text-align:center;color:var(--b-ink);text-decoration:none;font-size:12px;line-height:1.2;border-bottom:3px solid transparent}
+.b-tabs a b{display:block;font:700 22px "Barlow Condensed",sans-serif}
+.b-tabs a.on{border-bottom-color:var(--b-blue)}
+.b-tabs a.x b{color:var(--b-red)}
+.b-sort{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--b-muted);margin-bottom:6px}
+.b-seg{display:inline-flex;border:1px solid var(--b-line);border-radius:3px;overflow:hidden}
+.b-seg span{padding:3px 8px}
+.b-seg .on{background:var(--b-ink);color:var(--b-panel)}
+.b-gh{display:flex;justify-content:space-between;align-items:baseline;padding:8px 12px;background:var(--b-panel);border-bottom:2px solid var(--b-ink);margin-top:14px}
+.b-gh h5{margin:0;font:700 17px "Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.03em}
+.b-gh span{font-size:13px;color:var(--b-muted)}
+.b-gh.x h5{color:var(--b-red)}
+.b-note{font-size:13px;color:var(--b-muted);padding:8px 12px;background:var(--b-panel);border-bottom:1px solid var(--b-line)}
+.b-it{display:grid;grid-template-columns:58px 1fr auto;gap:10px;align-items:center;padding:10px 12px;background:var(--b-panel);border-bottom:1px solid var(--b-line)}
+.b-it .t b{display:block;font-weight:600}
+.b-it .t span{font-size:13px;color:var(--b-muted)}
+.b-btn{font:600 13px "Barlow",sans-serif;padding:7px 10px;border-radius:3px;border:1.5px solid var(--b-blue);color:var(--b-blue);background:var(--b-panel);white-space:nowrap}
+.b-btn.p{background:var(--b-blue);color:var(--b-panel)}
+.b-more{display:block;padding:9px 12px;font-size:13px;color:var(--b-blue);font-weight:600;background:var(--b-panel)}
+.b-search{display:flex;align-items:center;gap:8px;background:var(--b-panel);border:1.5px solid var(--b-ink);border-radius:3px;padding:9px 10px;color:var(--b-muted)}
+.b-chip{font-size:13px;font-weight:600;padding:5px 10px;border:1.5px solid var(--b-line);border-radius:3px;background:var(--b-panel)}
+.b-chip.on{background:var(--b-ink);border-color:var(--b-ink);color:var(--b-panel)}
+.b-wg{display:grid;grid-template-columns:28px 1fr 64px;gap:4px 10px;align-items:center;padding:10px 12px;background:var(--b-panel);border-bottom:1px solid var(--b-line)}
+.b-wg .nm{font-weight:600;line-height:1.2}
+.b-wg .q{font-size:12px;color:var(--b-muted)}
+.b-wg .dd{text-align:right;font:700 18px "Barlow Condensed",sans-serif}
+.b-wg .dd small{display:block;font:500 11px "Barlow",sans-serif;color:var(--b-muted)}
+.b-wg .tr{grid-column:2/4}
+.b-meter{position:relative;height:6px;background:var(--b-line)}
+.b-meter i{position:absolute;inset:0 auto 0 0;background:var(--b-ink)}
+.b-meter b{position:absolute;top:-4px;bottom:-4px;left:76.9%;width:2px;background:var(--b-red)}
+.b-low{color:var(--b-red);font-weight:700}
+.b-crumb{font-size:13px;opacity:.9;margin-bottom:4px}
+.b-sum{display:grid;grid-template-columns:repeat(3,1fr);background:var(--b-panel);border:1px solid var(--b-line);border-radius:4px}
+.b-sum div{padding:7px 10px}
+.b-sum div+div{border-left:1px solid var(--b-line)}
+.b-sum b{display:block;font:700 18px "Barlow Condensed",sans-serif}
+.b-sum span{font-size:12px;color:var(--b-muted)}
+.b-cat{display:flex;align-items:center;gap:8px;margin:14px 0 0;padding:6px 0;font:700 14px "Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.06em}
+.b-cat::after{content:"";flex:1;height:1px;background:var(--b-ink);order:1}
+.b-cat span{order:2;font:500 12px "Barlow",sans-serif;text-transform:none;letter-spacing:0;color:var(--b-muted)}
+.b-la{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:9px 12px;background:var(--b-panel);border:1px solid var(--b-line);border-top:0}
+.b-cat+.b-la{border-top:1px solid var(--b-line)}
+.b-la b{display:block;font-weight:600}
+.b-la span{font-size:13px;color:var(--b-muted)}
+.b-la .m{text-align:right;font-size:13px;line-height:1.25}
+.b-la .m b{font:700 15px "Barlow Condensed",sans-serif}
+.b-minus{width:44px;height:38px;border-radius:3px;border:1.5px solid var(--b-ink);background:var(--b-panel);color:var(--b-ink);font:700 16px "Barlow Condensed",sans-serif}
+.st-x{color:var(--b-red)} .st-s{color:var(--b-blue)}
+/* B · PC */
+.b-side{background:var(--b-head);color:var(--b-on-head);padding:18px 12px;display:flex;flex-direction:column;gap:2px}
+.b-brand{font:700 22px "Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.04em;margin:0 6px 14px}
+.b-new{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--b-yellow);color:var(--b-on-yellow);padding:9px;border-radius:3px;font-weight:700;margin-bottom:12px}
+.b-nav{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:3px;font-weight:500}
+.b-nav.on{background:rgba(255,255,255,.16);font-weight:700}
+.b-nav.sub{padding-left:40px;font-size:14px}
+.b-nav .ct{margin-left:auto;font:700 14px "Barlow Condensed",sans-serif}
+.b-pcmain{display:grid;grid-template-columns:270px 1fr;min-width:0}
+.b-col{border-right:1px solid var(--b-line);background:var(--b-panel)}
+.b-col h5{margin:0;padding:14px 12px 10px;font:700 18px "Barlow Condensed",sans-serif;text-transform:uppercase;border-bottom:2px solid var(--b-ink)}
+.b-col .b-wg.on{background:var(--b-bg);box-shadow:inset 4px 0 0 var(--b-blue)}
+.b-tbl{padding:16px 20px}
+.b-tbl table{width:100%;border-collapse:collapse;background:var(--b-panel);border:1px solid var(--b-line);font-size:14px}
+.b-tbl th{background:var(--b-ink);color:var(--b-panel);text-align:left;font:600 12px "Barlow Condensed",sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:7px 10px}
+.b-tbl td{padding:8px 10px;border-top:1px solid var(--b-line)}
+.b-tbl td.r,.b-tbl th.r{text-align:right}
+.b-tbl tr.cat td{background:var(--b-bg);font:700 13px "Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.06em;border-top:2px solid var(--b-ink)}
+.b-tbl tr.cat td span{font:500 12px "Barlow",sans-serif;text-transform:none;letter-spacing:0;color:var(--b-muted);margin-left:8px}
+.b-tbar{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.b-tbar .b-search{flex:1}
+
+/* ===== Richtung C · Haushaltsbuch ===== */
+.dir-c{--c-bg:#f2f5ef; --c-card:#ffffff; --c-ink:#22302a; --c-muted:#53625a; --c-line:#dce3d8; --c-sage:#2f6e50; --c-on-sage:#ffffff; --c-soft:#e3efe6; --c-peach:#fbe3cf; --c-clay:#9c4524; --c-sky:#2b6890; --c-sun:#8a6410}
+.dir-c .phone,.dir-c .pc{background:var(--c-bg);color:var(--c-ink);font-family:"Nunito Sans",system-ui,sans-serif;font-size:15px;line-height:1.5}
+.c-in{padding:6px 16px 18px}
+.c-top{display:flex;justify-content:space-between;align-items:center;margin:6px 0 14px}
+.c-hello{font-size:14px;color:var(--c-muted)}
+.c-hello b{display:block;font:800 24px/1.15 "Nunito",sans-serif;color:var(--c-ink)}
+.c-av{display:flex}
+.c-av span{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:800 12px "Nunito",sans-serif;border:2px solid var(--c-bg);margin-left:-8px;background:var(--c-soft);color:var(--c-sage)}
+.c-card{background:var(--c-card);border-radius:22px;padding:18px;border:1px solid var(--c-line)}
+.c-say{font:800 25px/1.25 "Nunito",sans-serif;margin:0 0 16px}
+.c-say mark{background:linear-gradient(transparent 55%,var(--c-peach) 55%);color:inherit;padding:0 2px}
+.c-bar{margin-top:12px}
+.c-bar .l{display:flex;justify-content:space-between;font-size:14px;margin-bottom:5px}
+.c-bar .l b{font-weight:700}
+.c-pill{position:relative;height:14px;background:var(--c-soft);border-radius:999px}
+.c-pill i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:var(--c-sage)}
+.c-pill.w i{background:var(--c-sky)}
+.c-pill b{position:absolute;top:-5px;bottom:-5px;width:3px;border-radius:2px;background:var(--c-ink)}
+.c-flag{display:flex;justify-content:flex-end;font-size:12px;color:var(--c-muted);margin-top:4px;padding-right:calc(16.67% - 18px)}
+.c-limit{font-size:12px;font-weight:700;color:var(--c-sky);background:var(--c-soft);border-radius:999px;padding:1px 8px;margin-left:6px}
+.c-goal{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--c-muted);margin-top:16px}
+.c-goal .ic{color:var(--c-sage);margin-top:2px}
+.c-next{display:flex;align-items:center;gap:12px;background:var(--c-sage);color:var(--c-on-sage);border-radius:18px;padding:14px 16px;margin-top:12px;text-decoration:none}
+.c-next span{flex:1;font-weight:700}
+.c-next small{display:block;font-weight:600;font-size:12px;opacity:.9}
+.c-h{display:flex;justify-content:space-between;align-items:baseline;margin:24px 2px 10px}
+.c-h h5{font:800 19px "Nunito",sans-serif;margin:0}
+.c-h a{color:var(--c-sage);font-weight:700;font-size:14px;text-decoration:none}
+.c-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.c-chip{font-size:13px;font-weight:700;border-radius:999px;padding:5px 12px;background:var(--c-card);border:1px solid var(--c-line);color:var(--c-ink)}
+.c-chip.on{background:var(--c-ink);color:var(--c-bg);border-color:var(--c-ink)}
+.c-chip.x{color:var(--c-clay)}
+.c-day{width:48px;height:52px;border-radius:14px;background:var(--c-soft);display:grid;place-items:center;align-content:center;text-align:center;line-height:1}
+.c-day b{font:800 20px "Nunito",sans-serif}
+.c-day small{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--c-muted);margin-top:2px}
+.c-day.x{background:var(--c-peach)}
+.c-day.x b,.c-day.x small{color:var(--c-clay)}
+.c-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--c-line)}
+.c-row:first-child{border-top:0;padding-top:0}
+.c-row:last-child{padding-bottom:0}
+.c-row .t b{display:block;font-weight:700}
+.c-row .t span{font-size:13px;color:var(--c-muted)}
+.c-btn{font:700 13px "Nunito Sans",sans-serif;border-radius:999px;padding:8px 14px;border:0;background:var(--c-sage);color:var(--c-on-sage);white-space:nowrap}
+.c-btn.g{background:var(--c-soft);color:var(--c-ink)}
+.c-stack{display:flex;height:12px;border-radius:999px;overflow:hidden;gap:2px;margin:10px 0}
+.c-stack i:nth-child(1){background:var(--c-clay)} .c-stack i:nth-child(2){background:var(--c-sage)} .c-stack i:nth-child(3){background:var(--c-sun)}
+.c-legend{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:13px;color:var(--c-muted)}
+.c-legend b{display:block;font:800 16px "Nunito",sans-serif;color:var(--c-ink)}
+.c-legend span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:var(--c-clay)}
+.c-legend div:nth-child(2) span::before{background:var(--c-sage)} .c-legend div:nth-child(3) span::before{background:var(--c-sun)}
+.c-kcal{font-size:14px;color:var(--c-muted)}
+.c-kcal b{font:800 24px "Nunito",sans-serif;color:var(--c-ink)}
+.c-dock{margin:0 12px 14px;background:var(--c-card);border:1px solid var(--c-line);border-radius:24px;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding:8px 4px 10px;font-size:11px;font-weight:700;color:var(--c-muted);text-align:center}
+.c-dock div{display:grid;justify-items:center;gap:2px}
+.c-dock .on{color:var(--c-sage)}
+.c-plus{width:52px;height:52px;border-radius:50%;background:var(--c-sage);color:var(--c-on-sage);display:grid;place-items:center;margin-top:-26px;border:4px solid var(--c-bg)}
+.c-back{display:inline-flex;align-items:center;gap:2px;color:var(--c-sage);font-weight:700;margin:2px 0 4px}
+.c-title{font:800 26px/1.15 "Nunito",sans-serif;margin:0 0 12px}
+.c-grp{margin-top:16px}
+.c-grp h5{margin:0 2px 2px;font:800 17px "Nunito",sans-serif;display:flex;justify-content:space-between}
+.c-grp h5 small{font:700 13px "Nunito Sans",sans-serif;color:var(--c-muted)}
+.c-grp p{margin:0 2px 8px;font-size:13px;color:var(--c-muted)}
+.c-grp.x h5{color:var(--c-clay)}
+.c-tip{background:var(--c-peach);border-radius:14px;padding:8px 12px;font-size:13px;margin-bottom:10px}
+.c-acts{grid-column:2/4;display:flex;gap:6px;justify-content:flex-end}
+.c-search{display:flex;align-items:center;gap:8px;background:var(--c-card);border:1px solid var(--c-line);border-radius:999px;padding:10px 16px;color:var(--c-muted)}
+.c-wg{display:grid;grid-template-columns:44px 1fr auto;gap:4px 12px;align-items:center;padding:12px 0;border-top:1px solid var(--c-line)}
+.c-wg:first-child{border-top:0;padding-top:0}
+.c-wg:last-child{padding-bottom:0}
+.c-ico{width:44px;height:44px;border-radius:50%;background:var(--c-soft);color:var(--c-sage);display:grid;place-items:center;grid-row:span 2}
+.c-ico.low{background:var(--c-peach);color:var(--c-clay)}
+.c-wg .nm{font-weight:700;line-height:1.25}
+.c-wg .dd{font:800 15px "Nunito",sans-serif;text-align:right;white-space:nowrap}
+.c-wg .sub{grid-column:2/4;font-size:12px;color:var(--c-muted);display:flex;flex-direction:column;gap:5px}
+.c-wg .c-pill{height:8px}
+.c-wg .c-pill b{left:76.9%;top:-3px;bottom:-3px;width:2px}
+.c-ok{color:var(--c-sage);display:inline-flex;align-items:center;gap:3px}
+.c-low{color:var(--c-clay);font-weight:700}
+.c-crumb{font-size:13px;color:var(--c-muted)}
+.c-crumb b{color:var(--c-sage)}
+.c-cat{display:flex;justify-content:space-between;align-items:baseline;margin:18px 4px 8px}
+.c-cat h5{margin:0;font:800 16px "Nunito",sans-serif}
+.c-cat span{font-size:12px;color:var(--c-muted)}
+.c-la{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--c-line)}
+.c-la:first-child{border-top:0;padding-top:0}
+.c-la:last-child{padding-bottom:0}
+.c-la b{font-weight:700}
+.c-la .q{font-size:13px;color:var(--c-muted)}
+.c-la .c-minus{grid-row:1/3;grid-column:2}
+.c-minus{width:46px;height:46px;border-radius:50%;border:0;background:var(--c-soft);color:var(--c-sage);font:800 16px "Nunito",sans-serif}
+.c-st{font-weight:700}
+.c-st.x{color:var(--c-clay)} .c-st.s{color:var(--c-sun)} .c-st.ok{color:var(--c-sage)}
+/* C · PC */
+.c-side{padding:20px 14px;display:flex;flex-direction:column;gap:4px;border-right:1px solid var(--c-line)}
+.c-brand{font:800 21px "Nunito",sans-serif;margin:0 8px 14px}
+.c-new{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--c-sage);color:var(--c-on-sage);border-radius:999px;padding:10px;font-weight:700;margin-bottom:14px}
+.c-nav{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:14px;color:var(--c-muted);font-weight:700}
+.c-nav.on{background:var(--c-card);color:var(--c-ink);border:1px solid var(--c-line)}
+.c-nav.sub{padding-left:42px;font-size:14px}
+.c-nav .ct{margin-left:auto;font-size:12px;background:var(--c-peach);color:var(--c-clay);border-radius:999px;padding:0 8px}
+.c-pcmain{padding:24px;display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:16px;align-content:start}
+.c-pcmain .c-h{margin-top:0}
+.c-span2{grid-column:span 2}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-grain" viewBox="0 0 24 24"><path d="M12 21V8M12 8c-3 0-4-2-4-5 3 0 4 2 4 5zm0 0c3 0 4-2 4-5-3 0-4 2-4 5zM12 14c-3 0-4-2-4-4 3 0 4 1 4 4zm0 0c3 0 4-2 4-4-3 0-4 1-4 4z"/></symbol>
+  <symbol id="i-veg" viewBox="0 0 24 24"><path d="M5 19c0-8 6-14 14-14 0 8-6 14-14 14zM5 19l8-8"/></symbol>
+  <symbol id="i-fruit" viewBox="0 0 24 24"><path d="M12 7c-4-2-8 0-8 5s3 9 6 9c1 0 1.5-.5 2-.5s1 .5 2 .5c3 0 6-4 6-9s-4-7-8-5zM12 7c0-2 1-4 3-4"/></symbol>
+  <symbol id="i-milk" viewBox="0 0 24 24"><path d="M8 3h8v3l2 3v12H6V9l2-3zM6 9h12"/></symbol>
+  <symbol id="i-fish" viewBox="0 0 24 24"><path d="M3 12c3-4 7-6 11-6 3 0 5 3 7 6-2 3-4 6-7 6-4 0-8-2-11-6zM16 11h.01"/></symbol>
+  <symbol id="i-oil" viewBox="0 0 24 24"><path d="M10 3h4v3l2 3v11a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V9l2-3z"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z"/></symbol>
+  <symbol id="i-can" viewBox="0 0 24 24"><path d="M6 5c0-1 3-2 6-2s6 1 6 2v14c0 1-3 2-6 2s-6-1-6-2zM6 5c0 1 3 2 6 2s6-1 6-2"/></symbol>
+  <symbol id="i-jar" viewBox="0 0 24 24"><path d="M8 3h8v3H8zM7 6h10l1 3v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9z"/></symbol>
+  <symbol id="i-bread" viewBox="0 0 24 24"><path d="M5 11a4 4 0 0 1 3-7h8a4 4 0 0 1 3 7v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 4h2l2 11h11l2-8H6M9 20h.01M17 20h.01"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 20v-9M12 20V5M19 20v-6M3 20h18"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3.2"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+  <symbol id="i-bat" viewBox="0 0 28 14"><path d="M2 2h21v10H2zM25 5v4" /><path d="M4 4h14v6H4z" fill="currentColor" stroke="none"/></symbol>
+</svg>
+
+<div class="wrap">
+<header>
+  <h1>Preposaurus · drei visuelle Richtungen</h1>
+  <p class="lead">Grundlage ist das UX-Konzept (Übersicht, Bald fällig, Vorrat). Alle drei Richtungen zeigen dieselben Inhalte mit denselben erfundenen Daten: Haushalt Alex, Sam und Kim, Ziel 10 Tage bis 01.03., heute ist Sonntag, 22.11. Sie unterscheiden sich in Schrift, Farbe und Aufteilung. Bitte nicht nach den Daten urteilen, sondern danach, wie es sich liest und anfühlt. Ein Mix ist möglich, z. B. die Schrift der einen mit der Aufteilung der anderen.</p>
+  <ul class="jump">
+    <li><a href="#a">A · Vorratskammer</a></li>
+    <li><a href="#b">B · Fahrplan</a></li>
+    <li><a href="#c">C · Haushaltsbuch</a></li>
+    <li><a href="#vergleich">Vergleich und Empfehlung</a></li>
+  </ul>
+  <div class="theme" role="group" aria-label="Darstellung">Darstellung:
+    <button type="button" data-set="auto" aria-pressed="true">Wie Gerät</button>
+    <button type="button" data-set="light" aria-pressed="false">Hell</button>
+    <button type="button" data-set="dark" aria-pressed="false">Dunkel</button>
+  </div>
+</header>
+
+<!-- ================= RICHTUNG A ================= -->
+<section class="dir dir-a" id="a">
+  <div class="dir-head">
+    <div class="kicker">Richtung A</div>
+    <h2>Vorratskammer</h2>
+    <p>Die App sieht aus wie ein gut sortiertes Regal mit beschrifteten Gläsern: warmes Papier, dunkle Tinte, Etiketten mit Rand und Loch für die Schnur. Die Kernzahl steht groß in einer Serifenschrift wie auf einem Einmach-Etikett. Die Balken sind Regalbretter mit einem Feld je Tag, so lassen sich die Tage abzählen.</p>
+  </div>
+  <div class="specs">
+    <div class="spec"><h3>Schrift</h3>
+      <p class="fontline"><b style="font:600 22px Fraunces,serif">Fraunces</b> für Überschriften und Zahlen. Weiche Serifenschrift mit Charakter, wirkt handgemacht, bleibt aber gut lesbar.</p>
+      <p class="fontline"><b style="font-family:'Source Sans 3'">Source Sans 3</b> für Text, Listen und Knöpfe. Ruhig, offen, mit Tabellenziffern.</p>
+    </div>
+    <div class="spec"><h3>Farben hell</h3><div class="swatches">
+      <div class="sw"><i style="background:#f4eee2"></i><b>Papier</b>#f4eee2</div>
+      <div class="sw"><i style="background:#2b241c"></i><b>Tinte</b>#2b241c</div>
+      <div class="sw"><i style="background:#ebdfc8"></i><b>Packpapier</b>#ebdfc8</div>
+      <div class="sw"><i style="background:#a33f1f"></i><b>Tomate</b>#a33f1f</div>
+      <div class="sw"><i style="background:#3b6a34"></i><b>Kräuter</b>#3b6a34</div>
+      <div class="sw"><i style="background:#2c5d85"></i><b>Wasser</b>#2c5d85</div>
+    </div></div>
+    <div class="spec"><h3>Farben dunkel</h3><div class="swatches">
+      <div class="sw"><i style="background:#1c1813"></i><b>Papier</b>#1c1813</div>
+      <div class="sw"><i style="background:#f2e9d8"></i><b>Tinte</b>#f2e9d8</div>
+      <div class="sw"><i style="background:#33291f"></i><b>Packpapier</b>#33291f</div>
+      <div class="sw"><i style="background:#ec8a63"></i><b>Tomate</b>#ec8a63</div>
+      <div class="sw"><i style="background:#9dc68e"></i><b>Kräuter</b>#9dc68e</div>
+      <div class="sw"><i style="background:#8fbbe0"></i><b>Wasser</b>#8fbbe0</div>
+    </div></div>
+  </div>
+
+  <div class="screens">
+    <!-- A · Übersicht -->
+    <div><p class="cap">Übersicht</p>
+    <div class="phone">
+      <div class="sb"><span>9:41</span><svg class="ic" style="width:26px;height:13px" viewBox="0 0 28 14"><use href="#i-bat"/></svg></div>
+      <div class="a-in">
+        <div class="a-top"><div><small>Alex · Sam · Kim</small><h4>Übersicht</h4></div><span class="a-gear"><svg class="ic"><use href="#i-gear"/></svg><span class="vh">Einstellungen</span></span></div>
+        <div class="a-label">
+          <div class="a-sc">Heute versorgt</div>
+          <p class="a-say">Euer Vorrat reicht für <b>6 Tage</b></p>
+          <div class="a-row"><span class="n">Essen</span><div class="a-track"><i style="width:78.3%"></i><b style="left:83.3%"></b></div><span class="v">9,4 Tage</span></div>
+          <div class="a-row"><span class="n">Wasser</span><div class="a-track w"><i style="width:50%"></i><b style="left:83.3%"></b></div><span class="v">6,0 Tage <span class="a-stamp">begrenzt</span></span></div>
+          <div class="a-scale"><span>0</span><span>3</span><span>6</span><span>9</span><span style="color:var(--a-tomato);font-weight:700">Ziel 10</span><span>12</span></div>
+          <div class="a-goal"><span>Am 01.03. wären es <b>5 von 10 Tagen</b>. 6 Packungen laufen vorher ab.</span><svg class="ic s"><use href="#i-next"/></svg></div>
+          <a class="a-next" href="#a"><span><em>Nächster Schritt</em>20 l Wasser bringen euch auf 9 Tage.</span><svg class="ic"><use href="#i-next"/></svg></a>
+        </div>
+        <div class="a-h"><h5>Bald fällig</h5><a href="#a">Alle 18 ansehen</a></div>
+        <div class="a-counts"><span class="a-tag">2 abgelaufen</span><span class="a-tag">3 diese Woche</span><span class="a-tag">4 diesen Monat</span><span class="a-tag">9 in 3 Monaten</span></div>
+        <div class="a-list">
+          <div class="a-item"><div class="a-date x">18.11.<small>abgel.</small></div><div class="a-t"><b>2 × Zwieback 225 g</b><span>vor 4 Tagen · Keller</span></div><svg class="ic s"><use href="#i-next"/></svg></div>
+          <div class="a-item"><div class="a-date x">20.11.<small>abgel.</small></div><div class="a-t"><b>1 × H-Milch 1 l</b><span>vor 2 Tagen · Küche</span></div><svg class="ic s"><use href="#i-next"/></svg></div>
+          <div class="a-item"><div class="a-date">25.11.<small>Mi.</small></div><div class="a-t"><b>4 × Haferdrink 1 l</b><span>in 3 Tagen · Küche</span></div><svg class="ic s"><use href="#i-next"/></svg></div>
+        </div>
+        <div class="a-h"><h5>Nährwerte</h5><a href="#a">Mehr</a></div>
+        <div class="a-kcal"><b>52.600 kcal</b> · Bedarf 5.600 kcal am Tag</div>
+        <div class="a-macros"><div><span>Eiweiß</span><b>1,6 kg</b><span>13 %</span></div><div><span>Kohlenhydr.</span><b>7,9 kg</b><span>60 %</span></div><div><span>Fett</span><b>1,6 kg</b><span>27 %</span></div></div>
+      </div>
+      <nav class="a-dock"><div class="on"><svg class="ic"><use href="#i-home"/></svg>Übersicht</div><div><svg class="ic"><use href="#i-box"/></svg>Vorrat</div><div><span class="a-plus"><svg class="ic l"><use href="#i-plus"/></svg></span>Erfassen</div><div><svg class="ic"><use href="#i-cart"/></svg>Nachkaufen</div><div><svg class="ic"><use href="#i-chart"/></svg>Statistik</div></nav>
+    </div></div>
+
+    <!-- A · Bald fällig -->
+    <div><p class="cap">Bald fällig</p>
+    <div class="phone">
+      <div class="sb"><span>9:41</span><svg class="ic" style="width:26px;height:13px" viewBox="0 0 28 14"><use href="#i-bat"/></svg></div>
+      <div class="a-in">
+        <span class="a-back"><svg class="ic s"><use href="#i-back"/></svg>Übersicht</span>
+        <div class="a-top" style="margin-top:0"><h4>Bald fällig</h4><span class="a-sc">18 Einträge</span></div>
+        <div class="a-counts"><span class="a-tag on">2 abgelaufen</span><span class="a-tag">3 diese Woche</span><span class="a-tag">4 diesen Monat</span><span class="a-tag">9 in 3 Mon.</span></div>
+        <div class="a-sc" style="font-size:12px">Sortiert nach Datum · <span style="color:var(--a-tomato)">nach Lagerort</span></div>
+
+        <div class="a-grp"><h5>Abgelaufen <small>2</small></h5><p>Bitte kurz anschauen.</p>
+          <div class="a-hint">MHD ist kein Wegwerfdatum: anschauen, riechen, probieren.</div>
+          <div class="a-list">
+            <div class="a-item"><div class="a-date x">18.11.<small>abgel.</small></div><div class="a-t"><b>2 × Zwieback 225 g</b><span>vor 4 Tagen · Keller</span></div><span></span>
+              <div class="a-acts"><button class="a-btn">Noch gut</button><button class="a-btn">Entsorgt</button><button class="a-btn p">Verbraucht</button></div></div>
+            <div class="a-item"><div class="a-date x">20.11.<small>abgel.</small></div><div class="a-t"><b>1 × H-Milch 1 l</b><span>vor 2 Tagen · Küche</span></div><span></span>
+              <div class="a-acts"><button class="a-btn">Noch gut</button><button class="a-btn">Entsorgt</button><button class="a-btn p">Verbraucht</button></div></div>
+          </div></div>
+        <div class="a-grp"><h5>Diese Woche <small>3</small></h5><p>Diese Woche verbrauchen.</p>
+          <div class="a-list">
+            <div class="a-item"><div class="a-date">25.11.<small>Mi.</small></div><div class="a-t"><b>4 × Haferdrink 1 l</b><span>in 3 Tagen · Küche</span></div><button class="a-btn">Verbraucht</button></div>
+            <div class="a-item"><div class="a-date">27.11.<small>Fr.</small></div><div class="a-t"><b>2 × Knäckebrot 250 g</b><span>in 5 Tagen · Keller</span></div><button class="a-btn">Verbraucht</button></div>
+            <div class="a-item"><div class="a-date">28.11.<small>Sa.</small></div><div class="a-t"><b>1 × Tomaten passiert</b><span>in 6 Tagen · Keller</span></div><button class="a-btn">Verbraucht</button></div>
+          </div></div>
+        <div class="a-grp"><h5>Diesen Monat <small>4</small></h5><p>Einplanen.</p>
+          <div class="a-list">
+            <div class="a-item"><div class="a-date">04.12.<small>Fr.</small></div><div class="a-t"><b>3 × Linsen, Dose</b><span>in 12 Tagen · Keller</span></div><button class="a-btn">Verbraucht</button></div>
+            <div class="a-item"><div class="a-date">09.12.<small>Mi.</small></div><div class="a-t"><b>2 × Thunfisch, Dose</b><span>in 17 Tagen · Keller</span></div><button class="a-btn">Verbraucht</button></div>
+          </div></div>
+        <div class="a-grp"><h5>In 3 Monaten <small>9</small></h5><p>Im Blick behalten.</p>
+          <div class="a-list">
+            <div class="a-item"><div class="a-date">12.01.<small>2027</small></div><div class="a-t"><b>3 × Kichererbsen, Dose</b><span>in 7 Wochen · Keller</span></div><button class="a-btn">Verbraucht</button></div>
+          </div></div>
+      </div>
+    </div></div>
+
+    <!-- A · Vorrat Ebene 1 -->
+    <div><p class="cap">Vorrat · Warengruppen</p>
+    <div class="phone">
+      <div class="sb"><span>9:41</span><svg class="ic" style="width:26px;height:13px" viewBox="0 0 28 14"><use href="#i-bat"/></svg></div>
+      <div class="a-in">
+        <div class="a-top"><div><small>Ziel 10 Tage</small><h4>Vorrat</h4></div><span class="a-gear"><svg class="ic"><use href="#i-filter"/></svg><span class="vh">Filter</span></span></div>
+        <div class="a-search"><svg class="ic"><use href="#i-search"/></svg>Suchen, z. B. Linsen</div>
+        <div class="hscroll a-chips"><span class="a-tag on">Im Vorrat</span><span class="a-tag">Bald fällig</span><span class="a-tag">Abgelaufen</span><span class="a-tag">Unvollständig</span></div>
+        <div class="a-shelf">
+          <div class="a-jar"><header><svg class="ic"><use href="#i-grain"/></svg><b>Getreide &amp; Co.</b></header><div><span class="q">13,9 kg</span><div class="a-mini"><i style="width:100%"></i><b></b></div>13,2 von 10 Tagen</div></div>
+          <div class="a-jar"><header><svg class="ic"><use href="#i-veg"/></svg><b>Gemüse, Hülsenfr.</b></header><div><span class="q">9,0 kg</span><div class="a-mini"><i style="width:57.7%"></i><b></b></div>7,5 von 10 Tagen</div></div>
+          <div class="a-jar low"><header><svg class="ic"><use href="#i-fruit"/></svg><b>Obst, Nüsse</b></header><div><span class="q">3,2 kg</span><div class="a-mini"><i style="width:33.1%"></i><b></b></div>4,3 von 10 · <span class="lowtxt">am knappsten</span></div></div>
+          <div class="a-jar"><header><svg class="ic"><use href="#i-milk"/></svg><b>Milch, Milchprod.</b></header><div><span class="q">4,1 kg</span><div class="a-mini"><i style="width:40.8%"></i><b></b></div>5,3 von 10 Tagen</div></div>
+          <div class="a-jar"><header><svg class="ic"><use href="#i-fish"/></svg><b>Fisch, Fleisch, Eier</b></header><div><span class="q">3,6 kg</span><div class="a-mini"><i style="width:61.5%"></i><b></b></div>8,0 von 10 Tagen</div></div>
+          <div class="a-jar"><header><svg class="ic"><use href="#i-oil"/></svg><b>Fette, Öle</b></header><div><span class="q">1,0 l</span><div class="a-mini"><i style="width:71.5%"></i><b></b></div>9,3 von 10 Tagen</div></div>
+          <div class="a-jar"><header><svg class="ic"><use href="#i-drop"/></svg><b>Wasser</b></header><div><span class="q">36 l</span><div class="a-mini"><i style="width:46.2%;background:var(--a-water)"></i><b></b></div>6,0 von 10 Tagen</div></div>
+          <div class="a-jar"><header><svg class="ic"><use href="#i-jar"/></svg><b>Sonstiges</b></header><div><span class="q">1,2 kg</span><div style="height:16px"></div>ohne Zielmenge</div></div>
+        </div>
+      </div>
+      <nav class="a-dock"><div><svg class="ic"><use href="#i-home"/></svg>Übersicht</div><div class="on"><svg class="ic"><use href="#i-box"/></svg>Vorrat</div><div><span class="a-plus"><svg class="ic l"><use href="#i-plus"/></svg></span>Erfassen</div><div><svg class="ic"><use href="#i-cart"/></svg>Nachkaufen</div><div><svg class="ic"><use href="#i-chart"/></svg>Statistik</div></nav>
+    </div></div>
+
+    <!-- A · Vorrat Ebene 2 -->
+    <div><p class="cap">Vorrat · Getreide (Ebene 2)</p>
+    <div class="phone">
+      <div class="sb"><span>9:41</span><svg class="ic" style="width:26px;height:13px" viewBox="0 0 28 14"><use href="#i-bat"/></svg></div>
+      <div class="a-in">
+        <span class="a-back"><svg class="ic s"><use href="#i-back"/></svg>Vorrat</span>
+        <div class="a-path">Vorrat › <b>Getreide, Kartoffeln, Nudeln, Reis</b></div>
+        <div class="a-top" style="margin:0 0 8px"><h4>Getreide &amp; Co.</h4></div>
+        <div class="a-kcal">21 Packungen · 13,9 kg · ca. 49.300 kcal · <b style="font-size:16px">13,2 von 10 Tagen</b></div>
+        <div class="hscroll a-chips"><span class="a-tag">Nudeln</span><span class="a-tag">Reis</span><span class="a-tag">Brot &amp; Knäcke</span><span class="a-tag">Flocken</span></div>
+        <div class="a-cat"><h5>Nudeln</h5><span>11 Pck. · 5,5 kg · 3,5 Tage</span></div>
+        <div class="a-list">
+          <div class="a-item"><svg class="ic"><use href="#i-grain"/></svg><div class="a-t"><b>Spaghetti</b><span>8 Packungen · 4 kg · 11/2027 <span class="a-state ok">gut</span></span></div><button class="a-minus">−1</button></div>
+          <div class="a-item"><svg class="ic"><use href="#i-grain"/></svg><div class="a-t"><b>Fusilli</b><span>3 Packungen · 1,5 kg · 03/2028 <span class="a-state ok">gut</span></span></div><button class="a-minus">−1</button></div>
+        </div>
+        <div class="a-cat"><h5>Reis</h5><span>6 Pck. · 6 kg · 3,9 Tage</span></div>
+        <div class="a-list">
+          <div class="a-item"><svg class="ic"><use href="#i-grain"/></svg><div class="a-t"><b>Basmatireis</b><span>2 Packungen · 2 kg · 15.02.2027 <span class="a-state soon">bald fällig</span></span></div><button class="a-minus">−1</button></div>
+          <div class="a-item"><svg class="ic"><use href="#i-grain"/></svg><div class="a-t"><b>Langkornreis</b><span>4 Packungen · 4 kg · 09/2028 <span class="a-state ok">gut</span></span></div><button class="a-minus">−1</button></div>
+        </div>
+        <div class="a-cat"><h5>Brot &amp; Knäcke</h5><span>4 Pck. · 0,9 kg · 0,6 Tage</span></div>
+        <div class="a-list">
+          <div class="a-item"><svg class="ic"><use href="#i-bread"/></svg><div class="a-t"><b>Knäckebrot</b><span>2 Packungen · 0,5 kg · 27.11. <span class="a-state bad">dringend</span></span></div><button class="a-minus">−1</button></div>
+          <div class="a-item"><svg class="ic"><use href="#i-bread"/></svg><div class="a-t"><b>Zwieback</b><span>2 Packungen · 0,45 kg · 18.11. <span class="a-state bad">abgelaufen</span></span></div><button class="a-minus">−1</button></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <p class="cap pc-cap">PC · Übersicht mit Seitenleiste (1100 px, seitlich scrollbar)</p>
+  <div class="pc-scroll"><div class="pc">
+    <aside class="a-side">
+      <div class="a-brand">Preposaurus</div>
+      <div class="a-new"><svg class="ic s"><use href="#i-plus"/></svg>Erfassen</div>
+      <div class="a-nav on"><svg class="ic"><use href="#i-home"/></svg>Übersicht</div>
+      <div class="a-nav sub">Bald fällig <span class="ct">18</span></div>
+      <div class="a-nav"><svg class="ic"><use href="#i-box"/></svg>Vorrat</div>
+      <div class="a-nav"><svg class="ic"><use href="#i-cart"/></svg>Nachkaufen <span class="ct">4</span></div>
+      <div class="a-nav"><svg class="ic"><use href="#i-chart"/></svg>Statistik</div>
+      <div class="a-nav" style="margin-top:auto"><svg class="ic"><use href="#i-gear"/></svg>Einstellungen</div>
+    </aside>
+    <div class="a-pcmain">
+      <div>
+        <div class="a-label">
+          <div class="a-sc">Heute versorgt · Alex, Sam, Kim</div>
+          <p class="a-say">Euer Vorrat reicht für <b>6 Tage</b></p>
+          <div class="a-row"><span class="n">Essen</span><div class="a-track"><i style="width:78.3%"></i><b style="left:83.3%"></b></div><span class="v">9,4 Tage</span></div>
+          <div class="a-row"><span class="n">Wasser</span><div class="a-track w"><i style="width:50%"></i><b style="left:83.3%"></b></div><span class="v">6,0 Tage <span class="a-stamp">begrenzt</span></span></div>
+          <div class="a-scale"><span>0</span><span>3</span><span>6</span><span>9</span><span style="color:var(--a-tomato);font-weight:700">Ziel 10</span><span>12</span></div>
+          <div class="a-goal"><span>Am 01.03. wären es <b>5 von 10 Tagen</b>. 6 Packungen laufen vorher ab.</span><svg class="ic s"><use href="#i-next"/></svg></div>
+          <a class="a-next" href="#a"><span><em>Nächster Schritt</em>20 l Wasser bringen euch auf 9 Tage.</span><svg class="ic"><use href="#i-next"/></svg></a>
+        </div>
+        <div class="a-h" style="margin-top:22px"><h5>Abdeckung je Warengruppe</h5><a href="#a">Zum Vorrat</a></div>
+        <div class="a-cov">
+          <span>Getreide &amp; Co.</span><div class="a-mini"><i style="width:100%"></i><b></b></div><span>13,2 / 10</span>
+          <span>Gemüse, Hülsenfr.</span><div class="a-mini"><i style="width:57.7%"></i><b></b></div><span>7,5 / 10</span>
+          <span><b>Obst, Nüsse</b></span><div class="a-mini"><i style="width:33.1%"></i><b></b></div><span style="color:var(--a-tomato);font-weight:700">4,3 knapp</span>
+          <span>Milch, Milchprod.</span><div class="a-mini"><i style="width:40.8%"></i><b></b></div><span>5,3 / 10</span>
+          <span>Fisch, Fleisch, Eier</span><div class="a-mini"><i style="width:61.5%"></i><b></b></div><span>8,0 / 10</span>
+          <span>Wasser</span><div class="a-mini"><i style="width:46.2%;background:var(--a-water)"></i><b></b></div><span>6,0 / 10</span>
+        </div>
+      </div>
+      <div>
+        <div class="a-h"><h5>Bald fällig</h5><a href="#a">Alle 18 ansehen</a></div>
+        <div class="a-counts"><span class="a-tag">2 abgelaufen</span><span class="a-tag">3 diese Woche</span><span class="a-tag">4 diesen Monat</span><span class="a-tag">9 in 3 Monaten</span></div>
+        <div class="a-list">
+          <div class="a-item"><div class="a-date x">18.11.<small>abgel.</small></div><div class="a-t"><b>2 × Zwieback 225 g</b><span>vor 4 Tagen · Keller</span></div><button class="a-btn p">Verbraucht</button></div>
+          <div class="a-item"><div class="a-date x">20.11.<small>abgel.</small></div><div class="a-t"><b>1 × H-Milch 1 l</b><span>vor 2 Tagen · Küche</span></div><button class="a-btn p">Verbraucht</button></div>
+          <div class="a-item"><div class="a-date">25.11.<small>Mi.</small></div><div class="a-t"><b>4 × Haferdrink 1 l</b><span>in 3 Tagen · Küche</span></div><button class="a-btn">Verbraucht</button></div>
+        </div>
+        <div class="a-h"><h5>Nachkaufen</h5><a href="#a">Zur Liste</a></div>
+        <div class="a-list">
+          <div class="a-item"><svg class="ic"><use href="#i-drop"/></svg><div class="a-t"><b>Wasser</b><span>fehlen 24 l bis zum Ziel</span></div><span></span></div>
+          <div class="a-item"><svg class="ic"><use href="#i-fruit"/></svg><div class="a-t"><b>Obst, Nüsse</b><span>fehlen 4,3 kg, z. B. Apfelmus, Nüsse</span></div><span></span></div>
+          <div class="a-item"><svg class="ic"><use href="#i-milk"/></svg><div class="a-t"><b>Milch, Milchprodukte</b><span>fehlen 3,7 kg, z. B. H-Milch</span></div><span></span></div>
+        </div>
+        <div class="a-h"><h5>Nährwerte</h5><a href="#a">Mehr</a></div>
+        <div class="a-kcal"><b>52.600 kcal</b> · Bedarf 5.600 kcal am Tag</div>
+        <div class="a-macros"><div><span>Eiweiß</span><b>1,6 kg</b><span>13 %</span></div><div><span>Kohlenhydrate</span><b>7,9 kg</b><span>60 %</span></div><div><span>Fett</span><b>1,6 kg</b><span>27 %</span></div></div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ================= RICHTUNG B ================= -->
+<section class="dir dir-b" id="b">
+  <div class="dir-head">
+    <div class="kicker">Richtung B</div>
+    <h2>Fahrplan</h2>
+    <p>Klar wie eine Abfahrtstafel am Bahnsteig: schmale, kräftige Schrift, Linien statt Karten, eine Signalfarbe Gelb für genau das, was wichtig ist. Der Vorrat ist eine Strecke mit Tagen als Haltestellen, das Ziel ist der Endbahnhof. „Bald fällig“ liest sich wie die Tafel mit den nächsten Abfahrten.</p>
+  </div>
+  <div class="specs">
+    <div class="spec"><h3>Schrift</h3>
+      <p class="fontline"><b style="font:700 22px 'Barlow Condensed',sans-serif;text-transform:uppercase">Barlow Condensed</b> für Überschriften, Daten und Kennzahlen. Schmal, technisch, an Beschilderung angelehnt.</p>
+      <p class="fontline"><b style="font-family:Barlow">Barlow</b> für Text und Knöpfe. Aus derselben Familie, leicht abgerundet, gut bei kleiner Größe.</p>
+    </div>
+    <div class="spec"><h3>Farben hell</h3><div class="swatches">
+      <div class="sw"><i style="background:#eef0ee"></i><b>Grund</b>#eef0ee</div>
+      <div class="sw"><i style="background:#101418"></i><b>Schwarz</b>#101418</div>
+      <div class="sw"><i style="background:#0a4b9c"></i><b>Signalblau</b>#0a4b9c</div>
+      <div class="sw"><i style="background:#ffcc00"></i><b>Signalgelb</b>#ffcc00</div>
+      <div class="sw"><i style="background:#b0261d"></i><b>Rot</b>#b0261d</div>
+      <div class="sw"><i style="background:#c7ccd1"></i><b>Linie</b>#c7ccd1</div>
+    </div></div>
+    <div class="spec"><h3>Farben dunkel</h3><div class="swatches">
+      <div class="sw"><i style="background:#0c0f13"></i><b>Grund</b>#0c0f13</div>
+      <div class="sw"><i style="background:#edf1f5"></i><b>Weiß</b>#edf1f5</div>
+      <div class="sw"><i style="background:#74a9ff"></i><b>Signalblau</b>#74a9ff</div>
+      <div class="sw"><i style="background:#ffd23f"></i><b>Signalgelb</b>#ffd23f</div>
+      <div class="sw"><i style="background:#ff8f85"></i><b>Rot</b>#ff8f85</div>
+      <div class="sw"><i style="background:#11305a"></i><b>Kopfleiste</b>#11305a</div>
+    </div></div>
+  </div>
+
+  <div class="screens">
+    <!-- B · Übersicht -->
+    <div><p class="cap">Übersicht</p>
+    <div class="phone">
+      <div class="sb"><span>9:41</span><svg class="ic" style="width:26px;height:13px" viewBox="0 0 28 14"><use href="#i-bat"/></svg></div>
+      <div class="b-bar"><div><small>So., 22.11. · Alex, Sam, Kim</small><h4>Übersicht</h4></div><span><svg class="ic"><use href="#i-gear"/></svg><span class="vh">Einstellungen</span></span></div>
+      <div class="b-in">
+        <div class="b-panel" style="padding:14px 12px 0">
+          <div class="b-lbl">Heute versorgt</div>
+          <p class="b-say">Euer Vorrat reicht für <span class="b-num">6</span> Tage.</p>
+          <div class="b-axis">
+            <div class="b-goal"><span>Ziel 10</span></div>
+            <div class="b-line"><span class="nm">Essen</span><span class="rail"></span><span class="run" style="width:78.3%"></span></div>
+            <div class="b-line w"><span class="nm">Wasser</span><span class="rail"></span><span class="run" style="width:50%"></span></div>
+          </div>
+          <div class="b-ticks"><span>0</span><span>2</span><span>4</span><span>6</span><span>8</span><span>10</span><span>12</span></div>
+          <div class="b-vals"><div><span class="b-lbl">Essen</span><br><b>9,4</b> Tage</div><div><span class="b-lbl">Wasser</span><br><b>6,0</b> Tage <span class="b-limit">begrenzt</span></div></div>
+          <a class="b-trow" href="#b" style="margin:0 -12px"><span class="k">Ziel 01.03.</span><span>5 von 10 Tagen. 6 Packungen laufen vorher ab.</span><svg class="ic s"><use href="#i-next"/></svg></a>
+          <a class="b-trow next" href="#b" style="margin:0 -12px"><span class="k">Nächster Schritt</span><span><b>20 l Wasser</b> bringen euch auf 9 Tage.</span><svg class="ic s"><use href="#i-next"/></svg></a>
+        </div>
+        <div class="b-sect"><h5>Bald fällig</h5><a href="#b">Alle 18 →</a></div>
+        <div class="b-board">
+          <div class="b-bh"><span>Datum</span><span>Lebensmittel</span><span>Ort</span></div>
+          <div class="b-br"><span class="b-d x">18.11.<small>abgelaufen</small></span><span><b>2 × Zwieback</b></span><span class="o">Keller</span></div>
+          <div class="b-br"><span class="b-d x">20.11.<small>abgelaufen</small></span><span><b>1 × H-Milch 1 l</b></span><span class="o">Küche</span></div>
+          <div class="b-br"><span class="b-d">25.11.<small>in 3 Tagen</small></span><span><b>4 × Haferdrink 1 l</b></span><span class="o">Küche</span></div>
+          <div class="b-br" style="font-size:13px;color:var(--b-muted)"><span></span><span>dazu 1 weitere diese Woche · 4 diesen Monat · 9 in 3 Monaten</span><span></span></div>
+        </div>
+        <div class="b-sect"><h5>Nährwerte</h5><a href="#b">Mehr →</a></div>
+        <div class="b-nut"><div><span>kcal</span><b>52.600</b><span>5.600/Tag</span></div><div><span>Eiweiß</span><b>1,6 kg</b><span>13 %</span></div><div><span>KH</span><b>7,9 kg</b><span>60 %</span></div><div><span>Fett</span><b>1,6 kg</b><span>27 %</span></div></div>
+      </div>
+      <nav class="b-dock"><div class="on"><svg class="ic"><use href="#i-home"/></svg>Übersicht</div><div><svg class="ic"><use href="#i-box"/></svg>Vorrat</div><div><span class="b-plus"><svg class="ic l"><use href="#i-plus"/></svg></span><span>Erfassen</span></div><div><svg class="ic"><use href="#i-cart"/></svg>Nachkauf</div><div><svg class="ic"><use href="#i-chart"/></svg>Statistik</div></nav>
+    </div></div>
+
+    <!-- B · Bald fällig -->
+    <div><p class="cap">Bald fällig</p>
+    <div class="phone">
+      <div class="sb"><span>9:41</span><svg class="ic" style="width:26px;height:13px" viewBox="0 0 28 14"><use href="#i-bat"/></svg></div>
+      <div class="b-bar"><div><span class="b-back"><svg class="ic s"><use href="#i-back"/></svg>Übersicht</span><h4>Bald fällig</h4></div><span style="font:600 14px Barlow">18 Einträge</span></div>
+      <nav class="b-tabs"><a class="on x" href="#b"><b>2</b>abgelaufen</a><a href="#b"><b>3</b>diese Woche</a><a href="#b"><b>4</b>diesen Monat</a><a href="#b"><b>9</b>in 3 Mon.</a></nav>
+      <div class="b-in" style="padding-top:10px">
+        <div class="b-sort"><span>Sortierung</span><span class="b-seg"><span class="on">Datum</span><span>Lagerort</span></span></div>
+        <div class="b-gh x"><h5>Abgelaufen</h5><span>Bitte kurz anschauen</span></div>
+        <div class="b-note">MHD ist kein Wegwerfdatum: anschauen, riechen, probieren.</div>
+        <div class="b-it"><span class="b-d x">18.11.<small>vor 4 T.</small></span><span class="t"><b>2 × Zwieback 225 g</b><span>Keller · Brot &amp; Knäcke</span></span><button class="b-btn p">Verbraucht</button>
+          <span></span><span style="grid-column:2/4;display:flex;gap:6px;justify-content:flex-end"><button class="b-btn">Noch gut</button><button class="b-btn">Entsorgt</button></span></div>
+        <div class="b-it"><span class="b-d x">20.11.<small>vor 2 T.</small></span><span class="t"><b>1 × H-Milch 1 l</b><span>Küche · Milch</span></span><button class="b-btn p">Verbraucht</button>
+          <span></span><span style="grid-column:2/4;display:flex;gap:6px;justify-content:flex-end"><button class="b-btn">Noch gut</button><button class="b-btn">Entsorgt</button></span></div>
+        <div class="b-gh"><h5>Diese Woche</h5><span>Diese Woche verbrauchen</span></div>
+        <div class="b-it"><span class="b-d">25.11.<small>Mi.</small></span><span class="t"><b>4 × Haferdrink 1 l</b><span>Küche · in 3 Tagen</span></span><button class="b-btn">Verbraucht</button></div>
+        <div class="b-it"><span class="b-d">27.11.<small>Fr.</small></span><span class="t"><b>2 × Knäckebrot 250 g</b><span>Keller · in 5 Tagen</span></span><button class="b-btn">Verbraucht</button></div>
+        <div class="b-it"><span class="b-d">28.11.<small>Sa.</small></span><span class="t"><b>1 × Tomaten passiert</b><span>Keller · in 6 Tagen</span></span><button class="b-btn">Verbraucht</button></div>
+        <div class="b-gh"><h5>Diesen Monat</h5><span>Einplanen</span></div>
+        <div class="b-it"><span class="b-d">04.12.<small>Fr.</small></span><span class="t"><b>3 × Linsen, Dose</b><span>Keller · in 12 Tagen</span></span><button class="b-btn">Verbraucht</button></div>
+        <div class="b-it"><span class="b-d">09.12.<small>Mi.</small></span><span class="t"><b>2 × Thunfisch, Dose</b><span>Keller · in 17 Tagen</span></span><button class="b-btn">Verbraucht</button></div>
+        <span class="b-more">2 weitere diesen Monat</span>
+        <div class="b-gh"><h5>In 3 Monaten</h5><span>Im Blick behalten</span></div>
+        <div class="b-it"><span class="b-d">12.01.<small>2027</small></span><span class="t"><b>3 × Kichererbsen, Dose</b><span>Keller · in 7 Wochen</span></span><button class="b-btn">Verbraucht</button></div>
+        <span class="b-more">8 weitere in 3 Monaten</span>
+      </div>
+    </div></div>
+
+    <!-- B · Vorrat Ebene 1 -->
+    <div><p class="cap">Vorrat · Warengruppen</p>
+    <div class="phone">
+      <div class="sb"><span>9:41</span><svg class="ic" style="width:26px;height:13px" viewBox="0 0 28 14"><use href="#i-bat"/></svg></div>
+      <div class="b-bar"><div><small>Ziel 10 Tage · 3 Personen</small><h4>Vorrat</h4></div><span><svg class="ic"><use href="#i-filter"/></svg><span class="vh">Filter</span></span></div>
+      <div class="b-in">
+        <div class="b-search"><svg class="ic"><use href="#i-search"/></svg>Suchen, z. B. Linsen</div>
+        <div class="hscroll" style="margin:10px 0 12px"><span class="b-chip on">Im Vorrat</span><span class="b-chip">Bald fällig</span><span class="b-chip">Abgelaufen</span><span class="b-chip">Unvollständig</span></div>
+        <div class="b-board">
+          <div class="b-bh" style="grid-template-columns:28px 1fr 64px"><span></span><span>Warengruppe</span><span style="text-align:right">Tage</span></div>
+          <div class="b-wg"><svg class="ic"><use href="#i-grain"/></svg><span><span class="nm">Getreide, Kartoffeln, Nudeln, Reis</span><br><span class="q">13,9 kg · 21 Packungen</span></span><span class="dd">13,2<small>von 10</small></span><span></span><div class="tr b-meter"><i style="width:100%"></i><b></b></div></div>
+          <div class="b-wg"><svg class="ic"><use href="#i-veg"/></svg><span><span class="nm">Gemüse, Hülsenfrüchte</span><br><span class="q">9,0 kg · 24 Packungen</span></span><span class="dd">7,5<small>von 10</small></span><span></span><div class="tr b-meter"><i style="width:57.7%"></i><b></b></div></div>
+          <div class="b-wg"><svg class="ic"><use href="#i-fruit"/></svg><span><span class="nm">Obst, Nüsse</span><br><span class="q">3,2 kg · <span class="b-low">am knappsten</span></span></span><span class="dd b-low">4,3<small>von 10</small></span><span></span><div class="tr b-meter"><i style="width:33.1%"></i><b></b></div></div>
+          <div class="b-wg"><svg class="ic"><use href="#i-milk"/></svg><span><span class="nm">Milch, Milchprodukte</span><br><span class="q">4,1 kg · 9 Packungen</span></span><span class="dd">5,3<small>von 10</small></span><span></span><div class="tr b-meter"><i style="width:40.8%"></i><b></b></div></div>
+          <div class="b-wg"><svg class="ic"><use href="#i-fish"/></svg><span><span class="nm">Fisch, Fleisch, Eier</span><br><span class="q">3,6 kg · 14 Packungen</span></span><span class="dd">8,0<small>von 10</small></span><span></span><div class="tr b-meter"><i style="width:61.5%"></i><b></b></div></div>
+          <div class="b-wg"><svg class="ic"><use href="#i-oil"/></svg><span><span class="nm">Fette, Öle</span><br><span class="q">1,0 l · 2 Flaschen</span></span><span class="dd">9,3<small>von 10</small></span><span></span><div class="tr b-meter"><i style="width:71.5%"></i><b></b></div></div>
+          <div class="b-wg"><svg class="ic"><use href="#i-drop"/></svg><span><span class="nm">Wasser</span><br><span class="q">36 l · 6 Kisten</span></span><span class="dd">6,0<small>von 10</small></span><span></span><div class="tr b-meter"><i style="width:46.2%;background:var(--b-blue)"></i><b></b></div></div>
+        </div>
+      </div>
+      <nav class="b-dock"><div><svg class="ic"><use href="#i-home"/></svg>Übersicht</div><div class="on"><svg class="ic"><use href="#i-box"/></svg>Vorrat</div><div><span class="b-plus"><svg class="ic l"><use href="#i-plus"/></svg></span><span>Erfassen</span></div><div><svg class="ic"><use href="#i-cart"/></svg>Nachkauf</div><div><svg class="ic"><use href="#i-chart"/></svg>Statistik</div></nav>
+    </div></div>
+
+    <!-- B · Vorrat Ebene 2 -->
+    <div><p class="cap">Vorrat · Getreide (Ebene 2)</p>
+    <div class="phone">
+      <div class="sb"><span>9:41</span><svg class="ic" style="width:26px;height:13px" viewBox="0 0 28 14"><use href="#i-bat"/></svg></div>
+      <div class="b-bar"><div><span class="b-back"><svg class="ic s"><use href="#i-back"/></svg>Vorrat</span><h4>Getreide &amp; Co.</h4></div></div>
+      <div class="b-in">
+        <div class="b-sum"><div><span>Packungen</span><b>21</b></div><div><span>Menge</span><b>13,9 kg</b></div><div><span>Tage</span><b>13,2 / 10</b></div></div>
+        <div class="hscroll" style="margin:10px 0 0"><span class="b-chip">Nudeln</span><span class="b-chip">Reis</span><span class="b-chip">Brot &amp; Knäcke</span><span class="b-chip">Flocken</span></div>
+        <div class="b-cat">Nudeln<span>5,5 kg · 3,5 Tage</span></div>
+        <div class="b-la"><span><b>Spaghetti</b><span>8 Pck. · 4 kg</span></span><span class="m"><b>11/2027</b><br>gut</span><button class="b-minus">−1</button></div>
+        <div class="b-la"><span><b>Fusilli</b><span>3 Pck. · 1,5 kg</span></span><span class="m"><b>03/2028</b><br>gut</span><button class="b-minus">−1</button></div>
+        <div class="b-cat">Reis<span>6 kg · 3,9 Tage</span></div>
+        <div class="b-la"><span><b>Basmatireis</b><span>2 Pck. · 2 kg</span></span><span class="m st-s"><b>15.02.27</b><br>bald fällig</span><button class="b-minus">−1</button></div>
+        <div class="b-la"><span><b>Langkornreis</b><span>4 Pck. · 4 kg</span></span><span class="m"><b>09/2028</b><br>gut</span><button class="b-minus">−1</button></div>
+        <div class="b-cat">Brot &amp; Knäcke<span>0,9 kg · 0,6 Tage</span></div>
+        <div class="b-la"><span><b>Knäckebrot</b><span>2 Pck. · 0,5 kg</span></span><span class="m st-x"><b>27.11.</b><br>dringend</span><button class="b-minus">−1</button></div>
+        <div class="b-la"><span><b>Zwieback</b><span>2 Pck. · 0,45 kg</span></span><span class="m st-x"><b>18.11.</b><br>abgelaufen</span><button class="b-minus">−1</button></div>
+        <div class="b-cat">Flocken<span>1,5 kg · 1,0 Tage</span></div>
+        <div class="b-la"><span><b>Haferflocken</b><span>3 Pck. · 1,5 kg</span></span><span class="m"><b>06/2027</b><br>gut</span><button class="b-minus">−1</button></div>
+      </div>
+    </div></div>
+  </div>
+
+  <p class="cap pc-cap">PC · Vorrat mit Seitenleiste, Warengruppen und Tabelle (1100 px, seitlich scrollbar)</p>
+  <div class="pc-scroll"><div class="pc">
+    <aside class="b-side">
+      <div class="b-brand">Preposaurus</div>
+      <div class="b-new"><svg class="ic s"><use href="#i-plus"/></svg>Erfassen</div>
+      <div class="b-nav"><svg class="ic"><use href="#i-home"/></svg>Übersicht</div>
+      <div class="b-nav sub">Bald fällig <span class="ct">18</span></div>
+      <div class="b-nav on"><svg class="ic"><use href="#i-box"/></svg>Vorrat</div>
+      <div class="b-nav"><svg class="ic"><use href="#i-cart"/></svg>Nachkaufen <span class="ct">4</span></div>
+      <div class="b-nav"><svg class="ic"><use href="#i-chart"/></svg>Statistik</div>
+      <div class="b-nav" style="margin-top:auto"><svg class="ic"><use href="#i-gear"/></svg>Einstellungen</div>
+    </aside>
+    <div class="b-pcmain">
+      <div class="b-col">
+        <h5>Warengruppen</h5>
+        <div class="b-wg on"><svg class="ic"><use href="#i-grain"/></svg><span><span class="nm">Getreide &amp; Co.</span><br><span class="q">13,9 kg</span></span><span class="dd">13,2<small>von 10</small></span><span></span><div class="tr b-meter"><i style="width:100%"></i><b></b></div></div>
+        <div class="b-wg"><svg class="ic"><use href="#i-veg"/></svg><span><span class="nm">Gemüse, Hülsenfr.</span><br><span class="q">9,0 kg</span></span><span class="dd">7,5<small>von 10</small></span><span></span><div class="tr b-meter"><i style="width:57.7%"></i><b></b></div></div>
+        <div class="b-wg"><svg class="ic"><use href="#i-fruit"/></svg><span><span class="nm">Obst, Nüsse</span><br><span class="q b-low">am knappsten</span></span><span class="dd b-low">4,3<small>von 10</small></span><span></span><div class="tr b-meter"><i style="width:33.1%"></i><b></b></div></div>
+        <div class="b-wg"><svg class="ic"><use href="#i-milk"/></svg><span><span class="nm">Milch, Milchprod.</span><br><span class="q">4,1 kg</span></span><span class="dd">5,3<small>von 10</small></span><span></span><div class="tr b-meter"><i style="width:40.8%"></i><b></b></div></div>
+        <div class="b-wg"><svg class="ic"><use href="#i-fish"/></svg><span><span class="nm">Fisch, Fleisch, Eier</span><br><span class="q">3,6 kg</span></span><span class="dd">8,0<small>von 10</small></span><span></span><div class="tr b-meter"><i style="width:61.5%"></i><b></b></div></div>
+        <div class="b-wg"><svg class="ic"><use href="#i-drop"/></svg><span><span class="nm">Wasser</span><br><span class="q">36 l</span></span><span class="dd">6,0<small>von 10</small></span><span></span><div class="tr b-meter"><i style="width:46.2%;background:var(--b-blue)"></i><b></b></div></div>
+      </div>
+      <div class="b-tbl">
+        <div class="b-tbar"><div class="b-search"><svg class="ic"><use href="#i-search"/></svg>In Getreide &amp; Co. suchen</div><span class="b-chip on">Im Vorrat</span><span class="b-chip">Bald fällig</span><span class="b-chip">Abgelaufen</span><span class="b-chip">Unvollständig</span><span class="b-chip">Filter</span></div>
+        <table>
+          <thead><tr><th>Lebensmittelart</th><th class="r">Packungen</th><th class="r">Menge</th><th class="r">kcal</th><th class="r">Tage</th><th>Nächstes MHD</th><th>Zustand</th><th></th></tr></thead>
+          <tbody>
+            <tr class="cat"><td colspan="8">Nudeln<span>11 Pck. · 5,5 kg · 3,5 Tage</span></td></tr>
+            <tr><td><b>Spaghetti</b></td><td class="r">8</td><td class="r">4,0 kg</td><td class="r">14.360</td><td class="r">2,6</td><td>11/2027</td><td>gut</td><td class="r"><button class="b-minus">−1</button></td></tr>
+            <tr><td><b>Fusilli</b></td><td class="r">3</td><td class="r">1,5 kg</td><td class="r">5.390</td><td class="r">1,0</td><td>03/2028</td><td>gut</td><td class="r"><button class="b-minus">−1</button></td></tr>
+            <tr class="cat"><td colspan="8">Reis<span>6 Pck. · 6 kg · 3,9 Tage</span></td></tr>
+            <tr><td><b>Basmatireis</b></td><td class="r">2</td><td class="r">2,0 kg</td><td class="r">7.000</td><td class="r">1,3</td><td>15.02.2027</td><td class="st-s">bald fällig</td><td class="r"><button class="b-minus">−1</button></td></tr>
+            <tr><td><b>Langkornreis</b></td><td class="r">4</td><td class="r">4,0 kg</td><td class="r">14.000</td><td class="r">2,5</td><td>09/2028</td><td>gut</td><td class="r"><button class="b-minus">−1</button></td></tr>
+            <tr class="cat"><td colspan="8">Brot &amp; Knäcke<span>4 Pck. · 0,9 kg · 0,6 Tage</span></td></tr>
+            <tr><td><b>Knäckebrot</b></td><td class="r">2</td><td class="r">0,5 kg</td><td class="r">1.800</td><td class="r">0,3</td><td>27.11.2026</td><td class="st-x">dringend</td><td class="r"><button class="b-minus">−1</button></td></tr>
+            <tr><td><b>Zwieback</b></td><td class="r">2</td><td class="r">0,45 kg</td><td class="r">1.750</td><td class="r">0,3</td><td>18.11.2026</td><td class="st-x">abgelaufen</td><td class="r"><button class="b-minus">−1</button></td></tr>
+            <tr class="cat"><td colspan="8">Flocken<span>3 Pck. · 1,5 kg · 1,0 Tage</span></td></tr>
+            <tr><td><b>Haferflocken</b></td><td class="r">3</td><td class="r">1,5 kg</td><td class="r">5.550</td><td class="r">1,0</td><td>06/2027</td><td>gut</td><td class="r"><button class="b-minus">−1</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ================= RICHTUNG C ================= -->
+<section class="dir dir-c" id="c">
+  <div class="dir-head">
+    <div class="kicker">Richtung C</div>
+    <h2>Haushaltsbuch</h2>
+    <p>Wie ein freundliches Notizbuch für den Haushalt: weiche Flächen, runde Formen, ein ruhiges Salbeigrün und ein Textmarker in Pfirsich für die eine Zahl, auf die es ankommt. Die App spricht in ganzen Sätzen und begrüßt mit Namen. Daten stehen wie Kalenderblätter neben den Einträgen.</p>
+  </div>
+  <div class="specs">
+    <div class="spec"><h3>Schrift</h3>
+      <p class="fontline"><b style="font:800 22px Nunito,sans-serif">Nunito</b> für Überschriften und Zahlen. Abgerundete Enden, freundlich, ohne verspielt zu wirken.</p>
+      <p class="fontline"><b style="font-family:'Nunito Sans'">Nunito Sans</b> für Text und Knöpfe. Gleiche Form ohne Rundungen, dadurch ruhiger im Fließtext.</p>
+    </div>
+    <div class="spec"><h3>Farben hell</h3><div class="swatches">
+      <div class="sw"><i style="background:#f2f5ef"></i><b>Grund</b>#f2f5ef</div>
+      <div class="sw"><i style="background:#22302a"></i><b>Text</b>#22302a</div>
+      <div class="sw"><i style="background:#2f6e50"></i><b>Salbei</b>#2f6e50</div>
+      <div class="sw"><i style="background:#e3efe6"></i><b>Salbei hell</b>#e3efe6</div>
+      <div class="sw"><i style="background:#fbe3cf"></i><b>Pfirsich</b>#fbe3cf</div>
+      <div class="sw"><i style="background:#9c4524"></i><b>Ton</b>#9c4524</div>
+    </div></div>
+    <div class="spec"><h3>Farben dunkel</h3><div class="swatches">
+      <div class="sw"><i style="background:#131916"></i><b>Grund</b>#131916</div>
+      <div class="sw"><i style="background:#e6eee8"></i><b>Text</b>#e6eee8</div>
+      <div class="sw"><i style="background:#86cba5"></i><b>Salbei</b>#86cba5</div>
+      <div class="sw"><i style="background:#21332a"></i><b>Salbei tief</b>#21332a</div>
+      <div class="sw"><i style="background:#4a3324"></i><b>Pfirsich</b>#4a3324</div>
+      <div class="sw"><i style="background:#f2a27f"></i><b>Ton</b>#f2a27f</div>
+    </div></div>
+  </div>
+
+  <div class="screens">
+    <!-- C · Übersicht -->
+    <div><p class="cap">Übersicht</p>
+    <div class="phone">
+      <div class="sb"><span>9:41</span><svg class="ic" style="width:26px;height:13px" viewBox="0 0 28 14"><use href="#i-bat"/></svg></div>
+      <div class="c-in">
+        <div class="c-top"><div class="c-hello">Sonntag, 22. November<b>Hallo Alex</b></div><div class="c-av" aria-label="Haushalt: Alex, Sam, Kim"><span>A</span><span>S</span><span>K</span></div></div>
+        <div class="c-card">
+          <p class="c-say">Euer Vorrat reicht für <mark>6 Tage</mark>.</p>
+          <div class="c-bar"><div class="l"><b>Essen</b><span>9,4 Tage</span></div><div class="c-pill"><i style="width:78.3%"></i><b style="left:83.3%"></b></div></div>
+          <div class="c-bar"><div class="l"><span><b>Wasser</b><span class="c-limit">begrenzt</span></span><span>6,0 Tage</span></div><div class="c-pill w"><i style="width:50%"></i><b style="left:83.3%"></b></div></div>
+          <div class="c-flag">Ziel 10 Tage</div>
+          <div class="c-goal"><svg class="ic"><use href="#i-cal"/></svg><span>Am 01.03. wären es <b style="color:var(--c-ink)">5 von 10 Tagen</b>. 6 Packungen laufen vorher ab.</span></div>
+          <a class="c-next" href="#c"><span><small>Nächster Schritt</small>20 l Wasser bringen euch auf 9 Tage.</span><svg class="ic"><use href="#i-next"/></svg></a>
+        </div>
+        <div class="c-h"><h5>Bald fällig</h5><a href="#c">Alle 18 ansehen</a></div>
+        <div class="c-pills"><span class="c-chip x">2 abgelaufen</span><span class="c-chip">3 diese Woche</span><span class="c-chip">4 diesen Monat</span><span class="c-chip">9 in 3 Monaten</span></div>
+        <div class="c-card" style="padding:14px 16px">
+          <div class="c-row"><div class="c-day x"><b>18</b><small>Nov</small></div><div class="t"><b>2 × Zwieback</b><span>abgelaufen · Keller</span></div><svg class="ic s"><use href="#i-next"/></svg></div>
+          <div class="c-row"><div class="c-day x"><b>20</b><small>Nov</small></div><div class="t"><b>1 × H-Milch 1 l</b><span>abgelaufen · Küche</span></div><svg class="ic s"><use href="#i-next"/></svg></div>
+          <div class="c-row"><div class="c-day"><b>25</b><small>Nov</small></div><div class="t"><b>4 × Haferdrink 1 l</b><span>in 3 Tagen · Küche</span></div><svg class="ic s"><use href="#i-next"/></svg></div>
+        </div>
+        <div class="c-h"><h5>Nährwerte</h5><a href="#c">Mehr</a></div>
+        <div class="c-card" style="padding:14px 16px">
+          <div class="c-kcal"><b>52.600 kcal</b> im Vorrat · 5.600 am Tag</div>
+          <div class="c-stack"><i style="width:13%"></i><i style="width:60%"></i><i style="width:27%"></i></div>
+          <div class="c-legend"><div><span>Eiweiß</span><b>1,6 kg</b>13 %</div><div><span>Kohlenhydr.</span><b>7,9 kg</b>60 %</div><div><span>Fett</span><b>1,6 kg</b>27 %</div></div>
+        </div>
+      </div>
+      <nav class="c-dock"><div class="on"><svg class="ic"><use href="#i-home"/></svg>Übersicht</div><div><svg class="ic"><use href="#i-box"/></svg>Vorrat</div><div><span class="c-plus"><svg class="ic l"><use href="#i-plus"/></svg></span>Erfassen</div><div><svg class="ic"><use href="#i-cart"/></svg>Nachkaufen</div><div><svg class="ic"><use href="#i-chart"/></svg>Statistik</div></nav>
+    </div></div>
+
+    <!-- C · Bald fällig -->
+    <div><p class="cap">Bald fällig</p>
+    <div class="phone">
+      <div class="sb"><span>9:41</span><svg class="ic" style="width:26px;height:13px" viewBox="0 0 28 14"><use href="#i-bat"/></svg></div>
+      <div class="c-in">
+        <span class="c-back"><svg class="ic s"><use href="#i-back"/></svg>Übersicht</span>
+        <h4 class="c-title">Bald fällig</h4>
+        <div class="c-pills"><span class="c-chip on">2 abgelaufen</span><span class="c-chip">3 diese Woche</span><span class="c-chip">4 diesen Monat</span><span class="c-chip">9 in 3 Mon.</span></div>
+        <div class="c-pills" style="font-size:13px;color:var(--c-muted);align-items:center">Sortieren: <span class="c-chip on">Datum</span><span class="c-chip">Lagerort</span></div>
+        <div class="c-grp x"><h5>Abgelaufen <small>2</small></h5><p>Bitte kurz anschauen.</p>
+          <div class="c-tip">MHD ist kein Wegwerfdatum: anschauen, riechen, probieren.</div>
+          <div class="c-card" style="padding:14px 16px">
+            <div class="c-row"><div class="c-day x"><b>18</b><small>Nov</small></div><div class="t"><b>2 × Zwieback 225 g</b><span>vor 4 Tagen · Keller</span></div><button class="c-btn">Verbraucht</button><div class="c-acts"><button class="c-btn g">Noch gut</button><button class="c-btn g">Entsorgt</button></div></div>
+            <div class="c-row"><div class="c-day x"><b>20</b><small>Nov</small></div><div class="t"><b>1 × H-Milch 1 l</b><span>vor 2 Tagen · Küche</span></div><button class="c-btn">Verbraucht</button><div class="c-acts"><button class="c-btn g">Noch gut</button><button class="c-btn g">Entsorgt</button></div></div>
+          </div></div>
+        <div class="c-grp"><h5>Diese Woche <small>3</small></h5><p>Diese Woche verbrauchen.</p>
+          <div class="c-card" style="padding:14px 16px">
+            <div class="c-row"><div class="c-day"><b>25</b><small>Nov</small></div><div class="t"><b>4 × Haferdrink 1 l</b><span>in 3 Tagen · Küche</span></div><button class="c-btn">Verbraucht</button></div>
+            <div class="c-row"><div class="c-day"><b>27</b><small>Nov</small></div><div class="t"><b>2 × Knäckebrot</b><span>in 5 Tagen · Keller</span></div><button class="c-btn">Verbraucht</button></div>
+            <div class="c-row"><div class="c-day"><b>28</b><small>Nov</small></div><div class="t"><b>1 × Tomaten passiert</b><span>in 6 Tagen · Keller</span></div><button class="c-btn">Verbraucht</button></div>
+          </div></div>
+        <div class="c-grp"><h5>Diesen Monat <small>4</small></h5><p>Einplanen.</p>
+          <div class="c-card" style="padding:14px 16px">
+            <div class="c-row"><div class="c-day"><b>04</b><small>Dez</small></div><div class="t"><b>3 × Linsen, Dose</b><span>in 12 Tagen · Keller</span></div><button class="c-btn">Verbraucht</button></div>
+            <div class="c-row"><div class="c-day"><b>09</b><small>Dez</small></div><div class="t"><b>2 × Thunfisch, Dose</b><span>in 17 Tagen · Keller</span></div><button class="c-btn">Verbraucht</button></div>
+          </div></div>
+        <div class="c-grp"><h5>In 3 Monaten <small>9</small></h5><p>Im Blick behalten.</p>
+          <div class="c-card" style="padding:14px 16px">
+            <div class="c-row"><div class="c-day"><b>12</b><small>Jan</small></div><div class="t"><b>3 × Kichererbsen, Dose</b><span>in 7 Wochen · Keller</span></div><button class="c-btn">Verbraucht</button></div>
+          </div></div>
+      </div>
+    </div></div>
+
+    <!-- C · Vorrat Ebene 1 -->
+    <div><p class="cap">Vorrat · Warengruppen</p>
+    <div class="phone">
+      <div class="sb"><span>9:41</span><svg class="ic" style="width:26px;height:13px" viewBox="0 0 28 14"><use href="#i-bat"/></svg></div>
+      <div class="c-in">
+        <div class="c-top"><h4 class="c-title" style="margin:0">Vorrat</h4><svg class="ic"><use href="#i-filter"/></svg></div>
+        <div class="c-search"><svg class="ic"><use href="#i-search"/></svg>Was sucht ihr? z. B. Linsen</div>
+        <div class="hscroll" style="margin:10px 0 14px"><span class="c-chip on">Im Vorrat</span><span class="c-chip">Bald fällig</span><span class="c-chip">Abgelaufen</span><span class="c-chip">Unvollständig</span></div>
+        <div class="c-card">
+          <div class="c-wg"><span class="c-ico"><svg class="ic"><use href="#i-grain"/></svg></span><span class="nm">Getreide, Kartoffeln, Nudeln, Reis</span><span class="dd">13,2 T.</span><div class="sub"><div class="c-pill"><i style="width:100%"></i><b></b></div><span>13,9 kg · <span class="c-ok"><svg class="ic s"><use href="#i-check"/></svg>Ziel erreicht</span></span></div></div>
+          <div class="c-wg"><span class="c-ico"><svg class="ic"><use href="#i-veg"/></svg></span><span class="nm">Gemüse, Hülsenfrüchte</span><span class="dd">7,5 T.</span><div class="sub"><div class="c-pill"><i style="width:57.7%"></i><b></b></div><span>9,0 kg · 7,5 von 10 Tagen</span></div></div>
+          <div class="c-wg"><span class="c-ico low"><svg class="ic"><use href="#i-fruit"/></svg></span><span class="nm">Obst, Nüsse</span><span class="dd c-low">4,3 T.</span><div class="sub"><div class="c-pill"><i style="width:33.1%;background:var(--c-clay)"></i><b></b></div><span>3,2 kg · <span class="c-low">am knappsten</span></span></div></div>
+          <div class="c-wg"><span class="c-ico"><svg class="ic"><use href="#i-milk"/></svg></span><span class="nm">Milch, Milchprodukte</span><span class="dd">5,3 T.</span><div class="sub"><div class="c-pill"><i style="width:40.8%"></i><b></b></div><span>4,1 kg · 5,3 von 10 Tagen</span></div></div>
+          <div class="c-wg"><span class="c-ico"><svg class="ic"><use href="#i-fish"/></svg></span><span class="nm">Fisch, Fleisch, Eier</span><span class="dd">8,0 T.</span><div class="sub"><div class="c-pill"><i style="width:61.5%"></i><b></b></div><span>3,6 kg · 8,0 von 10 Tagen</span></div></div>
+          <div class="c-wg"><span class="c-ico"><svg class="ic"><use href="#i-drop"/></svg></span><span class="nm">Wasser</span><span class="dd">6,0 T.</span><div class="sub"><div class="c-pill w"><i style="width:46.2%"></i><b></b></div><span>36 l · 6,0 von 10 Tagen</span></div></div>
+        </div>
+      </div>
+      <nav class="c-dock"><div><svg class="ic"><use href="#i-home"/></svg>Übersicht</div><div class="on"><svg class="ic"><use href="#i-box"/></svg>Vorrat</div><div><span class="c-plus"><svg class="ic l"><use href="#i-plus"/></svg></span>Erfassen</div><div><svg class="ic"><use href="#i-cart"/></svg>Nachkaufen</div><div><svg class="ic"><use href="#i-chart"/></svg>Statistik</div></nav>
+    </div></div>
+
+    <!-- C · Vorrat Ebene 2 -->
+    <div><p class="cap">Vorrat · Getreide (Ebene 2)</p>
+    <div class="phone">
+      <div class="sb"><span>9:41</span><svg class="ic" style="width:26px;height:13px" viewBox="0 0 28 14"><use href="#i-bat"/></svg></div>
+      <div class="c-in">
+        <span class="c-back"><svg class="ic s"><use href="#i-back"/></svg>Vorrat</span>
+        <div class="c-crumb">Vorrat › <b>Getreide, Kartoffeln, Nudeln, Reis</b></div>
+        <h4 class="c-title" style="margin-top:2px">Getreide &amp; Co.</h4>
+        <div class="c-card" style="padding:12px 16px;display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--c-muted)"><span><b style="font:800 18px Nunito;color:var(--c-ink);display:block">21</b>Packungen</span><span><b style="font:800 18px Nunito;color:var(--c-ink);display:block">13,9 kg</b>Menge</span><span><b style="font:800 18px Nunito;color:var(--c-sage);display:block">13,2 T.</b>von 10 Tagen</span></div>
+        <div class="hscroll" style="margin:12px 0 0"><span class="c-chip">Nudeln</span><span class="c-chip">Reis</span><span class="c-chip">Brot &amp; Knäcke</span><span class="c-chip">Flocken</span></div>
+        <div class="c-cat"><h5>Nudeln</h5><span>5,5 kg · 3,5 Tage</span></div>
+        <div class="c-card" style="padding:12px 16px">
+          <div class="c-la"><b>Spaghetti</b><button class="c-minus">−1</button><span class="q">8 Packungen · 4 kg · 11/2027 <span class="c-st ok">gut</span></span></div>
+          <div class="c-la"><b>Fusilli</b><button class="c-minus">−1</button><span class="q">3 Packungen · 1,5 kg · 03/2028 <span class="c-st ok">gut</span></span></div>
+        </div>
+        <div class="c-cat"><h5>Reis</h5><span>6 kg · 3,9 Tage</span></div>
+        <div class="c-card" style="padding:12px 16px">
+          <div class="c-la"><b>Basmatireis</b><button class="c-minus">−1</button><span class="q">2 Packungen · 2 kg · 15.02.2027 <span class="c-st s">bald fällig</span></span></div>
+          <div class="c-la"><b>Langkornreis</b><button class="c-minus">−1</button><span class="q">4 Packungen · 4 kg · 09/2028 <span class="c-st ok">gut</span></span></div>
+        </div>
+        <div class="c-cat"><h5>Brot &amp; Knäcke</h5><span>0,9 kg · 0,6 Tage</span></div>
+        <div class="c-card" style="padding:12px 16px">
+          <div class="c-la"><b>Knäckebrot</b><button class="c-minus">−1</button><span class="q">2 Packungen · 0,5 kg · 27.11. <span class="c-st x">dringend</span></span></div>
+          <div class="c-la"><b>Zwieback</b><button class="c-minus">−1</button><span class="q">2 Packungen · 0,45 kg · 18.11. <span class="c-st x">abgelaufen</span></span></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <p class="cap pc-cap">PC · Übersicht mit Seitenleiste (1100 px, seitlich scrollbar)</p>
+  <div class="pc-scroll"><div class="pc">
+    <aside class="c-side">
+      <div class="c-brand">Preposaurus</div>
+      <div class="c-new"><svg class="ic s"><use href="#i-plus"/></svg>Erfassen</div>
+      <div class="c-nav on"><svg class="ic"><use href="#i-home"/></svg>Übersicht</div>
+      <div class="c-nav sub">Bald fällig <span class="ct">18</span></div>
+      <div class="c-nav"><svg class="ic"><use href="#i-box"/></svg>Vorrat</div>
+      <div class="c-nav"><svg class="ic"><use href="#i-cart"/></svg>Nachkaufen</div>
+      <div class="c-nav"><svg class="ic"><use href="#i-chart"/></svg>Statistik</div>
+      <div class="c-nav" style="margin-top:auto"><svg class="ic"><use href="#i-gear"/></svg>Einstellungen</div>
+    </aside>
+    <div class="c-pcmain">
+      <div class="c-card c-span2" style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+        <div>
+          <div class="c-hello" style="margin-bottom:8px">Sonntag, 22. November · Alex, Sam, Kim</div>
+          <p class="c-say" style="font-size:30px">Euer Vorrat reicht für <mark>6 Tage</mark>.</p>
+          <div class="c-goal" style="margin-top:0"><svg class="ic"><use href="#i-cal"/></svg><span>Am 01.03. wären es <b style="color:var(--c-ink)">5 von 10 Tagen</b>. 6 Packungen laufen vorher ab.</span></div>
+          <a class="c-next" href="#c"><span><small>Nächster Schritt</small>20 l Wasser bringen euch auf 9 Tage.</span><svg class="ic"><use href="#i-next"/></svg></a>
+        </div>
+        <div style="align-self:center">
+          <div class="c-bar"><div class="l"><b>Essen</b><span>9,4 Tage</span></div><div class="c-pill"><i style="width:78.3%"></i><b style="left:83.3%"></b></div></div>
+          <div class="c-bar"><div class="l"><span><b>Wasser</b><span class="c-limit">begrenzt</span></span><span>6,0 Tage</span></div><div class="c-pill w"><i style="width:50%"></i><b style="left:83.3%"></b></div></div>
+          <div class="c-flag">Ziel 10 Tage</div>
+        </div>
+      </div>
+      <div>
+        <div class="c-h"><h5>Bald fällig</h5><a href="#c">Alle 18</a></div>
+        <div class="c-card" style="padding:14px 16px">
+          <div class="c-row"><div class="c-day x"><b>18</b><small>Nov</small></div><div class="t"><b>2 × Zwieback</b><span>abgelaufen</span></div><button class="c-btn">Verbraucht</button></div>
+          <div class="c-row"><div class="c-day x"><b>20</b><small>Nov</small></div><div class="t"><b>1 × H-Milch</b><span>abgelaufen</span></div><button class="c-btn">Verbraucht</button></div>
+          <div class="c-row"><div class="c-day"><b>25</b><small>Nov</small></div><div class="t"><b>4 × Haferdrink</b><span>in 3 Tagen</span></div><button class="c-btn">Verbraucht</button></div>
+        </div>
+      </div>
+      <div>
+        <div class="c-h"><h5>Abdeckung</h5><a href="#c">Zum Vorrat</a></div>
+        <div class="c-card" style="padding:14px 16px">
+          <div class="c-wg"><span class="c-ico"><svg class="ic"><use href="#i-grain"/></svg></span><span class="nm">Getreide &amp; Co.</span><span class="dd">13,2</span><div class="sub"><div class="c-pill"><i style="width:100%"></i><b></b></div></div></div>
+          <div class="c-wg"><span class="c-ico"><svg class="ic"><use href="#i-veg"/></svg></span><span class="nm">Gemüse</span><span class="dd">7,5</span><div class="sub"><div class="c-pill"><i style="width:57.7%"></i><b></b></div></div></div>
+          <div class="c-wg"><span class="c-ico low"><svg class="ic"><use href="#i-fruit"/></svg></span><span class="nm">Obst, Nüsse</span><span class="dd c-low">4,3</span><div class="sub"><div class="c-pill"><i style="width:33.1%;background:var(--c-clay)"></i><b></b></div><span class="c-low">am knappsten</span></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="c-h"><h5>Nachkaufen</h5><a href="#c">Zur Liste</a></div>
+        <div class="c-card" style="padding:14px 16px">
+          <div class="c-row"><span class="c-ico" style="grid-row:auto"><svg class="ic"><use href="#i-drop"/></svg></span><div class="t"><b>Wasser</b><span>fehlen 24 l</span></div><span></span></div>
+          <div class="c-row"><span class="c-ico low" style="grid-row:auto"><svg class="ic"><use href="#i-fruit"/></svg></span><div class="t"><b>Obst, Nüsse</b><span>fehlen 4,3 kg</span></div><span></span></div>
+          <div class="c-row"><span class="c-ico" style="grid-row:auto"><svg class="ic"><use href="#i-milk"/></svg></span><div class="t"><b>Milch</b><span>fehlen 3,7 kg</span></div><span></span></div>
+        </div>
+      </div>
+      <div class="c-span2">
+        <div class="c-h"><h5>Nährwerte</h5><a href="#c">Mehr</a></div>
+        <div class="c-card" style="padding:14px 16px">
+          <div class="c-kcal"><b>52.600 kcal</b> im Vorrat · 5.600 am Tag</div>
+          <div class="c-stack"><i style="width:13%"></i><i style="width:60%"></i><i style="width:27%"></i></div>
+          <div class="c-legend"><div><span>Eiweiß</span><b>1,6 kg</b>13 %</div><div><span>Kohlenhydrate</span><b>7,9 kg</b>60 %</div><div><span>Fett</span><b>1,6 kg</b>27 %</div></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ================= VERGLEICH ================= -->
+<section class="dir" id="vergleich">
+  <div class="dir-head"><div class="kicker">Abschluss</div><h2>Vergleich und Empfehlung</h2></div>
+  <div class="tbl-wrap" style="margin-top:16px">
+    <table class="cmp">
+      <thead><tr><th></th><th>A · Vorratskammer</th><th>B · Fahrplan</th><th>C · Haushaltsbuch</th></tr></thead>
+      <tbody>
+        <tr><th>Stimmung</th><td>Warm, handgemacht, „gut sortierter Keller“. Persönlich und mit Charakter</td><td>Sachlich, präzise, verlässlich. Wirkt wie ein gutes Werkzeug</td><td>Freundlich, weich, beruhigend. Am wenigsten technisch</td></tr>
+        <tr><th>Lesbarkeit</th><td>Gut. Serifenzahlen sehr groß lesbar, Fließtext in Source Sans ruhig. Viele Rahmenlinien machen dichte Seiten unruhiger</td><td>Sehr gut für Zahlen und Daten, schmale Schrift spart Breite. Großbuchstaben-Überschriften sparsam einsetzen, sonst wirkt es laut</td><td>Sehr gut im Fließtext, großzügige Abstände. Braucht mehr Höhe, am Duo außen (580 px) passt weniger auf einen Blick</td></tr>
+        <tr><th>Stärken</th><td>Unverwechselbar, passt zum Thema Vorrat. Tagesfelder machen die Kernzahl abzählbar. Eigenständig gegenüber üblichen Apps</td><td>Höchste Informationsdichte, beste PC-Form (Tabellen). „Bald fällig“ als Abfahrtstafel ist sofort verständlich. Gelb lenkt genau auf den nächsten Schritt</td><td>Ganze Sätze und Textmarker tragen den ruhigen Ton am besten. Große Knöpfe, gut für unterwegs. Leicht für alle im Haushalt</td></tr>
+        <tr><th>Risiken</th><td>Kann ins Nostalgische kippen. Papierfarben im Dunkelmodus schwieriger. Viele Linien und Schatten kosten Pflege im Code</td><td>Kann kühl und behördlich wirken. Abstand zur abgelehnten Cockpit-Idee halten (keine Instrumente). Rot und Gelb nur sparsam, sonst Alarmgefühl</td><td>Kann beliebig wirken, ähnlich vielen Wellness-Apps. Weniger Dichte am PC. Weiche Karten liegen näher an Karten-Dashboards als A und B</td></tr>
+        <tr><th>Aufwand</th><td>mittel</td><td>gering</td><td>gering</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="reco">
+    <h3>Empfehlung: C als Grundlage, mit der Ordnung von B</h3>
+    <p>C trifft den gewünschten Ton am direktesten: Der Satz „Euer Vorrat reicht für 6 Tage“ mit Textmarker ist die Kernaussage, ohne Instrument und ohne Alarm, und die großen runden Knöpfe passen zum Abarbeiten am Handy im Keller. Damit C nicht beliebig wird, übernimmt es zwei Dinge aus B: die Liste „Bald fällig“ mit dem Datum vorn als feste Spalte und am PC die Tabelle mit Kategorie-Zwischenzeilen statt Karten. Die Tagesfelder aus A (ein Feld je Tag im Balken) lohnen sich als Detail, solange das Ziel höchstens 14 Tage hat.</p>
+    <p>Wer es eigenständiger mag, nimmt A. Sie ist die mutigste Richtung und am stärksten mit dem Thema verbunden, braucht aber mehr Sorgfalt im Dunkelmodus und bei dichten Listen.</p>
+    <p class="note">Alle Zahlen und Namen sind erfunden. Kontraste der Textfarben sind auf WCAG AA ausgelegt (mindestens 4,5:1 auf dem jeweiligen Grund), Zustände stehen immer als Wort da. Die Mockups zeigen nur Inhalte, die im UX-Konzept und im Datenmodell vorgesehen sind.</p>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement, btns=document.querySelectorAll('.theme button');
+  function apply(v){
+    if(v==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',v)}
+    btns.forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.set===v))});
+  }
+  btns.forEach(function(b){b.addEventListener('click',function(){apply(b.dataset.set)})});
+})();
+</script>
