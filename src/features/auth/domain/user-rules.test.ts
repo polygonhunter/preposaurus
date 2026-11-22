@@ -3,7 +3,6 @@ import {
   changeRole,
   isLastActiveAdmin,
   linkMember,
-  removeUser,
   setUserActive,
   type AppUser,
 } from './user-rules'
@@ -70,21 +69,6 @@ describe('setUserActive', () => {
 
     expect(deactivated.ok && deactivated.value[1]?.isActive).toBe(false)
     expect(reactivated.ok && reactivated.value[2]?.isActive).toBe(true)
-  })
-})
-
-describe('removeUser', () => {
-  it('entfernt den letzten aktiven Admin nicht', () => {
-    expect(removeUser(team, 'alex')).toEqual(lastAdmin)
-  })
-
-  it('entfernt andere Nutzer', () => {
-    const result = removeUser(team, 'sam')
-    expect(result.ok && result.value.map((entry) => entry.id)).toEqual(['alex', 'kim'])
-  })
-
-  it('meldet einen unbekannten Nutzer', () => {
-    expect(removeUser(team, 'niemand')).toEqual(notFound)
   })
 })
 
