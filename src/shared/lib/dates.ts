@@ -104,3 +104,20 @@ export function endOfMonth(day: CalendarDay): CalendarDay {
 export function endOfYear(day: CalendarDay): CalendarDay {
   return toCalendarDay(`${pad(dayParts(day).year, 4)}-12-31`)
 }
+
+/** Wie genau ein Datum aufgedruckt ist: Tag, nur Monat oder nur Jahr. */
+export type DayPrecision = 'day' | 'month' | 'year'
+
+/** Datum so, wie es aufgedruckt war: „30.09.2027“, „09/2027“ oder „2027“. */
+export function formatDayWithPrecision({
+  date,
+  precision,
+}: {
+  date: CalendarDay
+  precision: DayPrecision
+}): string {
+  const { year, month, day } = dayParts(date)
+  if (precision === 'year') return String(year)
+  if (precision === 'month') return `${pad(month, 2)}/${String(year)}`
+  return `${pad(day, 2)}.${pad(month, 2)}.${String(year)}`
+}

@@ -12,6 +12,7 @@ import { foodTypes } from '@/server/db/schema/food-types'
 import { products } from '@/server/db/schema/inventory'
 import { productGroups } from '@/server/db/schema/recommendation'
 import { toNumberOrNull, toNutritionSource } from './db-values'
+import { isAnyOf } from './id-list'
 
 const ownOrSystem = (column: AnyPgColumn, householdId: string) =>
   or(isNull(column), eq(column, householdId))
@@ -35,6 +36,7 @@ function filterConditions(householdId: string, filter: ProductFilter): (SQL | un
     equals(products.categoryId, filter.categoryId),
     equals(products.foodTypeId, filter.foodTypeId),
     equals(products.id, filter.productId),
+    filter.productIds === undefined ? undefined : isAnyOf(products.id, filter.productIds),
     equals(products.containerId, filter.containerId),
     equals(products.storageLocationId, filter.storageLocationId),
     searchCondition(filter.search),
@@ -153,6 +155,7 @@ export async function loadProducts(
   householdId: string,
   filter: ProductFilter,
 ): Promise<StockProduct[]> {
+  if (filter.productIds?.length === 0) return []
   const rows = await selectProducts(db, householdId, filter)
   return rows.map(toStockProduct)
 }

@@ -11,7 +11,7 @@ import { createVisionRecognizer } from '@/server/ai/create-vision-recognizer'
 import type { VisionRecognizer } from '@/server/ai/vision-recognizer'
 import type { AiRole } from '@/shared/config/ai-roles'
 import { err, ok, type Result } from '@/shared/lib/result'
-import { insertAiCall } from '../data/ai-call-repository'
+import { insertAiCall, isPhotoOfHousehold } from '../data/ai-call-repository'
 import {
   loadAiConfig,
   type AiConfigDeps,
@@ -26,6 +26,9 @@ interface PrepareRecognitionInput {
   optional?: readonly AiRole[]
 }
 
+/** Ein fremdes oder unbekanntes Foto heißt not-found, nie forbidden (DATENKATALOG §8 Nr. 3). */
+type PrepareRecognitionError = AiConfigError | { kind: 'photo-not-found' }
+
 export interface PreparedRecognition {
   recognizer: VisionRecognizer
   /** Modell je verfügbarer Rolle. Fehlt eine optionale Rolle, ist sie aus. */
@@ -39,6 +42,12 @@ function routeFor(deps: AiConfigDeps, config: RoleConfig): RoleRoute {
   }
 }
 
+async function isForeignPhoto(deps: AiConfigDeps, input: PrepareRecognitionInput) {
+  const { householdId, photoId } = input
+  if (photoId === null) return false
+  return !(await isPhotoOfHousehold(deps.db, { householdId, photoId }))
+}
+
 function callLog(deps: AiConfigDeps): AiCallLog {
   return { record: (entry) => insertAiCall(deps.db, entry) }
 }
@@ -46,7 +55,9 @@ function callLog(deps: AiConfigDeps): AiCallLog {
 export async function prepareRecognition(
   deps: AiConfigDeps,
   input: PrepareRecognitionInput,
-): Promise<Result<PreparedRecognition, AiConfigError>> {
+): Promise<Result<PreparedRecognition, PrepareRecognitionError>> {
+  // Jeder Aufruf landet mit foto_id in ki_aufruf: Ein Foto eines anderen Haushalts käme dort hinein
+  if (await isForeignPhoto(deps, input)) return err({ kind: 'photo-not-found' })
   const config = await loadAiConfig(deps, input.householdId)
   const routes: Partial<Record<AiRole, RoleRoute>> = {}
   const models: Partial<Record<AiRole, string>> = {}

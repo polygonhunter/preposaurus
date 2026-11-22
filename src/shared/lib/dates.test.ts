@@ -8,6 +8,7 @@ import {
   daysInMonth,
   endOfMonth,
   endOfYear,
+  formatDayWithPrecision,
   parseCalendarDay,
   toCalendarDay,
   todayInBerlin,
@@ -149,5 +150,19 @@ describe('endOfMonth und endOfYear', () => {
 
   it('liefert den 31.12. des Jahres', () => {
     expect(endOfYear(day('2027-01-01'))).toBe('2027-12-31')
+  })
+})
+
+describe('formatDayWithPrecision', () => {
+  it.each([
+    ['day', '30.09.2027'],
+    ['month', '09/2027'],
+    ['year', '2027'],
+  ] as const)('zeigt Genauigkeit %s als %s', (precision, text) => {
+    expect(formatDayWithPrecision({ date: day('2027-09-30'), precision })).toBe(text)
+  })
+
+  it('zeigt einstellige Tage und Monate zweistellig', () => {
+    expect(formatDayWithPrecision({ date: day('2027-03-05'), precision: 'day' })).toBe('05.03.2027')
   })
 })

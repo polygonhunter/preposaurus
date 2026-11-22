@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
 import {
-  formatBestBefore,
+  bestBeforeKeyOf,
   formatBestBeforeGroup,
   groupByBestBefore,
+  groupKeyOf,
   type BestBeforeGroup,
 } from './group-units'
 import type { BestBefore, BestBeforePrecision } from './unit'
@@ -93,18 +94,17 @@ describe('groupByBestBefore mit „Datum fehlt“', () => {
   })
 })
 
-describe('formatBestBefore', () => {
-  it.each([
-    ['day', '30.09.2027'],
-    ['month', '09/2027'],
-    ['year', '2027'],
-  ] as const)('zeigt Genauigkeit %s als %s', (precision, text) => {
-    expect(formatBestBefore({ date: toCalendarDay('2027-09-30'), precision })).toBe(text)
+describe('bestBeforeKeyOf und groupKeyOf', () => {
+  it('geben einer Einheit und ihrer Gruppe denselben Schlüssel', () => {
+    const entries = [bestBefore('2027-09-30'), bestBefore('2027-09-30', 'day'), null]
+    const groups = groupByBestBefore(entries)
+
+    expect(groups.map(groupKeyOf).sort()).toEqual(entries.map(bestBeforeKeyOf).sort())
   })
 
-  it('zeigt einstellige Tage und Monate zweistellig', () => {
-    expect(formatBestBefore({ date: toCalendarDay('2027-03-05'), precision: 'day' })).toBe(
-      '05.03.2027',
+  it('trennt geschätzte und erkannte Daten', () => {
+    expect(bestBeforeKeyOf(bestBefore('2027-09-30', 'month', true))).not.toBe(
+      bestBeforeKeyOf(bestBefore('2027-09-30')),
     )
   })
 })

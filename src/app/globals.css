@@ -1,9 +1,127 @@
+/* Design-Tokens „Systemnah“ (docs/konzept/DESIGN_SYSTEM.md §2–4). */
 @import 'tailwindcss';
 
+/* Stufen aus DESIGN_SYSTEM §6. Unter „mittel“ gilt „kompakt“. */
+@custom-variant mittel (@media (width >= 640px) and (height >= 700px));
+@custom-variant breit (@media (width >= 900px));
+@custom-variant weit (@media (width >= 1280px));
+
+/* light-dark() folgt color-scheme: hell, dunkel per prefers-color-scheme, scheme-dark/-light erzwingt.
+   „inline“, weil Tailwind light-dark() über Variablen nachbildet. Stünde der Wert nur in einer
+   Variablen auf :root, wäre er dort schon aufgelöst und scheme-dark wirkte nicht. */
+@theme inline {
+  /* Nur die eigenen Farben, damit keine Tailwind-Palette nebenher genutzt wird. */
+  --color-*: initial;
+  --color-bg: light-dark(#f2f2f7, #000000);
+  --color-surface: light-dark(#ffffff, #1c1c1e);
+  --color-fill: light-dark(#e3e3e8, #2c2c2e);
+  --color-fg: light-dark(#000000, #ffffff);
+  --color-fg2: light-dark(#6c6c70, #a1a1a6);
+  --color-line: light-dark(#c6c6c8, #38383a);
+  /* Ränder interaktiver Elemente (Feld, ausgeschalteter Schalter): ≥ 3 : 1 auf surface und bg (WCAG 1.4.11). */
+  --color-line-strong: light-dark(#85858a, #6e6e73);
+  --color-bar: light-dark(#3a3a3c, #e5e5ea);
+  --color-accent: light-dark(#0060cc, #4da3ff);
+  --color-on-accent: light-dark(#ffffff, #000000);
+  --color-red: light-dark(#d70015, #ff6961);
+  --color-orange: light-dark(#b04e00, #ffb340);
+  --color-yellow: light-dark(#7e5f00, #ffd60a);
+  --color-green: light-dark(#1c7a32, #32d74b);
+  --color-bar-warn: light-dark(#e07a00, #ff9f0a);
+  --color-scrim: rgb(0 0 0 / 0.4);
+}
+
 @theme {
-  --color-surface: #f6f7f4;
-  --color-ink: #1f2a24;
-  --color-muted: #4a5750;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+
+  --text-hero: 64px;
+  --text-hero--line-height: 1;
+  --text-hero--font-weight: 700;
+  --text-title: 34px;
+  --text-title--line-height: 41px;
+  --text-title--font-weight: 700;
+  --text-title2: 22px;
+  --text-title2--line-height: 28px;
+  --text-title2--font-weight: 700;
+  --text-headline: 17px;
+  --text-headline--line-height: 22px;
+  --text-headline--font-weight: 600;
+  --text-body: 17px;
+  --text-body--line-height: 22px;
+  --text-callout: 15px;
+  --text-callout--line-height: 20px;
+  --text-footnote: 13px;
+  --text-footnote--line-height: 18px;
+  --text-caption: 11px;
+  --text-caption--line-height: 13px;
+  --text-caption--font-weight: 500;
+  --text-tab: 10px;
+  --text-tab--line-height: 12px;
+  --text-tab--font-weight: 500;
+
+  --radius-group: 10px;
+  --radius-field: 10px;
+  --radius-button: 12px;
+  --radius-sheet: 12px;
+  --radius-segment: 9px;
+  --radius-thumb: 7px;
+
+  --shadow-thumb: 0 1px 2px rgb(0 0 0 / 0.12);
+
+  --ease-out: ease-out;
+}
+
+/* Am PC eine Stufe kleiner (DESIGN_SYSTEM §2). */
+@media (width >= 900px) {
+  :root {
+    --text-title: 28px;
+    --text-title--line-height: 34px;
+    --text-body: 15px;
+    --text-body--line-height: 20px;
+    --text-footnote: 12px;
+    --text-footnote--line-height: 16px;
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  body {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid --theme(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+/* Haarlinie: 1 px, auf Retina halbiert. */
+@utility hairline {
+  height: 1px;
+  background: --theme(--color-line);
+  transform: scaleY(0.5);
+}
+
+/* Vergrößert die Trefferfläche auf mindestens 44 × 44 px, ohne das Aussehen zu ändern. */
+@utility touch-target {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 @media (prefers-reduced-motion: reduce) {

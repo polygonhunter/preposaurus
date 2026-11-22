@@ -4,9 +4,26 @@ import { buildHousehold, buildUser } from '../../../db/seeds/factories'
 import type { Database } from '../../../src/server/db/connection'
 import { users } from '../../../src/server/db/schema/account'
 import { households } from '../../../src/server/db/schema/household'
+import type { AccessError } from '../../../src/server/auth/guards'
 import type { SessionUser } from '../../../src/server/auth/session'
+import type { Result } from '../../../src/shared/lib/result'
 
 const ORIGIN = 'https://preposaurus.test'
+
+type Session = Result<SessionUser, AccessError> | null
+
+/** Ersatz für server/auth/guards: Sitzung aus dem Test, Haushaltsprüfung wie im Original. */
+export function fakeGuards(session: () => Session) {
+  return {
+    requireUser: () => Promise.resolve(session()),
+    requireHouseholdUser: () => {
+      const current = session()
+      if (current?.ok !== true || current.value.householdId !== null)
+        return Promise.resolve(current)
+      return Promise.resolve({ ok: false, error: { kind: 'forbidden' } })
+    },
+  }
+}
 
 /** Einfarbiges JPEG mit GPS im EXIF, wie ein Handyfoto. */
 export async function testJpeg(width = 800, height = 600): Promise<Uint8Array> {

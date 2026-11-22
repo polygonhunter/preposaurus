@@ -68,7 +68,8 @@ services:
     ports:
       - '127.0.0.1:3000:3000'
     # Der Next-Cache liegt im Arbeitsspeicher und gehört nur dem Nutzer der App. So braucht das
-    # Image keinen Ordner, in den jede Nutzer-ID schreiben darf.
+    # Image keinen Ordner, in den jede Nutzer-ID schreiben darf. 64 MB reichen ohne next/image;
+    # kommt next/image für Fotos dazu, die Größe neu bemessen (#153). Voll heißt nur: Next loggt.
     tmpfs:
       - /app/.next/cache:uid=${PREPOSAURUS_UID:-1000},gid=${PREPOSAURUS_GID:-1000},mode=0700,size=64m
     depends_on:
