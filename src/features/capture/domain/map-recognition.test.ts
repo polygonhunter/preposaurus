@@ -96,7 +96,7 @@ describe('mapNutritionAnswer', () => {
     expect(mapNutritionAnswer(nutrition({}))).toEqual({
       values: { kcal: 359, protein: 13, carbs: 71, fat: 1.5 },
       isPerPortion: false,
-      isEstimated: false,
+      source: 'label',
       confidence: 'high',
     })
   })
@@ -133,7 +133,7 @@ describe('mapNutritionAnswer', () => {
 })
 
 describe('mapNutritionEstimateAnswer', () => {
-  it('kennzeichnet jede Schätzung als geschätzt', () => {
+  it('kennzeichnet jede Schätzung mit der Herkunft ai-estimate', () => {
     const estimate: AiNutritionEstimateAnswer = {
       kcal: 350,
       eiweiss_g: 12,
@@ -145,7 +145,7 @@ describe('mapNutritionEstimateAnswer', () => {
     expect(mapNutritionEstimateAnswer(estimate)).toEqual({
       values: { kcal: 350, protein: 12, carbs: null, fat: 2 },
       isPerPortion: false,
-      isEstimated: true,
+      source: 'ai-estimate',
       confidence: 'medium',
     })
   })

@@ -1,6 +1,10 @@
 // Mapping der schlanken KI-Antworten ins strenge Fach-Modell (technik.html#api-ki „Grenzen der
 // Schemas“). Das KI-Schema kennt keine Grenzen, deshalb wird hier geprüft: Mengen größer null,
 // Nährwerte nicht negativ. Was nicht passt, wird null. `null` bleibt immer `null`.
+import type {
+  NutritionValues,
+  StoredNutritionSource,
+} from '@/features/inventory/domain/nutrition-source'
 import type { Quantity } from '@/shared/lib/quantities'
 import type {
   AiConfidence,
@@ -8,7 +12,6 @@ import type {
   AiNutritionEstimateAnswer,
   AiPackagingAnswer,
 } from './ai-answers'
-import type { NutritionValues } from './estimates'
 import { resolveKcal, toPer100 } from './nutrition'
 import type { Confidence } from './plausibility'
 
@@ -58,8 +61,11 @@ export interface NutritionSuggestion {
   /** Je 100 g bzw. 100 ml. Bei `isPerPortion` noch je Portion, bis die Portionsgröße bekannt ist. */
   values: NutritionValues
   isPerPortion: boolean
-  /** Eine Schätzung ohne Tabelle (#124). Muss gesondert bestätigt werden. */
-  isEstimated: boolean
+  /**
+   * Herkunft für `naehrwerte_quelle`: `label` = Tabelle gelesen, `ai-estimate` = Schätzung ohne
+   * Tabelle (#124), die gesondert bestätigt werden muss.
+   */
+  source: Extract<StoredNutritionSource, 'label' | 'ai-estimate'>
   confidence: Confidence
 }
 
@@ -91,7 +97,7 @@ function scalePortion(values: NutritionValues, portionSize: number): NutritionVa
 export function mapNutritionAnswer(answer: AiNutritionAnswer): NutritionSuggestion {
   const values = labelValues(answer)
   const portionSize = positiveOrNull(answer.portionsgroesse)
-  const base = { isEstimated: false, confidence: mapConfidence(answer.sicherheit) }
+  const base = { source: 'label' as const, confidence: mapConfidence(answer.sicherheit) }
   if (answer.bezug !== 'portion') return { ...base, values, isPerPortion: false }
   if (portionSize === null) return { ...base, values, isPerPortion: true }
   return { ...base, values: scalePortion(values, portionSize), isPerPortion: false }
@@ -102,7 +108,7 @@ export function mapNutritionEstimateAnswer(answer: AiNutritionEstimateAnswer): N
   return {
     values: labelValues(answer),
     isPerPortion: false,
-    isEstimated: true,
+    source: 'ai-estimate',
     confidence: mapConfidence(answer.sicherheit),
   }
 }
