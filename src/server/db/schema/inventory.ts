@@ -70,6 +70,10 @@ export const products = pgTable(
   (table) => [
     index('produkt_haushalt_id_idx').on(table.householdId),
     index('produkt_lebensmittelart_id_idx').on(table.foodTypeId),
+    // Filter im Vorrat: Kategorie, Behälter („Alle Dosen“), Lagerort
+    index('produkt_kategorie_id_idx').on(table.categoryId),
+    index('produkt_behaelter_id_idx').on(table.containerId),
+    index('produkt_lagerort_id_idx').on(table.storageLocationId),
     foreignKey({
       name: 'produkt_lebensmittelart_kategorie_fk',
       columns: [table.foodTypeId, table.categoryId],
@@ -110,6 +114,10 @@ export const units = pgTable(
   },
   (table) => [
     index('einheit_produkt_status_mhd_idx').on(table.productId, table.status, table.bestBefore),
+    // „Bald fällig“ und „Abgelaufen“ über den ganzen Vorrat, ohne die Historie zu durchsuchen
+    index('einheit_mhd_vorrat_idx')
+      .on(table.bestBefore)
+      .where(sql`${table.status} = 'vorrat'`),
     check('einheit_status_check', isOneOf(table.status, UNIT_STATUSES)),
     check(
       'einheit_mhd_genauigkeit_check',
