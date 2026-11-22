@@ -21,6 +21,7 @@ describe('Passwort per Kommandozeile zurücksetzen', () => {
   let testDb: TestDb
   let auth: Auth
   let userId: string
+  let otherUserId: string
 
   const deps = async (): Promise<ResetPasswordDeps> => {
     const context = await auth.$context
@@ -41,6 +42,11 @@ describe('Passwort per Kommandozeile zurücksetzen', () => {
     const { householdId } = await insertBasics(testDb.db)
     userId = await createCredentialUser(auth, {
       username: 'alex',
+      password: OLD_PASSWORD,
+      householdId,
+    })
+    otherUserId = await createCredentialUser(auth, {
+      username: 'sam',
       password: OLD_PASSWORD,
       householdId,
     })
@@ -78,6 +84,20 @@ describe('Passwort per Kommandozeile zurücksetzen', () => {
       passwordChangedAt: now,
       passwordChangedBy: null,
     })
+  })
+
+  it('lässt Sitzungen und Passwort anderer Nutzer unangetastet', async () => {
+    await signInForCookie(auth, { username: 'sam', password: OLD_PASSWORD })
+
+    await resetPasswordFromCli(await deps(), 'alex')
+
+    const others = await testDb.db.select().from(sessions).where(eq(sessions.userId, otherUserId))
+    expect(others).toHaveLength(1)
+    await expect(
+      signInForCookie(auth, { username: 'sam', password: OLD_PASSWORD }),
+    ).resolves.toBeDefined()
+    const [other] = await testDb.db.select().from(users).where(eq(users.id, otherUserId))
+    expect(other?.isPasswordTemporary).toBe(false)
   })
 
   it('speichert nur den Hash, mit dem die Anmeldung danach klappt', async () => {
