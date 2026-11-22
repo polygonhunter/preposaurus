@@ -23,8 +23,12 @@ services:
 
   # web teilt das Netz des Sidecars. Serve leitet auf 127.0.0.1:3000 in diesem Netz weiter und
   # setzt X-Forwarded-For auf die echte Tailnet-Adresse. Ein Port auf dem NAS entfällt ganz.
+  # Next lauscht hier nur auf 127.0.0.1. Sonst wäre Port 3000 über die Adresse des Sidecars im
+  # Compose-Netz direkt erreichbar, an Serve vorbei und mit selbst gesetztem X-Forwarded-For.
   web:
     network_mode: service:tailscale
+    environment:
+      HOSTNAME: 127.0.0.1
     ports: !reset []
     depends_on:
       tailscale:

@@ -62,6 +62,7 @@ Dazu kommt `tailscale` mit dem Zustand des Tailscale-Containers.
   docker compose version
   ```
   Erwartet: `Docker Compose version v2.24.0` oder höher.
+- **Nur für den zweiten Weg ohne Tailscale-Container** ([Abschnitt 16](#16-tailscale-als-paket-auf-dem-nas-zweiter-weg)): Docker Engine **28.3.3 oder neuer** (`docker version`, Zeile `Server: … Version`). Ältere Versionen ließen Geräte im selben Netz an einen nur auf `127.0.0.1` veröffentlichten Port (behoben in 28.0.0, nach einem firewalld-Neustart erneut bis 28.3.3, CVE-2025-54388). Mit dem empfohlenen Tailscale-Container ist kein Port auf dem NAS offen, dann spielt die Version dafür keine Rolle.
 - **Prozessor x86-64 (amd64) oder ARM64 (aarch64).** Ältere NAS mit 32-Bit-ARM gehen nicht. Prüfen:
   ```bash
   uname -m
@@ -445,6 +446,8 @@ In der CI auf Ubuntu mit Docker geprüft (ohne Tailscale-Container).
 ## 16. Tailscale als Paket auf dem NAS (zweiter Weg)
 
 Wer Tailscale schon als Paket direkt auf dem NAS hat, kann auf den Tailscale-Container verzichten. *Noch nicht am Gerät geprüft.*
+
+**Voraussetzung: Docker Engine 28.3.3 oder neuer.** Bei älteren Versionen erreichen Geräte im selben Netz den Port `127.0.0.1:3000` unter Umständen trotzdem (Docker-Lücken, behoben in 28.0.0 und 28.3.3). Dann könnte ein Gerät im WLAN die Anmeldebremse je Adresse mit einem selbst gesetzten `X-Forwarded-For` umgehen. NAS-Pakete bringen oft ältere Versionen mit (`docker version` zeigt sie). Im Zweifel den Tailscale-Container nehmen: Dort ist gar kein Port auf dem NAS offen, und die App lauscht nur innerhalb des Containers.
 
 1. In der `.env`: `COMPOSE_FILE=compose.yaml`. `TS_HOSTNAME` und `TS_AUTHKEY` werden nicht gebraucht.
 2. Starten wie in Abschnitt 6. Die App lauscht dann nur auf `127.0.0.1:3000` des NAS, also nicht im Heimnetz.
