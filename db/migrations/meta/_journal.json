@@ -78,6 +78,13 @@
       "when": 1795354182592,
       "tag": "0010_haushalt_einstellungen",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795354234936,
+      "tag": "0011_benutzername",
+      "breakpoints": true
     }
   ]
 }

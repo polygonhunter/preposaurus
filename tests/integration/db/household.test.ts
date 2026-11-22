@@ -7,6 +7,7 @@ import {
   memberAllergies,
   members,
 } from '../../../src/server/db/schema/household'
+import { buildUser } from '../../../db/seeds/factories'
 import { expectConstraintViolation } from '../../helpers/db-errors'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
 
@@ -85,7 +86,7 @@ describe('Schema Haushalt', () => {
     await testDb.db.insert(memberAllergies).values({ memberId: member.id, label: 'glutenfrei' })
     const [user] = await testDb.db
       .insert(users)
-      .values({ name: 'Kim', email: 'kim@example.org', householdId, memberId: member.id })
+      .values(buildUser({ name: 'Kim', householdId, memberId: member.id }))
       .returning()
 
     await testDb.db.delete(members).where(eq(members.id, member.id))

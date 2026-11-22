@@ -1,7 +1,7 @@
 // Fabriken (UMSETZUNG M1-10): erzeugen einfügefertige Zeilen mit sinnvollen Standardwerten.
 // Die Demo (db/seeds/demo.ts) und die Tests nutzen dieselben Fabriken, damit beide gleich aussehen.
 // Sie liegen hier und nicht unter tests/helpers, damit kein Seed aus dem Testordner importiert.
-// Nur erfundene Personen und @example.org, keine echten Haushaltsdaten.
+// Nur erfundene Personen, keine echten Haushaltsdaten.
 import { randomUUID } from 'node:crypto'
 import type { users } from '../../src/server/db/schema/account'
 import type { storageLocations } from '../../src/server/db/schema/catalog'
@@ -54,11 +54,19 @@ export function buildMember(
   }
 }
 
+// Technische E-Mail wie in der App: <id>@nutzer.invalid (Better Auth verlangt eine, angezeigt wird sie nie).
 export function buildUser(
-  overrides: Partial<Insert<typeof users>> & { householdId: string },
+  overrides: Partial<Insert<typeof users>> = {},
 ): WithId<Insert<typeof users>> {
   const id = overrides.id ?? randomUUID()
-  return { name: 'Alex', email: `nutzer-${id}@example.org`, role: 'mitglied', ...overrides, id }
+  return {
+    name: 'Alex',
+    username: `nutzer_${id.slice(0, 8)}`,
+    email: `${id}@nutzer.invalid`,
+    role: 'mitglied',
+    ...overrides,
+    id,
+  }
 }
 
 export function buildGoal(

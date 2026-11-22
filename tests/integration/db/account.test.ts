@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { buildUser } from '../../../db/seeds/factories'
 import { sessions, users } from '../../../src/server/db/schema/account'
 import { expectConstraintViolation } from '../../helpers/db-errors'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
@@ -15,40 +16,61 @@ describe('Schema Konto', () => {
     await testDb.close()
   })
 
-  it('legt einen Nutzer mit Standardrolle mitglied und aktiv an', async () => {
+  it('legt einen Nutzer mit Standardrolle mitglied, aktiv und ohne vorläufiges Passwort an', async () => {
     const [user] = await testDb.db
       .insert(users)
-      .values({ name: 'Alex', email: 'alex@example.org' })
+      .values(buildUser({ name: 'Alex', username: 'alex', role: undefined }))
       .returning()
 
-    expect(user).toMatchObject({ role: 'mitglied', isActive: true, emailVerified: false })
+    expect(user).toMatchObject({
+      role: 'mitglied',
+      isActive: true,
+      emailVerified: false,
+      isPasswordTemporary: false,
+      lastSignInAt: null,
+    })
   })
 
   it('lehnt eine unbekannte Rolle ab', async () => {
     await expectConstraintViolation(
-      testDb.db
-        .insert(users)
-        // @ts-expect-error -- absichtlich ungültige Rolle, die nur die DB abfangen soll
-        .values({ name: 'Sam', email: 'sam@example.org', role: 'gast' }),
+      // @ts-expect-error -- absichtlich ungültige Rolle, die nur die DB abfangen soll
+      testDb.db.insert(users).values(buildUser({ username: 'sam', role: 'gast' })),
       'nutzer_rolle_check',
     )
   })
 
-  it('lehnt eine doppelte E-Mail ab', async () => {
-    await testDb.db.insert(users).values({ name: 'Kim', email: 'kim@example.org' })
+  it('lehnt einen doppelten Benutzernamen ab (eindeutig über lower())', async () => {
+    await testDb.db.insert(users).values(buildUser({ username: 'kim' }))
 
     await expectConstraintViolation(
-      testDb.db.insert(users).values({ name: 'Kim 2', email: 'kim@example.org' }),
+      testDb.db.insert(users).values(buildUser({ username: 'kim' })),
+      'nutzer_benutzername_eindeutig',
+    )
+  })
+
+  it.each(['ab', 'mit leerzeichen', 'gross_A', 'a'.repeat(31)])(
+    'lehnt den Benutzernamen „%s“ ab',
+    async (username) => {
+      await expectConstraintViolation(
+        testDb.db.insert(users).values(buildUser({ username })),
+        'nutzer_benutzername_check',
+      )
+    },
+  )
+
+  it('lehnt eine doppelte (technische) E-Mail ab', async () => {
+    const email = 'doppelt@nutzer.invalid'
+    await testDb.db.insert(users).values(buildUser({ username: 'erste', email }))
+
+    await expectConstraintViolation(
+      testDb.db.insert(users).values(buildUser({ username: 'zweite', email })),
       'nutzer_email_unique',
     )
   })
 
   it('löscht die Sitzungen mit dem Nutzer', async () => {
-    const [user] = await testDb.db
-      .insert(users)
-      .values({ name: 'Sam', email: 'sam.sitzung@example.org', role: 'admin' })
-      .returning()
-    if (user === undefined) throw new Error('Nutzer fehlt')
+    const user = buildUser({ username: 'sam.sitzung', role: 'admin' })
+    await testDb.db.insert(users).values(user)
     await testDb.db.insert(sessions).values({
       token: 'token-zum-test',
       expiresAt: new Date('2030-01-01T00:00:00Z'),

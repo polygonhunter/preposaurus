@@ -3,7 +3,22 @@
 // verification) und die Felder über die Drizzle-Eigenschaften. Tabellen- und Spaltennamen in der
 // DB bestimmt allein dieses Schema. Spalten, die nur Better Auth nutzt, behalten die englischen
 // Namen der Bibliothek, unsere eigenen Spalten folgen dem deutschen Kanon.
-import { boolean, check, index, pgTable, text, uuid } from 'drizzle-orm/pg-core'
+// Anmeldung nur mit Benutzername und Passwort (Username-Plugin, EINSTELLUNGEN_NUTZER §6.1).
+// Better Auth verlangt trotzdem eine eindeutige E-Mail (Kernschema: required, unique). Die App
+// erzeugt dafür die technische Adresse <id>@nutzer.invalid und zeigt sie nie an.
+// Passwörter liegen nur als scrypt-Hash von Better Auth in konto.password, nie im Klartext.
+// Nutzer werden nie hart gelöscht, nur deaktiviert (aktiv = false), damit die Historie bleibt.
+import { sql } from 'drizzle-orm'
+import {
+  boolean,
+  check,
+  index,
+  pgTable,
+  text,
+  uniqueIndex,
+  uuid,
+  type AnyPgColumn,
+} from 'drizzle-orm/pg-core'
 import { USER_ROLES } from '../../../shared/config/constants'
 import { id, isOneOf, timestamps, timestampTz } from './columns'
 import { households, members } from './household'
@@ -12,7 +27,10 @@ export const users = pgTable(
   'nutzer',
   {
     id: id(),
+    // Anzeigename
     name: text('name').notNull(),
+    // Klein gespeichert (das Plugin normalisiert), 3–30 Zeichen: a–z, 0–9, Punkt, Unterstrich.
+    username: text('benutzername').notNull(),
     email: text('email').notNull().unique(),
     emailVerified: boolean('email_verified').notNull().default(false),
     image: text('image'),
@@ -23,9 +41,24 @@ export const users = pgTable(
     memberId: uuid('mitglied_id')
       .unique()
       .references(() => members.id, { onDelete: 'set null' }),
+    // Vom Admin oder per Kommandozeile vergeben und noch nicht selbst geändert
+    isPasswordTemporary: boolean('passwort_vorlaeufig').notNull().default(false),
+    passwordChangedAt: timestampTz('passwort_geaendert_am'),
+    // Leer, wenn es per Kommandozeile gesetzt wurde
+    passwordChangedBy: uuid('passwort_geaendert_von').references((): AnyPgColumn => users.id, {
+      onDelete: 'set null',
+    }),
+    // Eigene Spalte, weil Sitzungen gelöscht werden
+    lastSignInAt: timestampTz('letzte_anmeldung_am'),
+    aiNoticeConfirmedAt: timestampTz('ki_hinweis_bestaetigt_am'),
     ...timestamps(),
   },
-  (table) => [check('nutzer_rolle_check', isOneOf(table.role, USER_ROLES))],
+  (table) => [
+    check('nutzer_rolle_check', isOneOf(table.role, USER_ROLES)),
+    check('nutzer_benutzername_check', sql`${table.username} ~ '^[a-z0-9._]{3,30}$'`),
+    // Eindeutig ohne Rücksicht auf Groß- und Kleinschreibung, auch wenn ein Weg am Plugin vorbei schreibt.
+    uniqueIndex('nutzer_benutzername_eindeutig').on(sql`lower(${table.username})`),
+  ],
 )
 
 export const sessions = pgTable(
