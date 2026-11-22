@@ -1,15 +1,17 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { loadEnv } from './env'
 
-const minimal = { DATABASE_URL: 'pglite://./.data/dev' }
+const SECRET = 'x'.repeat(32)
+const minimal = { DATABASE_URL: 'pglite://./.data/dev', APP_SECRET: SECRET }
 
 describe('loadEnv', () => {
   afterEach(() => {
     vi.unstubAllEnvs()
   })
 
-  it('setzt Standardwerte, wenn nur die Pflichtvariable da ist', () => {
+  it('setzt Standardwerte, wenn nur die Pflichtvariablen da sind', () => {
     expect(loadEnv(minimal)).toMatchObject({
+      CLIENT_IP_HEADER: 'x-forwarded-for',
       AI_PROVIDER: 'fake',
       LOG_LEVEL: 'info',
       AI_MODEL_PACKAGING: 'claude-haiku-5-5',
@@ -21,6 +23,22 @@ describe('loadEnv', () => {
 
   it('meldet klar, wenn eine Pflichtvariable fehlt', () => {
     expect(() => loadEnv({})).toThrow('DATABASE_URL fehlt. Eine Vorlage steht in .env.example.')
+  })
+
+  it('verlangt APP_SECRET', () => {
+    expect(() => loadEnv({ DATABASE_URL: minimal.DATABASE_URL })).toThrow('APP_SECRET fehlt')
+  })
+
+  it('lehnt ein APP_SECRET unter 32 Zeichen ab', () => {
+    expect(() => loadEnv({ ...minimal, APP_SECRET: 'x'.repeat(31) })).toThrow(
+      'mindestens 32 Zeichen',
+    )
+  })
+
+  it('normalisiert den IP-Header auf Kleinbuchstaben', () => {
+    expect(loadEnv({ ...minimal, CLIENT_IP_HEADER: ' X-Real-IP ' }).CLIENT_IP_HEADER).toBe(
+      'x-real-ip',
+    )
   })
 
   it('lehnt eine Datenbank-URL mit unbekanntem Schema ab', () => {
@@ -49,6 +67,7 @@ describe('loadEnv', () => {
 
   it('liest ohne Argument process.env', () => {
     vi.stubEnv('DATABASE_URL', 'postgres://localhost/preposaurus')
+    vi.stubEnv('APP_SECRET', SECRET)
 
     expect(loadEnv().DATABASE_URL).toBe('postgres://localhost/preposaurus')
   })

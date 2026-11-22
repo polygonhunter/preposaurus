@@ -4,6 +4,16 @@
 
 export const USER_ROLES = ['admin', 'mitglied'] as const
 
+// Benutzername (EINSTELLUNGEN_NUTZER §4.4, #133): 3–30 Zeichen a–z, 0–9, Punkt, Unterstrich, vorne
+// ein Buchstabe oder eine Ziffer. Eine Quelle für den DB-CHECK, das Zod-Schema und den Validator
+// des Username-Plugins. Wer das Muster ändert, braucht eine neue Migration für den CHECK.
+export const USERNAME_PATTERN_SOURCE = '^[a-z0-9][a-z0-9._]{2,29}$'
+export const USERNAME_MAX_LENGTH = 30
+
+// Passwortlänge (EINSTELLUNGEN_NUTZER §4.4)
+export const PASSWORD_MIN_LENGTH = 10
+export const PASSWORD_MAX_LENGTH = 128
+
 // Rechenmodus des Haushalts (02_HAUSHALT_ZIEL §1 „Zwei Rechenmodi“)
 export const CALCULATION_MODES = ['offiziell', 'individuell'] as const
 

@@ -18,6 +18,8 @@ env:
   # Pflicht für env.ts (Serverstart in build und e2e), die DB selbst nutzt erst M1
   DATABASE_URL: pglite://./.data/ci
   AI_PROVIDER: fake
+  # Nur für die CI, kein Geheimnis. env.ts verlangt mindestens 32 Zeichen.
+  APP_SECRET: ci-nur-zum-testen-kein-geheimnis-0000
 
 jobs:
   lint:

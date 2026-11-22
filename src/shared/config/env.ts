@@ -5,6 +5,7 @@ import { LOG_LEVELS } from '../lib/logger'
 import { err, ok, type Result } from '../lib/result'
 
 const DATABASE_URL_PATTERN = /^(postgres|postgresql|pglite):\/\//
+const APP_SECRET_MIN_LENGTH = 32
 
 const required = (name: string) =>
   z
@@ -25,6 +26,13 @@ const envSchema = z
       DATABASE_URL_PATTERN,
       'DATABASE_URL muss mit postgres://, postgresql:// oder pglite:// beginnen.',
     ),
+    // Signiert die Sitzungs-Cookies (Better Auth). Ändert er sich, sind alle abgemeldet.
+    APP_SECRET: required('APP_SECRET').min(
+      APP_SECRET_MIN_LENGTH,
+      `APP_SECRET braucht mindestens ${String(APP_SECRET_MIN_LENGTH)} Zeichen, z. B. aus: openssl rand -base64 32`,
+    ),
+    // Header mit der Adresse des Geräts. Tailscale Serve setzt x-forwarded-for (EINSTELLUNGEN §4.3).
+    CLIENT_IP_HEADER: z.string().trim().toLowerCase().min(1).default('x-forwarded-for'),
     AI_PROVIDER: z.enum(['anthropic', 'fake']).default('fake'),
     ANTHROPIC_API_KEY: optionalSecret,
     AI_MODEL_PACKAGING: z.string().min(1).default(AI_ROLE_DEFAULT_MODELS.verpackung),
