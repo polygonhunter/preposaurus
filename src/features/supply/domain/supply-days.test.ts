@@ -28,6 +28,7 @@ describe('calculateSupplyDays', () => {
       days: 4,
       bottleneck: 'water',
       containsEstimates: false,
+      estimatedKcalShare: 0,
       kcal: 35200,
       waterMl: 16000,
     })
@@ -91,6 +92,18 @@ describe('calculateSupplyDays', () => {
     expect(run(estimatedKcal)).toBe(true)
     expect(run(estimatedDate)).toBe(true)
     expect(run(exact)).toBe(false)
+  })
+
+  it('nennt den Anteil der kcal aus Richtwerten der gezählten Einheiten', () => {
+    const units = [
+      supplyUnit('richtwert', '2028-01-31', { kcal: 1000, isKcalEstimated: true }),
+      supplyUnit('etikett', '2028-01-31', { kcal: 3000 }),
+      supplyUnit('abgelaufen', '2026-01-31', { kcal: 9000, isKcalEstimated: true }),
+    ]
+    const result = valueOf(
+      calculateSupplyDays({ units, need, reference: { day: today, kind: 'today' } }),
+    )
+    expect(result.estimatedKcalShare).toBe(0.25)
   })
 
   it('übersieht Schätzwerte, die am Stichtag nicht mehr zählen', () => {
