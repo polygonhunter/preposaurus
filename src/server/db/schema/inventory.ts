@@ -5,6 +5,9 @@
 // Das sichert ein zusammengesetzter Fremdschlüssel (lebensmittelart_id, kategorie_id) ab, ohne Trigger.
 // Er greift nur, wenn die Art gesetzt ist (MATCH SIMPLE), und zieht die Kategorie mit (ON UPDATE
 // CASCADE), wenn eine Art in eine andere Kategorie wandert.
+// Löschschutz mit NO ACTION statt RESTRICT: Beides verhindert das Löschen einer benutzten Kategorie
+// oder Art, NO ACTION prüft aber erst am Ende der Anweisung. Nur so kann das Löschen eines
+// Haushalts Produkte, eigene Arten und eigene Kategorien gemeinsam per CASCADE entfernen.
 import { sql } from 'drizzle-orm'
 import {
   boolean,
@@ -15,6 +18,7 @@ import {
   numeric,
   pgTable,
   text,
+  unique,
   uuid,
 } from 'drizzle-orm/pg-core'
 import {
@@ -41,7 +45,7 @@ export const products = pgTable(
       .references(() => households.id, { onDelete: 'cascade' }),
     categoryId: uuid('kategorie_id')
       .notNull()
-      .references(() => categories.id, { onDelete: 'restrict' }),
+      .references(() => categories.id, { onDelete: 'no action' }),
     foodTypeId: uuid('lebensmittelart_id'),
     containerId: uuid('behaelter_id').references(() => containers.id, { onDelete: 'set null' }),
     storageLocationId: uuid('lagerort_id').references(() => storageLocations.id, {
@@ -71,7 +75,7 @@ export const products = pgTable(
       columns: [table.foodTypeId, table.categoryId],
       foreignColumns: [foodTypes.id, foodTypes.categoryId],
     })
-      .onDelete('restrict')
+      .onDelete('no action')
       .onUpdate('cascade'),
     check('produkt_inhalt_einheit_check', isOneOf(table.contentUnit, QUANTITY_UNITS)),
     check('produkt_inhalt_check', sql`${table.contentAmount} > 0`),
@@ -119,5 +123,11 @@ export const units = pgTable(
     ),
     // Verbraucht oder entsorgt heißt immer: mit Zeitpunkt. Im Vorrat gibt es keinen.
     check('einheit_entnahme_check', sql`(${table.status} = 'vorrat') = (${table.takenAt} is null)`),
+    check(
+      'einheit_entnommen_von_check',
+      sql`${table.status} <> 'vorrat' or ${table.takenBy} is null`,
+    ),
+    // Ziel des zusammengesetzten Fremdschlüssels foto(einheit_id, produkt_id)
+    unique('einheit_id_produkt_eindeutig').on(table.id, table.productId),
   ],
 )

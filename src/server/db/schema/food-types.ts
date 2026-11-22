@@ -32,7 +32,9 @@ export const foodTypes = pgTable(
     name: text('name').notNull(),
     categoryId: uuid('kategorie_id')
       .notNull()
-      .references(() => categories.id, { onDelete: 'restrict' }),
+      // NO ACTION statt RESTRICT: prüft erst am Ende der Anweisung, damit das Löschen eines
+      // Haushalts eigene Kategorien und Arten gemeinsam per CASCADE entfernen kann.
+      .references(() => categories.id, { onDelete: 'no action' }),
     isHidden: boolean('ausgeblendet').notNull().default(false),
     sortOrder: integer('sortierung').notNull().default(0),
     kcalPer100: numeric('kcal_100', { precision: 6, scale: 1 }),

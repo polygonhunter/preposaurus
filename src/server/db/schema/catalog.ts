@@ -41,6 +41,8 @@ export const categories = pgTable(
   },
   (table) => [
     index('kategorie_haushalt_id_idx').on(table.householdId),
+    // Eine eigene Kategorie heißt je Haushalt nur einmal so (System-Kategorien haben keinen Haushalt).
+    unique('kategorie_name_eindeutig').on(table.householdId, table.name),
     check(
       'kategorie_herkunft_check',
       sql`${table.isSystem} = (${table.householdId} is null) and ${table.isSystem} = (${table.key} is not null)`,
