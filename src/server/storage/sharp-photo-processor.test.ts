@@ -131,4 +131,24 @@ describe('checkUpload', () => {
     ])
     expect(detectUploadType(avif)).toBeNull()
   })
+
+  it('lehnt AVIF auch mit allgemeiner HEIF-Marke mif1 ab', async () => {
+    const avif = new Uint8Array(await solid(4, 4).avif().toBuffer())
+    avif.set(new TextEncoder().encode('mif1'), 8)
+
+    expect(detectUploadType(avif)).toBeNull()
+    expect(await processor.process(avif)).toEqual({
+      ok: false,
+      error: { kind: 'unsupported-type' },
+    })
+  })
+
+  it('erkennt HEIC mit allgemeiner Marke mif1 an der kompatiblen Marke heic', () => {
+    const ftyp = new Uint8Array(24)
+    ftyp.set([0, 0, 0, 24])
+    ftyp.set(new TextEncoder().encode('ftypmif1\0\0\0\0mif1heic'), 4)
+
+    expect(detectUploadType(ftyp)).toBe('heic')
+    expect(detectUploadType(ftyp.subarray(0, 20))).toBeNull()
+  })
 })
