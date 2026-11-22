@@ -26,7 +26,9 @@ function photoResponse({ data, mimeType }: PhotoContent): Response {
   })
 }
 
-export async function GET(request: Request, context: RouteContext<'/api/photos/[id]'>) {
+// Kontext von Hand typisiert: Das globale RouteContext entsteht erst mit `next typegen`, ESLint
+// läuft in der CI ohne diesen Schritt.
+export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
   const actor = await requireCaptureActor()
   if (!actor.ok) return accessErrorResponse(actor.error)
   const { id } = await context.params
