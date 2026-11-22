@@ -17,7 +17,7 @@ import {
   minutesUntil,
   nameLockKey,
 } from '../domain/sign-in-brake'
-import type { SignInInput } from '../schemas'
+import { usernameSchema, type SignInInput } from '../schemas'
 
 export type SignInError = { kind: 'invalid-credentials' } | { kind: 'throttled'; minutes: number }
 
@@ -52,6 +52,11 @@ function brakeRequests(deps: SignInDeps, input: SignInInput): BrakeRequest[] {
   ]
 }
 
+// Ein Name, der nicht zum Muster passt, kann ein ins falsche Feld getipptes Passwort sein.
+// Er landet deshalb nicht im Log (Sicherheits-Review #138).
+const loggableUsername = (username: string) =>
+  usernameSchema.safeParse(username).success ? username : '<ungültig>'
+
 // Ein Erfolg setzt die Bremse des Namens zurück. Die übrigen Zähler bleiben, nur dieser eine
 // reservierte Versuch zählt nicht als Fehlversuch.
 async function releaseAfterSuccess(deps: SignInDeps, requests: readonly BrakeRequest[]) {
@@ -64,7 +69,7 @@ export async function signIn(
   input: SignInInput,
 ): Promise<Result<{ userId: string }, SignInError>> {
   const requests = brakeRequests(deps, input)
-  const logContext = { username: input.username, ip: deps.clientIp }
+  const logContext = { username: loggableUsername(input.username), ip: deps.clientIp }
   const now = deps.now()
   const lockedUntil = await deps.locks.reserve(requests, now)
   if (lockedUntil !== null) {
