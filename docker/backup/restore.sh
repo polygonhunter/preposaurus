@@ -54,6 +54,17 @@ swap_in_new_database() {
   dropdb --maintenance-db=postgres "${PGDATABASE}_alt"
 }
 
+# Die Datenbank ist hier schon getauscht. Scheitert der Abgleich (Platte voll, Strg+C), nennt die
+# Meldung den Weg zurück, auch wenn set -e das Skript beendet.
+restore_photos() {
+  photos_hint="Die Fotos sind nur zum Teil zurückgespielt, die Datenbank schon. Erneut zurückspielen:"
+  photos_hint="$photos_hint wiederherstellen $1. Der Zustand davor liegt unter $3."
+  trap 'log "FEHLER: $photos_hint" >&2' EXIT
+  trap 'exit 1' INT TERM
+  rsync -a --delete "$2/fotos/" "$PHOTO_DIR/"
+  trap - EXIT INT TERM
+}
+
 run_restore() {
   [ -n "${1:-}" ] || fail "Aufruf: wiederherstellen <stand> [--ja], Stände zeigt: liste"
   stand_dir=$(resolve_stand "$1") || fail "Den Stand $1 gibt es nicht. Stände zeigt: liste"
@@ -68,7 +79,7 @@ run_restore() {
     fail "Der Stand $1 lässt sich nicht einspielen. Nichts geändert."
   ensure_no_connections
   swap_in_new_database
-  rsync -a --delete "$stand_dir/fotos/" "$PHOTO_DIR/"
+  restore_photos "$1" "$stand_dir" "$safety_stand"
   apply_retention
   log "Wiederhergestellt. Der Zustand davor liegt unter $safety_stand."
   log "Jetzt die App starten (spielt auch neuere Migrationen ein): docker compose up -d"
