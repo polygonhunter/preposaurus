@@ -14,6 +14,13 @@ export async function lintFile(relativePath: string): Promise<Linter.LintMessage
   return result?.messages ?? []
 }
 
+// Der erste Lauf baut das TypeScript-Programm auf und dauert unter Last (CI, viele parallele
+// Testdateien) länger als ein einzelner Test darf. Darum einmal vorab in beforeAll, das das
+// großzügigere hookTimeout hat.
+export async function warmUpEslint(): Promise<void> {
+  await lintFile('limits/clean.ts')
+}
+
 type LintTextOptions = Readonly<{ code: string; asFile: string }>
 
 export async function lintTextAs({ code, asFile }: LintTextOptions): Promise<Linter.LintMessage[]> {

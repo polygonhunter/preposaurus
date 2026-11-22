@@ -1,6 +1,8 @@
 import { dirname, relative } from 'node:path'
-import { describe, expect, it } from 'vitest'
-import { fixturePath, lintTextAs } from './run-eslint'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { fixturePath, lintTextAs, warmUpEslint } from './run-eslint'
+
+beforeAll(warmUpEslint)
 
 const featureFile = (feature: string, layer: string): string =>
   `src/features/${feature}/${layer}/${layer}-module.ts`

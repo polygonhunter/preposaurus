@@ -1,5 +1,7 @@
-import { describe, expect, it } from 'vitest'
-import { lintFile } from './run-eslint'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { lintFile, warmUpEslint } from './run-eslint'
+
+beforeAll(warmUpEslint)
 
 const rejectedFixtures = [
   { file: 'max-lines.ts', ruleId: 'max-lines' },
