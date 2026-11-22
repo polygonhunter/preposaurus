@@ -4,7 +4,7 @@ import { categories } from '../../../src/server/db/schema/catalog'
 import { products, units } from '../../../src/server/db/schema/inventory'
 import { expectConstraintViolation } from '../../helpers/db-errors'
 import { insertBasics } from '../../helpers/db-fixtures'
-import { buildProduct } from '../../helpers/factories'
+import { buildProduct } from '../../../db/seeds/factories'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
 
 describe('Schema Vorrat', () => {

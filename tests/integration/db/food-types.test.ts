@@ -7,7 +7,7 @@ import { households } from '../../../src/server/db/schema/household'
 import { products } from '../../../src/server/db/schema/inventory'
 import { expectConstraintViolation } from '../../helpers/db-errors'
 import { insertBasics, type Basics } from '../../helpers/db-fixtures'
-import { buildHousehold, buildProduct } from '../../helpers/factories'
+import { buildHousehold, buildProduct } from '../../../db/seeds/factories'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
 
 describe('Schema Lebensmittelart', () => {

@@ -5,7 +5,7 @@ import { seedMasterData } from '../../../db/seeds/master-data'
 import { users } from '../../../src/server/db/schema/account'
 import { households } from '../../../src/server/db/schema/household'
 import { units } from '../../../src/server/db/schema/inventory'
-import { AMPEL_OFFSETS, daysFrom } from '../../helpers/factories'
+import { AMPEL_OFFSETS, daysFrom } from '../../../db/seeds/factories'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
 
 const TODAY = new Date('2026-11-22T12:00:00Z')

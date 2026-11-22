@@ -6,7 +6,7 @@
     "!src/features/*/domain/**!",
     "!src/shared/lib/{dates,quantities}.ts!",
     "db/**/*.ts!",
-    "!db/seeds/demo*.ts!",
+    "!db/seeds/{demo*,factories}.ts!",
     "tests/**/*.{ts,tsx}",
     "eslint/**/*.mjs",
     "scripts/**/*.ts"
