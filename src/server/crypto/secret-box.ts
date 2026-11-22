@@ -64,8 +64,10 @@ export function decryptSecret(
   context: SecretBoxContext,
 ): Result<SecretValue, 'undecryptable'> {
   try {
-    const key = deriveKey(context.appSecret, parts.version)
     const iv = Buffer.from(parts.iv, 'base64')
+    // GCM würde einen falschen IV am Tag erkennen, die Prüfung macht die Erwartung ausdrücklich.
+    if (iv.length !== IV_BYTES) return err('undecryptable')
+    const key = deriveKey(context.appSecret, parts.version)
     const decipher = createDecipheriv(ALGORITHM, key, iv, { authTagLength: AUTH_TAG_BYTES })
     decipher.setAAD(Buffer.from(context.associatedData, 'utf8'))
     decipher.setAuthTag(Buffer.from(parts.authTag, 'base64'))
