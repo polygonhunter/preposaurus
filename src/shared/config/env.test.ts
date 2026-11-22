@@ -82,11 +82,22 @@ describe('isPatternPageEnabled', () => {
     expect(isPatternPageEnabled({ NODE_ENV: 'development', SHOW_PATTERN_PAGE: false })).toBe(true)
   })
 
-  it('setzt Secure-Cookies nur im Produktionsbuild und dort ohne E2E-Schalter', () => {
+  it('setzt Secure-Cookies nur im Produktionsbuild und dort ohne E2E-Schalter der CI', () => {
+    const production = { NODE_ENV: 'production', CI: true } as const
     expect(loadEnv(minimal).E2E_INSECURE_COOKIES).toBe(false)
-    expect(isCookieSecure({ NODE_ENV: 'production', E2E_INSECURE_COOKIES: false })).toBe(true)
-    expect(isCookieSecure({ NODE_ENV: 'production', E2E_INSECURE_COOKIES: true })).toBe(false)
-    expect(isCookieSecure({ NODE_ENV: 'development', E2E_INSECURE_COOKIES: false })).toBe(false)
+    expect(isCookieSecure({ ...production, E2E_INSECURE_COOKIES: false })).toBe(true)
+    expect(isCookieSecure({ ...production, E2E_INSECURE_COOKIES: true })).toBe(false)
+    expect(isCookieSecure({ ...production, E2E_INSECURE_COOKIES: true, CI: false })).toBe(true)
+    expect(
+      isCookieSecure({ NODE_ENV: 'development', E2E_INSECURE_COOKIES: false, CI: false }),
+    ).toBe(false)
+  })
+
+  it('lässt E2E_INSECURE_COOKIES im Produktionsbuild nur in der CI zu', () => {
+    const insecure = { ...minimal, NODE_ENV: 'production', E2E_INSECURE_COOKIES: 'true' }
+    expect(() => loadEnv(insecure)).toThrow(/E2E_INSECURE_COOKIES gilt nur/)
+    expect(() => loadEnv({ ...insecure, CI: 'false' })).toThrow(/E2E_INSECURE_COOKIES gilt nur/)
+    expect(loadEnv({ ...insecure, CI: 'true' }).CI).toBe(true)
   })
 
   it('zeigt sie im Produktionsbuild nur mit SHOW_PATTERN_PAGE', () => {

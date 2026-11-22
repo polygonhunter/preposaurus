@@ -20,6 +20,20 @@ describe('safeReturnPath', () => {
     }
   })
 
+  // searchParams dekodiert einmal: %2F%2F kommt hier als // an. Doppelt kodiert bleibt es ein
+  // Pfad auf dem eigenen Host, weil Browser den Location-Header nicht erneut dekodieren.
+  it('lehnt kodierte und mit Tab oder Zeilenumbruch versteckte fremde Adressen ab', () => {
+    for (const path of [
+      '%2F%2Fexample.org',
+      '/\t/example.org',
+      '/\n/example.org',
+      '\\example.org',
+    ]) {
+      expect(safeReturnPath(path)).toBe(DEFAULT_RETURN_PATH)
+    }
+    expect(safeReturnPath('/%2F%2Fexample.org')).toBe('/%2F%2Fexample.org')
+  })
+
   it('lehnt Steuerzeichen und überlange Pfade ab', () => {
     expect(safeReturnPath('/vorrat\r\nSet-Cookie: x')).toBe(DEFAULT_RETURN_PATH)
     expect(safeReturnPath(`/${'a'.repeat(2048)}`)).toBe(DEFAULT_RETURN_PATH)

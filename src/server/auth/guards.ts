@@ -9,7 +9,10 @@ import { readSession, type SessionUser } from './session'
 export type AccessError = { kind: 'unauthenticated' } | { kind: 'forbidden' }
 
 export async function requireUser(): Promise<Result<SessionUser, AccessError>> {
-  const user = await readSession(await getAuth(), await headers())
+  // headers() zuerst: Das macht die Seite dynamisch, bevor getAuth() die Umgebung liest. Sonst
+  // rendert der Build die App-Seiten vorab und scheitert ohne .env (Docker-Build).
+  const requestHeaders = await headers()
+  const user = await readSession(await getAuth(), requestHeaders)
   return user === null ? err({ kind: 'unauthenticated' }) : ok(user)
 }
 
