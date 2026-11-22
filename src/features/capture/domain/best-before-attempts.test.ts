@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { AiBestBeforeAnswer } from './ai-answers'
-import { needsSecondAttempt, pickBestBeforeAnswer } from './best-before-attempts'
+import { mergeAttempts, needsSecondAttempt } from './best-before-attempts'
 
 const answer = (overrides: Partial<AiBestBeforeAnswer>): AiBestBeforeAnswer => ({
   roh_text: '30.09.2027',
@@ -27,29 +27,59 @@ describe('needsSecondAttempt', () => {
   })
 })
 
-describe('pickBestBeforeAnswer', () => {
-  const sure = answer({})
-  const unsure = answer({ datum: '2027-10-31', sicherheit: 'niedrig' })
+describe('mergeAttempts', () => {
+  const sure = answer({ datum: '2027-08-31', roh_text: '31.08.2027' })
+  const unsure = answer({ datum: '2027-09-30', sicherheit: 'niedrig' })
   const empty = answer({ datum: null, roh_text: null, sicherheit: 'niedrig' })
 
-  it('bleibt beim ersten Versuch, wenn der Zweitversuch gescheitert ist', () => {
-    expect(pickBestBeforeAnswer(unsure, null)).toBe(unsure)
+  it('nimmt Versuch 2, wenn nur er ein Datum hat', () => {
+    expect(mergeAttempts(empty, sure)).toEqual({ answer: sure, conflictingDate: null })
   })
 
-  it('nimmt das Datum vor „kein Datum“, egal aus welchem Versuch', () => {
-    expect(pickBestBeforeAnswer(empty, unsure)).toBe(unsure)
-    expect(pickBestBeforeAnswer(unsure, empty)).toBe(unsure)
+  it('nimmt Versuch 2 unverändert, wenn beide dasselbe Datum lesen', () => {
+    const same = answer({ datum: ' 2027-09-30 ', sicherheit: 'hoch' })
+
+    expect(mergeAttempts(unsure, same)).toEqual({ answer: same, conflictingDate: null })
   })
 
-  it('nimmt bei zwei Daten das sicherere', () => {
-    expect(pickBestBeforeAnswer(unsure, sure)).toBe(sure)
-    expect(pickBestBeforeAnswer(answer({ sicherheit: 'mittel' }), unsure).sicherheit).toBe('mittel')
+  it('macht bei zwei verschiedenen Daten Versuch 2 zu „bitte prüfen“ und behält Versuch 1', () => {
+    expect(mergeAttempts(unsure, sure)).toEqual({
+      answer: { ...sure, sicherheit: 'niedrig' },
+      conflictingDate: '2027-09-30',
+    })
   })
 
-  it('nimmt bei Gleichstand den Zweitversuch', () => {
-    const second = answer({ datum: '2027-11-30', sicherheit: 'niedrig' })
+  it('nimmt Versuch 1 als „bitte prüfen“, wenn nur er ein Datum hat', () => {
+    const firstMedium = answer({ sicherheit: 'mittel' })
 
-    expect(pickBestBeforeAnswer(unsure, second)).toBe(second)
-    expect(pickBestBeforeAnswer(empty, { ...empty })).not.toBe(empty)
+    expect(mergeAttempts(firstMedium, empty)).toEqual({
+      answer: { ...firstMedium, sicherheit: 'niedrig' },
+      conflictingDate: null,
+    })
+    expect(mergeAttempts(firstMedium, null)?.answer.sicherheit).toBe('niedrig')
+  })
+
+  it('liefert ohne Datum in beiden Versuchen die Antwort von Versuch 2', () => {
+    const secondEmpty = answer({ datum: null, roh_text: 'L1234 08:15', sicherheit: 'mittel' })
+
+    expect(mergeAttempts(empty, secondEmpty)).toEqual({
+      answer: secondEmpty,
+      conflictingDate: null,
+    })
+  })
+
+  it('wertet ein ungültiges Datum wie kein Datum, ein Widerspruch entsteht daraus nicht', () => {
+    const invalid = answer({ datum: '2027-02-30', sicherheit: 'niedrig' })
+
+    expect(mergeAttempts(invalid, sure)).toEqual({ answer: sure, conflictingDate: null })
+  })
+
+  it('nimmt den Versuch, der nicht gescheitert ist', () => {
+    expect(mergeAttempts(null, sure)).toEqual({ answer: sure, conflictingDate: null })
+    expect(mergeAttempts(empty, null)).toEqual({ answer: empty, conflictingDate: null })
+  })
+
+  it('ergibt null, wenn beide Versuche gescheitert sind', () => {
+    expect(mergeAttempts(null, null)).toBeNull()
   })
 })
