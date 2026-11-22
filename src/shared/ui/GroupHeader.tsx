@@ -13,7 +13,9 @@ export function GroupHeader({ id, children, trailing }: GroupHeaderProps) {
       <h2 id={id} className="text-footnote tracking-wide text-fg2 uppercase">
         {children}
       </h2>
-      {trailing ? <div className="text-callout text-fg2">{trailing}</div> : null}
+      {trailing ? (
+        <div className="shrink-0 text-callout whitespace-nowrap text-fg2">{trailing}</div>
+      ) : null}
     </div>
   )
 }

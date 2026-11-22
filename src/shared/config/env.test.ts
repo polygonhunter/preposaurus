@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { isPatternPageEnabled, loadEnv } from './env'
+import { isHouseholdWithoutLoginEnabled, isPatternPageEnabled, loadEnv } from './env'
 
 const SECRET = 'x'.repeat(32)
 const minimal = { DATABASE_URL: 'pglite://./.data/dev', APP_SECRET: SECRET }
@@ -120,5 +120,21 @@ describe('loadEnv: SMTP', () => {
 
   it('lehnt einen ungültigen Port ab', () => {
     expect(() => loadEnv({ ...smtp, SMTP_PORT: '70000' })).toThrow('SMTP_PORT')
+  })
+})
+
+describe('isHouseholdWithoutLoginEnabled', () => {
+  const off = { DEV_HOUSEHOLD_WITHOUT_LOGIN: false }
+
+  it('gilt im Dev-Modus immer, im Produktionsbuild nur mit DEV_HOUSEHOLD_WITHOUT_LOGIN', () => {
+    expect(isHouseholdWithoutLoginEnabled({ NODE_ENV: 'development', ...off })).toBe(true)
+    expect(isHouseholdWithoutLoginEnabled({ NODE_ENV: 'production', ...off })).toBe(false)
+    expect(
+      isHouseholdWithoutLoginEnabled({ NODE_ENV: 'production', DEV_HOUSEHOLD_WITHOUT_LOGIN: true }),
+    ).toBe(true)
+  })
+
+  it('ist ohne Angabe aus', () => {
+    expect(loadEnv(minimal).DEV_HOUSEHOLD_WITHOUT_LOGIN).toBe(false)
   })
 })

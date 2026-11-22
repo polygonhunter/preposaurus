@@ -12,7 +12,7 @@ export function StatTiles({ tiles }: StatTilesProps) {
           className="flex min-w-0 flex-1 flex-col-reverse px-3 py-2.5 not-first:border-l not-first:border-line"
         >
           <dt className="truncate text-footnote text-fg2">{tile.label}</dt>
-          <dd className="text-title2">{tile.value}</dd>
+          <dd className="text-title2 whitespace-nowrap">{tile.value}</dd>
         </div>
       ))}
     </dl>

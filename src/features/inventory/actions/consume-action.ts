@@ -1,0 +1,51 @@
+'use server'
+// „Verbraucht“ und „−1“ (#46, #125): prüft Eingabe und Haushalt selbst, weil eine Action per POST
+// direkt aufrufbar ist (CODE_PRINZIPIEN §7), und lädt danach die Seite neu. Rückgängig statt
+// Rückfrage: Die Oberfläche zeigt nach Erfolg die UndoBar mit `undoConsumeAction`.
+import { refresh } from 'next/cache'
+import { requireHousehold, type HouseholdAccess } from '@/server/auth/household'
+import { consumeUnit, type ConsumeError } from '../application/consume-unit'
+import { stockServices } from '../application/stock-services'
+import { takeOne, type TakeOneError, type TakenUnit } from '../application/take-one'
+import { consumeRequestSchema, type ConsumeRequest } from '../schemas'
+import type { Result } from '@/shared/lib/result'
+import { ACCESS_MESSAGE, type ActionFailure } from './action-messages'
+
+export type ConsumeActionResult = Readonly<{ ok: true; taken: TakenUnit }> | ActionFailure
+
+const GONE = 'Diese Packung gibt es nicht mehr. Die Liste ist jetzt neu geladen.'
+
+function messageFor(error: ConsumeError | TakeOneError): string {
+  switch (error.kind) {
+    case 'not-found':
+      return GONE
+    case 'not-in-stock':
+      return 'Diese Packung ist schon entnommen.'
+    case 'empty':
+      return 'Davon ist nichts mehr im Vorrat.'
+  }
+}
+
+async function run(
+  request: ConsumeRequest,
+  { householdId, userId }: HouseholdAccess,
+): Promise<Result<TakenUnit, ConsumeError | TakeOneError>> {
+  const { reader, writer, now } = await stockServices()
+  if (request.kind === 'target') {
+    return takeOne({ reader, writer }, { householdId, userId, target: request.target, now })
+  }
+  const result = await consumeUnit(writer, { householdId, userId, unitId: request.unitId, now })
+  return result.ok ? { ok: true, value: { unitId: request.unitId, bestBefore: null } } : result
+}
+
+export async function consumeAction(input: unknown): Promise<ConsumeActionResult> {
+  const parsed = consumeRequestSchema.safeParse(input)
+  if (!parsed.success) return { ok: false, message: GONE }
+  const access = await requireHousehold()
+  if (!access.ok) return { ok: false, message: ACCESS_MESSAGE }
+  const result = await run(parsed.data, access.value)
+  refresh()
+  return result.ok
+    ? { ok: true, taken: result.value }
+    : { ok: false, message: messageFor(result.error) }
+}

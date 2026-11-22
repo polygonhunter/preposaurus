@@ -84,6 +84,9 @@ const baseSchema = z.object({
   PHOTO_STORAGE_DIR: z.string().min(1).default('./.data/fotos'),
   // Musterseite /muster auch im Produktionsbuild zeigen (nur für die E2E-Tests in der CI).
   SHOW_PATTERN_PAGE: z.stringbool().default(false),
+  // Übergang bis zur Anmeldung (#33): Ohne Sitzung gilt der einzige Haushalt der Installation.
+  // Im Dev-Modus immer, im Produktionsbuild nur mit true (E2E-Tests der CI).
+  DEV_HOUSEHOLD_WITHOUT_LOGIN: z.stringbool().default(false),
 })
 
 const envSchema = baseSchema.extend(smtpSchema.shape).superRefine(checkSmtp)
@@ -101,6 +104,13 @@ function parseEnv(source: EnvSource): Result<Env, string> {
 // Im Dev-Modus immer, sonst nur mit SHOW_PATTERN_PAGE=true.
 export function isPatternPageEnabled(env: Pick<Env, 'NODE_ENV' | 'SHOW_PATTERN_PAGE'>): boolean {
   return env.NODE_ENV !== 'production' || env.SHOW_PATTERN_PAGE
+}
+
+// Im Dev-Modus immer, sonst nur mit DEV_HOUSEHOLD_WITHOUT_LOGIN=true (#33 löst das ab).
+export function isHouseholdWithoutLoginEnabled(
+  env: Pick<Env, 'NODE_ENV' | 'DEV_HOUSEHOLD_WITHOUT_LOGIN'>,
+): boolean {
+  return env.NODE_ENV !== 'production' || env.DEV_HOUSEHOLD_WITHOUT_LOGIN
 }
 
 // Wirft bei ungültigen Werten: ohne gültige Umgebung soll der Server gar nicht erst starten.
