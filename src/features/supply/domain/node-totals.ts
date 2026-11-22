@@ -1,4 +1,5 @@
 import type { BestBefore } from '@/features/inventory/domain/unit'
+import type { CalendarDay } from '@/shared/lib/dates'
 import type { Quantity, QuantityUnit } from '@/shared/lib/quantities'
 import { ok, type Result } from '@/shared/lib/result'
 import { estimatedKcalShare, isApproximate } from './approximation'
@@ -8,7 +9,7 @@ import {
   type SupplyInput,
   type SupplyUnit,
 } from './supply-days'
-import { isCountedOn } from './supply-rules'
+import { isCountedOn, isFreshOn } from './supply-rules'
 
 // Summen je Knoten des Baums Warengruppe → Kategorie → Lebensmittelart → Produkt (UX-Konzept A8).
 // Der Baum kommt als Daten herein: Jede Einheit trägt ihren Pfad, ein Knoten ist Ebene + Schlüssel.
@@ -81,13 +82,17 @@ function sumMacros(units: readonly NodeUnit[]): Macros {
   return total
 }
 
-/** Bei gleichem Datum gewinnt die zuerst genannte Packung. */
-function earliestBestBefore(units: readonly NodeUnit[]): BestBefore | null {
+/**
+ * Frühestes Datum, das am Stichtag noch hält. Abgelaufene „Noch gut“-Packungen zählen zwar mit
+ * dem Schalter heute mit, ein vergangenes Datum ist aber kein „nächstes MHD“. Bei gleichem Datum
+ * gewinnt die zuerst genannte Packung.
+ */
+function earliestBestBefore(units: readonly NodeUnit[], day: CalendarDay): BestBefore | null {
   let earliest: BestBefore | null = null
-  for (const { bestBefore } of units) {
-    if (bestBefore !== null && (earliest === null || bestBefore.date < earliest.date)) {
-      earliest = bestBefore
-    }
+  for (const unit of units) {
+    const { bestBefore } = unit
+    if (bestBefore === null || !isFreshOn(unit, day)) continue
+    if (earliest === null || bestBefore.date < earliest.date) earliest = bestBefore
   }
   return earliest
 }
@@ -108,7 +113,7 @@ export function calculateNodeTotals(input: NodeTotalsInput): Result<NodeTotals, 
     macros: sumMacros(counted),
     energyDays: supply.value.energyDays,
     waterDays: supply.value.waterDays,
-    nextBestBefore: earliestBestBefore(counted),
+    nextBestBefore: earliestBestBefore(counted, input.reference.day),
     withoutDate: inStock.filter((unit) => unit.bestBefore === null).length,
     estimatedKcalShare: share,
     isApproximate: isApproximate(share),

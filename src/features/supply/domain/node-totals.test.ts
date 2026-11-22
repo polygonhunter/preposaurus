@@ -35,25 +35,26 @@ interface UnitOptions {
   content?: Quantity
   status?: NodeUnit['status']
   waterMl?: number
+  checkedAt?: string
 }
 
 let counter = 0
 // Nudeln 500 g mit 359 kcal je 100 g: 1.795 kcal, 65 g Eiweiß, 355 g Kohlenhydrate, 7,5 g Fett
-function unit(options: UnitOptions = {}): NodeUnit {
+function unit({
+  path = spaghetti,
+  bestBefore = '2028-03-31',
+  content = { value: 500, unit: 'g' },
+  estimated = false,
+  kcal = 1795,
+  ...rest
+}: UnitOptions = {}): NodeUnit {
   counter += 1
-  const base = supplyUnit(`e${String(counter)}`, options.bestBefore ?? '2028-03-31', {
-    kcal: options.kcal ?? 1795,
-    isKcalEstimated: options.estimated ?? false,
-    waterMl: options.waterMl ?? 0,
-    ...(options.status === undefined ? {} : { status: options.status }),
+  const base = supplyUnit(`e${String(counter)}`, bestBefore, {
+    ...rest,
+    kcal,
+    isKcalEstimated: estimated,
   })
-  return {
-    ...base,
-    bestBefore: options.bestBefore === null ? null : base.bestBefore,
-    path: options.path ?? spaghetti,
-    content: options.content ?? { value: 500, unit: 'g' },
-    macros: { protein: 65, carbs: 355, fat: 7.5 },
-  }
+  return { ...base, path, content, macros: { protein: 65, carbs: 355, fat: 7.5 } }
 }
 
 const totalsOf = (units: NodeUnit[], node: TreeNode, reference = today) => {
@@ -151,6 +152,44 @@ describe('calculateNodeTotals', () => {
       reference: today,
     })
     expect(result).toEqual({ ok: false, error: { kind: 'no-need' } })
+  })
+})
+
+describe('calculateNodeTotals mit „Noch gut zählt mit“', () => {
+  const node: TreeNode = { level: 'foodType', key: 'spaghetti' }
+  const units = [
+    unit({ bestBefore: '2026-01-01', checkedAt: '2026-11-20' }),
+    unit({ bestBefore: '2027-09-30' }),
+  ]
+  const totalsWithSwitch = (reference: ReferenceDay) => {
+    const result = calculateNodeTotals({ units, node, need, reference, stillGoodCounts: true })
+    if (!result.ok) throw new Error('Rechnung fehlgeschlagen')
+    return result.value
+  }
+
+  it('zählt die geprüfte Packung heute mit, macht ihr Datum aber nicht zum nächsten MHD', () => {
+    const totals = totalsWithSwitch(today)
+
+    expect(totals.packages).toBe(2)
+    expect(totals.nextBestBefore?.date).toBe(day('2027-09-30'))
+  })
+
+  it('hat kein nächstes MHD, wenn nur abgelaufene „Noch gut“-Packungen zählen', () => {
+    const result = calculateNodeTotals({
+      units: [unit({ bestBefore: '2026-01-01', checkedAt: '2026-11-20' })],
+      node,
+      need,
+      reference: today,
+      stillGoodCounts: true,
+    })
+    expect(result.ok && result.value.packages).toBe(1)
+    expect(result.ok && result.value.nextBestBefore).toBeNull()
+  })
+
+  it('zählt sie am Zieldatum nie', () => {
+    const totals = totalsWithSwitch(target)
+    expect(totals.packages).toBe(1)
+    expect(totals.uncountedPackages).toBe(1)
   })
 })
 

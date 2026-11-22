@@ -102,8 +102,20 @@ describe('calculateGoalProgress', () => {
 
       expect(result.ok && result.value.today.days).toBe(1)
       expect(result.ok && result.value.atTarget.days).toBe(0)
+    })
+
+    it('steht mit Einstellung nicht unter „läuft vor Zieldatum ab“, sie ist schon abgelaufen', () => {
+      const mixed = [...units, supplyUnit('laeuft-ab', '2027-01-31', { kcal: 2000, waterMl: 2000 })]
+      const result = calculateGoalProgress({
+        units: mixed,
+        need,
+        today,
+        goal,
+        stillGoodCounts: true,
+      })
+
       expect(result.ok && result.value.expiringBeforeTarget.map((unit) => unit.id)).toEqual([
-        'geprueft',
+        'laeuft-ab',
       ])
     })
 
@@ -198,7 +210,7 @@ describe('Gemischter Bestand mit „Datum fehlt“', () => {
 
 describe('unitsExpiringBefore', () => {
   it('übergeht Einheiten ohne Datum', () => {
-    expect(unitsExpiringBefore([supplyUnit('ohne', null)], { today, targetDay }, false)).toEqual([])
+    expect(unitsExpiringBefore([supplyUnit('ohne', null)], { today, targetDay })).toEqual([])
   })
 
   it('nennt nur Einheiten, die heute zählen und am Zieldatum nicht mehr', () => {
@@ -208,7 +220,7 @@ describe('unitsExpiringBefore', () => {
       supplyUnit('verbraucht', '2027-01-31', { status: 'consumed' }),
       supplyUnit('haelt', '2027-06-30'),
     ]
-    expect(unitsExpiringBefore(units, { today, targetDay }, false).map((unit) => unit.id)).toEqual([
+    expect(unitsExpiringBefore(units, { today, targetDay }).map((unit) => unit.id)).toEqual([
       'laeuft-ab',
     ])
   })

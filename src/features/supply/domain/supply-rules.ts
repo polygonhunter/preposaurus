@@ -17,6 +17,11 @@ const ROUNDING_EPSILON = 1e-9
 
 export type CountableUnit = Pick<StockUnit, 'status' | 'bestBefore' | 'checkedAt'>
 
+/** Hat die Einheit ein Datum, das am Stichtag noch nicht überschritten ist? */
+export function isFreshOn(unit: Pick<CountableUnit, 'bestBefore'>, day: CalendarDay): boolean {
+  return unit.bestBefore !== null && unit.bestBefore.date >= day
+}
+
 const countsAsStillGood = (
   unit: CountableUnit,
   reference: ReferenceDay,
@@ -37,7 +42,7 @@ export function isCountedOn(
   if (unit.status !== 'stock') return false
   // „Datum fehlt“: Die Packung ist da, aber niemand weiß, ob sie am Zieldatum noch hält (#116)
   if (unit.bestBefore === null) return reference.kind === 'today'
-  if (unit.bestBefore.date >= reference.day) return true
+  if (isFreshOn(unit, reference.day)) return true
   return countsAsStillGood(unit, reference, stillGoodCounts)
 }
 
