@@ -3,7 +3,7 @@
 // ohne DB-Zeile liegen und das Aufräumen verwaister Dateien entfernt sie nach 24 Stunden.
 import 'server-only'
 import { err, ok, type Result } from '@/shared/lib/result'
-import { deleteOwnDraft, findDraft } from '../data/draft-repository'
+import { deleteOwnDraft, findDraft, lockDraftOwner } from '../data/draft-repository'
 import { deleteDraftPhotos, listDraftPhotos, type DraftPhoto } from '../data/photo-repository'
 import type { CaptureActor } from './capture-actor'
 import type { CaptureDeps } from './capture-deps'
@@ -25,10 +25,13 @@ type Database = CaptureDeps['db']
 /**
  * Gehört der Entwurf dem Nutzer: Fotozeilen und Entwurf löschen, sonst null. Die Fotos zuerst,
  * weil das Löschen des Entwurfs ihren Verweis leert (ON DELETE SET NULL) und sie dann nicht
- * mehr zu finden wären. Feste Fotos (schon bestätigt) bleiben stehen.
+ * mehr zu finden wären. Feste Fotos (schon bestätigt) bleiben stehen. Dieselbe Sperre wie beim
+ * Upload: Ein gleichzeitig hochgeladenes Foto landet ganz vor oder ganz nach dem Verwerfen, nie
+ * als Entwurfsfoto ohne Entwurf, dessen Dateien niemand mehr löscht.
  */
 function deleteRows(db: Database, { actor, draftId }: DiscardDraftInput) {
   return db.transaction(async (tx): Promise<DraftPhoto[] | null> => {
+    await lockDraftOwner(tx, actor)
     if ((await findDraft(tx, actor, draftId)) === null) return null
     const photos = await listDraftPhotos(tx, draftId)
     await deleteDraftPhotos(tx, draftId)
