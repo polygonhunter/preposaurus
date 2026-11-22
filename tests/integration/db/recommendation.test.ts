@@ -4,6 +4,7 @@ import { households } from '../../../src/server/db/schema/household'
 import {
   goals,
   productGroups,
+  sourceNeeds,
   sources,
   sourceValues,
   sourceVersions,
@@ -86,6 +87,48 @@ describe('Schema Empfehlung und Ziel', () => {
       testDb.db.delete(sources).where(eq(sources.id, sourceId)),
       'quelle_version_quelle_id_quelle_id_fk',
     )
+  })
+
+  it('speichert den Bedarf je Personentyp mit Wasser in ml', async () => {
+    const version = await insertVersion('2027-01', '100.00')
+    const [need] = await testDb.db
+      .insert(sourceNeeds)
+      .values({
+        sourceVersionId: version.id,
+        personGroup: 'erwachsen',
+        kcalPerDay: '2200',
+        waterMlPerDay: 2000,
+      })
+      .returning()
+
+    expect(need).toMatchObject({ personGroup: 'erwachsen', waterMlPerDay: 2000 })
+  })
+
+  it('lehnt eine Personengruppe außerhalb der Mitgliedstypen ab', async () => {
+    const version = await insertVersion('2028-01', '100.00')
+
+    await expectConstraintViolation(
+      testDb.db
+        .insert(sourceNeeds)
+        // @ts-expect-error -- absichtlich ungültige Gruppe, die nur die DB abfangen soll
+        .values({
+          sourceVersionId: version.id,
+          personGroup: 'haustier',
+          kcalPerDay: '500',
+          waterMlPerDay: 500,
+        }),
+      'quelle_bedarf_personengruppe_check',
+    )
+  })
+
+  it('merkt sich am Haushalt die genutzte Fassung der Empfehlung', async () => {
+    const version = await insertVersion('2029-01', '100.00')
+    const [household] = await testDb.db
+      .insert(households)
+      .values({ name: 'Mit Fassung', activeSourceVersionId: version.id })
+      .returning()
+
+    expect(household?.activeSourceVersionId).toBe(version.id)
   })
 
   it('lehnt ein Ziel ohne positive Tage ab', async () => {

@@ -1,6 +1,6 @@
 // System-Lebensmittelarten, je einer System-Kategorie zugeordnet. Namen und Schlüssel nennen keinen
 // Behälter (die Dose ist ein Merkmal am Produkt), nur echte Unterschiede wie „getrocknet“.
-// VORLÄUFIG, wird vom Maintainer geprüft. Richtwerte (kcal_100, übliche Haltbarkeit) bleiben leer,
+// VORLÄUFIG, wird vom Maintainer geprüft. Richtwerte (kcal, Makros, übliche Haltbarkeit) bleiben leer,
 // bis sie belegt sind (M1-08). Sie wären ohnehin nur Anzeige-Richtwerte, nie ein MHD.
 type SystemFoodType = Readonly<{
   key: string
@@ -8,6 +8,9 @@ type SystemFoodType = Readonly<{
   category: string
   // Anzeige-Richtwerte, sobald belegt (M1-08). Fehlt ein Wert, setzt der Seed die Spalte auf leer.
   kcalPer100?: string
+  proteinPer100?: string
+  carbsPer100?: string
+  fatPer100?: string
   typicalShelfLifeMonths?: number
 }>
 

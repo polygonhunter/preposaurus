@@ -1,10 +1,11 @@
-import { eq } from 'drizzle-orm'
+import { eq, isNull } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { seedDemo } from '../../../db/seeds/demo'
 import { seedMasterData } from '../../../db/seeds/master-data'
 import { users } from '../../../src/server/db/schema/account'
+import { captures } from '../../../src/server/db/schema/confirmed-captures'
 import { households } from '../../../src/server/db/schema/household'
-import { units } from '../../../src/server/db/schema/inventory'
+import { products, units } from '../../../src/server/db/schema/inventory'
 import { AMPEL_OFFSETS, daysFrom } from '../../../db/seeds/factories'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
 
@@ -48,6 +49,17 @@ describe('Demo-Daten', () => {
       expect(dates).toContain(daysFrom(TODAY, offset))
     }
     expect(dates).toContain(null)
+  })
+
+  it('enthält ein Produkt ohne Nährwerte und Erfassungen auf beiden Wegen', async () => {
+    const withoutNutrition = await testDb.db
+      .select({ name: products.name })
+      .from(products)
+      .where(isNull(products.nutritionSource))
+    const methods = await testDb.db.selectDistinct({ method: captures.method }).from(captures)
+
+    expect(withoutNutrition).toEqual([{ name: 'Walnüsse' }])
+    expect(methods.map((row) => row.method).sort()).toEqual(['foto', 'manuell'])
   })
 
   it('enthält Historie mit einer verbrauchten und einer entsorgten Einheit', async () => {

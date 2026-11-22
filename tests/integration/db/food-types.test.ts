@@ -30,6 +30,12 @@ describe('Schema Lebensmittelart', () => {
     categoryId: basics.categoryId,
   })
 
+  const macroColumns = {
+    protein: foodTypes.proteinPer100,
+    carbs: foodTypes.carbsPer100,
+    fat: foodTypes.fatPer100,
+  }
+
   beforeAll(async () => {
     testDb = await createTestDb()
     basics = await insertBasics(testDb.db)
@@ -93,6 +99,23 @@ describe('Schema Lebensmittelart', () => {
         categoryId: basics.categoryId,
       }),
       'lebensmittelart_schluessel_system_eindeutig',
+    )
+  })
+
+  it('speichert Makro-Richtwerte und lehnt negative ab', async () => {
+    const ownType = { ...ownFoodType('Linsenmehl'), householdId: basics.householdId }
+    const macros = { proteinPer100: '24.0', carbsPer100: '48.0', fatPer100: '2.0' }
+    const [saved] = await testDb.db
+      .insert(foodTypes)
+      .values({ ...ownType, ...macros })
+      .returning(macroColumns)
+    expect(saved).toEqual({ protein: '24.0', carbs: '48.0', fat: '2.0' })
+
+    await expectConstraintViolation(
+      testDb.db
+        .insert(foodTypes)
+        .values({ ...ownFoodType('Minusmehl'), householdId: basics.householdId, fatPer100: '-1' }),
+      'lebensmittelart_makros_check',
     )
   })
 

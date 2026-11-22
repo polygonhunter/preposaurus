@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm'
 import type { Database } from '../../src/server/db/connection'
 import { users } from '../../src/server/db/schema/account'
 import { categories, containers, storageLocations } from '../../src/server/db/schema/catalog'
+import { captures } from '../../src/server/db/schema/confirmed-captures'
 import { foodTypes } from '../../src/server/db/schema/food-types'
 import { householdSettings, households, members } from '../../src/server/db/schema/household'
 import { products, units } from '../../src/server/db/schema/inventory'
@@ -11,6 +12,7 @@ import { goals } from '../../src/server/db/schema/recommendation'
 import { restockItems } from '../../src/server/db/schema/restock'
 import {
   bestBeforeFor,
+  buildCapture,
   buildGoal,
   buildHousehold,
   buildHouseholdSettings,
@@ -31,8 +33,8 @@ type Lookups = Readonly<{
   locationIds: Map<string, string>
 }>
 
-// Was jeder Schritt der Demo braucht: Verbindung bzw. Transaktion, Haushalt und Stichtag.
-type DemoContext = Readonly<{ db: Database; householdId: string; today: Date }>
+// Was jeder Schritt der Demo braucht: Verbindung bzw. Transaktion, Haushalt, Stichtag und wer erfasst.
+type DemoContext = Readonly<{ db: Database; householdId: string; today: Date; userId: string }>
 
 const GOAL_HORIZON_DAYS = 40
 
@@ -76,11 +78,13 @@ async function insertLocations(db: Database, householdId: string) {
 }
 
 function buildDemoProduct(item: DemoProduct, householdId: string, lookups: Lookups) {
-  const { units: stages, category, foodType, container, location, ...fields } = item
+  const { units: stages, category, foodType, container, location, kcalPer100, ...fields } = item
   return {
     product: buildProduct({
       householdId,
       ...fields,
+      kcalPer100: kcalPer100 ?? null,
+      nutritionSource: kcalPer100 === undefined ? null : 'tabelle',
       categoryId: requireId(lookups.categoryIds, category),
       foodTypeId: foodType === undefined ? null : requireId(lookups.foodTypeIds, foodType),
       containerId: requireId(lookups.containerIds, container),
@@ -90,12 +94,22 @@ function buildDemoProduct(item: DemoProduct, householdId: string, lookups: Looku
   }
 }
 
-async function insertStock({ db, householdId, today }: DemoContext, lookups: Lookups) {
-  const built = DEMO_PRODUCTS.map((item) => buildDemoProduct(item, householdId, lookups))
+// Jedes Produkt kam mit einer eigenen Erfassung dazu, abwechselnd per Foto und von Hand.
+async function insertStock(context: DemoContext, lookups: Lookups) {
+  const { db, householdId, today, userId } = context
+  const built = DEMO_PRODUCTS.map((item, index) => ({
+    ...buildDemoProduct(item, householdId, lookups),
+    capture: buildCapture({ householdId, userId, method: index % 2 === 0 ? 'foto' : 'manuell' }),
+  }))
   await db.insert(products).values(built.map(({ product }) => product))
-  const unitRows = built.flatMap(({ product, stages }) =>
+  await db.insert(captures).values(built.map(({ capture }) => capture))
+  const unitRows = built.flatMap(({ product, stages, capture }) =>
     stages.map((stage) =>
-      buildUnit({ productId: product.id, bestBefore: bestBeforeFor(stage, today) }),
+      buildUnit({
+        productId: product.id,
+        captureId: capture.id,
+        bestBefore: bestBeforeFor(stage, today),
+      }),
     ),
   )
   await db.insert(units).values(unitRows)
@@ -103,24 +117,17 @@ async function insertStock({ db, householdId, today }: DemoContext, lookups: Loo
 }
 
 // Je eine verbrauchte und eine entsorgte Einheit, damit Historie und Statistik etwas zeigen.
-async function insertHistory({ db, today }: DemoContext, productId: string, takenBy: string) {
+async function insertHistory({ db, householdId, today, userId }: DemoContext, productId: string) {
   const takenAt = new Date(today.getTime())
-  await db.insert(units).values([
-    buildUnit({
-      productId,
-      bestBefore: daysFrom(today, 30),
-      status: 'verbraucht',
-      takenAt,
-      takenBy,
-    }),
-    buildUnit({
-      productId,
-      bestBefore: daysFrom(today, -10),
-      status: 'entsorgt',
-      takenAt,
-      takenBy,
-    }),
-  ])
+  const capture = buildCapture({ householdId, userId })
+  await db.insert(captures).values(capture)
+  const taken = { productId, captureId: capture.id, takenAt, takenBy: userId }
+  await db
+    .insert(units)
+    .values([
+      buildUnit({ ...taken, bestBefore: daysFrom(today, 30), status: 'verbraucht' }),
+      buildUnit({ ...taken, bestBefore: daysFrom(today, -10), status: 'entsorgt' }),
+    ])
 }
 
 async function insertHousehold(db: Database, today: Date): Promise<string> {
@@ -144,9 +151,9 @@ export async function seedDemo(db: Database, today: Date): Promise<boolean> {
     const householdId = await insertHousehold(tx, today)
     const adminId = await insertPeople(tx, householdId)
     const locationIds = await insertLocations(tx, householdId)
-    const context = { db: tx, householdId, today }
+    const context = { db: tx, householdId, today, userId: adminId }
     const productId = await insertStock(context, { ...masterData, locationIds })
-    await insertHistory(context, productId, adminId)
+    await insertHistory(context, productId)
     await tx.insert(restockItems).values(buildRestockItem({ householdId }))
   })
   return true

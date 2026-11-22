@@ -38,6 +38,12 @@ export const BEST_BEFORE_KINDS = ['mhd', 'verbrauchen_bis'] as const
 
 export const PHOTO_ROLES = ['verpackung', 'naehrwerte', 'mhd'] as const
 
+// Weg einer bestätigten Erfassung (DATENKATALOG §2.9): Vorbelegung beim nächsten Erfassen.
+export const CAPTURE_METHODS = ['foto', 'manuell'] as const
+
+// Wie sicher sich die KI bei einem Ergebnis ist (KI-Schemas A–C, #114).
+export const AI_CONFIDENCE_LEVELS = ['hoch', 'mittel', 'niedrig'] as const
+
 // entwurf: gehört zu einer unbestätigten Erfassung. fest: gehört zu einem gespeicherten Produkt.
 export const PHOTO_STATUSES = ['entwurf', 'fest'] as const
 

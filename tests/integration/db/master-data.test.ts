@@ -2,6 +2,7 @@ import { asc, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { seedMasterData } from '../../../db/seeds/master-data'
 import { categories, containers } from '../../../src/server/db/schema/catalog'
+import { foodTypes } from '../../../src/server/db/schema/food-types'
 import { productGroups } from '../../../src/server/db/schema/recommendation'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
 
@@ -78,18 +79,31 @@ describe('Seed Stammdaten', () => {
     expect(drinks?.isHidden).toBe(true)
   })
 
-  it('übernimmt Richtwerte auch beim Aktualisieren aus den Seed-Dateien', async () => {
+  it('übernimmt Richtwerte der Arten auch beim Aktualisieren aus den Seed-Dateien', async () => {
+    const referenceValues = {
+      kcal: foodTypes.kcalPer100,
+      protein: foodTypes.proteinPer100,
+      carbs: foodTypes.carbsPer100,
+      fat: foodTypes.fatPer100,
+      months: foodTypes.typicalShelfLifeMonths,
+    }
     await testDb.db
-      .update(categories)
-      .set({ averageKcalPer100: '999.0', typicalShelfLifeMonths: 99 })
-      .where(eq(categories.key, 'getreide'))
+      .update(foodTypes)
+      .set({
+        kcalPer100: '999.0',
+        proteinPer100: '9.9',
+        carbsPer100: '9.9',
+        fatPer100: '9.9',
+        typicalShelfLifeMonths: 99,
+      })
+      .where(eq(foodTypes.key, 'spaghetti'))
 
     await seedMasterData(testDb.db)
 
-    const [cereal] = await testDb.db
-      .select({ kcal: categories.averageKcalPer100, months: categories.typicalShelfLifeMonths })
-      .from(categories)
-      .where(eq(categories.key, 'getreide'))
-    expect(cereal).toEqual({ kcal: null, months: null })
+    const [spaghetti] = await testDb.db
+      .select(referenceValues)
+      .from(foodTypes)
+      .where(eq(foodTypes.key, 'spaghetti'))
+    expect(spaghetti).toEqual({ kcal: null, protein: null, carbs: null, fat: null, months: null })
   })
 })

@@ -11,16 +11,20 @@ import {
   jsonb,
   numeric,
   pgTable,
+  smallint,
   text,
   uuid,
 } from 'drizzle-orm/pg-core'
 import { AI_ROLES } from '../../../shared/config/ai-roles'
-import { PHOTO_ROLES, PHOTO_STATUSES } from '../../../shared/config/constants'
+import { AI_CONFIDENCE_LEVELS, PHOTO_ROLES, PHOTO_STATUSES } from '../../../shared/config/constants'
 import { users } from './account'
 import { aiConnections } from './ai-connections'
 import { id, isOneOf, timestamps } from './columns'
 import { households } from './household'
 import { products, units } from './inventory'
+
+// Erster Versuch plus höchstens ein Zweitversuch mit stärkerem Modell
+const MAX_AI_ATTEMPTS = 2
 
 export const captureDrafts = pgTable(
   'erfassung_entwurf',
@@ -48,10 +52,11 @@ export const photos = pgTable(
       .references(() => households.id, { onDelete: 'cascade' }),
     role: text('rolle', { enum: PHOTO_ROLES }).notNull(),
     path: text('pfad').notNull().unique(),
-    hash: text('hash').notNull(),
-    sizeBytes: integer('groesse_bytes').notNull(),
     mimeType: text('dateityp').notNull(),
     status: text('status', { enum: PHOTO_STATUSES }).notNull().default('entwurf'),
+    // Wer hochgeladen hat: Die Hinweise beim Erfassen enden nach drei gelungenen Fotos je Rolle
+    // und Nutzer (SCHNITTSTELLEN Nr. 14). Der Entwurf reicht dafür nicht, er wird gelöscht.
+    userId: uuid('nutzer_id').references(() => users.id, { onDelete: 'set null' }),
     // Wird ein Entwurf gelöscht, bleibt ein festes Foto stehen (nur der Verweis fällt weg).
     draftId: uuid('entwurf_id').references(() => captureDrafts.id, { onDelete: 'set null' }),
     productId: uuid('produkt_id').references(() => products.id, { onDelete: 'cascade' }),
@@ -71,7 +76,11 @@ export const photos = pgTable(
     check('foto_rolle_check', isOneOf(table.role, PHOTO_ROLES)),
     check('foto_status_check', isOneOf(table.status, PHOTO_STATUSES)),
     check('foto_fest_check', sql`${table.status} <> 'fest' or ${table.productId} is not null`),
-    check('foto_groesse_check', sql`${table.sizeBytes} > 0`),
+    // Der zusammengesetzte Fremdschlüssel prüft nur, wenn beide Spalten gesetzt sind (MATCH SIMPLE).
+    check(
+      'foto_einheit_braucht_produkt_check',
+      sql`${table.unitId} is null or ${table.productId} is not null`,
+    ),
   ],
 )
 
@@ -89,6 +98,10 @@ export const aiCalls = pgTable(
     connectionId: uuid('verbindung_id').references(() => aiConnections.id, {
       onDelete: 'set null',
     }),
+    // 1 oder 2: Beim MHD folgt bei „niedrig“ oder ohne Datum ein Zweitversuch (#114).
+    attempt: smallint('versuch').notNull().default(1),
+    // Leer, wenn die Antwort keine Sicherheit nennt oder der Aufruf fehlschlug.
+    confidence: text('sicherheit', { enum: AI_CONFIDENCE_LEVELS }),
     model: text('modell').notNull(),
     inputTokens: integer('tokens_ein'),
     outputTokens: integer('tokens_aus'),
@@ -101,5 +114,10 @@ export const aiCalls = pgTable(
   (table) => [
     index('ki_aufruf_haushalt_erstellt_idx').on(table.householdId, table.createdAt),
     check('ki_aufruf_rolle_check', isOneOf(table.role, AI_ROLES)),
+    check(
+      'ki_aufruf_versuch_check',
+      sql`${table.attempt} between 1 and ${sql.raw(String(MAX_AI_ATTEMPTS))}`,
+    ),
+    check('ki_aufruf_sicherheit_check', isOneOf(table.confidence, AI_CONFIDENCE_LEVELS)),
   ],
 )

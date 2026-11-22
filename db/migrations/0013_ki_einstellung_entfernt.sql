@@ -1,1 +1,0 @@
-DROP TABLE "ki_einstellung" CASCADE;

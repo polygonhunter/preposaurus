@@ -1,5 +1,5 @@
 // System-Kategorien, jede mit ihrer Warengruppe (01 „Ordnungssystem“, EIN-04).
-// kcal-Durchschnitt und übliche Haltbarkeit bleiben leer, bis M1-08 sie belegt hat.
+// Richtwerte stehen an der Lebensmittelart (E-22), nicht an der Kategorie.
 import type { ProductGroupKey } from './warengruppen'
 
 type SystemCategory = Readonly<{
@@ -7,9 +7,6 @@ type SystemCategory = Readonly<{
   name: string
   pictogram: string
   productGroup: ProductGroupKey
-  // Richtwerte, sobald belegt (M1-08). Fehlt ein Wert, setzt der Seed die Spalte auf leer.
-  averageKcalPer100?: string
-  typicalShelfLifeMonths?: number
 }>
 
 export const SYSTEM_CATEGORIES: readonly SystemCategory[] = [
