@@ -25,6 +25,16 @@ const PRECISION_ORDER: Record<BestBeforePrecision, number> = { day: 0, month: 1,
 const groupKey = (entry: BestBefore) =>
   `${entry.date}|${entry.precision}|${String(entry.isEstimated)}`
 
+/**
+ * Schlüssel der Gruppe, in die ein Datum fällt („Datum fehlt“ bei null). Gleich für die Einheit
+ * und ihre Gruppe, damit sich Einheiten in einem Durchlauf zuordnen lassen (#141).
+ */
+export const bestBeforeKeyOf = (entry: BestBefore | null) =>
+  entry === null ? NO_DATE_LABEL : groupKey(entry)
+
+export const groupKeyOf = (group: BestBeforeGroup) =>
+  bestBeforeKeyOf(group.kind === 'no-date' ? null : group)
+
 function compareGroups(a: DatedGroup, b: DatedGroup): number {
   if (a.date !== b.date) return a.date < b.date ? -1 : 1
   if (a.precision !== b.precision)

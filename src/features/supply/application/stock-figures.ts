@@ -28,17 +28,43 @@ interface FiguresInput {
   stillGoodCounts: boolean
 }
 
+const nodeKey = (level: TreeNode['level'], key: string) => `${level}:${key}`
+
+/**
+ * Packungen je Knoten in einem Durchlauf (#141). So läuft jeder Knoten nur über seine eigenen
+ * Packungen statt über den ganzen Vorrat.
+ */
+function unitsByNode(
+  units: readonly NodeUnit[],
+  nodes: readonly TreeNode[],
+): Map<string, NodeUnit[]> {
+  const levels = [...new Set(nodes.map((node) => node.level))]
+  const byNode = new Map<string, NodeUnit[]>()
+  for (const unit of units) {
+    for (const level of levels) {
+      const key = unit.path[level]
+      if (key === null) continue
+      const id = nodeKey(level, key)
+      const existing = byNode.get(id)
+      if (existing) existing.push(unit)
+      else byNode.set(id, [unit])
+    }
+  }
+  return byNode
+}
+
 /** Summen je Knoten am heutigen Tag, in der Reihenfolge der Knoten. */
 export function totalsForNodes(
   input: FiguresInput,
   nodes: readonly TreeNode[],
 ): { node: TreeNode; totals: NodeTotals }[] {
-  const { units, need, today, stillGoodCounts } = input
+  const { need, today, stillGoodCounts } = input
   const reference = { day: today, kind: 'today' } as const
-  return nodes.map((node) => ({
-    node,
-    totals: calculateNodeTotals({ units, need, reference, stillGoodCounts, node }),
-  }))
+  const byNode = unitsByNode(input.units, nodes)
+  return nodes.map((node) => {
+    const units = byNode.get(nodeKey(node.level, node.key)) ?? []
+    return { node, totals: calculateNodeTotals({ units, need, reference, stillGoodCounts, node }) }
+  })
 }
 
 /** Tagesbedarf des Haushalts. Ohne aktive Quelle 0, dann gibt es keine Tage (null). */
