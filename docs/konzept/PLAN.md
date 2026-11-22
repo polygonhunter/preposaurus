@@ -63,7 +63,7 @@ Aus den DB-Skizzen in `01`–`04`. Mit * markierte Tabellen stehen in keiner Ski
 
 - Haushalt: `haushalt`, `haushalt_einstellung`, `mitglied`, `mitglied_allergie`
 - Konto: `nutzer`, `nutzer_einstellung`, Sitzungen und Passkeys (Tabellen von Better Auth), `benachrichtigung_einstellung`, `push_abo`
-- Empfehlung: `quelle`, `quelle_version`, `quelle_wert`, `warengruppe`, `ziel`, `ziel_etappe`
+- Empfehlung: `quelle`, `quelle_version`, `quelle_bedarf` (Bedarf je Personengruppe, freigegeben 2026-11-22), `quelle_wert`, `warengruppe`, `ziel`, `ziel_etappe`
 - Vorrat: `kategorie`, `behaelter`, `lagerort`, `tag`, `produkt_tag`, `produkt`, `einheit`
 - Nachkaufen: `einkaufsliste_eintrag` (Tabellenname aus `03`; Vorschlag zur Umbenennung in `nachkauf_eintrag` als offenen Punkt führen)
 - Vorschläge*: `foto` (Rolle, Pfad, Hash, Bezug zu Produkt/Einheit), `erfassung_entwurf` (unbestätigte Erfassung), `ki_aufruf` (Modell, Tokens, Kosten für die Monatsübersicht aus `04`), Job-Tabellen von pg-boss

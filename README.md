@@ -2,7 +2,7 @@
 
 Selbst gehostete Web-App, mit der ein Haushalt seinen **Notvorrat nach offiziellen Empfehlungen** (BBK, BLE) plant und verwaltet. Ruhig und freundlich, ohne Angstmache.
 
-> **Status: frühe Entwicklung.** Konzept und Umsetzungsplan stehen, das Projektgerüst entsteht gerade. Die App ist **noch nicht nutzbar**.
+> **Status: frühe Entwicklung.** Konzept und Umsetzungsplan stehen, das Projektgerüst (Meilenstein M0) ist aufgesetzt, fachliche Funktionen folgen. Die App ist **noch nicht nutzbar**.
 
 *English summary: Preposaurus is a self-hosted web app for managing a household emergency food supply based on official German recommendations (BBK/BLE). It runs via Docker on your own NAS (similar to Paperless-ngx), supports multiple user accounts and is reached on the local network or from your phone via Tailscale. Products can be added manually or from a photo, which an AI model (Anthropic) turns into a suggestion that you confirm. The project is in early development and not usable yet. The UI and documentation are in German. Licensed under AGPL-3.0-or-later.*
 
@@ -35,6 +35,28 @@ Eine Einrichtungsanleitung folgt, sobald das MVP steht.
 
 Next.js 16 (Full-Stack, TypeScript strict) · PostgreSQL 18 mit Drizzle · Zod 4 · Better Auth · Anthropic SDK hinter einem austauschbaren Adapter · sharp · web-push und Nodemailer · pg-boss (Worker) · Serwist (PWA) · Vitest, Playwright, ESLint, Prettier · Docker Compose. Details: [`research/26_tech_stack_mvp.md`](research/26_tech_stack_mvp.md).
 
+## Entwickeln
+
+Voraussetzung: Node.js 24 oder neuer, npm.
+
+```bash
+cp .env.example .env   # Werte prüfen, die .env nie committen
+npm install            # installiert auch die Git-Hooks (lefthook)
+npm run dev            # http://localhost:3000
+npm run check          # Format, Lint, Budget, Typecheck, knip und Tests
+```
+
+| Befehl | Zweck |
+|---|---|
+| `npm run build` / `npm start` | Produktions-Build bauen bzw. starten |
+| `npm run lint` | ESLint mit harten Grenzen und Schichtregeln, ohne Warnungen |
+| `npm run lint:budget` | warnt bei Dateien über 200 Zeilen (Richtwert) |
+| `npm run typecheck` | TypeScript strict |
+| `npm run test` | Vitest mit Abdeckung |
+| `npm run e2e` | Playwright in fünf Viewports, einmalig vorher `npx playwright install chromium webkit` |
+| `npm run knip` | ungenutzte Dateien, Exporte und Abhängigkeiten |
+| `npm run licenses` | Lizenzen der Produktionsabhängigkeiten prüfen |
+
 ## Hinweis zu den Empfehlungswerten
 
 Preposaurus ist **kein offizielles Angebot** des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe (BBK), der Bundesanstalt für Landwirtschaft und Ernährung (BLE) oder einer anderen Behörde. Die Empfehlungswerte werden mit Quelle und Stand hinterlegt, aber **ohne Gewähr** für Richtigkeit, Vollständigkeit oder Aktualität. Maßgeblich sind die Veröffentlichungen der Herausgeber.
@@ -48,9 +70,10 @@ Preposaurus ist **kein offizielles Angebot** des Bundesamts für Bevölkerungssc
 | [`docs/konzept/`](docs/konzept/) | Konzept-Dokumente als HTML: Technik, Funktionen, Design |
 | [`docs/UMSETZUNG.md`](docs/UMSETZUNG.md) | Umsetzungsplan des MVP (Meilensteine M0 bis M14) |
 | [`docs/CODE_PRINZIPIEN.md`](docs/CODE_PRINZIPIEN.md) | verbindliche Code-Regeln |
+| `src/`, `tests/` | App (Next.js 16) und Tests |
 | [`research/`](research/) | Recherche-Berichte (Markt, Empfehlungen, Technik, Recht) |
 | [`prototypes/`](prototypes/) | klickbarer Design-Prototyp, gewählt `/d6` „Glas-Cockpit“. Nicht Teil der App, eigener Lizenzhinweis |
-| `CLAUDE.md` | Projektregeln für KI-gestützte Entwicklung |
+| `CLAUDE.md`, `AGENTS.md` | Projektregeln für KI-gestützte Entwicklung |
 
 Ein Teil der Planung und Umsetzung geschieht mit KI-Agenten (Claude). Ein Agent plant, ein anderer setzt die Arbeitspakete um, Reviews prüfen die Ergebnisse. Der Maintainer prüft und mergt die Pull Requests.
 

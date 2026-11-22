@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-surface: #f6f7f4;
+  --color-ink: #1f2a24;
+  --color-muted: #4a5750;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

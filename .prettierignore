@@ -1,0 +1,19 @@
+# Eigene Projekte bzw. erzeugte Dateien
+prototypes/
+.next/
+out/
+build/
+coverage/
+playwright-report/
+test-results/
+package-lock.json
+next-env.d.ts
+db/migrations/
+
+# Absichtlich fehlerhafte Lint-Fixtures
+tests/lint/fixtures/
+
+# Konzept und Recherche: von Hand gepflegt, Prettier würde Tabellen umbrechen
+*.md
+docs/
+research/

@@ -87,7 +87,7 @@ ESLint kennt pro Regel nur eine Stufe. Deshalb steht in der Config die harte 300
 - Keine Daten-Fetches in Client-Komponenten. Daten kommen von der Server-Seite oder über Actions.
 - Formulare nutzen `useActionState` + Server Action. Fehlermeldungen pro Feld aus `z.flattenError` und Status mit `aria-live` [4].
 - **React Compiler** einschalten (`reactCompiler: true`, seit Next 16 stabil) [5]. Dann gibt es kein `useMemo`/`useCallback` „auf Verdacht“, und die Compiler-Regeln aus `eslint-plugin-react-hooks` (`purity`, `refs`, `set-state-in-effect` …) bleiben an [6].
-- Animationen (GSAP) respektieren `prefers-reduced-motion` (siehe `shared/motion`).
+- Animationen nur mit **CSS** (Übergänge, View Transitions), keine Animationsbibliothek und kein GSAP (UMSETZUNG Grundentscheidung 10). `prefers-reduced-motion` gilt immer, die Grundregel steht in `src/app/globals.css`.
 
 ## 6. Fehlerbehandlung
 
@@ -171,11 +171,26 @@ export default defineConfig([
 
 Richtwert 200 als Skript: `"lint:budget": "eslint src --rule \"max-lines: [warn, {max: 200, skipBlankLines: true, skipComments: true}]\""`. Das läuft in CI und im Review und erzeugt eine Warnung, keine Blockade.
 
-**Unsicher:** (a) ob `eslint-config-next` und `typescript-eslint` dieselbe Plugin-Instanz nutzen (sonst „Cannot redefine plugin“). Dann `strictTypeChecked` nur auf `files: ['**/*.ts?(x)']` legen. (b) `eslint-plugin-jsx-a11y` 6.10.2 nennt als Peer nur ESLint ≤ 9. Also bei **ESLint 9** bleiben, bis das Plugin ESLint 10 offiziell unterstützt. (c) Der Namespace `import/` aus `eslint-config-next` ist vor Einsatz zu prüfen. `strict-type-checked` ist laut typescript-eslint nicht semver-stabil, also Regeländerungen bei Updates prüfen [9].
+**Geprüft in M0-02 (22.11.2026)**, maßgeblich ist die echte `eslint.config.mjs`:
+- (a) **Plugin-Doppelung:** `eslint-config-next` 16.4.6 und `typescript-eslint` 8.73.0 teilen sich dieselbe Instanz (npm dedupliziert, kein „Cannot redefine plugin“). Global gespreizt wendet `strictTypeChecked` aber den Type-Checker auch auf `.mjs`-Konfigurationsdateien an („not found by the project service“). Deshalb liegen `strictTypeChecked` und `stylisticTypeChecked` per `extends` nur auf `files: ['**/*.{ts,tsx,mts,cts}']`.
+- (b) **jsx-a11y mit ESLint 9:** 6.10.2 läuft mit ESLint 9.39.5 ohne Peer-Warnung. Wir bleiben bei ESLint 9.
+- (c) **Namespace `import/`:** `eslint-config-next` registriert `eslint-plugin-import` unter `import`. `import/no-default-export` greift (Fixture-Test).
+- Die Ausnahme für Tests gilt für `**/*.test.ts(x)`, `tests/e2e/**` und `tests/helpers/**`, nicht pauschal für `tests/**`, weil dort auch die Lint-Fixtures liegen (`tests/lint/fixtures/`, im normalen Lauf ignoriert).
+- `consistent-type-imports`: Einen Wert-Import, der nur als Typ dient, lehnt schon `tsc` ab (`verbatimModuleSyntax`). Die Regel fängt zusätzlich `import('…')`-Typen.
+
+`strict-type-checked` ist laut typescript-eslint nicht semver-stabil, also Regeländerungen bei Updates prüfen [9].
 
 ### 9.2 Schichtgrenzen (`eslint-plugin-boundaries` 7.x)
 
-Elemente: `app`, `ui`, `actions`, `application`, `domain`, `data`, `schemas`, `server`, `shared`, `worker` (Muster wie `src/features/*/ui`). Die Regel `boundaries/dependencies` mit `default: 'disallow'` und einer Policy je Zeile der Tabelle in Abschnitt 2. Die Syntax (`policies`, `from/allow`, Captures für „gleiches Feature“) hat sich in v7 geändert, deshalb gegen den Quick Start schreiben [10] **(unsicher in den Details)**. Alternative ohne ESLint-Bindung: `dependency-cruiser` 18.x [11].
+Elemente: `app`, `ui`, `actions`, `application`, `domain`, `data`, `schemas`, `server`, `shared`, `worker` (Muster wie `src/features/*/ui`). Die Regel `boundaries/dependencies` mit `default: 'disallow'` und einer Policy je Zeile der Tabelle in Abschnitt 2. Die Syntax (`policies`, `from/allow`, Captures für „gleiches Feature“) hat sich in v7 geändert, deshalb gegen den Quick Start schreiben [10]. Alternative ohne ESLint-Bindung: `dependency-cruiser` 18.x [11].
+
+**Umgesetzt in M0-03** (`eslint/boundaries.mjs`, v7.4.4 trägt, `dependency-cruiser` ist nicht nötig):
+- Elemente mit Rechts-nach-links-Muster (`src/features/*/ui`, Capture `feature`; `src/server/*` und `src/shared/*` mit Capture `module`). `schemas.ts` ist eine Datei und deshalb ein Datei-Deskriptor (`boundaries/files`, Kategorie `schemas`), weil Element-Muster Ordner meinen und `mode: 'file'` veraltet ist.
+- „Gleiches Feature“ per Template: `captured: { feature: '{{ from.element.captured.feature }}' }`. „Nur Typen“ per `dependency: { kind: 'type' }`.
+- `checkAllOrigins: true`: Auch externe Pakete und Node-Module brauchen eine Policy. `domain/` darf keine externen Pakete importieren (auch nicht `react` oder `node:fs`).
+- `boundaries/no-unknown-files` und `boundaries/no-unknown-dependencies` (v7-Name von `no-unknown`) gelten für `src/**`: Jede Datei muss zu einer Schicht gehören, sonst wären Barrel-`index.ts` oder `src/lib/…` ein Umweg (z. B. `ui → index.ts → data`).
+- `worker/` steht nicht in der Tabelle. Vorläufig: `worker → application, server, shared`.
+- Geprüft durch `tests/lint/boundaries.test.ts` (Tabelle erlaubter und verbotener Paare gegen Fixtures in `tests/lint/fixtures/boundaries`).
 
 ### 9.3 TypeScript (`tsconfig.json`, Auszug)
 
@@ -189,7 +204,7 @@ Elemente: `app`, `ui`, `actions`, `application`, `domain`, `data`, `schemas`, `s
 } }
 ```
 
-Ungenutzte Variablen meldet typescript-eslint (`noUnusedLocals` bleibt aus, um doppelte Meldungen zu vermeiden). TypeScript bleibt bei **6.0.x**, weil typescript-eslint 8.73 `typescript <6.1` verlangt. TS 7 nur über die Alias-Lösung aus der Next-Doku [12]. **Unsicher:** ob `noUncheckedSideEffectImports` mit `import './globals.css'` ohne eigene Deklaration klappt und ob `verbatimModuleSyntax` mit allen Next-Konfigurationsdateien harmoniert. Beides beim Aufsetzen testen.
+Ungenutzte Variablen meldet typescript-eslint (`noUnusedLocals` bleibt aus, um doppelte Meldungen zu vermeiden). TypeScript bleibt bei **6.0.x**, weil typescript-eslint 8.73 `typescript <6.1` verlangt. TS 7 nur über die Alias-Lösung aus der Next-Doku [12]. **Geprüft in M0-01:** `noUncheckedSideEffectImports` ist aktiv (ein Import einer fehlenden Datei bricht `tsc` mit TS2882 ab), `import './globals.css'` klappt ohne eigene Deklaration, weil `next/types/global.d.ts` `declare module '*.css'` mitbringt (über `next-env.d.ts`). `verbatimModuleSyntax` läuft mit `next.config.ts`, `vitest.config.ts` und `playwright.config.ts`, weil das Paket `"type": "module"` hat. Next ergänzt beim ersten Lauf selbst `esModuleInterop: true`. `typecheck` ruft vorher `next typegen` auf, weil `next-env.d.ts` nicht eingecheckt wird.
 
 ### 9.4 knip (`knip.json`)
 
@@ -199,7 +214,7 @@ Ungenutzte Variablen meldet typescript-eslint (`noUnusedLocals` bleibt aus, um d
   "project": ["src/**/*.{ts,tsx}", "db/**/*.ts"], "ignoreDependencies": ["server-only"] }
 ```
 
-Plugins für Next.js, Drizzle, Vitest, Playwright, ESLint, Prettier und lefthook erkennt knip automatisch [13]. Die Schema-URL ist **unsicher**.
+Plugins für Next.js, Drizzle, Vitest, Playwright, ESLint, Prettier und lefthook erkennt knip automatisch [13]. Die Schema-URL `https://unpkg.com/knip@6/schema.json` ist geprüft (M0-05). Maßgeblich ist `knip.json`: `project` umfasst auch `*.css` (sonst gilt `tailwindcss` als ungenutzt), die Lint-Fixtures sind ausgenommen, `ignoreDependencies` kommt erst mit `server-only`. `npm run knip` läuft zusätzlich mit `--production` (nur ausgelieferter Code, `src/**` deshalb mit `!`). So fallen Exporte auf, die nur Tests nutzen. `src/instrumentation.ts` prüft beim Serverstart die Umgebung und nutzt den Logger.
 
 ### 9.5 lefthook (`lefthook.yml`)
 
@@ -227,7 +242,7 @@ pre-push:
     - run: npx vitest run
 ```
 
-Das `jobs`-Format steht so in der lefthook-Doku [14]. `{staged_files}` und `piped` sind **nicht einzeln verifiziert**.
+Das `jobs`-Format steht so in der lefthook-Doku [14]. `{staged_files}`, `piped` und `stage_fixed` sind in M0-05/M0-06 real ausprobiert: Prettier formatiert eine absichtlich unformatierte, gestagte Datei, der Commit enthält die formatierte Fassung. Maßgeblich ist `lefthook.yml` (ESLint mit `--no-warn-ignored`, Typecheck über `npm run typecheck`).
 
 ## 10. Tests
 
@@ -235,7 +250,7 @@ Das `jobs`-Format steht so in der lefthook-Doku [14]. `{staged_files}` und `pipe
 |---|---|---|---|
 | Unit | Vitest | `domain/`, `shared/lib` (Datum, Menge), Schemas, Mapping KI → Domain | viele, schnell |
 | Use-Case | Vitest + Fake-Adapter/Repos | `application/` ohne DB und Netz | mittel |
-| Integration | Vitest + echte Postgres (Compose-Test-DB) | Repositories, Migrationen laufen durch | wenige |
+| Integration | Vitest + PGlite lokal, PostgreSQL 18 in der CI (Dienst `postgres:18`) | Repositories, Migrationen laufen durch | wenige |
 | E2E | Playwright + `@axe-core/playwright` | Login, manuell erfassen, Foto-Flow mit Fake-KI, Entnahme, mobil | wenige Kernflows |
 
 - Tests prüfen Verhalten, nicht Implementierung. Namen als deutscher Satz („liefert null, wenn kein Datum erkennbar ist“). Abdeckung: `domain/` und `shared/lib` ≥ 90 % Zweige (Vitest-Threshold), sonst kein Prozentziel.

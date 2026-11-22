@@ -16,6 +16,17 @@ build/
 # System
 .DS_Store
 
+# Von Next erzeugt
+next-env.d.ts
+
+# Testberichte
+coverage/
+playwright-report/
+test-results/
+
+# Lokale Daten (PGlite, Fotos)
+.data/
+
 # Agenten-Arbeitskopien
 .claude/worktrees/
 
