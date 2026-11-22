@@ -157,7 +157,7 @@ Hinweis: HH-02 nennt das Geburtsjahr als Pflicht. Das ist durch den MVP-Zuschnit
 | `lagerort_id` | Lagerort | uuid | o | M (vorbelegt aus letzter Erfassung) | A19, Bald fällig nach Lagerort | MVP |
 | `kcal_100`, `eiweiss_100`, `kh_100`, `fett_100` | Nährwerte je 100 g/ml | numeric | o | F/M/KI-Schätzung | A1, A5, A6, A8, Detail | MVP |
 | `naehrwerte_geschaetzt` **[Ä]** | Schätzung ja/nein | bool | P | A | ersetzen durch `naehrwerte_quelle` | – |
-| `naehrwerte_quelle` **[L]** | `etikett` · `manuell` · `ki_schaetzung`, leer = keine Werte (dann Richtwert der Art live) | text CHECK | o | Sys | A18, „ca.“, Detail („vom Etikett“, „von Hand“, „Schätzung“), #115 | MVP |
+| `naehrwerte_quelle` **[L]** | `tabelle` · `manuell` · `ki_schaetzung`, leer = keine Werte (dann Richtwert der Art live, nie gespeichert) | text CHECK | o | Sys | A18, „ca.“, Detail („vom Etikett“, „von Hand“, „Schätzung“), #115 | MVP |
 | `naehrwerte_bestaetigt_am` | gesonderte Bestätigung der Schätzung (#115) | timestamptz | o | M | siehe Frage 2: nur nötig, wenn unbestätigte Schätzungen gespeichert werden dürfen | offen |
 | `erfassung_id` **[Ä]** | Idempotenz | uuid UNIQUE | o | Sys | wandert an `einheit` bzw. in `erfassung` (§2.9) | – |
 | `ballaststoffe_100`, `zucker_100`, `salz_100` | – | – | – | – | nirgends ausgewertet, nicht anlegen | – |
@@ -311,7 +311,7 @@ Empfehlung: Da PR #112 noch offen ist, die P1/P2-Punkte **direkt in die Migratio
 | 1 | P1 | einheit | `mhd` nullable; `mhd_genauigkeit` nullable ohne Standard; CHECKs: `(mhd is null) = (mhd_genauigkeit is null)`, `not mhd_geschaetzt or mhd is not null`. Index `(produkt_id, status, mhd)` bleibt | #116 „Datum fehlt“. Kopfkommentar und 05 (M1-Festlegung „mhd ist Pflicht“) nachziehen |
 | 2 | P1 | ki_einstellung | ersetzen durch `ki_verbindung` + `ki_rollen_zuweisung` (§2.9), Seed der fünf Rollen mit Empfehlung, `AI_ROLES` in `constants.ts` | #108 (letzter Kommentar), #114. Läuft laut Orchestrator bereits in PR #112 |
 | 3 | P1 | haushalt_einstellung | + `noch_gut_zaehlt_mit`, `wochenuebersicht_aktiv/_wochentag/_uhrzeit`, `dringend_aktiv`, `einrichtung_abgeschlossen_am`, `einrichtung_schritt`, `wochenuebersicht_gesendet_am`, `dringend_gesendet_am` | #117, Einstellungen §6.2, Onboarding §2.3, Worker-Dedupe |
-| 4 | P1 | produkt | `naehrwerte_geschaetzt` → `naehrwerte_quelle` (CHECK etikett/manuell/ki_schaetzung, leer erlaubt; CHECK: leer ⇔ alle vier Werte leer) | #115 |
+| 4 | P1 | produkt | `naehrwerte_geschaetzt` → `naehrwerte_quelle` (CHECK tabelle/manuell/ki_schaetzung, leer erlaubt; CHECK: leer ⇔ alle vier Werte leer). Umgesetzt in #132: `richtwert` ist keine gespeicherte Quelle, der Name bleibt `tabelle` wie in 05 | #115 |
 | 5 | P1 | nutzer | + `benutzername`, `passwort_vorlaeufig`, `passwort_geaendert_am/_von`, `letzte_anmeldung_am`, `ki_hinweis_bestaetigt_am`; neue Tabelle `anmelde_sperre` | Anmeldung (05), Einstellungen §6.1 |
 | 6 | P1 | erfassung (neu), einheit, produkt | neue Tabelle `erfassung(id, haushalt_id, nutzer_id, weg)`; `einheit.erfassung_id` NOT NULL FK; `produkt.erfassung_id` entfällt | Idempotenz für Nachschub, Vorbelegung ohne `nutzer_einstellung` |
 | 7 | P2 | produkt | `lebensmittelart_id` NOT NULL; `kategorie_id` und zusammengesetzter FK entfallen; `bezeichnung` nullable (Zusatz) | UX §1 (Art Pflicht), Normalisierung. Seed braucht dann je Kategorie eine Art „Sonstiges …“ für Fälle ohne Treffer, oder „+ Neue Lebensmittelart“ ist Pflichtweg |
@@ -510,7 +510,7 @@ Rechte: **A** Admin · **M** Mitglied · **öff.** ohne Anmeldung. Eingabe als Z
 | `setUnitsDateAction` („Datum ändern“, „Datum nachtragen“, „Datum fehlt“) | `{ einheitIds, mhd: date \| null, genauigkeit?, art, geschaetzt: bool }` | – | `validation` |
 | `estimateBestBeforeAction` | `{ lebensmittelartId }` | `{ mhd, genauigkeit: 'tag', geschaetzt: true }` als Vorschlag | `no-typical-value` · siehe Frage 3 |
 | `updateProductAction` | `{ produktId, bezeichnung?, lebensmittelartId?, inhalt?, abtropfgewichtG?, behaelterId?, lagerortId? }` | – | `validation` |
-| `updateNutritionAction` | `{ produktId, naehrwerte: {…} \| null, quelle: 'etikett' \| 'manuell' \| 'ki_schaetzung', fotoId? }` | – | `validation` |
+| `updateNutritionAction` | `{ produktId, naehrwerte: {…} \| null, quelle: 'tabelle' \| 'manuell' \| 'ki_schaetzung', fotoId? }` | – | `validation` |
 | `deleteProductAction` | `{ produktId }` | – (DB, dann Dateien) | Rechte A, Rückfrage im UI |
 
 **Nachkaufen** (A, M; endgültig entfernen nur A)

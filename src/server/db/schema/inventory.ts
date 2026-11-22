@@ -60,8 +60,9 @@ export const products = pgTable(
     proteinPer100: per100('eiweiss_100'),
     carbsPer100: per100('kh_100'),
     fatPer100: per100('fett_100'),
-    // Leer genau dann, wenn alle vier Nährwerte leer sind. Geschätzte Werte (ki_schaetzung,
-    // richtwert) zeigt die App als „ca.“, bis jemand sie bestätigt hat.
+    // Leer genau dann, wenn alle vier Nährwerte leer sind. Dann ergänzt die App beim Lesen den
+    // Richtwert der Lebensmittelart, kopiert ihn aber nie hierher (E-5). ki_schaetzung zeigt die
+    // App als „ca.“, bis jemand sie bestätigt hat.
     nutritionSource: text('naehrwerte_quelle', { enum: NUTRITION_SOURCES }),
     nutritionConfirmedAt: timestampTz('naehrwerte_bestaetigt_am'),
     ...timestamps(),

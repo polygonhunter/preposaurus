@@ -308,7 +308,7 @@ CREATE TABLE "produkt" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "produkt_inhalt_einheit_check" CHECK ("produkt"."inhalt_einheit" in ('g', 'ml')),
 	CONSTRAINT "produkt_inhalt_check" CHECK ("produkt"."inhalt_wert" > 0),
-	CONSTRAINT "produkt_naehrwerte_quelle_check" CHECK ("produkt"."naehrwerte_quelle" in ('tabelle', 'ki_schaetzung', 'richtwert', 'manuell')),
+	CONSTRAINT "produkt_naehrwerte_quelle_check" CHECK ("produkt"."naehrwerte_quelle" in ('tabelle', 'manuell', 'ki_schaetzung')),
 	CONSTRAINT "produkt_naehrwerte_bestaetigt_check" CHECK ("produkt"."naehrwerte_bestaetigt_am" is null or "produkt"."naehrwerte_quelle" is not null),
 	CONSTRAINT "produkt_naehrwerte_vollstaendig_check" CHECK (("produkt"."naehrwerte_quelle" is null) = ("produkt"."kcal_100" is null
         and "produkt"."eiweiss_100" is null and "produkt"."kh_100" is null

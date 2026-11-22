@@ -1,5 +1,5 @@
 {
-  "id": "f140c3cb-91c2-4a11-a227-035a63d5ad95",
+  "id": "fb122e03-03c6-47bc-ae96-798ed5bfbdeb",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -2629,7 +2629,7 @@
         },
         "produkt_naehrwerte_quelle_check": {
           "name": "produkt_naehrwerte_quelle_check",
-          "value": "\"produkt\".\"naehrwerte_quelle\" in ('tabelle', 'ki_schaetzung', 'richtwert', 'manuell')"
+          "value": "\"produkt\".\"naehrwerte_quelle\" in ('tabelle', 'manuell', 'ki_schaetzung')"
         },
         "produkt_naehrwerte_bestaetigt_check": {
           "name": "produkt_naehrwerte_bestaetigt_check",
