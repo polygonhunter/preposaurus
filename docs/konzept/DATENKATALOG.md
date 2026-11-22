@@ -174,7 +174,7 @@ Hinweis: HH-02 nennt das Geburtsjahr als Pflicht. Das ist durch den MVP-Zuschnit
 | `status` | vorrat/verbraucht/entsorgt | text | P | M | alle Auswertungen, ROT-03/04, Verlauf | MVP |
 | `entnommen_am` | Zeitpunkt der Entscheidung | timestamptz | P bei ≠ vorrat | Sys | A15, A16, A17, Verlauf, ROT-07 | MVP |
 | `entnommen_von` | wer | uuid → nutzer | o | Sys | Verlauf („von Alex“), ROT-07 | MVP |
-| `geprueft_am` | „Noch gut“ | date | o | M | Vorrat „geprüft am“, verlässt Gruppe „Abgelaufen“, A1 mit Schalter | MVP |
+| `geprueft_am` | „Noch gut“ | date | o | M | Vorrat „geprüft am“, verlässt Gruppe „Abgelaufen“, A1 mit Schalter. Ändert sich das MHD, wird es zurückgesetzt (`changeBestBefore`, #135) | MVP |
 | `erfassung_id` **[L]** | aus welcher Erfassung | uuid → `erfassung` | P (neu) | Sys | Idempotenz auch für „Packungen hinzufügen“, Verlauf „hinzugefügt“ | MVP |
 | `created_at` | Anlagezeitpunkt | timestamptz | P | Sys | A16 (Rückrechnung), Verlauf. **Muss beim Import erhalten bleiben** | MVP |
 
@@ -350,7 +350,7 @@ Richtig benannt und passend: `ziel`, `quelle_version`, `quelle_wert`, `warengrup
 | 11 | `capture/domain/plausibility.ts` | `typicalShelfLifeDays` aus der Lebensmittelart (nur Kommentar/Quelle) | #110 |
 | 12 | `supply/domain/group-targets.ts` / `diet-shifts.ts` | Die DB speichert Mengen **je Ernährungsform** (`quelle_wert.ernaehrungsform`), die Fachlogik erwartet Verschiebungsregeln. Eins wählen: Vorschlag DB-Zeilen je Form, Fachlogik wählt nur aus; `targetsForDiet`/`validateDietShifts` nur noch im Seed-Werkzeug oder streichen | doppelte Wahrheit |
 | 13 | `supply/domain/daily-need.ts` | unverändert, wenn `quelle_bedarf.personengruppe = MEMBER_TYPES`. Mapping Englisch ↔ DB-Werte im Repository | – |
-| 14 | `supply/domain/goal-progress.ts` | `target-in-past` → Ergebnis „kein gültiges Zieldatum“ statt Fehler, damit die Übersicht ohne Zielzeile weiterrechnet | A3 Sonderfall |
+| 14 | `supply/domain/goal-progress.ts` | Ein vergangenes Zieldatum ist kein Fehler, sondern das Ergebnis `target.kind = 'target-in-past'` mit dem alten Datum. „Heute versorgt“ rechnet weiter, die Zielzeile entfällt, die UI fragt nach einem neuen Datum. Zieldatum = heute ist ein gültiges Ziel. **Umgesetzt** (#131, #135) | A3 Sonderfall |
 | 15 | `supply/domain/stats.ts` `compareOutcomes` | zusätzlich je Monat und kcal | A15 |
 | 16 | neu: Summen je Knoten | `summarizeNode(units, need)` → Packungen, Menge, kcal, Makros, Tage, nächstes MHD, Richtwert-Anteil, Anzahl ohne Datum | A8 |
 | 17 | neu: nächster Schritt | `nextStep(goalProgress, need)` → Engpass und Fehlmenge | A4 |
