@@ -49,7 +49,7 @@ export const RESTOCK_UNITS = ['g', 'ml', 'stueck'] as const
 // ERI-02 Wochenübersicht, ERI-03 Dringend, ERI-06 Check-in-Mail. Etappe und Inventur kommen später.
 export const NOTIFICATION_KINDS = ['wochenuebersicht', 'dringend', 'checkin_mail'] as const
 
-// KI-Anbieter, die in der App einstellbar sind (Issue #108). OpenAI braucht später nur einen
+// Anbieter einer KI-Verbindung (Issue #108). Weitere (z. B. openai, lokal) brauchen nur einen
 // weiteren Wert, eine Migration und einen Adapter.
 export const AI_PROVIDERS = ['anthropic'] as const
 

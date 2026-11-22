@@ -92,6 +92,20 @@
       "when": 1795354328982,
       "tag": "0012_anmelde_sperre",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1795354373077,
+      "tag": "0013_ki_einstellung_entfernt",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795354581251,
+      "tag": "0014_ki_verbindungen",
+      "breakpoints": true
     }
   ]
 }

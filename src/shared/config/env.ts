@@ -1,9 +1,9 @@
 // Einzige Stelle, die process.env liest (CODE_PRINZIPIEN §2). Jede Variable steht auch in .env.example.
 import { z } from 'zod'
+import { AI_ROLE_DEFAULT_MODELS } from './ai-roles'
 import { LOG_LEVELS } from '../lib/logger'
 import { err, ok, type Result } from '../lib/result'
 
-const DEFAULT_AI_MODEL = 'claude-sonnet-5-5'
 const DATABASE_URL_PATTERN = /^(postgres|postgresql|pglite):\/\//
 
 const required = (name: string) =>
@@ -27,9 +27,9 @@ const envSchema = z
     ),
     AI_PROVIDER: z.enum(['anthropic', 'fake']).default('fake'),
     ANTHROPIC_API_KEY: optionalSecret,
-    AI_MODEL_PACKAGING: z.string().min(1).default(DEFAULT_AI_MODEL),
-    AI_MODEL_NUTRITION: z.string().min(1).default(DEFAULT_AI_MODEL),
-    AI_MODEL_BEST_BEFORE: z.string().min(1).default(DEFAULT_AI_MODEL),
+    AI_MODEL_PACKAGING: z.string().min(1).default(AI_ROLE_DEFAULT_MODELS.verpackung),
+    AI_MODEL_NUTRITION: z.string().min(1).default(AI_ROLE_DEFAULT_MODELS.naehrwerte),
+    AI_MODEL_BEST_BEFORE: z.string().min(1).default(AI_ROLE_DEFAULT_MODELS.mhd),
   })
   .refine((env) => env.AI_PROVIDER !== 'anthropic' || env.ANTHROPIC_API_KEY !== undefined, {
     path: ['ANTHROPIC_API_KEY'],
