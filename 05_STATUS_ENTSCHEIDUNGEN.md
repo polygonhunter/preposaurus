@@ -121,6 +121,17 @@ Server-Teil ohne UI, Details in den Kopfkommentaren von `src/features/capture/{d
 - **Wiedererkennen:** `findMatchingProducts` (Action `findMatchingProductsAction`) liefert eigene Produkte mit gleicher Art, Menge (Toleranz 0,005) und Behälter, auch mehrere (gleiches Produkt an zwei Lagerorten). Es bleibt ein Vorschlag, nichts wird zusammengelegt.
 - **Guard** `requireHouseholdUser` in `server/auth/guards.ts`: angemeldet und einem Haushalt zugeordnet, sonst `forbidden`.
 
+## Festlegungen aus M5-02 bis M5-04 „Manuell erfassen“ (#52 bis #54, 2026-11-22, vorläufig)
+- **Adressen:** Das Formular steht unter `/neu/manuell`. `/neu` leitet dorthin, bis der Foto-Weg (M6) eine Oberfläche hat; dann öffnet `/neu` den zuletzt genutzten Weg mit Umschalter Foto · Manuell (UX §8.5).
+- **Reihenfolge:** Lebensmittelart · Inhalt · Behälter · MHD und Anzahl · Lagerort · Nährwerte · Zusammenfassung · Speichern. Abweichung von UX §8.5: Der Behälter steht vor dem MHD und nicht unter „Weitere Angaben“, weil er fürs Wiedererkennen zählt. Wählt man „Zu … hinzufügen“, entfallen Lagerort und Nährwerte (sie gehören zum Produkt). Eine Bezeichnung gibt es im Formular nicht, es gilt der Name der Art.
+- **Lebensmittelart:** Suche direkt im Formular statt in einem eigenen Blatt (Fokus sofort im Suchfeld, darunter „Zuletzt genutzt“, Treffer mit Pfadzeile). Treffer im Namen vor Treffern im Pfad, Umlaute und ß egal (`searchFoodTypes`). Neue Arten anlegen folgt mit #126.
+- **MHD:** ein Textfeld, die Genauigkeit folgt der Eingabe (30.09.2027, 09/2027, 2027, `parseBestBefore`), je Datum eine Zeile mit − und +, gleiches Datum zählt hoch, „Datum fehlt“ ist ein eigener Knopf. **Keine Schnellknöpfe „+6 Mon. · +1 J. · +2 J.“**, weil sie ein Datum vorschlügen, das nicht auf der Packung steht (zur Klärung offen, #180).
+- **Vorbelegung ohne Einstellungstabelle (E-4):** Lagerort und „Zuletzt genutzt“ kommen aus den letzten 20 Erfassungen des Nutzers (`getCaptureOptions`), nur solange sie nicht ausgeblendet sind. Nach dem Speichern behält „Noch eins“ den gewählten Lagerort.
+- **Prüfung:** `manualCaptureSchema` (in `capture/schemas.ts`) übersetzt das Formular in die Eingabe von `createStockAction` und prüft sie mit `createStockSchema`, das die Action auf dem Server noch einmal anwendet. Meldungen stehen am Feld, der Fokus springt zum ersten Fehler. Die `captureId` entsteht einmal je Formular (`createUuid`, mit Rückfall ohne sicheren Kontext), ein doppeltes Absenden speichert einmal.
+- **Nährwerte:** freiwillig, je 100 g bzw. ml, eingetippt gelten sie als `manual`. Ohne Werte zeigt das Formular den Richtwert der Art als „ca. … geschätzt“, die Zusammenfassung die kcal mit „ca.“.
+- **Erster Start:** Ist keine einzige Packung im Vorrat, begrüßt die Seite mit einem Satz, die Bestätigung sagt „Der Anfang ist gemacht.“
+- **E2E-Datenbank:** Nach den Migrationen spielt `playwright.config.ts` die Stammdaten ein (`npm run db:seed`, ohne Haushalt), damit es Lebensmittelarten und Behälter gibt.
+
 ## Technische Festlegungen aus M1 (2026-11-22)
 Beim Datenmodell getroffen, Details in den Kopfkommentaren von `src/server/db/schema/*.ts`:
 - **Versionen:** drizzle-orm 0.45.4, drizzle-kit 0.31.11 (stabile Linie, nicht 1.0-rc), PGlite 0.5.17, pg 8.23.1, tsx 4.23.15 für die Skripte `db:migrate`, `db:seed`, `db:seed:demo`.
@@ -255,6 +266,7 @@ Beim Datenmodell getroffen, Details in den Kopfkommentaren von `src/server/db/sc
 1. **Offline**: nur anzeigen oder auch eintragen (mit späterem Abgleich)?
 2. ~~**Lizenz**~~ entschieden 2026-11-22: AGPL-3.0-or-later (siehe oben). Der Prototyp mit GSAP ist ausgenommen, siehe `prototypes/README.md`
 3. **NAS**: Welches Modell bzw. Hersteller (Synology, QNAP, Unraid; x86 oder ARM)?
+4. **MHD-Schnellknöpfe** („+6 Mon. · +1 J. · +2 J.“ aus UX §8.5/F2): weglassen (Stand #53, nie ein vorgeschlagenes Datum) oder als ausdrücklich gewählte Abkürzung zulassen? Die Fachlogik `quickPickBestBefore` gibt es schon. Issue #180.
 
 ## Nächste Schritte
 1. Pakete aus `docs/UMSETZUNG.md` als GitHub-Issues abarbeiten, mit Tests (M0 liegt als PR vor, dann M1 und M2)
