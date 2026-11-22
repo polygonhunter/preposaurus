@@ -60,6 +60,16 @@ Beim Aufsetzen von M0 getroffen, Details in `docs/CODE_PRINZIPIEN.md` §9:
 - **E2E in der CI** laufen gegen den Standalone-Server (`npm run start:standalone`, wie später im Container), nicht gegen `next start`, das nicht zu `output: 'standalone'` passt.
 - **E2E** laufen auf Port 3100 (Prototyp bleibt auf 3000). `playwright.config.ts` darf `process.env` lesen (nur `CI`), weil es Werkzeug und nicht App ist.
 
+## Fachliche Festlegungen aus M2 (2026-11-22, vorläufig)
+Beim Umsetzen der Fachlogik getroffen, jeweils als benannte Konstante, damit eine andere Antwort nur eine Stelle ändert:
+- **Aus UMSETZUNG §7.3 (U11) übernommen:** „Noch gut“ zählt nicht zu „versorgt“ (`STILL_GOOD_COUNTS_AS_SUPPLIED`), Kennzahlen auf eine Nachkommastelle abgerundet, Baby zählt nicht im Bedarf und nicht in den Zielmengen (`MEMBER_TYPES_WITHOUT_NEED`), Erfüllungsgrad bezogen auf die Zieldauer (`FULFILLMENT_BASIS`), keine eigene Ampelstufe für das Verbrauchsdatum (nur ROT-06), Wasser als eigene Warengruppe.
+- **Neu, nicht im Konzept beziffert:** „Weit weg vom üblichen Wert der Kategorie“ heißt: MHD mehr als doppelt so weit in der Zukunft wie die übliche Haltbarkeit (`FAR_FROM_TYPICAL_FACTOR = 2`). Kürzere Restlaufzeiten werden nicht markiert.
+- **MHD-Parsing:** Zweistellige Jahre bei Tagesdaten (`30.09.27`) gelten als 20JJ. Nur Jahre 2000 bis 2099. `09/27` ist mehrdeutig und wird abgelehnt, `30.09` ohne Jahr ebenso. Eine Uhrzeit hinter dem Datum wird ignoriert.
+- **Mengen:** `1.000 g` ist deutsch 1000 g, `1.5 l` wird als 1,5 l gelesen. Einheiten g, kg, ml, cl, l und Stück.
+- **Geschätztes MHD** („Ohne Datum“) = heute + übliche Haltbarkeit der Kategorie, Genauigkeit Tag, immer mit Kennzeichen. Ohne üblichen Wert gibt es keine Schätzung.
+- **Ernährungsform:** Die Verschiebung zwischen Warengruppen ist mengengleich (g bzw. ml). Ob dabei auch die kcal-Summe gleich bleibt, hängt an den geprüften Ersatzregeln (U3).
+- **FIFO und knappste Warengruppe:** Bei Gleichstand gewinnt die zuerst genannte Einheit bzw. Gruppe.
+
 ## Offene Fragen an den Maintainer (endgültige Entscheidung steht noch aus)
 1. **Offline**: nur anzeigen oder auch eintragen (mit späterem Abgleich)?
 2. ~~**Lizenz**~~ entschieden 2026-11-22: AGPL-3.0-or-later (siehe oben). Der Prototyp mit GSAP ist ausgenommen, siehe `prototypes/README.md`
