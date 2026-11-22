@@ -4,7 +4,7 @@
 // in capture/domain (map-recognition.ts, map-best-before-recognition.ts).
 // Dazu am Ende die Eingabe des Speicherns (#51), gleich für Foto und manuell.
 import { z } from 'zod'
-import { AI_CONFIDENCE_LEVELS, CONTAINER_KEYS } from '@/shared/config/constants'
+import { AI_CONFIDENCE_LEVELS, CONTAINER_KEYS, PHOTO_ROLES } from '@/shared/config/constants'
 import { parseCalendarDay } from '@/shared/lib/dates'
 
 const confidence = z.enum(AI_CONFIDENCE_LEVELS).describe('Wie sicher die Werte lesbar waren')
@@ -96,6 +96,21 @@ export const bestBeforeEstimateAnswerSchema = z.strictObject({
     .enum(['monat', 'jahr'])
     .describe('Wie genau die Schätzung gemeint ist: auf den Monat oder nur auf das Jahr'),
   sicherheit: confidence,
+})
+
+/** Query von `POST /api/photos?rolle=…&entwurf=…`. Der Body ist das rohe Bild. */
+export const photoUploadQuerySchema = z.object({
+  rolle: z.enum(PHOTO_ROLES),
+  entwurf: z.uuid().optional(),
+})
+
+/** `GET /api/photos/[id]?variante=vorschau`. Ohne Variante kommt das verkleinerte Bild. */
+export const photoRequestSchema = z.object({
+  id: z.uuid(),
+  variante: z
+    .enum(['bild', 'vorschau'])
+    .default('bild')
+    .transform((variant) => (variant === 'vorschau' ? 'thumbnail' : 'full')),
 })
 
 export type PackagingAnswer = z.infer<ReturnType<typeof packagingAnswerSchema>>
