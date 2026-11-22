@@ -2,7 +2,8 @@
 // wird über ihren festen Schlüssel gefunden und nur aktualisiert. Was der Haushalt selbst
 // einstellt (ausgeblendet), bleibt beim erneuten Seed erhalten. Richtwerte der Lebensmittelarten
 // (kcal, Makros, übliche Haltbarkeit) übernimmt der Seed auch beim Aktualisieren: Die Quelle dafür
-// sind die Seed-Dateien.
+// sind die Seed-Dateien. Entfallene System-Arten und -Kategorien räumt retired-master-data.ts
+// auf, ohne benutzte Einträge zu löschen.
 import { sql } from 'drizzle-orm'
 import type { Database } from '../../src/server/db/connection'
 import { categories, containers } from '../../src/server/db/schema/catalog'
@@ -10,8 +11,9 @@ import { foodTypes } from '../../src/server/db/schema/food-types'
 import { productGroups } from '../../src/server/db/schema/recommendation'
 import { CONTAINERS } from './stammdaten/behaelter'
 import { SYSTEM_CATEGORIES } from './stammdaten/kategorien'
-import { SYSTEM_FOOD_TYPES } from './stammdaten/lebensmittelarten'
+import { MERGED_FOOD_TYPES, SYSTEM_FOOD_TYPES } from './stammdaten/lebensmittelarten'
 import { PRODUCT_GROUPS } from './stammdaten/warengruppen'
+import { retireSystemCategories, retireSystemFoodTypes } from './retired-master-data'
 
 const SORT_STEP = 10
 const sortOrderOf = (index: number) => (index + 1) * SORT_STEP
@@ -113,6 +115,16 @@ export async function seedMasterData(db: Database): Promise<void> {
     const groupIds = await seedProductGroups(tx)
     const categoryIds = await seedSystemCategories(tx, groupIds)
     await seedSystemFoodTypes(tx, categoryIds)
+    // Erst die Arten, dann die Kategorien: Eine entfallene Art kann ihre Kategorie noch belegen.
+    await retireSystemFoodTypes(
+      tx,
+      SYSTEM_FOOD_TYPES.map((foodType) => foodType.key),
+      MERGED_FOOD_TYPES,
+    )
+    await retireSystemCategories(
+      tx,
+      SYSTEM_CATEGORIES.map((category) => category.key),
+    )
     await seedContainers(tx)
   })
 }
