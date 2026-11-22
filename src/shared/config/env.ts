@@ -84,12 +84,32 @@ const baseSchema = z.object({
   PHOTO_STORAGE_DIR: z.string().min(1).default('./.data/fotos'),
   // Musterseite /muster auch im Produktionsbuild zeigen (nur für die E2E-Tests in der CI).
   SHOW_PATTERN_PAGE: z.stringbool().default(false),
-  // Übergang bis zur Anmeldung (#33): Ohne Sitzung gilt der einzige Haushalt der Installation.
-  // Im Dev-Modus immer, im Produktionsbuild nur mit true (E2E-Tests der CI).
-  DEV_HOUSEHOLD_WITHOUT_LOGIN: z.stringbool().default(false),
+  // Sitzungs-Cookie im Produktionsbuild ohne Secure (nur für die E2E-Tests der CI über
+  // http://localhost: WebKit speichert dort keine Secure-Cookies). Im Betrieb nie setzen.
+  E2E_INSECURE_COOKIES: z.stringbool().default(false),
+  // Setzt GitHub Actions (CI=true). Bindet E2E_INSECURE_COOKIES an die CI.
+  CI: optionalText.transform((value) => value !== undefined && !/^(0|false)$/i.test(value.trim())),
 })
 
-const envSchema = baseSchema.extend(smtpSchema.shape).superRefine(checkSmtp)
+type BaseValues = z.infer<typeof baseSchema>
+
+// Ein versehentlich gesetztes E2E_INSECURE_COOKIES im Betrieb stoppt den Start, statt die
+// Sitzungs-Cookies still ohne Secure auszuliefern.
+function checkInsecureCookies(values: BaseValues, context: z.RefinementCtx): void {
+  if (values.E2E_INSECURE_COOKIES && values.NODE_ENV === 'production' && !values.CI) {
+    context.addIssue({
+      code: 'custom',
+      path: ['E2E_INSECURE_COOKIES'],
+      message:
+        'E2E_INSECURE_COOKIES gilt nur für die E2E-Tests der CI. Im Betrieb bitte entfernen.',
+    })
+  }
+}
+
+const envSchema = baseSchema
+  .extend(smtpSchema.shape)
+  .superRefine(checkSmtp)
+  .superRefine(checkInsecureCookies)
 
 export type Env = z.infer<typeof envSchema>
 
@@ -106,11 +126,11 @@ export function isPatternPageEnabled(env: Pick<Env, 'NODE_ENV' | 'SHOW_PATTERN_P
   return env.NODE_ENV !== 'production' || env.SHOW_PATTERN_PAGE
 }
 
-// Im Dev-Modus immer, sonst nur mit DEV_HOUSEHOLD_WITHOUT_LOGIN=true (#33 löst das ab).
-export function isHouseholdWithoutLoginEnabled(
-  env: Pick<Env, 'NODE_ENV' | 'DEV_HOUSEHOLD_WITHOUT_LOGIN'>,
+// Secure-Cookies im Produktionsbuild, außer im E2E-Lauf der CI (E2E_INSECURE_COOKIES und CI).
+export function isCookieSecure(
+  env: Pick<Env, 'NODE_ENV' | 'E2E_INSECURE_COOKIES' | 'CI'>,
 ): boolean {
-  return env.NODE_ENV !== 'production' || env.DEV_HOUSEHOLD_WITHOUT_LOGIN
+  return env.NODE_ENV === 'production' && !(env.E2E_INSECURE_COOKIES && env.CI)
 }
 
 // Wirft bei ungültigen Werten: ohne gültige Umgebung soll der Server gar nicht erst starten.

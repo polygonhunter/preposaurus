@@ -8,10 +8,10 @@
     "src/server/ai/anthropic-adapter.ts!",
     "src/server/notify/nodemailer-mail-sender.ts!",
     "src/features/ai-settings/application/*.ts!",
-    "src/features/auth/actions/*.ts!",
     "src/features/capture/actions/*.ts!",
     "src/server/auth/guards.ts!",
-    "scripts/admin.ts!"
+    "scripts/admin.ts!",
+    "tests/e2e/*.setup.ts"
   ],
   "project": [
     "src/**/*.{ts,tsx,css}!",

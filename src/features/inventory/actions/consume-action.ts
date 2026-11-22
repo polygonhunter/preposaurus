@@ -3,7 +3,7 @@
 // direkt aufrufbar ist (CODE_PRINZIPIEN §7), und lädt danach die Seite neu. Rückgängig statt
 // Rückfrage: Die Oberfläche zeigt nach Erfolg die UndoBar mit `undoConsumeAction`.
 import { refresh } from 'next/cache'
-import { requireHousehold, type HouseholdAccess } from '@/server/auth/household'
+import { requireHouseholdUser } from '@/server/auth/guards'
 import { consumeUnit, type ConsumeError } from '../application/consume-unit'
 import { stockServices } from '../application/stock-services'
 import { takeOne, type TakeOneError, type TakenUnit } from '../application/take-one'
@@ -28,7 +28,7 @@ function messageFor(error: ConsumeError | TakeOneError): string {
 
 async function run(
   request: ConsumeRequest,
-  { householdId, userId }: HouseholdAccess,
+  { householdId, userId }: Readonly<{ householdId: string; userId: string }>,
 ): Promise<Result<TakenUnit, ConsumeError | TakeOneError>> {
   const { reader, writer, now } = await stockServices()
   if (request.kind === 'target') {
@@ -41,9 +41,12 @@ async function run(
 export async function consumeAction(input: unknown): Promise<ConsumeActionResult> {
   const parsed = consumeRequestSchema.safeParse(input)
   if (!parsed.success) return { ok: false, message: GONE }
-  const access = await requireHousehold()
-  if (!access.ok) return { ok: false, message: ACCESS_MESSAGE }
-  const result = await run(parsed.data, access.value)
+  const user = await requireHouseholdUser()
+  if (!user.ok) return { ok: false, message: ACCESS_MESSAGE }
+  const result = await run(parsed.data, {
+    householdId: user.value.householdId,
+    userId: user.value.id,
+  })
   refresh()
   return result.ok
     ? { ok: true, taken: result.value }

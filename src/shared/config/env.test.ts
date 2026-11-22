@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { isHouseholdWithoutLoginEnabled, isPatternPageEnabled, loadEnv } from './env'
+import { isPatternPageEnabled, loadEnv, isCookieSecure } from './env'
 
 const SECRET = 'x'.repeat(32)
 const minimal = { DATABASE_URL: 'pglite://./.data/dev', APP_SECRET: SECRET }
@@ -82,6 +82,24 @@ describe('isPatternPageEnabled', () => {
     expect(isPatternPageEnabled({ NODE_ENV: 'development', SHOW_PATTERN_PAGE: false })).toBe(true)
   })
 
+  it('setzt Secure-Cookies nur im Produktionsbuild und dort ohne E2E-Schalter der CI', () => {
+    const production = { NODE_ENV: 'production', CI: true } as const
+    expect(loadEnv(minimal).E2E_INSECURE_COOKIES).toBe(false)
+    expect(isCookieSecure({ ...production, E2E_INSECURE_COOKIES: false })).toBe(true)
+    expect(isCookieSecure({ ...production, E2E_INSECURE_COOKIES: true })).toBe(false)
+    expect(isCookieSecure({ ...production, E2E_INSECURE_COOKIES: true, CI: false })).toBe(true)
+    expect(
+      isCookieSecure({ NODE_ENV: 'development', E2E_INSECURE_COOKIES: false, CI: false }),
+    ).toBe(false)
+  })
+
+  it('lässt E2E_INSECURE_COOKIES im Produktionsbuild nur in der CI zu', () => {
+    const insecure = { ...minimal, NODE_ENV: 'production', E2E_INSECURE_COOKIES: 'true' }
+    expect(() => loadEnv(insecure)).toThrow(/E2E_INSECURE_COOKIES gilt nur/)
+    expect(() => loadEnv({ ...insecure, CI: 'false' })).toThrow(/E2E_INSECURE_COOKIES gilt nur/)
+    expect(loadEnv({ ...insecure, CI: 'true' }).CI).toBe(true)
+  })
+
   it('zeigt sie im Produktionsbuild nur mit SHOW_PATTERN_PAGE', () => {
     expect(isPatternPageEnabled({ NODE_ENV: 'production', SHOW_PATTERN_PAGE: false })).toBe(false)
     expect(isPatternPageEnabled({ NODE_ENV: 'production', SHOW_PATTERN_PAGE: true })).toBe(true)
@@ -120,21 +138,5 @@ describe('loadEnv: SMTP', () => {
 
   it('lehnt einen ungültigen Port ab', () => {
     expect(() => loadEnv({ ...smtp, SMTP_PORT: '70000' })).toThrow('SMTP_PORT')
-  })
-})
-
-describe('isHouseholdWithoutLoginEnabled', () => {
-  const off = { DEV_HOUSEHOLD_WITHOUT_LOGIN: false }
-
-  it('gilt im Dev-Modus immer, im Produktionsbuild nur mit DEV_HOUSEHOLD_WITHOUT_LOGIN', () => {
-    expect(isHouseholdWithoutLoginEnabled({ NODE_ENV: 'development', ...off })).toBe(true)
-    expect(isHouseholdWithoutLoginEnabled({ NODE_ENV: 'production', ...off })).toBe(false)
-    expect(
-      isHouseholdWithoutLoginEnabled({ NODE_ENV: 'production', DEV_HOUSEHOLD_WITHOUT_LOGIN: true }),
-    ).toBe(true)
-  })
-
-  it('ist ohne Angabe aus', () => {
-    expect(loadEnv(minimal).DEV_HOUSEHOLD_WITHOUT_LOGIN).toBe(false)
   })
 })

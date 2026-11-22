@@ -28,6 +28,13 @@ export const ACTIVITY_LEVELS = ['wenig', 'normal', 'viel'] as const
 
 export const MEMBER_CONDITIONS = ['schwanger', 'stillend'] as const
 
+// Zieldauer der Ersteinrichtung (ONBOARDING §2.2, L2): Standard der BBK/BLE-Empfehlung. Sobald die
+// Quellen im Seed stehen (M1-09), kommt der Wert aus quelle_version.standard_tage.
+export const DEFAULT_GOAL_DAYS = 10
+
+// Name des Haushalts, solange niemand einen anderen einträgt (ONBOARDING §2.2)
+export const DEFAULT_HOUSEHOLD_NAME = 'Unser Haushalt'
+
 export const DEFAULT_AMPEL_YELLOW_DAYS = 90
 export const DEFAULT_AMPEL_ORANGE_DAYS = 28
 // Orange mindestens 7 Tage, sonst überlappen „Diese Woche“ und „Diesen Monat“ (E-21).

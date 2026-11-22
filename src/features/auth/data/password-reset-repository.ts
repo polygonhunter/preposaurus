@@ -6,9 +6,7 @@ import { and, eq, inArray, like, or, sql } from 'drizzle-orm'
 import type { Database } from '@/server/db/connection'
 import { accounts, sessions, users } from '@/server/db/schema/account'
 import { signInLocks } from '@/server/db/schema/sign-in-lock'
-
-// Better Auth führt das Passwort im Konto mit diesem Anbieter (Kernschema, account.providerId).
-const CREDENTIAL_PROVIDER = 'credential'
+import { CREDENTIAL_PROVIDER } from './credential'
 
 type FoundUser = Readonly<{ id: string; isActive: boolean }>
 
