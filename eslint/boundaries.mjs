@@ -109,6 +109,8 @@ const policies = [
     allow: [
       to({ module: { origin: ['external', 'core'] } }),
       to(element(['test-helpers', 'domain'])),
+      // Test-DB, Schema und Fixtures für die Integrationstests (M1)
+      to(serverModule('db')),
       to(anyShared),
     ],
   },
