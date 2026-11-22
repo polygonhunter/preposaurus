@@ -7,8 +7,17 @@
 # gelöscht wird, fehlt im Stand. Nachts ist das vertretbar.
 # Ein Stand entsteht unter .laufend-… und wird erst am Ende umbenannt. Reste abgebrochener Läufe
 # räumt der nächste Lauf weg. Nach dem Lauf steht der Name in LAST_STAND.
+#   run_backup <art>   Stand anlegen, alte Stände rotieren, Status schreiben
 
 run_backup() {
+  create_stand "$1"
+  apply_retention
+  finish_backup
+}
+
+# Legt den Stand an, ohne alte Stände zu löschen. Das Sicherheitsnetz beim Wiederherstellen
+# rotiert erst nach dem Zurückspielen, sonst könnte es genau den gewählten Stand löschen.
+create_stand() {
   kind=$1
   kind_dir="$BACKUP_DIR/$kind"
   name=$(new_stand_name)
@@ -24,10 +33,12 @@ run_backup() {
   mv "$work" "$kind_dir/$name"
   LAST_STAND="$kind/$name"
   [ "$kind" != taeglich ] || keep_weekly_copy "$kind_dir/$name"
-  apply_retention
+}
+
+finish_backup() {
   hand_over_ownership
   write_status ok "$LAST_STAND"
-  log "Sicherung fertig: $LAST_STAND ($(du -sh "$kind_dir/$name" | cut -f1))"
+  log "Sicherung fertig: $LAST_STAND ($(du -sh "$BACKUP_DIR/$LAST_STAND" | cut -f1))"
 }
 
 remove_unfinished() {

@@ -104,6 +104,20 @@ safety=$(newest vor-wiederherstellung)
 [ -f "backups/$safety/fotos/haushalt/zwei.jpg" ] || fail "Die Sicherung vor dem Zurückspielen fehlt"
 grep -q "$safety" restore.log || fail "Die Meldung nennt die Sicherung davor nicht"
 
+# Der älteste von fünf Ständen vor-wiederherstellung: Das Sicherheitsnetz darf ihn nicht vor dem
+# Zurückspielen wegrotieren. Danach bleiben wieder fünf.
+rm -rf backups/vor-wiederherstellung
+mkdir backups/vor-wiederherstellung
+for day in 1 2 3 4 5; do
+  cp -a "backups/$stand" "backups/vor-wiederherstellung/2026-01-0${day}_000000"
+done
+add_user 3
+backup backup wiederherstellen vor-wiederherstellung/2026-01-01_000000 --ja ||
+  fail "Der älteste Stand vor-wiederherstellung ließ sich nicht zurückspielen"
+[ "$(psql_value "$ROW_COUNTS")" = "$before" ] || fail "Der älteste Stand ist nicht zurück"
+[ "$(backup backup liste | grep -c '^vor-wiederherstellung/')" = "5" ] ||
+  fail "Nach dem Zurückspielen sollen fünf Stände vor-wiederherstellung bleiben"
+
 docker compose up -d
 wait_for_health
 echo "Zeilenzahlen gleich: $after"
