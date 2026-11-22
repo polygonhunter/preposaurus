@@ -94,6 +94,30 @@ describe('Schema Vorrat', () => {
     )
   })
 
+  it('verlangt zur Bestätigung der Nährwerte eine Quelle', async () => {
+    await expectConstraintViolation(
+      testDb.db.insert(products).values(
+        buildProduct({
+          householdId,
+          categoryId,
+          nutritionSource: null,
+          nutritionConfirmedAt: new Date(),
+        }),
+      ),
+      'produkt_naehrwerte_bestaetigt_check',
+    )
+  })
+
+  it('lehnt eine unbekannte Nährwertquelle ab', async () => {
+    await expectConstraintViolation(
+      testDb.db
+        .insert(products)
+        // @ts-expect-error -- absichtlich ungültige Quelle, die nur die DB abfangen soll
+        .values(buildProduct({ householdId, categoryId, nutritionSource: 'geraten' })),
+      'produkt_naehrwerte_quelle_check',
+    )
+  })
+
   it('lehnt eine doppelte erfassung_id ab', async () => {
     const captureId = randomUUID()
     await insertProduct(captureId)

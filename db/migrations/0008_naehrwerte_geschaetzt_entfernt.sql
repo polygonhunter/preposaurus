@@ -1,0 +1,1 @@
+ALTER TABLE "produkt" DROP COLUMN "naehrwerte_geschaetzt";
