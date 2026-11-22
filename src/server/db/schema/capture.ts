@@ -5,6 +5,7 @@ import { sql } from 'drizzle-orm'
 import {
   boolean,
   check,
+  foreignKey,
   index,
   integer,
   jsonb,
@@ -54,13 +55,19 @@ export const photos = pgTable(
     // Wird ein Entwurf gelöscht, bleibt ein festes Foto stehen (nur der Verweis fällt weg).
     draftId: uuid('entwurf_id').references(() => captureDrafts.id, { onDelete: 'set null' }),
     productId: uuid('produkt_id').references(() => products.id, { onDelete: 'cascade' }),
-    // MHD-Foto einer bestimmten Packung
+    // MHD-Foto einer bestimmten Packung. Der einfache Fremdschlüssel leert den Verweis, wenn die
+    // Einheit gelöscht wird. Der zusammengesetzte (unten) sichert, dass sie zum Produkt gehört.
     unitId: uuid('einheit_id').references(() => units.id, { onDelete: 'set null' }),
     ...timestamps(),
   },
   (table) => [
     index('foto_entwurf_id_idx').on(table.draftId),
     index('foto_produkt_id_idx').on(table.productId),
+    foreignKey({
+      name: 'foto_einheit_produkt_fk',
+      columns: [table.unitId, table.productId],
+      foreignColumns: [units.id, units.productId],
+    }).onDelete('no action'),
     check('foto_rolle_check', isOneOf(table.role, PHOTO_ROLES)),
     check('foto_status_check', isOneOf(table.status, PHOTO_STATUSES)),
     check('foto_fest_check', sql`${table.status} <> 'fest' or ${table.productId} is not null`),
