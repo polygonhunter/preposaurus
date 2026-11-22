@@ -38,6 +38,7 @@ export const FRUIT_AND_NUT_FOOD_TYPES = [
     ['haselnuesse', 'Haselnüsse', reference([654, 14.9, 7, 60.8])],
     ['mandeln', 'Mandeln', reference([595, 21.1, 9.1, 49.9])],
     ['erdnuesse', 'Erdnüsse', reference([613, 24.4, 12.9, 49.7])],
+    ['erdnussbutter', 'Erdnussbutter und Nussmus'],
     ['cashewkerne', 'Cashewkerne'],
     ['pistazien', 'Pistazien'],
     ['nuesse_sonstige', 'Nüsse (sonstige: Paranüsse, Macadamia, Pekan)'],

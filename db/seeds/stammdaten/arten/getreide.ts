@@ -22,7 +22,6 @@ export const GRAIN_FOOD_TYPES = [
     ['griess', 'Grieß', reference([344, 12.7, 68.9, 1.1])],
     ['speisestaerke', 'Speisestärke'],
     ['paniermehl', 'Paniermehl'],
-    ['brotbackmischung', 'Brotbackmischung'],
   ]),
   ...inCategory('cerealien', [
     ['haferflocken', 'Haferflocken', reference([362, 13.2, 57.6, 6.5], 12)],

@@ -82,6 +82,22 @@ describe('Seed Stammdaten: entfallene System-Einträge', () => {
     expect(await foodTypeByKey('spaghetti')).toBeUndefined()
   })
 
+  it('zieht beim Umhängen auch die Kategorie des Produkts mit (thunfisch)', async () => {
+    const oldTuna = await insertOldFoodType('thunfisch')
+    const productId = await productOn(oldTuna)
+
+    await seedMasterData(testDb.db)
+
+    const tuna = await foodTypeByKey('thunfisch_konserve')
+    const [moved] = await testDb.db
+      .select({ foodTypeId: products.foodTypeId, categoryId: products.categoryId })
+      .from(products)
+      .where(eq(products.id, productId))
+    expect(tuna?.categoryId).not.toBe(oldTuna.categoryId)
+    expect(moved).toEqual({ foodTypeId: tuna?.id, categoryId: tuna?.categoryId })
+    expect(await foodTypeByKey('thunfisch')).toBeUndefined()
+  })
+
   it('blendet eine entfallene, noch benutzte Art aus und löscht eine unbenutzte', async () => {
     await productOn(await insertOldFoodType('alte_benutzte_art'))
     await insertOldFoodType('alte_leere_art')

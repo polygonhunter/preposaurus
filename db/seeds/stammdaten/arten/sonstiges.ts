@@ -13,6 +13,7 @@ export const OTHER_FOOD_TYPES = [
     ['fertiggericht_trocken', 'Fertiggericht zum Anrühren (Nudel-, Reis-, Kartoffelgerichte)'],
     ['fertiggericht_gekuehlt', 'Fertiggericht (gekühlt)'],
     ['feinkostsalat', 'Feinkostsalat (Kartoffel-, Nudel-, Fleischsalat)'],
+    // Einzige Art für Dips, haltbare Salsa steht bei den Würzsaucen.
     ['hummus_dips', 'Hummus und Dips'],
   ]),
   ...inCategory('tk_gerichte', [
@@ -39,19 +40,21 @@ export const OTHER_FOOD_TYPES = [
     ['honig', 'Honig', reference([330, 0.3, 82.2, 0], 24)],
     ['marmelade', 'Marmelade und Konfitüre', reference([275, 0.4, 67.8, 0.1], 18)],
     ['nuss_nougat_creme', 'Nuss-Nougat-Creme'],
-    ['erdnussbutter', 'Erdnussbutter und Nussmus'],
     ['aufstrich_herzhaft', 'Brotaufstrich (herzhaft, vegetarisch)'],
   ]),
   ...inCategory('backzutaten', [
     ['zucker', 'Zucker', reference([400, 0, 100, 0])],
     ['suessungsmittel', 'Süßstoff und Zuckerersatz'],
-    ['dicksaft', 'Dicksaft und Sirup (Ahorn, Agave, Zuckerrübe)'],
+    // Eine Art für Sirup zum Verdünnen und zum Süßen, Nährwerte und Haltbarkeit sind ähnlich.
+    ['sirup', 'Sirup und Dicksaft (Frucht-, Ahorn-, Agavensirup)'],
     ['backpulver', 'Backpulver und Natron'],
     ['hefe', 'Hefe'],
     ['vanillezucker', 'Vanillezucker und Backaromen'],
     ['puddingpulver', 'Puddingpulver und Dessertpulver'],
     ['gelatine', 'Gelatine und Agar-Agar'],
-    ['backmischung', 'Backmischung (Kuchen, Muffins)'],
+    // Backmischungen und Teige stehen alle hier und zählen nur über kcal, weil ihre
+    // Zusammensetzung stark schwankt.
+    ['backmischung', 'Backmischung (Brot, Kuchen, Muffins)'],
     ['kuvertuere', 'Kuvertüre, Schokotropfen und Glasur'],
     ['marzipan', 'Marzipan und Persipan (Rohmasse)'],
     ['backdekor', 'Streusel und Backdekor'],
@@ -74,12 +77,11 @@ export const OTHER_FOOD_TYPES = [
     ['mayonnaise', 'Mayonnaise und Remoulade'],
     ['tomatensauce', 'Tomatensauce und Pastasauce'],
     ['pesto', 'Pesto'],
-    ['grillsauce', 'Grill- und Würzsaucen (BBQ, Curry, Chili)'],
+    ['grillsauce', 'Grill- und Würzsaucen (BBQ, Curry, Chili, Salsa)'],
     ['sauce_fertig', 'Fertige Saucen (Hollandaise, Bratensauce)'],
     ['saucenpulver', 'Fix-Produkte und Saucenpulver'],
     ['wuerzpaste', 'Würzpasten (Curry-, Chilipaste)'],
     ['dressing', 'Salatdressing'],
-    ['salsa', 'Salsa und Dips (haltbar)'],
   ]),
   ...inCategory('kaffee_tee', [
     ['kaffee', 'Kaffee'],
@@ -97,6 +99,14 @@ export const OTHER_FOOD_TYPES = [
     ['getreidebrei', 'Getreide- und Milchbrei (Pulver)'],
     ['babysnacks', 'Baby- und Kleinkindsnacks'],
     ['babytee', 'Baby- und Kindertee'],
+  ]),
+  ...inCategory('sonstige_lebensmittel', [
+    // Kochzutat mit viel Fett, kein Milchersatz zum Trinken: zählt nicht zum Milch-Ziel.
+    ['kokosmilch', 'Kokosmilch'],
+    // Meist aus Stärke und Kokosfett, kaum Eiweiß: zählt nicht zum Milch-Ziel.
+    ['kaesealternative', 'Käsealternative (pflanzlich)'],
+    // Auffang-Art, wenn keine andere passt. Besser eine eigene Art anlegen (#142).
+    ['sonstiges_lebensmittel', 'Sonstiges Lebensmittel'],
   ]),
   ...inCategory('spezialnahrung', [
     ['notration', 'Notration und Kompaktnahrung'],

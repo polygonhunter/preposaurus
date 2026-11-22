@@ -23,9 +23,8 @@ export const FAT_WATER_DRINK_FOOD_TYPES = [
     ['fruchtsaft', 'Fruchtsaft', reference([46, 0.1, 11.1, 0.1], 18)],
     ['fruchtnektar', 'Fruchtnektar'],
     ['gemuesesaft', 'Gemüsesaft'],
-    ['smoothie', 'Smoothies und Direktsaft (gekühlt)'],
+    ['smoothie', 'Smoothies (gekühlt)'],
     ['zitronensaft', 'Zitronensaft'],
-    ['sirup', 'Sirup zum Verdünnen'],
   ]),
   ...inCategory('erfrischungsgetraenke', [
     ['limonade', 'Limonade und Cola'],
@@ -37,6 +36,9 @@ export const FAT_WATER_DRINK_FOOD_TYPES = [
     ['getraenkepulver', 'Getränkepulver und Elektrolyte'],
   ]),
   ...inCategory('alkohol', [
+    // Alkohol: nie im Getränke- oder Wasser-Ziel. Als Trinkmenge zählt nur die Warengruppe
+    // Wasser (stock-model.ts), die Gruppe Getränke hat kein Ziel. Die kcal zählen wie alle
+    // anderen zur Energie.
     ['bier', 'Bier'],
     ['bier_alkoholfrei', 'Bier (alkoholfrei) und Malzbier'],
     ['wein', 'Wein'],

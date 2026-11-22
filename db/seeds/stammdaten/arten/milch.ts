@@ -7,7 +7,8 @@ export const DAIRY_FOOD_TYPES = [
     ['h_milch', 'H-Milch', reference([61, 3.1, 4.8, 3.3])],
     ['frischmilch', 'Frischmilch'],
     ['milchpulver', 'Milchpulver', reference([499, 26.3, 38.4, 26.7])],
-    ['kondensmilch', 'Kondensmilch und Kaffeesahne', reference([135, 6.8, 10, 7.6])],
+    ['kondensmilch', 'Kondensmilch', reference([135, 6.8, 10, 7.6])],
+    ['kaffeesahne', 'Kaffeesahne'],
     ['sahne', 'Sahne (Schlagsahne, Kochsahne)'],
     ['saure_sahne', 'Saure Sahne, Schmand und Crème fraîche'],
     ['buttermilch', 'Buttermilch und Kefir'],
@@ -37,7 +38,5 @@ export const DAIRY_FOOD_TYPES = [
     ['pflanzendrink', 'Pflanzendrink (Mandel, Reis, Kokos u. a.)'],
     ['joghurtalternative', 'Joghurtalternative (pflanzlich)'],
     ['sahnealternative', 'Sahnealternative (pflanzlich)'],
-    ['kaesealternative', 'Käsealternative (pflanzlich)'],
-    ['kokosmilch', 'Kokosmilch'],
   ]),
 ]
