@@ -25,11 +25,16 @@ x-app: &app
     PHOTO_STORAGE_DIR: /data/fotos
   volumes:
     - ./fotos:/data/fotos
+  # Die App braucht keine Linux-Capabilities und darf sich keine Rechte verschaffen.
+  cap_drop: [ALL]
+  security_opt: ['no-new-privileges:true']
   restart: unless-stopped
 
 services:
   db:
     image: postgres:18.7-trixie
+    # Capabilities bleiben: Der Start wechselt per gosu von root zum Nutzer postgres.
+    security_opt: ['no-new-privileges:true']
     environment:
       POSTGRES_USER: preposaurus
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD fehlt in .env}
@@ -90,6 +95,8 @@ services:
   #                      danach docker compose up -d
   backup:
     image: ghcr.io/polygonhunter/preposaurus-backup:${PREPOSAURUS_VERSION:?PREPOSAURUS_VERSION fehlt in .env}
+    # Läuft als root, weil es Fotos jedes Besitzers sichern und zurückspielen muss.
+    security_opt: ['no-new-privileges:true']
     environment:
       PGHOST: db
       PGUSER: preposaurus
