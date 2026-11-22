@@ -18,7 +18,15 @@ export interface AmpelThresholds {
 /** Standard laut Konzept: bald fällig bis 3 Monate, dringend bis 4 Wochen. */
 export const DEFAULT_AMPEL_THRESHOLDS: AmpelThresholds = { soonDays: 90, urgentDays: 28 }
 
-export type ThresholdError = { kind: 'not-a-whole-number' } | { kind: 'urgent-above-soon' }
+/**
+ * Die Zeitgruppe „Diese Woche“ auf der Seite Bald fällig umfasst fest 7 Tage (UX-Konzept F13).
+ * Die Orange-Schwelle darf darunter nicht liegen, sonst überlappen „Diese Woche“ und
+ * „Diesen Monat“ (E-21).
+ */
+export const THIS_WEEK_DAYS = 7
+
+export type ThresholdError =
+  { kind: 'not-a-whole-number' } | { kind: 'urgent-below-week' } | { kind: 'urgent-above-soon' }
 
 interface UnitStateInput {
   /** null heißt „Datum fehlt“ */
@@ -36,7 +44,7 @@ export function unitStateFor({ bestBefore, today, thresholds }: UnitStateInput):
   return 'good'
 }
 
-/** Prüft neue Schwellen: ganze Tage ab 0, und orange darf nicht größer sein als gelb. */
+/** Prüft neue Schwellen: ganze Tage, orange mindestens 7 Tage und nicht größer als gelb. */
 export function validateAmpelThresholds(
   thresholds: AmpelThresholds,
 ): Result<AmpelThresholds, ThresholdError> {
@@ -44,6 +52,7 @@ export function validateAmpelThresholds(
   if (!values.every((value) => Number.isInteger(value) && value >= 0)) {
     return err({ kind: 'not-a-whole-number' })
   }
+  if (thresholds.urgentDays < THIS_WEEK_DAYS) return err({ kind: 'urgent-below-week' })
   if (thresholds.urgentDays > thresholds.soonDays) return err({ kind: 'urgent-above-soon' })
   return ok(thresholds)
 }

@@ -67,6 +67,25 @@ describe('validateAmpelThresholds', () => {
     expect(validateAmpelThresholds({ soonDays: 14, urgentDays: 14 }).ok).toBe(true)
   })
 
+  it('nimmt orange genau 7 Tage an, auch wenn gelb gleich ist', () => {
+    expect(validateAmpelThresholds({ soonDays: 90, urgentDays: 7 }).ok).toBe(true)
+    expect(validateAmpelThresholds({ soonDays: 7, urgentDays: 7 }).ok).toBe(true)
+  })
+
+  it.each([6, 1, 0])('lehnt orange mit %i Tagen ab, das ist kürzer als „Diese Woche“', (days) => {
+    expect(validateAmpelThresholds({ soonDays: 90, urgentDays: days })).toEqual({
+      ok: false,
+      error: { kind: 'urgent-below-week' },
+    })
+  })
+
+  it('meldet bei gelb unter 7 Tagen zuerst die zu kurze Orange-Schwelle', () => {
+    expect(validateAmpelThresholds({ soonDays: 5, urgentDays: 5 })).toEqual({
+      ok: false,
+      error: { kind: 'urgent-below-week' },
+    })
+  })
+
   it('lehnt orange größer als gelb ab', () => {
     expect(validateAmpelThresholds({ soonDays: 28, urgentDays: 29 })).toEqual({
       ok: false,
