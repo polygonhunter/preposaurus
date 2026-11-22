@@ -26,8 +26,8 @@ import {
   DEFAULT_WEEKLY_SUMMARY_WEEKDAY,
   DIETS,
   MEMBER_CONDITIONS,
-  MIN_AMPEL_ORANGE_DAYS,
   MEMBER_TYPES,
+  MIN_AMPEL_ORANGE_DAYS,
   SEXES,
 } from '../../../shared/config/constants'
 import { id, isOneOf, timestamps, timestampTz } from './columns'

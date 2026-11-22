@@ -89,12 +89,20 @@ export type ContentParseError = QuantityParseError | { kind: 'piece-not-content'
 const isContentQuantity = (quantity: Quantity): quantity is ContentQuantity =>
   quantity.unit !== 'piece'
 
+/** Ist als Einheit Stück angegeben, egal ob die Zahl davor gültig ist („1,5 Stück“, „0 Stück“)? */
+function namesPieces(text: string): boolean {
+  const unitText = QUANTITY.exec(text.trim().toLowerCase())?.[2]
+  return unitText !== undefined && UNITS[unitText]?.unit === 'piece'
+}
+
 /**
  * Liest den Inhalt einer Packung wie `parseQuantity`, lehnt Stück aber ab. Die DB kennt als Inhalt
  * nur g und ml (`produkt_inhalt_einheit_check`). „6 Stück“ meint bei der Erfassung sechs Packungen,
- * die UI leitet deshalb auf die Anzahl um. Stück bleibt dem Nachkaufen vorbehalten.
+ * die UI soll deshalb auf die Anzahl umleiten. Stück wird zuerst abgelehnt, auch mit ungültiger
+ * Zahl, damit die UI immer diesen Hinweis zeigt. Stück bleibt dem Nachkaufen vorbehalten.
  */
 export function parseContentQuantity(text: string): Result<ContentQuantity, ContentParseError> {
+  if (namesPieces(text)) return err({ kind: 'piece-not-content' })
   const parsed = parseQuantity(text)
   if (!parsed.ok) return parsed
   return isContentQuantity(parsed.value) ? ok(parsed.value) : err({ kind: 'piece-not-content' })
