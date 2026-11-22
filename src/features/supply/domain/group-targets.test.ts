@@ -3,6 +3,7 @@ import {
   calculateHouseholdTargets,
   resolveDiet,
   targetsForDiet,
+  type Diet,
   type DietShifts,
   type GroupTarget,
   type HouseholdMember,
@@ -15,6 +16,7 @@ const TEST_TARGETS: GroupTarget[] = [
   { groupKey: 'obst', unit: 'g', amountPerPersonPerDay: 80 },
   { groupKey: 'fleisch', unit: 'g', amountPerPersonPerDay: 60 },
   { groupKey: 'milch', unit: 'ml', amountPerPersonPerDay: 300 },
+  { groupKey: 'pflanzendrink', unit: 'ml', amountPerPersonPerDay: 0 },
   { groupKey: 'wasser', unit: 'ml', amountPerPersonPerDay: 2000 },
 ]
 
@@ -40,25 +42,29 @@ const TEST_SHIFTS: DietShifts = {
     },
     {
       from: 'milch',
-      to: [
-        { groupKey: 'gemuese', share: 1 / 2 },
-        { groupKey: 'obst', share: 1 / 2 },
-      ],
+      to: [{ groupKey: 'pflanzendrink', share: 1 }],
     },
   ],
 }
 
-const sum = (values: Iterable<number>) => [...values].reduce((total, value) => total + value, 0)
-const amounts = (members: HouseholdMember[], householdDiet: HouseholdMember['diet'] = 'omnivore') =>
-  Object.fromEntries(
-    calculateHouseholdTargets({
-      members,
-      householdDiet: householdDiet ?? 'omnivore',
-      targets: TEST_TARGETS,
-      dietShifts: TEST_SHIFTS,
-      days: 10,
-    }).map((target) => [target.groupKey, target.amount]),
-  )
+/** Summe je Einheit, damit g und ml nie zusammengezählt werden. */
+function totalsByUnit(amounts: ReadonlyMap<string, number>) {
+  const totals = { g: 0, ml: 0 }
+  for (const target of TEST_TARGETS) totals[target.unit] += amounts.get(target.groupKey) ?? 0
+  return totals
+}
+
+function amounts(members: HouseholdMember[], householdDiet: Diet = 'omnivore') {
+  const result = calculateHouseholdTargets({
+    members,
+    householdDiet,
+    targets: TEST_TARGETS,
+    dietShifts: TEST_SHIFTS,
+    days: 10,
+  })
+  if (!result.ok) throw new Error('Verteilung ungültig')
+  return Object.fromEntries(result.value.map((target) => [target.groupKey, target.amount]))
+}
 
 describe('targetsForDiet', () => {
   it('lässt bei „alles“ die Mengen der Quelle unverändert', () => {
@@ -74,10 +80,12 @@ describe('targetsForDiet', () => {
   })
 
   it.each(['omnivore', 'vegetarian', 'vegan'] as const)(
-    'hält bei %s die Gesamtmenge gleich',
+    'hält bei %s die Gesamtmenge je Einheit gleich',
     (diet) => {
-      const total = sum(targetsForDiet(TEST_TARGETS, TEST_SHIFTS[diet]).values())
-      expect(total).toBeCloseTo(sum(TEST_TARGETS.map((target) => target.amountPerPersonPerDay)))
+      const shifted = totalsByUnit(targetsForDiet(TEST_TARGETS, TEST_SHIFTS[diet]))
+      const original = totalsByUnit(targetsForDiet(TEST_TARGETS, []))
+      expect(shifted.g).toBeCloseTo(original.g)
+      expect(shifted.ml).toBeCloseTo(original.ml)
     },
   )
 })
@@ -103,6 +111,7 @@ describe('calculateHouseholdTargets', () => {
 
     expect(result['fleisch']).toBe(0)
     expect(result['milch']).toBe(0)
+    expect(result['pflanzendrink']).toBe(3000)
   })
 
   it('zählt ein Baby nicht in die Zielmengen', () => {
@@ -121,6 +130,7 @@ describe('calculateHouseholdTargets', () => {
       obst: 0,
       fleisch: 0,
       milch: 0,
+      pflanzendrink: 0,
       wasser: 0,
     })
   })
@@ -130,5 +140,51 @@ describe('resolveDiet', () => {
   it('nimmt die eigene Angabe vor dem Haushalts-Standard', () => {
     expect(resolveDiet({ type: 'adult', diet: 'vegan' }, 'omnivore')).toBe('vegan')
     expect(resolveDiet({ type: 'adult', diet: null }, 'vegetarian')).toBe('vegetarian')
+  })
+})
+
+describe('calculateHouseholdTargets mit fehlerhaften Verteilungsdaten', () => {
+  const run = (dietShifts: DietShifts) =>
+    calculateHouseholdTargets({
+      members: [{ type: 'adult', diet: 'vegan' }],
+      householdDiet: 'omnivore',
+      targets: TEST_TARGETS,
+      dietShifts,
+      days: 10,
+    })
+  const withVegan = (vegan: DietShifts['vegan']): DietShifts => ({ ...TEST_SHIFTS, vegan })
+
+  it('lehnt einen Zielschlüssel ohne Zielmenge ab, statt Menge zu verlieren', () => {
+    const shifts = withVegan([{ from: 'milch', to: [{ groupKey: 'unbekannt', share: 1 }] }])
+    expect(run(shifts)).toEqual({
+      ok: false,
+      error: { kind: 'unknown-group', groupKey: 'unbekannt' },
+    })
+  })
+
+  it('lehnt eine unbekannte Ausgangsgruppe ab', () => {
+    const shifts = withVegan([{ from: 'eier', to: [{ groupKey: 'gemuese', share: 1 }] }])
+    expect(run(shifts)).toEqual({ ok: false, error: { kind: 'unknown-group', groupKey: 'eier' } })
+  })
+
+  it('lehnt Anteile ab, die nicht 1 ergeben', () => {
+    const shifts = withVegan([{ from: 'fleisch', to: [{ groupKey: 'gemuese', share: 0.9 }] }])
+    expect(run(shifts)).toEqual({
+      ok: false,
+      error: { kind: 'shares-not-one', from: 'fleisch', sum: 0.9 },
+    })
+  })
+
+  it('lehnt eine Verschiebung zwischen g und ml ab', () => {
+    const shifts = withVegan([{ from: 'milch', to: [{ groupKey: 'gemuese', share: 1 }] }])
+    expect(run(shifts)).toEqual({
+      ok: false,
+      error: { kind: 'mixed-units', from: 'milch', to: 'gemuese' },
+    })
+  })
+
+  it('prüft auch Verteilungen, die gerade niemand im Haushalt nutzt', () => {
+    const shifts = { ...TEST_SHIFTS, vegetarian: [{ from: 'x', to: [] }] }
+    expect(run(shifts).ok).toBe(false)
   })
 })
