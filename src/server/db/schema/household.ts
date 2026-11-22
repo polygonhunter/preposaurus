@@ -26,6 +26,7 @@ import {
   DEFAULT_WEEKLY_SUMMARY_WEEKDAY,
   DIETS,
   MEMBER_CONDITIONS,
+  MIN_AMPEL_ORANGE_DAYS,
   MEMBER_TYPES,
   SEXES,
 } from '../../../shared/config/constants'
@@ -88,7 +89,7 @@ export const householdSettings = pgTable(
     check('haushalt_einstellung_ernaehrungsform_check', isOneOf(table.defaultDiet, DIETS)),
     check(
       'haushalt_einstellung_ampel_check',
-      sql`${table.ampelOrangeDays} > 0 and ${table.ampelOrangeDays} <= ${table.ampelYellowDays}`,
+      sql`${table.ampelOrangeDays} >= ${sql.raw(String(MIN_AMPEL_ORANGE_DAYS))} and ${table.ampelOrangeDays} <= ${table.ampelYellowDays}`,
     ),
     check(
       'haushalt_einstellung_wochentag_check',

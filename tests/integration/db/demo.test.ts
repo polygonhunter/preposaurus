@@ -4,9 +4,10 @@ import { seedDemo } from '../../../db/seeds/demo'
 import { seedMasterData } from '../../../db/seeds/master-data'
 import { users } from '../../../src/server/db/schema/account'
 import { captures } from '../../../src/server/db/schema/confirmed-captures'
-import { households } from '../../../src/server/db/schema/household'
+import { householdSettings, households } from '../../../src/server/db/schema/household'
 import { products, units } from '../../../src/server/db/schema/inventory'
 import { AMPEL_OFFSETS, daysFrom } from '../../../db/seeds/factories'
+import { MIN_AMPEL_ORANGE_DAYS } from '../../../src/shared/config/constants'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
 
 const TODAY = new Date('2026-11-22T12:00:00Z')
@@ -49,6 +50,20 @@ describe('Demo-Daten', () => {
       expect(dates).toContain(daysFrom(TODAY, offset))
     }
     expect(dates).toContain(null)
+  })
+
+  it('hält die Ampel-Schwellen ein: Orange mindestens 7 Tage und höchstens Gelb (E-21)', async () => {
+    const [settings] = await testDb.db
+      .select({
+        yellow: householdSettings.ampelYellowDays,
+        orange: householdSettings.ampelOrangeDays,
+      })
+      .from(householdSettings)
+    if (settings === undefined) throw new Error('Einstellungen fehlen')
+
+    expect(settings.orange).toBeGreaterThanOrEqual(MIN_AMPEL_ORANGE_DAYS)
+    expect(settings.orange).toBeLessThanOrEqual(settings.yellow)
+    expect(AMPEL_OFFSETS.orange).toBeLessThanOrEqual(settings.orange)
   })
 
   it('enthält ein Produkt ohne Nährwerte und Erfassungen auf beiden Wegen', async () => {
