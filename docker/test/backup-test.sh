@@ -48,6 +48,8 @@ stand=$(newest taeglich)
 [ -f "backups/$stand/fotos/haushalt/eins.jpg" ] || fail "Das Foto fehlt in backups/$stand"
 [ -n "$(newest woechentlich)" ] || fail "Kein Wochenstand am Stichtag"
 [ "$(stat -c %u "backups/$stand")" = "$(id -u)" ] || fail "Der Stand gehört nicht dem Nutzer von fotos"
+[ "$(stat -c %a "backups/$stand")" = "700" ] || fail "Der Stand ist für andere lesbar"
+[ "$(stat -c %a "backups/$stand/datenbank.dump")" = "600" ] || fail "Der Dump ist für andere lesbar"
 
 # Mehrere Stände am selben Tag überschreiben sich nicht. vor-update bleibt beim Rotieren.
 backup backup jetzt

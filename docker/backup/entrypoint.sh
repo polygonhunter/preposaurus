@@ -7,6 +7,8 @@
 #   wiederherstellen <stand>     Stand zurückspielen (vorher die App stoppen)
 #   gesund                       Healthcheck: letzter Lauf erfolgreich und jünger als 26 Stunden
 set -eu
+# Dumps enthalten Passwort-Hashes, Sitzungen und Gesundheitsangaben: nur für den Besitzer lesbar.
+umask 077
 LIB=/usr/local/lib/preposaurus
 . "$LIB/common.sh"
 . "$LIB/rotate.sh"
