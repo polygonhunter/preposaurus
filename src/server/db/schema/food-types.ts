@@ -12,6 +12,7 @@ import {
   pgTable,
   text,
   unique,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
 import { categories } from './catalog'
@@ -24,8 +25,10 @@ export const foodTypes = pgTable(
     id: id(),
     householdId: uuid('haushalt_id').references(() => households.id, { onDelete: 'cascade' }),
     isSystem: boolean('ist_system').notNull().default(false),
-    // Fester Slug nur für System-Arten (z. B. spaghetti), damit der Seed dieselbe Zeile wiederfindet.
-    key: text('schluessel').unique(),
+    // Slug für Seed und KI (#110: die KI bekommt die Schlüssel als Enum). System-Arten haben einen
+    // festen Slug (spaghetti), eigene Arten einen erzeugten mit Präfix eigen_ (eigen_dinkelnudeln).
+    // Das Präfix verhindert, dass eine eigene Art den Schlüssel einer System-Art belegt.
+    key: text('schluessel').notNull(),
     name: text('name').notNull(),
     categoryId: uuid('kategorie_id')
       .notNull()
@@ -43,10 +46,18 @@ export const foodTypes = pgTable(
     unique('lebensmittelart_id_kategorie_eindeutig').on(table.id, table.categoryId),
     // Eine eigene Art heißt je Haushalt nur einmal so.
     unique('lebensmittelart_name_eindeutig').on(table.householdId, table.name),
+    // System-Schlüssel global eindeutig, eigene je Haushalt.
+    uniqueIndex('lebensmittelart_schluessel_system_eindeutig')
+      .on(table.key)
+      .where(sql`${table.householdId} is null`),
+    uniqueIndex('lebensmittelart_schluessel_eigen_eindeutig')
+      .on(table.householdId, table.key)
+      .where(sql`${table.householdId} is not null`),
     check(
       'lebensmittelart_herkunft_check',
-      sql`${table.isSystem} = (${table.householdId} is null) and ${table.isSystem} = (${table.key} is not null)`,
+      sql`${table.isSystem} = (${table.householdId} is null) and ${table.isSystem} = (${table.key} !~ '^eigen_')`,
     ),
+    check('lebensmittelart_schluessel_check', sql`${table.key} ~ '^[a-z0-9_]{2,60}$'`),
     check('lebensmittelart_kcal_check', sql`${table.kcalPer100} >= 0`),
     check('lebensmittelart_haltbarkeit_check', sql`${table.typicalShelfLifeMonths} > 0`),
   ],
