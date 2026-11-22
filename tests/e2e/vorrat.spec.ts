@@ -35,7 +35,9 @@ test('Drilldown: Warengruppe, Lebensmittelarten nach Kategorie, Detail', async (
   ).toBeVisible()
   // Der feste Knopf „1 entnehmen“ verdeckt beim Scrollen Zeilen (auf dem Duo außen auch beim
   // Laden). Am Seitenende steht er an seinem Platz, dann prüft axe die Trefferflächen ohne Überdeckung.
-  await page.evaluate(() => { window.scrollTo(0, document.body.scrollHeight); })
+  await page.evaluate(() => {
+    window.scrollTo(0, document.body.scrollHeight)
+  })
   await expectAccessibleLayout(page)
 })
 

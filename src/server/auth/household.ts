@@ -1,17 +1,18 @@
-// Haushalt der Anfrage für Seiten und Actions des Vorrats (#44 bis #46, #125). Alle Lese- und
-// Schreibpfade holen haushalt_id und Nutzer nur hier, damit #33 (Anmeldung und Zugriffsschutz)
-// genau eine Stelle anpasst.
+// Haushalt der Anfrage für Seiten und Actions des Vorrats (#44 bis #46, #125), auf Basis von
+// `requireHouseholdUser`. Alle Lese- und Schreibpfade holen haushalt_id und Nutzer nur hier,
+// damit #33 (Anmeldung und Zugriffsschutz) genau eine Stelle anpasst: Mit dem E2E-Login entfällt
+// der Übergang unten, `requireHousehold` ist dann nur noch `requireHouseholdUser`.
 // Übergang bis #33: Ohne Sitzung gilt im Dev-Modus (oder mit DEV_HOUSEHOLD_WITHOUT_LOGIN=true)
 // der älteste Haushalt der Installation, entnommen wird im Namen seines ersten aktiven Admins.
 import 'server-only'
 import { and, asc, eq } from 'drizzle-orm'
 import { redirect } from 'next/navigation'
 import { isHouseholdWithoutLoginEnabled, loadEnv } from '@/shared/config/env'
-import { err, ok, type Result } from '@/shared/lib/result'
+import { ok, type Result } from '@/shared/lib/result'
 import { getDb } from '../db/get-db'
 import { users } from '../db/schema/account'
 import { households } from '../db/schema/household'
-import { requireUser, type AccessError } from './guards'
+import { requireHouseholdUser, type AccessError } from './guards'
 
 export type HouseholdAccess = Readonly<{ householdId: string; userId: string | null }>
 
@@ -38,11 +39,10 @@ async function loadInstallationHousehold(): Promise<HouseholdAccess | null> {
 }
 
 export async function requireHousehold(): Promise<Result<HouseholdAccess, AccessError>> {
-  const session = await requireUser()
-  if (session.ok) {
-    const { householdId, id } = session.value
-    return householdId === null ? err({ kind: 'forbidden' }) : ok({ householdId, userId: id })
-  }
+  const session = await requireHouseholdUser()
+  if (session.ok) return ok({ householdId: session.value.householdId, userId: session.value.id })
+  // Angemeldet ohne Haushalt bleibt verboten, nur „gar nicht angemeldet“ nutzt den Übergang
+  if (session.error.kind === 'forbidden') return session
   if (!isHouseholdWithoutLoginEnabled(loadEnv())) return session
   const fallback = await loadInstallationHousehold()
   return fallback === null ? session : ok(fallback)

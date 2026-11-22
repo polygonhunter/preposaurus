@@ -1,7 +1,10 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig, devices } from '@playwright/test'
 
 const PORT = 3100
 const isCi = Boolean(process.env['CI'])
+// Absolut, weil der Standalone-Server in .next/standalone wechselt. npm run e2e:db leert denselben Ordner.
+const E2E_DB_DIR = fileURLToPath(new URL('./.data/e2e', import.meta.url))
 
 // Geräte aus design.html „Geräte und Umbruchpunkte“.
 const touch = { isMobile: true, hasTouch: true }
@@ -52,7 +55,7 @@ export default defineConfig({
     reuseExistingServer: !isCi,
     timeout: 120_000,
     env: {
-      DATABASE_URL: 'pglite://./.data/e2e',
+      DATABASE_URL: `pglite://${E2E_DB_DIR}`,
       AI_PROVIDER: 'fake',
       // Nur für die E2E-Tests, kein Geheimnis (env.ts verlangt mindestens 32 Zeichen)
       APP_SECRET: 'e2e-nur-zum-testen-kein-geheimnis-000',

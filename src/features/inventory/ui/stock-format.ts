@@ -1,9 +1,8 @@
 // Texte der Vorrat-Seiten aus den DTOs (UX-Konzept §2: überall dieselben Kennwerte in derselben
 // Reihenfolge, §11: „Packung“ statt „Einheit“). Rein, damit Liste, Detail und Bald fällig gleich
 // sprechen und es Tests gibt.
-import { toCalendarDay } from '@/shared/lib/dates'
+import { formatDayWithPrecision, toCalendarDay } from '@/shared/lib/dates'
 import { formatGermanNumber, formatQuantity } from '@/shared/lib/quantities'
-import { formatBestBefore } from '../domain/group-units'
 import type {
   BestBeforeDto,
   FoodTypeDetail,
@@ -28,7 +27,7 @@ export function formatPackages(count: number): string {
 }
 
 /** Menge in kg bzw. l, beides nebeneinander, wenn es beides gibt. Ohne Menge null. */
-export function formatAmounts({ g, ml }: NodeTotalsDto['amounts']): string | null {
+function formatAmounts({ g, ml }: NodeTotalsDto['amounts']): string | null {
   const parts = [
     g > 0 ? formatQuantity({ value: g, unit: 'g' }) : null,
     ml > 0 ? formatQuantity({ value: ml, unit: 'ml' }) : null,
@@ -36,18 +35,18 @@ export function formatAmounts({ g, ml }: NodeTotalsDto['amounts']): string | nul
   return parts.length === 0 ? null : parts.join(' · ')
 }
 
-export function formatKcal(kcal: number, isApproximate: boolean): string {
+function formatKcal(kcal: number, isApproximate: boolean): string {
   const value = `${formatGermanNumber(Math.round(kcal))} kcal`
   return isApproximate ? `ca. ${value}` : value
 }
 
-export function formatDays(days: number): string {
+function formatDays(days: number): string {
   const rounded = Math.round(days * 10) / 10
   return rounded === 1 ? '1 Tag' : `${formatGermanNumber(rounded)} Tage`
 }
 
 /** Beitrag in Tagen: Wasser zählt in Wasser-Tagen, alles andere in Essen-Tagen. */
-export function supplyDaysOf(totals: NodeTotalsDto): number | null {
+function supplyDaysOf(totals: NodeTotalsDto): number | null {
   if (totals.amounts.ml > 0 && totals.kcal === 0) return totals.waterDays
   return totals.energyDays
 }
@@ -88,7 +87,7 @@ export function formatTakenMessage(name: string, dateLabel: string | null): stri
 
 /** MHD wie aufgedruckt („30.09.2027“, „09/2027“, „2027“), geschätzt mit Vermerk. */
 export function formatDate({ date, precision, isEstimated }: BestBeforeDto): string {
-  const text = formatBestBefore({ date: toCalendarDay(date), precision })
+  const text = formatDayWithPrecision({ date: toCalendarDay(date), precision })
   return isEstimated ? `${text}, geschätzt` : text
 }
 

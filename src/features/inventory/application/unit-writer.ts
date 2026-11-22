@@ -4,7 +4,7 @@
 import 'server-only'
 
 /** Entnahme einer Packung: wer, wann und mit welchem Status sie den Vorrat verlässt. */
-export interface TakeOut {
+interface TakeOut {
   unitId: string
   status: 'consumed' | 'discarded'
   /** null nur ohne angemeldeten Nutzer (Übergang bis zur Anmeldung, #33) */

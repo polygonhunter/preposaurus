@@ -10,7 +10,7 @@ type LinkFilter = Partial<
 >
 
 export const STOCK_PATH = '/vorrat'
-export const DUE_PATH = '/uebersicht/bald-faellig'
+const DUE_PATH = '/uebersicht/bald-faellig'
 export const CAPTURE_PATH = '/neu'
 
 const STATUS_SLUGS: Record<StockStatus, string> = {
