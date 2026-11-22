@@ -25,7 +25,9 @@ export interface MailSender {
 // Better Auth verlangt eine E-Mail je Nutzer. Die App trägt dafür `<id>@nutzer.invalid` ein
 // (05, Konto). Die Endung .invalid ist nach RFC 2606 nie zustellbar.
 const TECHNICAL_DOMAIN = /\.invalid$/i
-const ADDRESS_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// Genau eine nackte Adresse: ohne Anzeigenamen, Listen oder Kommentare, damit Nodemailer sie nicht
+// in mehrere Empfänger aufteilt.
+const ADDRESS_SHAPE = /^[^\s@,;:<>()[\]"]+@[^\s@,;:<>()[\]"]+\.[^\s@,;:<>()[\]"]+$/
 
 /** Eine Adresse, an die sich wirklich senden lässt: vorhanden, plausibel, nicht technisch. */
 export function isDeliverableAddress(address: string | null | undefined): address is string {
