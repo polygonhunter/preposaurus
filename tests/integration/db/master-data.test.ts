@@ -65,17 +65,14 @@ describe('Seed Stammdaten', () => {
   })
 
   it('lässt eine ausgeblendete System-Kategorie beim erneuten Seed ausgeblendet', async () => {
-    await testDb.db
-      .update(categories)
-      .set({ isHidden: true })
-      .where(eq(categories.key, 'getraenke'))
+    await testDb.db.update(categories).set({ isHidden: true }).where(eq(categories.key, 'saefte'))
 
     await seedMasterData(testDb.db)
 
     const [drinks] = await testDb.db
       .select({ isHidden: categories.isHidden })
       .from(categories)
-      .where(eq(categories.key, 'getraenke'))
+      .where(eq(categories.key, 'saefte'))
     expect(drinks?.isHidden).toBe(true)
   })
 
@@ -96,14 +93,20 @@ describe('Seed Stammdaten', () => {
         fatPer100: '9.9',
         typicalShelfLifeMonths: 99,
       })
-      .where(eq(foodTypes.key, 'spaghetti'))
+      .where(eq(foodTypes.key, 'nudeln'))
 
     await seedMasterData(testDb.db)
 
-    const [spaghetti] = await testDb.db
+    const [noodles] = await testDb.db
       .select(referenceValues)
       .from(foodTypes)
-      .where(eq(foodTypes.key, 'spaghetti'))
-    expect(spaghetti).toEqual({ kcal: null, protein: null, carbs: null, fat: null, months: null })
+      .where(eq(foodTypes.key, 'nudeln'))
+    expect(noodles).toEqual({
+      kcal: '358.0',
+      protein: '13.0',
+      carbs: '71.5',
+      fat: '1.5',
+      months: 24,
+    })
   })
 })

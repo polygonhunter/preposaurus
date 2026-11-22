@@ -1,112 +1,52 @@
-// System-Lebensmittelarten, je einer System-Kategorie zugeordnet. Namen und Schlüssel nennen keinen
-// Behälter (die Dose ist ein Merkmal am Produkt), nur echte Unterschiede wie „getrocknet“.
-// VORLÄUFIG, wird vom Maintainer geprüft. Richtwerte (kcal, Makros, übliche Haltbarkeit) bleiben leer,
-// bis sie belegt sind (M1-08). Sie wären ohnehin nur Anzeige-Richtwerte, nie ein MHD.
-type SystemFoodType = Readonly<{
-  key: string
-  name: string
-  category: string
-  // Anzeige-Richtwerte, sobald belegt (M1-08). Fehlt ein Wert, setzt der Seed die Spalte auf leer.
-  kcalPer100?: string
-  proteinPer100?: string
-  carbsPer100?: string
-  fatPer100?: string
-  typicalShelfLifeMonths?: number
-}>
-
-const inCategory = (category: string, entries: readonly (readonly [string, string])[]) =>
-  entries.map(([key, name]) => ({ key, name, category }))
+// System-Lebensmittelarten, je einer System-Kategorie zugeordnet. Die Listen stehen je Warengruppe
+// in arten/, damit keine Datei zu groß wird. VORLÄUFIG, wird vom Maintainer geprüft (#128).
+// Neue Arten bekommen erst Richtwerte, wenn sie belegt sind (EMPFEHLUNGSWERTE.md).
+import { FAT_WATER_DRINK_FOOD_TYPES } from './arten/fette-wasser-getraenke'
+import { MEAT_FISH_EGG_FOOD_TYPES } from './arten/fleisch-fisch-eier'
+import { VEGETABLE_FOOD_TYPES } from './arten/gemuese'
+import { GRAIN_FOOD_TYPES } from './arten/getreide'
+import { DAIRY_FOOD_TYPES } from './arten/milch'
+import { FRUIT_AND_NUT_FOOD_TYPES } from './arten/obst-nuesse'
+import { OTHER_FOOD_TYPES } from './arten/sonstiges'
+import type { SystemFoodType } from './arten/eintrag'
 
 export const SYSTEM_FOOD_TYPES: readonly SystemFoodType[] = [
-  ...inCategory('getreide', [
-    ['spaghetti', 'Spaghetti'],
-    ['penne', 'Penne'],
-    ['fusilli', 'Fusilli'],
-    ['langkornreis', 'Langkornreis'],
-    ['basmatireis', 'Basmatireis'],
-    ['milchreis', 'Milchreis'],
-    ['haferflocken', 'Haferflocken'],
-    ['knaeckebrot', 'Knäckebrot'],
-    ['zwieback', 'Zwieback'],
-    ['mehl', 'Mehl'],
-    ['griess', 'Grieß'],
-    ['couscous', 'Couscous'],
-    ['kartoffelpueree_pulver', 'Kartoffelpüree (Pulver)'],
-    ['muesli', 'Müsli'],
-  ]),
-  ...inCategory('gemuese_huelsenfruechte', [
-    ['linsen', 'Linsen'],
-    ['linsen_getrocknet', 'Linsen getrocknet'],
-    ['kichererbsen', 'Kichererbsen'],
-    ['kichererbsen_getrocknet', 'Kichererbsen getrocknet'],
-    ['weisse_bohnen', 'Weiße Bohnen'],
-    ['kidneybohnen', 'Kidneybohnen'],
-    ['mais', 'Mais'],
-    ['erbsen_moehren', 'Erbsen & Möhren'],
-    ['tomaten_gehackt', 'Tomaten gehackt'],
-    ['passierte_tomaten', 'Passierte Tomaten'],
-    ['tomatenmark', 'Tomatenmark'],
-    ['sauerkraut', 'Sauerkraut'],
-    ['rote_bete', 'Rote Bete'],
-    ['gewuerzgurken', 'Gewürzgurken'],
-  ]),
-  ...inCategory('obst_nuesse', [
-    ['apfelmus', 'Apfelmus'],
-    ['pfirsiche', 'Pfirsiche'],
-    ['ananas', 'Ananas'],
-    ['mandarinen', 'Mandarinen'],
-    ['rosinen', 'Rosinen'],
-    ['trockenobst', 'Trockenobst'],
-    ['walnuesse', 'Walnüsse'],
-    ['haselnuesse', 'Haselnüsse'],
-    ['mandeln', 'Mandeln'],
-    ['erdnuesse', 'Erdnüsse und Erdnussbutter'],
-  ]),
-  // Pflanzendrinks stehen bei Milch, weil sie im Vorrat dieselbe Rolle spielen: Sie werden wie
-  // Milch verwendet und gelagert. Wer vegan lebt, findet sie so an der erwarteten Stelle.
-  ...inCategory('milch', [
-    ['h_milch', 'H-Milch'],
-    ['haferdrink', 'Haferdrink'],
-    ['sojadrink', 'Sojadrink'],
-    ['kondensmilch', 'Kondensmilch'],
-    ['milchpulver', 'Milchpulver'],
-    ['hartkaese', 'Hartkäse'],
-  ]),
-  ...inCategory('fleisch_fisch_eier', [
-    ['thunfisch', 'Thunfisch'],
-    ['sardinen', 'Sardinen'],
-    ['makrele', 'Makrele'],
-    ['hering', 'Hering'],
-    ['fleischkonserve', 'Fleischkonserve'],
-    ['wuerstchen', 'Würstchen'],
-    ['eipulver', 'Eipulver'],
-  ]),
-  ...inCategory('fette_oele', [
-    ['rapsoel', 'Rapsöl'],
-    ['olivenoel', 'Olivenöl'],
-    ['sonnenblumenoel', 'Sonnenblumenöl'],
-    ['butterschmalz', 'Butterschmalz'],
-  ]),
-  ...inCategory('wasser', [
-    ['stilles_wasser', 'Stilles Wasser'],
-    ['sprudelwasser', 'Sprudelwasser'],
-  ]),
-  ...inCategory('getraenke', [['fruchtsaft', 'Fruchtsaft']]),
-  ...inCategory('fertiggerichte', [
-    ['ravioli', 'Ravioli'],
-    ['eintopf', 'Eintopf'],
-    ['suppe', 'Suppe'],
-    ['instantnudeln', 'Instantnudeln'],
-  ]),
-  ...inCategory('sonstiges', [
-    ['honig', 'Honig'],
-    ['zucker', 'Zucker'],
-    ['salz', 'Salz'],
-    ['marmelade', 'Marmelade'],
-    ['schokolade', 'Schokolade'],
-    ['kakaopulver', 'Kakaopulver'],
-    // Tee und Kaffee liefern kaum Energie und zählen nicht als Getränk für den Wasserbedarf.
-    ['tee', 'Tee'],
-    ['kaffee', 'Kaffee'],
-  ]),
+  ...GRAIN_FOOD_TYPES,
+  ...VEGETABLE_FOOD_TYPES,
+  ...FRUIT_AND_NUT_FOOD_TYPES,
+  ...DAIRY_FOOD_TYPES,
+  ...MEAT_FISH_EGG_FOOD_TYPES,
+  ...FAT_WATER_DRINK_FOOD_TYPES,
+  ...OTHER_FOOD_TYPES,
 ]
+
+// Zusammengelegte Arten der ersten Startliste (alt → neu). Der Seed hängt Produkte, die noch auf
+// eine alte Art zeigen, auf die neue um (siehe retired-master-data.ts). Schlüssel werden nie wieder
+// für etwas anderes vergeben.
+export const MERGED_FOOD_TYPES: Readonly<Record<string, string>> = {
+  spaghetti: 'nudeln',
+  penne: 'nudeln',
+  fusilli: 'nudeln',
+  langkornreis: 'reis',
+  basmatireis: 'reis',
+  milchreis: 'reis',
+  erbsen_moehren: 'mischgemuese_konserve',
+  mais: 'mais_konserve',
+  tomaten_gehackt: 'tomaten_konserve',
+  passierte_tomaten: 'tomaten_konserve',
+  rote_bete: 'rote_bete_konserve',
+  linsen: 'linsen_konserve',
+  kichererbsen: 'kichererbsen_konserve',
+  weisse_bohnen: 'bohnen_konserve',
+  kidneybohnen: 'bohnen_konserve',
+  pfirsiche: 'obst_konserve',
+  ananas: 'obst_konserve',
+  mandarinen: 'obst_konserve',
+  thunfisch: 'thunfisch_konserve',
+  sardinen: 'sardinen_konserve',
+  makrele: 'makrele_konserve',
+  hering: 'hering_konserve',
+  wuerstchen: 'wuerstchen_konserve',
+  rapsoel: 'speiseoel',
+  sonnenblumenoel: 'speiseoel',
+}

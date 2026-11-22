@@ -49,7 +49,7 @@ describe('Schema Lebensmittelart', () => {
     const rows = await testDb.db.select().from(foodTypes).where(eq(foodTypes.isSystem, true))
 
     expect(rows).toHaveLength(SYSTEM_FOOD_TYPES.length)
-    expect(rows.every((row) => row.householdId === null && row.kcalPer100 === null)).toBe(true)
+    expect(rows.every((row) => row.householdId === null && row.categoryId !== '')).toBe(true)
   })
 
   it('erlaubt eine eigene Art je Haushalt, auch mit gleichem Namen in einem anderen Haushalt', async () => {
@@ -81,8 +81,8 @@ describe('Schema Lebensmittelart', () => {
   it('lehnt eine eigene Art mit dem Schlüssel einer System-Art ab', async () => {
     await expectConstraintViolation(
       testDb.db.insert(foodTypes).values({
-        key: 'spaghetti',
-        name: 'Meine Spaghetti',
+        key: 'nudeln',
+        name: 'Meine Nudeln',
         categoryId: basics.categoryId,
         householdId: basics.householdId,
       }),
@@ -94,8 +94,8 @@ describe('Schema Lebensmittelart', () => {
     await expectConstraintViolation(
       testDb.db.insert(foodTypes).values({
         isSystem: true,
-        key: 'spaghetti',
-        name: 'Spaghetti doppelt',
+        key: 'nudeln',
+        name: 'Nudeln doppelt',
         categoryId: basics.categoryId,
       }),
       'lebensmittelart_schluessel_system_eindeutig',
@@ -127,7 +127,7 @@ describe('Schema Lebensmittelart', () => {
   })
 
   it('verlangt am Produkt die Kategorie der Lebensmittelart', async () => {
-    const tuna = await foodTypeId('thunfisch')
+    const tuna = await foodTypeId('thunfisch_konserve')
 
     await expectConstraintViolation(
       testDb.db.insert(products).values(
@@ -142,11 +142,11 @@ describe('Schema Lebensmittelart', () => {
   })
 
   it('zieht die Kategorie des Produkts mit, wenn die Art in eine andere Kategorie wandert', async () => {
-    const spaghetti = await foodTypeId('spaghetti')
+    const noodles = await foodTypeId('nudeln')
     const product = buildProduct({
       householdId: basics.householdId,
-      categoryId: spaghetti.categoryId,
-      foodTypeId: spaghetti.id,
+      categoryId: noodles.categoryId,
+      foodTypeId: noodles.id,
     })
     await testDb.db.insert(products).values(product)
     const ready = await foodTypeId('ravioli')
@@ -154,7 +154,7 @@ describe('Schema Lebensmittelart', () => {
     await testDb.db
       .update(foodTypes)
       .set({ categoryId: ready.categoryId })
-      .where(eq(foodTypes.id, spaghetti.id))
+      .where(eq(foodTypes.id, noodles.id))
 
     const [moved] = await testDb.db
       .select({ categoryId: products.categoryId })
@@ -164,11 +164,11 @@ describe('Schema Lebensmittelart', () => {
   })
 
   it('schützt Arten mit Produkten und Kategorien mit Arten vor dem Löschen', async () => {
-    const spaghetti = await foodTypeId('spaghetti')
+    const noodles = await foodTypeId('nudeln')
     const apple = await foodTypeId('apfelmus')
 
     await expectConstraintViolation(
-      testDb.db.delete(foodTypes).where(eq(foodTypes.id, spaghetti.id)),
+      testDb.db.delete(foodTypes).where(eq(foodTypes.id, noodles.id)),
       'produkt_lebensmittelart_kategorie_fk',
     )
     await expectConstraintViolation(
