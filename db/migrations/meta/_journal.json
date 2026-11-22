@@ -57,6 +57,20 @@
       "when": 1795353941334,
       "tag": "0007_mhd_optional",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795354098932,
+      "tag": "0008_naehrwerte_geschaetzt_entfernt",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795354099470,
+      "tag": "0009_naehrwerte_quelle",
+      "breakpoints": true
     }
   ]
 }

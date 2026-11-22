@@ -57,3 +57,7 @@ export const AI_CONNECTION_STATUSES = [
   'zeitueberschreitung',
   'fehler',
 ] as const
+
+// Woher die Nährwerte eines Produkts stammen. ki_schaetzung und richtwert sind Schätzungen,
+// die gesondert bestätigt werden müssen (naehrwerte_bestaetigt_am).
+export const NUTRITION_SOURCES = ['tabelle', 'ki_schaetzung', 'richtwert', 'manuell'] as const

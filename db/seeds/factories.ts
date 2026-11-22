@@ -81,6 +81,7 @@ export function buildProduct(
     contentAmount: '500',
     contentUnit: 'g',
     kcalPer100: '359',
+    nutritionSource: 'tabelle',
     ...overrides,
     id: overrides.id ?? randomUUID(),
   }

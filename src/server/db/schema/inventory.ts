@@ -20,6 +20,7 @@ import {
 import {
   BEST_BEFORE_KINDS,
   BEST_BEFORE_PRECISIONS,
+  NUTRITION_SOURCES,
   QUANTITY_UNITS,
   UNIT_STATUSES,
 } from '../../../shared/config/constants'
@@ -54,7 +55,10 @@ export const products = pgTable(
     proteinPer100: per100('eiweiss_100'),
     carbsPer100: per100('kh_100'),
     fatPer100: per100('fett_100'),
-    isNutritionEstimated: boolean('naehrwerte_geschaetzt').notNull().default(false),
+    // Leer, solange es keine Nährwerte gibt. Geschätzte Werte (ki_schaetzung, richtwert) zeigt die
+    // App als „ca.“, bis jemand sie bestätigt hat.
+    nutritionSource: text('naehrwerte_quelle', { enum: NUTRITION_SOURCES }),
+    nutritionConfirmedAt: timestampTz('naehrwerte_bestaetigt_am'),
     // Idempotenz-Schlüssel der Erfassung: Ein doppelt gesendetes Bestätigen legt nichts doppelt an.
     captureId: uuid('erfassung_id').unique(),
     ...timestamps(),
@@ -71,6 +75,11 @@ export const products = pgTable(
       .onUpdate('cascade'),
     check('produkt_inhalt_einheit_check', isOneOf(table.contentUnit, QUANTITY_UNITS)),
     check('produkt_inhalt_check', sql`${table.contentAmount} > 0`),
+    check('produkt_naehrwerte_quelle_check', isOneOf(table.nutritionSource, NUTRITION_SOURCES)),
+    check(
+      'produkt_naehrwerte_bestaetigt_check',
+      sql`${table.nutritionConfirmedAt} is null or ${table.nutritionSource} is not null`,
+    ),
   ],
 )
 
