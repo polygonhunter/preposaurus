@@ -225,7 +225,7 @@ Die 3 Tage als Zwischenstufe sind ein Vorschlag (Frage 7). Sie stammen nicht aus
 
 ## 6. Technisches Onboarding für Selbsthoster
 
-Die volle Anleitung ist **Issue #1** (wird nach dem MVP als `docs/EINRICHTUNG.md` geschrieben, M13-05). Hier nur, was vor dem ersten Öffnen erledigt sein muss und was die App zeigt, wenn etwas fehlt.
+Die volle Anleitung ist **Issue #1**, umgesetzt als [`docs/INSTALLATION.md`](../INSTALLATION.md) (M13-05). Hier nur, was vor dem ersten Öffnen erledigt sein muss und was die App zeigt, wenn etwas fehlt.
 
 ### 6.1 Vor dem ersten Start
 

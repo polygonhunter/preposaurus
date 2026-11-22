@@ -428,10 +428,10 @@ Alle Pakete: Quelle D „Geräte und Umbruchpunkte“, „iPhone Duo“, „PC-B
 - **M13-04 · Release-Workflow für amd64 und arm64** (M) — Quelle: `05` Annahme NAS · Ordner: `.github/workflows/release.yml`
   - Fertig, wenn: Ein Git-Tag `vX.Y.Z` baut mit buildx beide Architekturen und schiebt das Image mit Versions-Tag in die GitHub Container Registry. Kein `latest` in der Compose-Datei.
   - Tests: Probelauf mit einem Vorab-Tag · Braucht: M13-01 · **[USER]** U10
-- **M13-05 · Einrichtungsanleitung** (M) — Quelle: Issue #1 (11 Punkte), T#einrichtung · Ordner: `docs/EINRICHTUNG.md`, `README.md`
+- **M13-05 · Einrichtungsanleitung** (M) — Quelle: Issue #1 (11 Punkte), T#einrichtung · Ordner: `docs/INSTALLATION.md` (umbenannt, siehe `05` M13), `README.md`
   - Fertig, wenn: Jeder Punkt aus Issue #1 ist als Schritt mit Befehl und erwartetem Ergebnis beschrieben, dazu Updates, Rückweg und Fehlerbehebung. Beide Tailscale-Wege sind erklärt, der Sidecar ausführlich. Hinweise: neutraler Gerätename, `.env` nie ins Repository, zweiter Backup-Ort verschlüsselt.
   - Tests: keine · Braucht: M13-02, M13-03, M13-04 · **[USER]** U7
-- **M13-06 · Erste Installation und Abnahme auf echten Geräten** (S) — Quelle: FAKTEN F12, F13, D „Offene Punkte“ · Ordner: `docs/EINRICHTUNG.md` (Prüfliste)
+- **M13-06 · Erste Installation und Abnahme auf echten Geräten** (S) — Quelle: FAKTEN F12, F13, D „Offene Punkte“ · Ordner: `docs/INSTALLATION.md` (Prüfliste)
   - Fertig, wenn: **[USER]** hat nach der Anleitung installiert und die Prüfliste abgehakt: Kamera in der Home-Bildschirm-App, Push, Verhalten bei ausgeschaltetem Tailscale, Wiederherstellung eines Backups. Fehler stehen als Issues.
   - Braucht: M13-05 · **[USER]** U7, U8, U9, U13
 
