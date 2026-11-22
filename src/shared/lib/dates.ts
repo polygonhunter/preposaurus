@@ -24,9 +24,12 @@ export function daysInMonth(year: number, month: number): number {
 const isIntegerBetween = (value: number, min: number, max: number) =>
   Number.isInteger(value) && value >= min && value <= max
 
+// Date.UTC legt die Jahre 0–99 auf 1900–1999, deshalb erst ab Jahr 1000
+const MIN_YEAR = 1000
+
 /** Baut einen Kalendertag aus Jahr, Monat (1–12) und Tag. Ungültiges ergibt null. */
 export function calendarDayFrom({ year, month, day }: DayParts): CalendarDay | null {
-  if (!isIntegerBetween(year, 1, 9999) || !isIntegerBetween(month, 1, 12)) return null
+  if (!isIntegerBetween(year, MIN_YEAR, 9999) || !isIntegerBetween(month, 1, 12)) return null
   if (!isIntegerBetween(day, 1, daysInMonth(year, month))) return null
   return `${pad(year, 4)}-${pad(month, 2)}-${pad(day, 2)}` as CalendarDay
 }
