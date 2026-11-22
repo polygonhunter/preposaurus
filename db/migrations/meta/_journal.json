@@ -29,6 +29,13 @@
       "when": 1795352048914,
       "tag": "0003_vorrat",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795352182124,
+      "tag": "0004_erfassung_nachkaufen_erinnerungen",
+      "breakpoints": true
     }
   ]
 }
