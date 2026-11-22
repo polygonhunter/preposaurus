@@ -26,7 +26,7 @@ function unit(groupKey: string | null, amount: number, bestBefore = '2028-01-31'
 }
 
 const progressFor = (units: GroupUnit[]) =>
-  calculateGroupProgress({ units, targets, goalDays: 10, referenceDay: today })
+  calculateGroupProgress({ units, targets, goalDays: 10, reference: { day: today, kind: 'today' } })
 
 describe('calculateGroupProgress', () => {
   const units = [
@@ -107,7 +107,7 @@ describe('calculateGoalGap', () => {
       units: [unit('salz', 9.5)],
       targets: [{ groupKey: 'salz', unit: 'g', amount: 10 }],
       goalDays: 10,
-      referenceDay: today,
+      reference: { day: today, kind: 'today' },
     })
     expect(calculateGoalGap(small)).toEqual([])
   })

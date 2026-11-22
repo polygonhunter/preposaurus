@@ -1,8 +1,7 @@
 import type { StockUnit } from '@/features/inventory/domain/unit'
-import type { CalendarDay } from '@/shared/lib/dates'
 import { err, ok, type Result } from '@/shared/lib/result'
 import type { DailyNeed } from './daily-need'
-import { isCountedOn, roundDownDays, STILL_GOOD_COUNTS_AS_SUPPLIED } from './supply-rules'
+import { isCountedOn, roundDownDays, type ReferenceDay } from './supply-rules'
 
 /** Eine Einheit mit dem, was sie zur Versorgung beiträgt. */
 export interface SupplyUnit extends Pick<StockUnit, 'id' | 'status' | 'bestBefore' | 'checkedAt'> {
@@ -34,7 +33,8 @@ export interface SupplyError {
 export interface SupplyInput {
   units: readonly SupplyUnit[]
   need: Pick<DailyNeed, 'kcalPerDay' | 'waterMlPerDay'>
-  referenceDay: CalendarDay
+  reference: ReferenceDay
+  /** Haushalts-Einstellung „Noch gut zählt mit“, Standard aus (#117) */
   stillGoodCounts?: boolean
 }
 
@@ -42,10 +42,9 @@ const isEstimate = (unit: SupplyUnit) => unit.isKcalEstimated || unit.bestBefore
 
 /** „Versorgt“ am Stichtag (heute oder Zieldatum). Abgelaufene Einheiten zählen nicht. */
 export function calculateSupplyDays(input: SupplyInput): Result<SupplyDays, SupplyError> {
-  const { units, need, referenceDay } = input
+  const { units, need, reference } = input
   if (need.kcalPerDay <= 0 || need.waterMlPerDay <= 0) return err({ kind: 'no-need' })
-  const stillGoodCounts = input.stillGoodCounts ?? STILL_GOOD_COUNTS_AS_SUPPLIED
-  const counted = units.filter((unit) => isCountedOn(unit, referenceDay, stillGoodCounts))
+  const counted = units.filter((unit) => isCountedOn(unit, reference, input.stillGoodCounts))
   const kcal = counted.reduce((sum, unit) => sum + unit.kcal, 0)
   const waterMl = counted.reduce((sum, unit) => sum + unit.waterMl, 0)
   const energyDays = kcal / need.kcalPerDay

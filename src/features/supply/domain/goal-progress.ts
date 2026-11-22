@@ -7,7 +7,7 @@ import {
   type SupplyInput,
   type SupplyUnit,
 } from './supply-days'
-import { isCountedOn, STILL_GOOD_COUNTS_AS_SUPPLIED } from './supply-rules'
+import { isCountedOn } from './supply-rules'
 
 interface Goal {
   days: number
@@ -26,7 +26,7 @@ export interface GoalProgress<T extends SupplyUnit> {
 
 export type GoalProgressError = SupplyError | { kind: 'target-in-past' }
 
-interface GoalProgressInput<T extends SupplyUnit> extends Omit<SupplyInput, 'referenceDay'> {
+interface GoalProgressInput<T extends SupplyUnit> extends Omit<SupplyInput, 'reference'> {
   units: readonly T[]
   today: CalendarDay
   goal: Goal
@@ -36,12 +36,12 @@ interface GoalProgressInput<T extends SupplyUnit> extends Omit<SupplyInput, 'ref
 export function unitsExpiringBefore<T extends SupplyUnit>(
   units: readonly T[],
   period: { today: CalendarDay; targetDay: CalendarDay },
-  stillGoodCounts = STILL_GOOD_COUNTS_AS_SUPPLIED,
+  stillGoodCounts = false,
 ): T[] {
   return units.filter(
     (unit) =>
-      isCountedOn(unit, period.today, stillGoodCounts) &&
-      !isCountedOn(unit, period.targetDay, stillGoodCounts),
+      isCountedOn(unit, { day: period.today, kind: 'today' }, stillGoodCounts) &&
+      !isCountedOn(unit, { day: period.targetDay, kind: 'target' }),
   )
 }
 
@@ -50,8 +50,11 @@ export function calculateGoalProgress<T extends SupplyUnit>(
 ): Result<GoalProgress<T>, GoalProgressError> {
   const { today, goal, ...rest } = input
   if (goal.targetDay < today) return err({ kind: 'target-in-past' })
-  const now = calculateSupplyDays({ ...rest, referenceDay: today })
-  const atTarget = calculateSupplyDays({ ...rest, referenceDay: goal.targetDay })
+  const now = calculateSupplyDays({ ...rest, reference: { day: today, kind: 'today' } })
+  const atTarget = calculateSupplyDays({
+    ...rest,
+    reference: { day: goal.targetDay, kind: 'target' },
+  })
   if (!now.ok) return now
   if (!atTarget.ok) return atTarget
   return ok({

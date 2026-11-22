@@ -73,6 +73,30 @@ describe('calculateGoalProgress', () => {
     expect(result.ok && result.value.expiringBeforeTarget).toEqual([])
   })
 
+  describe('„Noch gut“ geprüfte Packung', () => {
+    const units = [
+      supplyUnit('geprueft', '2026-10-31', { kcal: 2000, waterMl: 2000, checkedAt: '2026-11-20' }),
+    ]
+    const goal = { days: 10, targetDay }
+
+    it('zählt mit Einstellung heute, am Zieldatum aber nie', () => {
+      const result = calculateGoalProgress({ units, need, today, goal, stillGoodCounts: true })
+
+      expect(result.ok && result.value.today.days).toBe(1)
+      expect(result.ok && result.value.atTarget.days).toBe(0)
+      expect(result.ok && result.value.expiringBeforeTarget.map((unit) => unit.id)).toEqual([
+        'geprueft',
+      ])
+    })
+
+    it('zählt ohne Einstellung weder heute noch am Zieldatum', () => {
+      const result = calculateGoalProgress({ units, need, today, goal })
+
+      expect(result.ok && result.value.today.days).toBe(0)
+      expect(result.ok && result.value.expiringBeforeTarget).toEqual([])
+    })
+  })
+
   it('erlaubt das Zieldatum heute', () => {
     const result = calculateGoalProgress({
       units: [],

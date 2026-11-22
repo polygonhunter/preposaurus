@@ -2,10 +2,13 @@ import type { StockUnit } from '@/features/inventory/domain/unit'
 import type { CalendarDay } from '@/shared/lib/dates'
 
 /**
- * Vorläufige Annahme U11 (W12, L9): Eine als „Noch gut“ geprüfte, abgelaufene Einheit zählt
- * nicht zu „versorgt“, wie im Prototyp. Eine andere Antwort ändert nur diesen Wert.
+ * Stichtag einer Rechnung. „Heute“ und „Zieldatum“ zählen verschieden: Am Zieldatum zählt eine
+ * „Noch gut“ geprüfte Packung nie, auch wenn der Haushalt sie für heute mitzählen lässt (#117).
  */
-export const STILL_GOOD_COUNTS_AS_SUPPLIED = false
+export interface ReferenceDay {
+  day: CalendarDay
+  kind: 'today' | 'target'
+}
 
 /** Vorläufige Annahme U11: Kennzahlen werden auf eine Nachkommastelle abgerundet. */
 const SUPPLY_DAYS_FACTOR = 10
@@ -14,15 +17,25 @@ const ROUNDING_EPSILON = 1e-9
 
 export type CountableUnit = Pick<StockUnit, 'status' | 'bestBefore' | 'checkedAt'>
 
-/** Zählt die Einheit am Stichtag? Nur im Vorrat und am Stichtag noch haltbar (MHD ≥ Stichtag). */
+const countsAsStillGood = (
+  unit: CountableUnit,
+  reference: ReferenceDay,
+  stillGoodCounts: boolean,
+) => reference.kind === 'today' && stillGoodCounts && unit.checkedAt !== null
+
+/**
+ * Zählt die Einheit am Stichtag? Nur im Vorrat und am Stichtag noch haltbar (MHD ≥ Stichtag).
+ * `stillGoodCounts` ist die Haushalts-Einstellung „Noch gut zählt mit“ (Standard aus, #117) und
+ * gilt nur für heute.
+ */
 export function isCountedOn(
   unit: CountableUnit,
-  referenceDay: CalendarDay,
-  stillGoodCounts = STILL_GOOD_COUNTS_AS_SUPPLIED,
+  reference: ReferenceDay,
+  stillGoodCounts = false,
 ): boolean {
   if (unit.status !== 'stock') return false
-  if (unit.bestBefore.date >= referenceDay) return true
-  return stillGoodCounts && unit.checkedAt !== null
+  if (unit.bestBefore.date >= reference.day) return true
+  return countsAsStillGood(unit, reference, stillGoodCounts)
 }
 
 /** Rundet Tage auf eine Nachkommastelle ab, damit die App nie mehr verspricht als da ist. */

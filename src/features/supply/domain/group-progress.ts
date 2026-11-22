@@ -1,11 +1,5 @@
-import type { CalendarDay } from '@/shared/lib/dates'
 import type { HouseholdGroupTarget } from './group-targets'
-import {
-  isCountedOn,
-  roundDownDays,
-  STILL_GOOD_COUNTS_AS_SUPPLIED,
-  type CountableUnit,
-} from './supply-rules'
+import { isCountedOn, roundDownDays, type CountableUnit, type ReferenceDay } from './supply-rules'
 
 /** Eine Einheit mit ihrer Warengruppe und ihrer Menge in g oder ml. */
 export interface GroupUnit extends CountableUnit {
@@ -29,17 +23,18 @@ interface GroupProgressInput {
   units: readonly GroupUnit[]
   targets: readonly HouseholdGroupTarget[]
   goalDays: number
-  referenceDay: CalendarDay
+  reference: ReferenceDay
+  /** Haushalts-Einstellung „Noch gut zählt mit“, Standard aus (#117) */
   stillGoodCounts?: boolean
 }
 
 const PERCENT = 100
 
 function stockByGroup(input: GroupProgressInput): Map<string, number> {
-  const stillGoodCounts = input.stillGoodCounts ?? STILL_GOOD_COUNTS_AS_SUPPLIED
   const stock = new Map<string, number>()
   for (const unit of input.units) {
-    if (unit.groupKey === null || !isCountedOn(unit, input.referenceDay, stillGoodCounts)) continue
+    const isCounted = isCountedOn(unit, input.reference, input.stillGoodCounts)
+    if (unit.groupKey === null || !isCounted) continue
     stock.set(unit.groupKey, (stock.get(unit.groupKey) ?? 0) + unit.amount)
   }
   return stock
