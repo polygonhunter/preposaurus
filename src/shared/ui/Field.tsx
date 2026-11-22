@@ -33,7 +33,7 @@ export function Field({ label, hint, error, ...inputProps }: FieldProps) {
         ])}
         className={cx(
           'min-h-11 w-full rounded-field border bg-surface px-4 text-body text-fg placeholder:text-fg2',
-          error ? 'border-red' : 'border-line',
+          error ? 'border-red' : 'border-line-strong',
         )}
       />
       {hint ? (

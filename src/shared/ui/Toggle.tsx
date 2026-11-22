@@ -11,7 +11,7 @@ export function Toggle({ label, ...inputProps }: ToggleProps) {
       <input {...inputProps} type="checkbox" role="switch" className="peer sr-only" />
       <span
         aria-hidden="true"
-        className="relative h-[31px] w-[51px] shrink-0 rounded-full bg-fill transition-colors duration-200 ease-out peer-checked:bg-green peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent peer-disabled:opacity-40 after:absolute after:top-0.5 after:left-0.5 after:size-[27px] after:rounded-full after:bg-surface after:shadow-thumb after:transition-transform after:duration-200 after:ease-out peer-checked:after:translate-x-5"
+        className="relative h-[31px] w-[51px] shrink-0 rounded-full bg-fill inset-ring inset-ring-line-strong transition-colors duration-200 ease-out peer-checked:bg-green peer-checked:inset-ring-transparent peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent peer-disabled:opacity-40 after:absolute after:top-0.5 after:left-0.5 after:size-[27px] after:rounded-full after:bg-surface after:shadow-thumb after:transition-transform after:duration-200 after:ease-out peer-checked:after:translate-x-5"
       />
     </label>
   )

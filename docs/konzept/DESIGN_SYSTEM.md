@@ -44,6 +44,7 @@ Als CSS-Variablen in `src/app/globals.css`, in Tailwind über `@theme` als `bg-s
 | `fg` | `#000000` | `#FFFFFF` | Text |
 | `fg2` | `#6C6C70` | `#A1A1A6` | Zweittext, Piktogramme |
 | `line` | `#C6C6C8` | `#38383A` | Trennlinien (0,5 px auf Retina) |
+| `line-strong` | `#85858A` | `#6E6E73` | Rand interaktiver Elemente: Feld, ausgeschalteter Schalter (≥ 3 : 1 auf `surface` und `bg`, WCAG 1.4.11) |
 | `bar` | `#3A3A3C` | `#E5E5EA` | Balken, Diagramm |
 | `accent` | `#0060CC` | `#4DA3FF` | Links, Knöpfe, aktiver Tab, Fokus |
 | `on-accent` | `#FFFFFF` | `#000000` | Text auf Akzent |
@@ -76,8 +77,8 @@ Alle Text-Kombinationen erfüllen WCAG AA (4,5 : 1). Der helle Akzent ist dafür
 | `StatusBadge` | Ampel-Punkt 8 px plus Wort in Ampelfarbe, 13/600 |
 | `DayBar` | Balken auf Tages-Skala: Spur `fill`, Füllung `bar` oder `bar-warn`, Zielmarke 2 px `fg`, Wert rechts |
 | `StatTiles` | 2–4 Kennzahlen nebeneinander in einer Gruppe, durch Linien getrennt (Zahl `title2`, Wort `footnote`) |
-| `Field` | Label über dem Feld, Feld auf `surface` mit Linie bzw. in Gruppe, Hinweis und Fehler darunter (`red`, mit `aria-describedby`) |
-| `Toggle` | Schalter wie iOS, Akzent bzw. Grün für „an“ |
+| `Field` | Label über dem Feld, Feld auf `surface` mit Rand `line-strong`, Hinweis und Fehler darunter (`red`, mit `aria-describedby`) |
+| `Toggle` | Schalter wie iOS, Grün für „an“, „aus“ als Spur `fill` mit 1-px-Innenrand `line-strong` |
 | `Sheet` | Blatt von unten (`<dialog>`), Griff, Titel, Inhalt, Aktionen unten. Am PC als zentrierter Dialog |
 | `UndoBar` | Rückgängig-Zeile unten über der Tab-Leiste, 5 s, optional zweite Aktion („Auf Einkaufsliste“) |
 | `EmptyState` | Ein Satz, eine Handlung. Kein Bild |
