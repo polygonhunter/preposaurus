@@ -52,6 +52,8 @@ export default defineConfig({
     env: {
       DATABASE_URL: 'pglite://./.data/e2e',
       AI_PROVIDER: 'fake',
+      // Nur für die E2E-Tests, kein Geheimnis (env.ts verlangt mindestens 32 Zeichen)
+      APP_SECRET: 'e2e-nur-zum-testen-kein-geheimnis-000',
       LOG_LEVEL: 'warn',
       PORT: String(PORT),
       // server.js bindet an HOSTNAME, und GitHub Actions setzt dort den Rechnernamen.

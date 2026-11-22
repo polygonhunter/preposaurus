@@ -19,7 +19,7 @@ import {
   uuid,
   type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
-import { USER_ROLES } from '../../../shared/config/constants'
+import { USER_ROLES, USERNAME_PATTERN_SOURCE } from '../../../shared/config/constants'
 import { id, isOneOf, timestamps, timestampTz } from './columns'
 import { households, members } from './household'
 
@@ -56,7 +56,11 @@ export const users = pgTable(
   },
   (table) => [
     check('nutzer_rolle_check', isOneOf(table.role, USER_ROLES)),
-    check('nutzer_benutzername_check', sql`${table.username} ~ '^[a-z0-9][a-z0-9._]{2,29}$'`),
+    // Das Muster ist eine feste Konstante aus dem Code, nie eine Nutzereingabe.
+    check(
+      'nutzer_benutzername_check',
+      sql`${table.username} ~ ${sql.raw(`'${USERNAME_PATTERN_SOURCE}'`)}`,
+    ),
     // Eindeutig ohne Rücksicht auf Groß- und Kleinschreibung, auch wenn ein Weg am Plugin vorbei schreibt.
     uniqueIndex('nutzer_benutzername_eindeutig').on(sql`lower(${table.username})`),
   ],
