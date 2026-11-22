@@ -15,3 +15,13 @@ export interface BestBefore {
   precision: BestBeforePrecision
   isEstimated: boolean
 }
+
+/** Eine Packung im Haushalt, so wie die Fachlogik sie braucht. */
+export interface StockUnit {
+  id: string
+  status: UnitStatus
+  bestBefore: BestBefore
+  kind: DateKind
+  /** „Noch gut“ geprüft am, sonst null */
+  checkedAt: CalendarDay | null
+}
