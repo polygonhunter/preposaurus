@@ -108,6 +108,7 @@ Validiert wird **überall, wo Daten von außen kommen**, und danach nicht mehr:
 
 Regeln:
 - `safeParse` an Grenzen, Typen per `z.infer` statt doppelter Interfaces.
+  - **Ausnahme: gespiegelte Antworttypen in `domain/`.** `domain/` darf kein Zod importieren. Braucht die Fachlogik die Form einer KI-Antwort (z. B. `capture/domain/ai-answers.ts`), steht der Typ dort noch einmal von Hand. Ein Typtest mit `expectTypeOf<z.infer<…>>().toEqualTypeOf<…>()` (z. B. `src/server/ai/schema-types.test.ts`) hält beide deckungsgleich, `tsc` bricht bei jeder Abweichung ab. Quelle bleibt das Zod-Schema. Ohne einen solchen Typtest ist die Spiegelung nicht erlaubt.
 - Fehler fürs Formular mit `z.flattenError`, für Logs mit `z.prettifyError`. `formatError` ist veraltet [7].
 - Innerhalb von `domain/` und `application/` gelten die Typen. Dort wird nicht erneut validiert.
 
