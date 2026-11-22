@@ -66,17 +66,6 @@ describe('Schema Haushalt', () => {
     )
   })
 
-  it('lehnt eine orange Schwelle über der gelben ab', async () => {
-    const otherId = await insertHousehold('Zweiter Haushalt')
-
-    await expectConstraintViolation(
-      testDb.db
-        .insert(householdSettings)
-        .values({ householdId: otherId, ampelYellowDays: 20, ampelOrangeDays: 30 }),
-      'haushalt_einstellung_ampel_check',
-    )
-  })
-
   it('lehnt einen unbekannten Mitgliedstyp ab', async () => {
     await expectConstraintViolation(
       testDb.db

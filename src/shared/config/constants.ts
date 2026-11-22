@@ -20,6 +20,9 @@ export const MEMBER_CONDITIONS = ['schwanger', 'stillend'] as const
 
 export const DEFAULT_AMPEL_YELLOW_DAYS = 90
 export const DEFAULT_AMPEL_ORANGE_DAYS = 28
+// Orange mindestens 7 Tage, sonst überlappen „Diese Woche“ und „Diesen Monat“ (E-21).
+// Gleicher Wert wie `THIS_WEEK_DAYS` in `inventory/domain/unit-state.ts`, ein Test hält beide gleich.
+export const MIN_AMPEL_ORANGE_DAYS = 7
 
 // Wochenübersicht standardmäßig samstags (ISO-Wochentag 6) um 10:00 Uhr
 export const DEFAULT_WEEKLY_SUMMARY_WEEKDAY = 6
