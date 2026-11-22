@@ -11,21 +11,11 @@ import { usernameSchema } from '@/features/auth/schemas'
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, USER_ROLES } from '@/shared/config/constants'
 import type { Database } from '../db/connection'
 import { accounts, sessions, users, verifications } from '../db/schema/account'
+import { ALLOWED_HTTP_PATHS, httpAllowList } from './http-allow-list'
 
 const DAY_IN_SECONDS = 24 * 60 * 60
 // 180 Tage, gleitend: Jede Nutzung nach mehr als einem Tag verlängert wieder (EINSTELLUNGEN §4.1).
 const SESSION_DAYS = 180
-
-// HTTP-Routen, die kein Gerät aufrufen soll: Namen erraten, Registrieren, Anmelden mit der
-// technischen E-Mail, eigenen Namen oder E-Mail ändern. disabledPaths wirkt nur auf HTTP, für
-// Server-Aufrufe sperrt disableSignUp die Registrierung selbst (Probelauf in den Tests).
-const DISABLED_PATHS = [
-  '/is-username-available',
-  '/sign-up/email',
-  '/sign-in/email',
-  '/update-user',
-  '/change-email',
-]
 
 // Anmeldung nur über das Username-Plugin. Registrieren gibt es nicht, Nutzer legt ein Admin an.
 const EMAIL_AND_PASSWORD = {
@@ -51,6 +41,8 @@ export type AuthOptions = Readonly<{
   secureCookies: boolean
   // Meldungen von Better Auth laufen über unseren Logger statt direkt auf die Konsole.
   log: (level: AuthLogLevel, message: string) => void
+  // Nur für Tests der Erlaubt-Liste, die App nutzt ALLOWED_HTTP_PATHS.
+  allowedHttpPaths?: readonly string[]
 }>
 
 async function isUserActive(db: Database, userId: string): Promise<boolean> {
@@ -74,7 +66,8 @@ function sessionHooks(db: Database) {
   }
 }
 
-export function createAuth({ db, secret, clientIpHeader, secureCookies, log }: AuthOptions) {
+export function createAuth(options: AuthOptions) {
+  const { db, secret, clientIpHeader, secureCookies, log } = options
   return betterAuth({
     secret,
     database: drizzleAdapter(db, {
@@ -93,7 +86,6 @@ export function createAuth({ db, secret, clientIpHeader, secureCookies, log }: A
     },
     session: SESSION,
     databaseHooks: { session: sessionHooks(db) },
-    disabledPaths: DISABLED_PATHS,
     advanced: {
       database: { generateId: () => crypto.randomUUID() },
       ipAddress: { ipAddressHeaders: [clientIpHeader] },
@@ -107,6 +99,8 @@ export function createAuth({ db, secret, clientIpHeader, secureCookies, log }: A
     },
     telemetry: { enabled: false },
     plugins: [
+      // Über HTTP nur ausdrücklich erlaubte Pfade, auth.api bleibt davon unberührt.
+      httpAllowList(options.allowedHttpPaths ?? ALLOWED_HTTP_PATHS),
       username({
         displayUsername: false,
         validationOrder: { username: 'post-normalization' },
