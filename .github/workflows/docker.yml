@@ -56,3 +56,5 @@ jobs:
         run: docker/test/compose-test.sh
       - name: Sichern, zurückspielen, vergleichen
         run: docker/test/backup-test.sh
+      - name: Installationsarchiv packen wie im Release
+        run: docker/release/pack-install-files.sh 0.0.0-ci "$RUNNER_TEMP"
