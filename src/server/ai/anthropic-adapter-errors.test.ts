@@ -21,14 +21,19 @@ const BEST_BEFORE = {
   sicherheit: 'niedrig',
 }
 
-function setup(replies: Parameters<typeof createFakeAnthropicApi>[0], timeoutMs = 5_000) {
+interface Timeouts {
+  attemptTimeoutMs?: number
+  totalTimeoutMs?: number
+}
+
+function setup(replies: Parameters<typeof createFakeAnthropicApi>[0], timeouts: Timeouts = {}) {
   const api = createFakeAnthropicApi(replies)
   const sleep = vi.fn(() => Promise.resolve())
   const adapter = createAnthropicAdapter({
     apiKey: new SecretValue(API_KEY),
     baseUrl: null,
     limit: createConcurrencyLimit(2),
-    timeoutMs,
+    ...timeouts,
     fetch: api.fetch,
     sleep,
   })
@@ -55,7 +60,7 @@ describe('Anthropic-Adapter: Fehlerarten', () => {
   })
 
   it('bricht nach dem Zeitlimit ab und wiederholt eine Zeitüberschreitung nicht', async () => {
-    const { recognize, requests } = setup([hangingReply], 50)
+    const { recognize, requests } = setup([hangingReply], { attemptTimeoutMs: 50 })
 
     const outcome = await recognize()
 
@@ -63,11 +68,39 @@ describe('Anthropic-Adapter: Fehlerarten', () => {
     expect(requests).toHaveLength(1)
   })
 
-  it('meldet 504 nach einer Wiederholung als Zeitüberschreitung', async () => {
+  it('meldet 504 als Zeitüberschreitung und wiederholt ihn nicht', async () => {
     const { recognize, requests } = setup([errorReply(504, 'timeout_error')])
 
     expect((await recognize()).answer).toEqual({ ok: false, error: { kind: 'timeout' } })
-    expect(requests).toHaveLength(2)
+    expect(requests).toHaveLength(1)
+  })
+
+  it('hält das Gesamt-Zeitlimit der Erkennung ein, auch wenn ein Versuch länger dürfte', async () => {
+    const { recognize } = setup([hangingReply], { attemptTimeoutMs: 30_000, totalTimeoutMs: 1_200 })
+    const startedAt = performance.now()
+
+    expect((await recognize()).answer).toEqual({ ok: false, error: { kind: 'timeout' } })
+    expect(performance.now() - startedAt).toBeLessThan(5_000)
+  })
+
+  it('meldet einen Netzwerkfehler als provider-error, ohne zu wiederholen', async () => {
+    const failing = () => Promise.reject(new TypeError('fetch failed'))
+    const { recognize, requests } = setup([failing])
+
+    expect((await recognize()).answer).toEqual({ ok: false, error: { kind: 'provider-error' } })
+    expect(requests).toHaveLength(1)
+  })
+
+  it('wirft Fehler weiter, die nicht von der API kommen', async () => {
+    // 200 mit kaputtem JSON: Das SDK wirft beim Lesen einen SyntaxError, keinen APIError.
+    const brokenBody = () =>
+      Promise.resolve(
+        new Response('{kaputt', { status: 200, headers: { 'content-type': 'application/json' } }),
+      )
+    const { recognize, requests } = setup([brokenBody])
+
+    await expect(recognize()).rejects.toThrow(SyntaxError)
+    expect(requests).toHaveLength(1)
   })
 
   it('verrät den Schlüssel in keiner Rückgabe', async () => {
