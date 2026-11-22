@@ -1,6 +1,5 @@
-// Ordnung des Vorrats: Kategorie, Behälter, Lagerort (UMSETZUNG M1-05, 01 „Ordnungssystem“).
-// System-Kategorien und Behälter kommen als Seed ohne Haushalt (db/seeds). Eigene Kategorien
-// gehören einem Haushalt. Richtwerte (kcal, Haltbarkeit) stehen an der Lebensmittelart, nicht hier. tag und produkt_tag kommen später (Grundentscheidung 7).
+// Ordnung des Vorrats: Kategorie, Behälter, Lagerort (UMSETZUNG M1-05). System-Einträge kommen als
+// Seed ohne Haushalt, eigene gehören einem Haushalt. Richtwerte stehen an der Lebensmittelart.
 import { sql } from 'drizzle-orm'
 import { boolean, check, index, integer, pgTable, text, unique, uuid } from 'drizzle-orm/pg-core'
 import { id, timestamps } from './columns'
