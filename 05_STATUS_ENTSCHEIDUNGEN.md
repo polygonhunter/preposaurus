@@ -3,7 +3,7 @@
 > Zentrale Übersicht für jede neue Session (lokal oder Cloud). Details stehen in den Konzeptdateien 00–04.
 
 ## Phase
-Konzept ✅ · Recherche ✅ · UI-Prototyp ✅ · Konzept-Dokumente ✅ (`docs/konzept/`) · **Freigabe ✅ (2026-11-22)** · Umsetzungsplan ⏳ · Programmierung ⏳ · PoC Foto-Erkennung ⬜
+Konzept ✅ · Recherche ✅ · UI-Prototyp ✅ · Konzept-Dokumente ✅ (`docs/konzept/`) · **Freigabe ✅ (2026-11-22)** · Umsetzungsplan ✅ (`docs/UMSETZUNG.md`) · Programmierung 🔄 (M0 Projektgerüst als PR) · PoC Foto-Erkennung ⬜
 
 Der Maintainer hat am 2026-11-22 auf Rückfrage ausdrücklich bestätigt: Die drei Konzept-Dokumente sind samt aller Vorschläge freigegeben, das Programmieren des MVP ebenso. Gearbeitet wird nach `docs/UMSETZUNG.md` und `docs/CODE_PRINZIPIEN.md`.
 
@@ -48,13 +48,22 @@ Vom Maintainer auf Rückfrage bestätigt: **Alle als „Vorschlag“ markierten 
 | Lizenz | ~~vorläufig~~ entschieden: AGPL-3.0-or-later, siehe oben |
 | NAS | Docker-Images für **amd64 und arm64**, Tailscale als **Sidecar-Container** |
 
+## Technische Festlegungen aus M0 (2026-11-22)
+Beim Aufsetzen von M0 getroffen, Details in `docs/CODE_PRINZIPIEN.md` §9:
+- **Versionen:** Next 16.4.6, React 19.3, TypeScript 6.0.3, ESLint 9.39.5, typescript-eslint 8.73.0, Tailwind 4.3, Vitest 5.1, Zod 4.6, Playwright 1.65, alle exakt gepinnt. CI auf Node 24.
+- **Schichtgrenzen** mit `eslint-plugin-boundaries` 7.4.4 (kein `dependency-cruiser` nötig). `worker/` darf vorläufig `application`, `server` und `shared` importieren, weil die Tabelle in CP §2 ihn nicht nennt.
+- **Lizenzprüfung** (`npm run licenses`) mit Ausnahmedatei `scripts/license-exceptions.json`: libvips (LGPL-3.0-or-later, über sharp aus next) und zusätzlich `caniuse-lite` (CC-BY-4.0, Browserdaten von next). Beides wartet auf [USER] U2.
+- **Prettier** formatiert keine Markdown-Dokumente und nichts unter `docs/` und `research/`, damit von Hand gepflegte Tabellen nicht umbrechen.
+- **E2E in der CI** laufen gegen den Standalone-Server (`npm run start:standalone`, wie später im Container), nicht gegen `next start`, das nicht zu `output: 'standalone'` passt.
+- **E2E** laufen auf Port 3100 (Prototyp bleibt auf 3000). `playwright.config.ts` darf `process.env` lesen (nur `CI`), weil es Werkzeug und nicht App ist.
+
 ## Offene Fragen an den Maintainer (endgültige Entscheidung steht noch aus)
 1. **Offline**: nur anzeigen oder auch eintragen (mit späterem Abgleich)?
 2. ~~**Lizenz**~~ entschieden 2026-11-22: AGPL-3.0-or-later (siehe oben). Der Prototyp mit GSAP ist ausgenommen, siehe `prototypes/README.md`
 3. **NAS**: Welches Modell bzw. Hersteller (Synology, QNAP, Unraid; x86 oder ARM)?
 
 ## Nächste Schritte
-1. Umsetzungsplan `docs/UMSETZUNG.md` erstellen → GitHub-Issues je Meilenstein → abarbeiten, mit Tests
+1. Pakete aus `docs/UMSETZUNG.md` als GitHub-Issues abarbeiten, mit Tests (M0 liegt als PR vor, dann M1 und M2)
 2. PoC Foto-Erkennung: ca. 15 Verpackungs-, 10 Nährwert-, 30 MHD-Fotos vom Maintainer; Sonnet 5.5 vs. Haiku 5.5 messen (Kennzahl Nr. 1: erfundene MHDs)
 3. Offizielle Werte (BBK/BLE, DGE) an Primärquellen prüfen, bevor sie als Seed-Daten übernommen werden
 4. Danach Programmierung

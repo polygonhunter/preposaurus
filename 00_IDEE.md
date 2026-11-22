@@ -69,4 +69,4 @@ Eine App (oder Web-App/PWA), die Haushalten hilft, einen **Notvorrat nach offizi
 - Startmarkt: **Deutschland** (BBK/BLE), weitere Quellen vorbereitet
 - Foto-/Bilderkennung: **wichtig**, Anthropic API (siehe 01_FOTO_ERKENNUNG.md)
 - Name: **Preposaurus** (Entscheidung 2026-11-22). Der frühere Arbeitstitel war wegen einer Markenkollision nur ein Codename, siehe research/25
-- Zugriff: **mobiler Browser (PWA, „Zum Home-Bildschirm“) und PC-Browser**, gleiche Daten. Erreichbar **nur im Heimnetz**; von unterwegs bei Bedarf über eigenes VPN (Tailscale/WireGuard). Kein öffentliches Hosting.
+- Zugriff: **mobiler Browser (PWA, „Zum Home-Bildschirm“) und PC-Browser**, gleiche Daten. Erreichbar **ausschließlich über Tailscale** (Update 2026-11-22, PLAN W1), zu Hause wie unterwegs, HTTPS über Tailscale Serve. Kein öffentliches Hosting.

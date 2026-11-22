@@ -11,6 +11,7 @@ Neue Entscheidungen immer in `05_STATUS_ENTSCHEIDUNGEN.md` (und ggf. im passende
 
 ## Code-Qualität (verbindlich)
 **Vollständige, verbindliche Referenz: `docs/CODE_PRINZIPIEN.md`** (Schichten, harte Linter-Grenzen, Werkzeuge, Review-Checkliste). Vor jedem Code-Schritt lesen. Die Grenzen werden per ESLint/knip/lefthook erzwungen, nicht nur dokumentiert.
+- **Next.js 16:** `AGENTS.md` beachten (von `next dev` erzeugt). APIs vor dem Schreiben in `node_modules/next/dist/docs/` nachlesen.
 - **Kleine Dateien:** Richtwert ≤ 200 Zeilen pro Datei, harte Grenze 300. Wird es größer, wird aufgeteilt.
 - **Kleine Funktionen** mit genau einer Aufgabe. Sprechende Namen statt Kommentare, die erklären, *was* passiert.
 - **Wiederverwendbar:**

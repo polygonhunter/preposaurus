@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  LEFTHOOK: '0' # Git-Hooks braucht die CI nicht
+  NEXT_TELEMETRY_DISABLED: '1'
+  # Pflicht für env.ts (Serverstart in build und e2e), die DB selbst nutzt erst M1
+  DATABASE_URL: pglite://./.data/ci
+  AI_PROVIDER: fake
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: npm run format:check
+      - run: npm run lint
+      - name: lint:budget (Richtwert 200 Zeilen, nur Warnung)
+        run: npm run lint:budget
+
+  typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: npm run typecheck
+
+  knip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      # npm run knip prüft zweimal: mit Tests als Einstieg und mit --production nur den ausgelieferten Code
+      - run: npm run knip
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: npm run test
+
+  # Platzhalter bis M1-01: Bis dahin gibt es keine DB-Tests, der Job prüft nur, dass Dienst und
+  # Suite gegen eine postgres://-URL laufen. Ab M1 laufen hier die Integrationstests gegen PostgreSQL 18.
+  test-pg:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          # Wegwerf-Datenbank nur für diesen Lauf, kein Geheimnis
+          POSTGRES_USER: preposaurus
+          POSTGRES_PASSWORD: preposaurus
+          POSTGRES_DB: preposaurus
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U preposaurus"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://preposaurus:preposaurus@localhost:5432/preposaurus
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Vitest gegen PostgreSQL 18
+        run: npx vitest run
+
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run build
+      - run: npm run e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  licenses:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: npm run licenses
