@@ -54,11 +54,11 @@ swap_in_new_database() {
     -c "alter database \"${PGDATABASE}_neu\" rename to \"$PGDATABASE\"" > /dev/null
 }
 
-# Nur Aufräumen nach den Fotos: Scheitert es, ist der Stand trotzdem zurück, und der nächste Lauf
-# räumt <db>_alt weg. Deshalb kein Abbruch über set -e.
+# Nur Aufräumen nach den Fotos: Scheitert es, ist der Stand trotzdem zurück, und die nächste
+# Wiederherstellung räumt <db>_alt weg (die tägliche Sicherung nicht). Deshalb kein Abbruch über set -e.
 drop_old_database() {
   dropdb --maintenance-db=postgres "${PGDATABASE}_alt" ||
-    log "Hinweis: Die alte Datenbank ${PGDATABASE}_alt ist noch da, der nächste Lauf räumt sie weg."
+    log "Hinweis: Die alte Datenbank ${PGDATABASE}_alt ist noch da. Die nächste Wiederherstellung räumt sie weg."
 }
 
 # Die Datenbank ist hier schon getauscht. Scheitert der Abgleich (Platte voll, Strg+C), nennt die
