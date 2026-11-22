@@ -536,7 +536,7 @@ Rechte: **A** Admin · **M** Mitglied · **öff.** ohne Anmeldung. Eingabe als Z
 
 ### 8.3 KI-Adapter
 
-Eine Schnittstelle, ein Adapter je Anbieter (`server/adapters/ai/anthropic.ts`). Eingabe `{ rolle, bild?, kontext }`, Ausgabe nach Zod-Schema. Der Adapter liest Verbindung und Modell über einen zentralen Service aus `ki_rollen_zuweisung` (Vorrang `.env`). Gemeinsamer Prompt-Kopf: „Wenn ein Wert nicht sicher lesbar ist, setze null – schätze und erfinde nichts.“ (außer Rolle `naehrwerte_schaetzen`). Alle Felder Pflicht, Unlesbares ist `null` bzw. `unbekannt`. Lockeres KI-Schema ohne Grenzen, danach strenges Fach-Schema.
+Eine Schnittstelle (`server/ai/vision-recognizer.ts`), ein Adapter je Anbieter (`server/ai/anthropic-adapter.ts`). Eingabe `{ rolle, bild?, kontext }`, Ausgabe nach Zod-Schema. Verbindung und Modell liefert der zentrale Konfigurations-Service `features/ai-settings/application/ai-config-service.ts` aus `ki_rollen_zuweisung` (Vorrang `.env`), der Adapter liest weder env noch DB. Gemeinsamer Prompt-Kopf: „Wenn ein Wert nicht sicher lesbar ist, setze null – schätze und erfinde nichts.“ (außer Rolle `naehrwerte_schaetzen`). Alle Felder Pflicht, Unlesbares ist `null` bzw. `unbekannt`. Lockeres KI-Schema ohne Grenzen, danach strenges Fach-Schema.
 
 **A · Verpackung** (`verpackung`)
 ```
