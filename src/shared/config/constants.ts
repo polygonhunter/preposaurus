@@ -31,3 +31,16 @@ export const UNIT_STATUSES = ['vorrat', 'verbraucht', 'entsorgt'] as const
 export const BEST_BEFORE_PRECISIONS = ['tag', 'monat', 'jahr'] as const
 
 export const BEST_BEFORE_KINDS = ['mhd', 'verbrauchen_bis'] as const
+
+export const PHOTO_ROLES = ['verpackung', 'naehrwerte', 'mhd'] as const
+
+// entwurf: gehört zu einer unbestätigten Erfassung. fest: gehört zu einem gespeicherten Produkt.
+export const PHOTO_STATUSES = ['entwurf', 'fest'] as const
+
+// Die Lücke zum Ziel wird live berechnet und nicht gespeichert, deshalb fehlt „ziel“.
+export const RESTOCK_SOURCES = ['nachkauf', 'manuell'] as const
+
+export const RESTOCK_UNITS = ['g', 'ml', 'stueck'] as const
+
+// ERI-02 Wochenübersicht, ERI-03 Dringend, ERI-06 Check-in-Mail. Etappe und Inventur kommen später.
+export const NOTIFICATION_KINDS = ['wochenuebersicht', 'dringend', 'checkin_mail'] as const
