@@ -16,6 +16,9 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}', 'tests/**/*.test.ts', 'scripts/**/*.test.ts'],
     exclude: ['node_modules/**', 'prototypes/**', 'tests/e2e/**', 'tests/lint/fixtures/**'],
     testTimeout: 30_000,
+    // Integrationstests starten in beforeAll je eine frische DB mit allen Migrationen.
+    // Laufen viele Dateien parallel, braucht PGlite (WASM) dafür mehr als die üblichen 10 s.
+    hookTimeout: 60_000,
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,tsx}'],

@@ -1,10 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { categories } from '../../../src/server/db/schema/catalog'
-import { households } from '../../../src/server/db/schema/household'
 import { products, units } from '../../../src/server/db/schema/inventory'
-import { productGroups } from '../../../src/server/db/schema/recommendation'
 import { expectConstraintViolation } from '../../helpers/db-errors'
+import { insertBasics } from '../../helpers/db-fixtures'
+import { buildProduct } from '../../helpers/factories'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
 
 describe('Schema Vorrat', () => {
@@ -14,17 +14,7 @@ describe('Schema Vorrat', () => {
 
   beforeAll(async () => {
     testDb = await createTestDb()
-    const [household] = await testDb.db.insert(households).values({ name: 'Test' }).returning()
-    const [group] = await testDb.db
-      .insert(productGroups)
-      .values({ key: 'getreide', name: 'Getreide' })
-      .returning()
-    const [category] = await testDb.db
-      .insert(categories)
-      .values({ isSystem: true, key: 'nudeln', name: 'Nudeln', productGroupId: group?.id ?? '' })
-      .returning()
-    householdId = household?.id ?? ''
-    categoryId = category?.id ?? ''
+    ;({ householdId, categoryId } = await insertBasics(testDb.db))
   })
 
   afterAll(async () => {
@@ -32,18 +22,12 @@ describe('Schema Vorrat', () => {
   })
 
   const insertProduct = async (captureId?: string) => {
-    const [product] = await testDb.db
-      .insert(products)
-      .values({
-        householdId,
-        categoryId,
-        name: 'Nudeln',
-        contentAmount: '500',
-        contentUnit: 'g',
-        ...(captureId === undefined ? {} : { captureId }),
-      })
-      .returning()
-    if (product === undefined) throw new Error('Produkt fehlt')
+    const product = buildProduct({
+      householdId,
+      categoryId,
+      ...(captureId === undefined ? {} : { captureId }),
+    })
+    await testDb.db.insert(products).values(product)
     return product
   }
 

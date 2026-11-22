@@ -1,14 +1,10 @@
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { users } from '../../../src/server/db/schema/account'
 import { captureDrafts, photos } from '../../../src/server/db/schema/capture'
-import { categories } from '../../../src/server/db/schema/catalog'
-import { households } from '../../../src/server/db/schema/household'
-import { products } from '../../../src/server/db/schema/inventory'
-import { productGroups } from '../../../src/server/db/schema/recommendation'
 import { notificationSettings } from '../../../src/server/db/schema/reminders'
 import { restockItems } from '../../../src/server/db/schema/restock'
 import { expectConstraintViolation } from '../../helpers/db-errors'
+import { insertBasics } from '../../helpers/db-fixtures'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
 
 describe('Schema Erfassung, Nachkaufen, Erinnerungen', () => {
@@ -17,38 +13,9 @@ describe('Schema Erfassung, Nachkaufen, Erinnerungen', () => {
   let userId: string
   let productId: string
 
-  const insertProduct = async () => {
-    const [group] = await testDb.db
-      .insert(productGroups)
-      .values({ key: 'getreide', name: 'Getreide' })
-      .returning()
-    const [category] = await testDb.db
-      .insert(categories)
-      .values({ isSystem: true, key: 'nudeln', name: 'Nudeln', productGroupId: group?.id ?? '' })
-      .returning()
-    const [product] = await testDb.db
-      .insert(products)
-      .values({
-        householdId,
-        categoryId: category?.id ?? '',
-        name: 'Nudeln',
-        contentAmount: '500',
-        contentUnit: 'g',
-      })
-      .returning()
-    return product?.id ?? ''
-  }
-
   beforeAll(async () => {
     testDb = await createTestDb()
-    const [household] = await testDb.db.insert(households).values({ name: 'Test' }).returning()
-    householdId = household?.id ?? ''
-    const [user] = await testDb.db
-      .insert(users)
-      .values({ name: 'Alex', email: 'alex@example.org', householdId })
-      .returning()
-    userId = user?.id ?? ''
-    productId = await insertProduct()
+    ;({ householdId, userId, productId } = await insertBasics(testDb.db))
   })
 
   afterAll(async () => {
