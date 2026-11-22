@@ -19,7 +19,7 @@
     "!src/shared/lib/{dates,quantities,slug,stock-unit}.ts!",
     "!src/server/{ai,crypto,notify,storage}/**!",
     "!src/features/ai-settings/{application,data}/**!",
-    "!src/features/capture/{application/{estimate-on-request,find-open-draft}.ts,schemas/{ai-answers,draft}.ts}!",
+    "!src/features/capture/{application/{clean-up-captures,estimate-on-request,find-open-draft}.ts,data/capture-cleanup-repository.ts,schemas/{ai-answers,draft}.ts}!",
     "!src/features/inventory/schemas.ts!",
     "db/**/*.ts!",
     "!db/seeds/{demo*,factories}.ts!",

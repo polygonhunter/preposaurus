@@ -2,7 +2,9 @@
 // entstehen Erfassung, Produkt (oder Nachschub zu einem bestehenden) und je Packung eine Einheit.
 // Die id der Erfassung ist der Idempotenz-Schlüssel: Ein zweiter Aufruf mit derselben id legt
 // nichts an und liefert das erste Ergebnis. Stammdaten gelten nur aus dem eigenen Haushalt bzw.
-// als System-Einträge, alles andere ist „nicht gefunden“ (#133).
+// als System-Einträge, alles andere ist „nicht gefunden“ (#133). Beim Foto-Weg (#66) werden in
+// derselben Transaktion die Entwurfsfotos fest und der Entwurf gelöscht: Scheitert etwas, bleibt
+// der Entwurf samt Fotos stehen und lässt sich fortsetzen.
 import 'server-only'
 import { err, ok, type Result } from '@/shared/lib/result'
 import {
@@ -117,6 +119,9 @@ async function write(
   const productId =
     target.value.kind === 'new' ? await tx.insertProduct(target.value.row) : target.value.productId
   await tx.insertUnits({ productId, captureId: capture.id, units: plan.units })
+  if (draft.draftId !== null) {
+    await tx.adoptDraft({ householdId, userId, draftId: draft.draftId, productId })
+  }
   return ok({ captureId: capture.id, productId, unitCount: plan.units.length, isReplay: false })
 }
 

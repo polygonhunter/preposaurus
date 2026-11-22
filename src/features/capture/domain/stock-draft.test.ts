@@ -18,6 +18,7 @@ function draft(overrides: Partial<StockDraft> = {}): StockDraft {
   return {
     captureId: 'erfassung-1',
     method: 'manual',
+    draftId: null,
     product: { kind: 'new', ...newProduct },
     units: [{ bestBefore: null, kind: 'best-before', count: 1 }],
     ...overrides,
