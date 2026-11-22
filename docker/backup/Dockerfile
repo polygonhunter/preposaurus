@@ -12,5 +12,7 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 COPY common.sh rotate.sh backup.sh restore.sh /usr/local/lib/preposaurus/
 COPY --chmod=755 entrypoint.sh /usr/local/bin/backup
+# Krank nach einer fehlgeschlagenen Sicherung oder wenn die letzte über 26 Stunden alt ist.
+HEALTHCHECK --interval=5m --timeout=10s --start-period=1m CMD ["backup", "gesund"]
 ENTRYPOINT ["backup"]
 CMD ["zeitplan"]

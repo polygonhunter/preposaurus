@@ -45,6 +45,19 @@ describe('prune_old', () => {
     ])
   })
 
+  it('rotiert Stände mit Uhrzeit, auch mehrere am selben Tag', () => {
+    createStands([
+      '2026-11-21_030000',
+      '2026-11-22_010000',
+      '2026-11-22_030000',
+      '2026-11-20_030000',
+    ])
+
+    pruneOld(dir, 2)
+
+    expect(readdirSync(dir).sort()).toEqual(['2026-11-22_010000', '2026-11-22_030000'])
+  })
+
   it('sortiert über den Jahreswechsel richtig und behält 4 Wochenstände', () => {
     createStands(['2026-W51', '2025-W52', '2026-W52', '2026-W53', '2027-W01', '2026-W50'])
 

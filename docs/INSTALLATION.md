@@ -270,25 +270,37 @@ Auf Android geht es in Chrome über das Menü (⋮) → **Zum Startbildschirm hi
 
 Der Dienst `backup` sichert jede Nacht um `BACKUP_TIME`:
 - die **Datenbank** mit `pg_dump` (Version 18, passend zur Datenbank) als Datei `datenbank.dump`
-- die **Fotos** als vollständigen Ordner. Unveränderte Fotos sind feste Links auf den Vortag und kosten keinen zusätzlichen Platz. Ein versehentlich gelöschtes Foto bleibt in älteren Ständen erhalten.
+- die **Fotos** als vollständigen Ordner. Unveränderte Fotos sind feste Links auf den vorigen Stand und kosten keinen zusätzlichen Platz. Ein versehentlich gelöschtes Foto bleibt in älteren Ständen erhalten.
 
-Aufbewahrt werden **7 tägliche** und **4 wöchentliche** Stände (der Sonntag wird als Wochenstand behalten). Ältere löscht der Container selbst.
+Jeder Stand heißt nach seinem Zeitpunkt, mehrere am selben Tag überschreiben sich also nicht. Es gibt fünf Arten:
+
+| Ordner | entsteht | bleibt |
+|---|---|---|
+| `taeglich` | jede Nacht | die neuesten 7 |
+| `woechentlich` | sonntags als Kopie des Tagesstands | die neuesten 4 |
+| `manuell` | `jetzt` (Abschnitt 10.2) | die neuesten 5 |
+| `vor-update` | `jetzt vor-update` (Abschnitt 12) | **immer**, bis du ihn selbst löschst |
+| `vor-wiederherstellung` | automatisch vor jedem Wiederherstellen | die neuesten 5 |
 
 ```
 backups/
 ├─ taeglich/
-│  ├─ 2026-11-21/  datenbank.dump, fotos/
-│  └─ 2026-11-22/  datenbank.dump, fotos/
-└─ woechentlich/
-   └─ 2026-W47/    datenbank.dump, fotos/
+│  ├─ 2026-11-21_030000/  datenbank.dump, fotos/
+│  └─ 2026-11-22_030000/  datenbank.dump, fotos/
+├─ woechentlich/
+│  └─ 2026-W47/           datenbank.dump, fotos/
+└─ vor-update/
+   └─ 2026-11-22_100512/  datenbank.dump, fotos/
 ```
 
-Im Log steht jede Sicherung (`docker compose logs backup`), z. B. `Sicherung fertig: taeglich/2026-11-22 (14M)`.
+Im Log steht jede Sicherung (`docker compose logs backup`), z. B. `Sicherung fertig: taeglich/2026-11-22_030000 (14M)`.
+
+**Fehlgeschlagene Sicherungen fallen auf:** Scheitert eine Sicherung oder ist die letzte älter als 26 Stunden, zeigt `docker compose ps` den Dienst `backup` als `unhealthy`. Schau deshalb ab und zu in `docker compose ps` oder in die Container-Übersicht des NAS. Ein Hinweis in der App kommt später.
 
 ### 10.2 Von Hand sichern und Stände ansehen
 
 ```bash
-docker compose run --rm backup jetzt     # sofort sichern
+docker compose run --rm backup jetzt     # sofort sichern (Ordner manuell)
 docker compose run --rm backup liste     # vorhandene Stände zeigen
 ```
 
@@ -297,10 +309,10 @@ docker compose run --rm backup liste     # vorhandene Stände zeigen
 Einmal nach der Einrichtung und nach größeren Updates prüfen, ob sich eine Sicherung einspielen lässt. Die Probe nutzt eine Wegwerf-Datenbank, die App läuft dabei weiter:
 
 ```bash
-docker compose run --rm backup pruefen taeglich/2026-11-22
+docker compose run --rm backup pruefen taeglich/2026-11-22_030000
 ```
 
-Erwartet: `Probe in Ordnung: taeglich/2026-11-22 lässt sich einspielen (… Tabellen, … Fotodateien).`
+Erwartet: `Probe in Ordnung: taeglich/2026-11-22_030000 lässt sich einspielen (… Tabellen, … Fotodateien).`
 
 ### 10.4 Was du zusätzlich tun solltest
 
@@ -310,18 +322,23 @@ Erwartet: `Probe in Ordnung: taeglich/2026-11-22 lässt sich einspielen (… Tab
 
 ## 11. Wiederherstellen
 
-So spielst du einen Stand zurück. **Datenbank und Fotos werden dabei vollständig durch den Stand ersetzt.**
+So spielst du einen Stand zurück. **Datenbank und Fotos werden dabei durch den Stand ersetzt.**
 
 ```bash
-docker compose stop web                                         # App anhalten
-docker compose run --rm backup liste                            # Stand aussuchen
-docker compose run --rm backup wiederherstellen taeglich/2026-11-22
-docker compose start web                                        # App wieder starten
+docker compose stop web                                                  # App anhalten
+docker compose run --rm backup liste                                     # Stand aussuchen
+docker compose run --rm backup wiederherstellen taeglich/2026-11-22_030000
+docker compose up -d                                                     # App wieder starten
 ```
 
 Der Container fragt vor dem Ersetzen nach und erwartet die Eingabe `ja`. Läuft die App noch, bricht er ohne Änderung ab: `Die App ist noch verbunden. Bitte zuerst: docker compose stop web`.
 
-Erwartet: `Wiederhergestellt. Jetzt die App starten: docker compose start web`. Danach zeigt die App den Stand der Sicherung.
+So bleibt es sicher:
+- **Zuerst sichert er den jetzigen Zustand** nach `vor-wiederherstellung/…`. Hast du den falschen Stand gewählt, spielst du einfach diesen zurück.
+- Er spielt den Stand in eine **neue** Datenbank ein und ersetzt die alte erst, wenn das geklappt hat. Lässt sich der Stand nicht einspielen, bleibt alles, wie es war.
+- Die Fotos ersetzt er erst ganz am Ende.
+
+Erwartet: `Wiederhergestellt. Der Zustand davor liegt unter vor-wiederherstellung/…` und `Jetzt die App starten …: docker compose up -d`. Nimm `up -d` und nicht nur `start web`: So läuft auch `migrate` und bringt einen älteren Stand auf das Schema der aktuellen Version.
 
 **Auf einem neuen NAS** (das alte ist defekt):
 1. Abschnitte 4 bis 6 durchgehen, mit **derselben `.env`** (gleiches `APP_SECRET`) und derselben Version wie beim Backup.
@@ -334,7 +351,7 @@ Wer ein **altes oder fremdes** Backup einspielt, holt damit auch alte Sitzungen 
 
 Neue Versionen stehen auf der [Release-Seite](https://github.com/polygonhunter/preposaurus/releases) mit ihren Änderungen.
 
-1. **Sichern:** `docker compose run --rm backup jetzt` und die Ausgabe merken (z. B. `taeglich/2026-11-22`).
+1. **Sichern:** `docker compose run --rm backup jetzt vor-update` und den Namen aus der Ausgabe merken (z. B. `vor-update/2026-11-22_100512`). Diesen Stand löscht der Container nie von selbst, auch nicht die nächtliche Sicherung.
 2. **Version eintragen:** in der `.env` die Zeile `PREPOSAURUS_VERSION=` auf die neue Nummer setzen.
 3. **Neue Dateien prüfen:** Falls das Release geänderte Compose-Dateien enthält, das neue Archiv wie in Abschnitt 4.2 entpacken (ohne `cp env.beispiel .env`, deine `.env` bleibt).
 4. **Ziehen und neu starten:**
@@ -348,10 +365,10 @@ Neue Versionen stehen auf der [Release-Seite](https://github.com/polygonhunter/p
 **Zurück zur alten Version:** Datenbank-Änderungen laufen nur vorwärts. Der Weg zurück ist deshalb:
 1. `docker compose stop web`
 2. Alte Nummer in `PREPOSAURUS_VERSION` eintragen, `docker compose pull`.
-3. Das Backup von vor dem Update einspielen: `docker compose run --rm backup wiederherstellen taeglich/2026-11-22` (Abschnitt 11).
+3. Den Stand von vor dem Update einspielen: `docker compose run --rm backup wiederherstellen vor-update/2026-11-22_100512` (Abschnitt 11).
 4. `docker compose up -d`
 
-Was zwischen Update und Rückweg erfasst wurde, ist danach weg.
+Was zwischen Update und Rückweg erfasst wurde, ist danach weg (es steckt aber noch im Stand `vor-wiederherstellung/…`). Alte Stände unter `vor-update` löschst du selbst, wenn du sie nicht mehr brauchst: `rm -r backups/vor-update/<name>`.
 
 ## 13. Notfall: Admin-Passwort vergessen
 

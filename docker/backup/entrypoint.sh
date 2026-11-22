@@ -1,10 +1,11 @@
 #!/bin/sh
 # Backup-Container von Preposaurus (UMSETZUNG M13-03). Befehle:
 #   zeitplan                     täglich um BACKUP_TIME sichern (Standard im Compose-Dienst)
-#   jetzt                        sofort einmal sichern
+#   jetzt [vor-update]           sofort sichern (manuell/… bzw. vor-update/…, das nie rotiert)
 #   liste                        vorhandene Stände zeigen
 #   pruefen <stand>              Stand probeweise in eine Wegwerf-Datenbank einspielen
 #   wiederherstellen <stand>     Stand zurückspielen (vorher die App stoppen)
+#   gesund                       Healthcheck: letzter Lauf erfolgreich und jünger als 26 Stunden
 set -eu
 LIB=/usr/local/lib/preposaurus
 . "$LIB/common.sh"
@@ -31,19 +32,33 @@ run_schedule() {
     log "Nächste Sicherung um $BACKUP_TIME (in $((wait_seconds / 60)) Minuten)"
     sleep "$wait_seconds" &
     wait $!
-    # Eigener Prozess, damit set -e dort greift. Ein Fehlschlag beendet den Zeitplan nicht,
-    # der nächste Tag versucht es wieder.
-    "$0" jetzt || log "FEHLER: Sicherung fehlgeschlagen, siehe Meldungen oben"
+    # Eigener Prozess, damit set -e dort greift. Ein Fehlschlag beendet den Zeitplan nicht, macht
+    # den Container aber "unhealthy", bis eine Sicherung wieder klappt.
+    if ! "$0" zeitplan-lauf; then
+      write_status fehler "taeglich"
+      log "FEHLER: Sicherung fehlgeschlagen, siehe Meldungen oben"
+    fi
   done
+}
+
+backup_now() {
+  [ $# -le 1 ] || fail "Aufruf: jetzt [vor-update]"
+  case "${1:-}" in
+    '') run_backup manuell ;;
+    vor-update) run_backup vor-update ;;
+    *) fail "Aufruf: jetzt [vor-update]" ;;
+  esac
 }
 
 command=${1:-zeitplan}
 [ $# -gt 0 ] && shift
 case "$command" in
   zeitplan) run_schedule ;;
-  jetzt) run_backup ;;
+  zeitplan-lauf) acquire_lock; run_backup taeglich ;;
+  jetzt) acquire_lock; backup_now "$@" ;;
   liste) list_stands ;;
-  pruefen) run_check "$@" ;;
-  wiederherstellen) run_restore "$@" ;;
+  pruefen) acquire_lock; run_check "$@" ;;
+  wiederherstellen) acquire_lock; run_restore "$@" ;;
+  gesund) check_health ;;
   *) exec "$command" "$@" ;;
 esac
