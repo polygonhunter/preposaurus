@@ -1,0 +1,458 @@
+# Preposaurus einrichten
+
+Diese Anleitung führt Schritt für Schritt durch die Einrichtung von Preposaurus auf einem NAS oder einem anderen eigenen Server, ähnlich wie bei Paperless-ngx. Vorwissen zu Docker brauchst du nicht. Jeder Schritt nennt den Befehl und das, was danach zu sehen sein sollte.
+
+> **Stand:** Die Anleitung beschreibt die Dateien aus dem Repository (Compose-Dateien, Images, Backup). Sie ist in der CI geprüft, aber **noch nicht an einem echten NAS**. Stellen, die nur am Gerät prüfbar sind, tragen den Hinweis *noch nicht am Gerät geprüft*. Die Abnahme am Gerät ist Arbeitspaket M13-06 (Issue #1). Die App selbst ist noch in Entwicklung, einige Schritte (Ersteinrichtung, Push, Mail) folgen mit späteren Versionen.
+
+## Inhalt
+
+1. [So ist Preposaurus aufgebaut](#1-so-ist-preposaurus-aufgebaut)
+2. [Voraussetzungen](#2-voraussetzungen)
+3. [Tailscale vorbereiten](#3-tailscale-vorbereiten)
+4. [Ordner und Dateien anlegen](#4-ordner-und-dateien-anlegen)
+5. [Die Datei .env ausfüllen](#5-die-datei-env-ausfüllen)
+6. [Starten](#6-starten)
+7. [Erster Aufruf und Ersteinrichtung](#7-erster-aufruf-und-ersteinrichtung)
+8. [Weitere Geräte und Haushaltsmitglieder](#8-weitere-geräte-und-haushaltsmitglieder)
+9. [Die App auf den Home-Bildschirm des iPhones legen](#9-die-app-auf-den-home-bildschirm-des-iphones-legen)
+10. [Backups](#10-backups)
+11. [Wiederherstellen](#11-wiederherstellen)
+12. [Updates und der Weg zurück](#12-updates-und-der-weg-zurück)
+13. [Notfall: Admin-Passwort vergessen](#13-notfall-admin-passwort-vergessen)
+14. [Fehlersuche](#14-fehlersuche)
+15. [Hinweise je NAS-Typ](#15-hinweise-je-nas-typ)
+16. [Tailscale als Paket auf dem NAS (zweiter Weg)](#16-tailscale-als-paket-auf-dem-nas-zweiter-weg)
+
+---
+
+## 1. So ist Preposaurus aufgebaut
+
+Preposaurus läuft als kleine Gruppe von Containern (Programmpaketen) mit Docker Compose. Compose startet sie in der richtigen Reihenfolge und hält sie am Laufen.
+
+| Dienst | Aufgabe |
+|---|---|
+| `db` | Datenbank (PostgreSQL 18). Nur intern erreichbar |
+| `migrate` | richtet beim Start die Datenbank ein bzw. bringt sie auf den neuen Stand und beendet sich dann |
+| `web` | die App selbst |
+| `backup` | sichert jede Nacht Datenbank und Fotos |
+| `tailscale` | bringt die App verschlüsselt (HTTPS) in dein privates Tailscale-Netz |
+| `worker` | Erinnerungen und Mails, kommt mit einer späteren Version |
+
+**Erreichbar ist die App nur über Tailscale**, nicht aus dem offenen Internet und nicht direkt im Heimnetz. Tailscale ist ein privates, verschlüsseltes Netz zwischen deinen eigenen Geräten (dem „Tailnet“). Die App bekommt darin eine Adresse wie `https://haushalt.dein-tailnet.ts.net`.
+
+Warum so streng?
+- Kamera, Home-Bildschirm-App und Benachrichtigungen gehen im Browser nur über HTTPS.
+- Die Anmeldung geht in Produktion **nur über HTTPS**. Das Sitzungs-Cookie ist als „Secure“ markiert, über reines `http://` verwirft der Browser es. Das ist gewollt.
+- Der App-Port 3000 wird **nie ins Heimnetz freigegeben**. Die Anmeldebremse zählt Fehlversuche je Gerät. Bei direktem Zugriff könnte ein Gerät eine falsche Adresse mitschicken und so die Bremse umgehen. Tailscale Serve setzt die echte Adresse.
+
+Alle Daten liegen in drei sichtbaren Ordnern neben der Compose-Datei:
+
+| Ordner | Inhalt |
+|---|---|
+| `db` | die Datenbank |
+| `fotos` | die Fotos der Packungen |
+| `backups` | die nächtlichen Sicherungen |
+
+Dazu kommt `tailscale` mit dem Zustand des Tailscale-Containers.
+
+## 2. Voraussetzungen
+
+- **Ein NAS oder Server mit Docker und Docker Compose** (Version 2.24 oder neuer, wegen `!reset` in der Tailscale-Datei). Prüfen per SSH:
+  ```bash
+  docker compose version
+  ```
+  Erwartet: `Docker Compose version v2.24.0` oder höher.
+- **Prozessor x86-64 (amd64) oder ARM64 (aarch64).** Ältere NAS mit 32-Bit-ARM gehen nicht. Prüfen:
+  ```bash
+  uname -m
+  ```
+  Erwartet: `x86_64` oder `aarch64`.
+- **Etwa 1 GB Arbeitsspeicher frei** und Platz für Fotos und Backups (Richtwert: dreimal so viel wie die Fotos selbst).
+- **Ein Tailscale-Konto** (kostenlos für bis zu 6 Personen, nur privat): [tailscale.com](https://tailscale.com)
+- **Die Tailscale-App** auf jedem Handy und PC, mit dem ihr Preposaurus nutzen wollt.
+- **SSH-Zugang** zum NAS ist hilfreich. Die Befehle in dieser Anleitung laufen dort. Auf manchen Geräten braucht Docker `sudo` davor.
+
+## 3. Tailscale vorbereiten
+
+Alles in diesem Abschnitt passiert im Browser im Tailscale-Admin-Bereich: [login.tailscale.com/admin](https://login.tailscale.com/admin).
+
+### 3.1 MagicDNS und HTTPS einschalten
+
+1. Seite **DNS** öffnen.
+2. **MagicDNS** einschalten (falls noch aus). Damit bekommen deine Geräte Namen statt Zahlen.
+3. Weiter unten bei **HTTPS Certificates** auf **Enable HTTPS** klicken.
+
+Erwartet: Oben auf der Seite steht der Name deines Tailnets, z. B. `dein-tailnet.ts.net`. Notiere ihn.
+
+### 3.2 Einen neutralen Gerätenamen wählen
+
+Der Gerätename landet im **öffentlichen Zertifikats-Verzeichnis** (Certificate-Transparency-Log), weil Tailscale dafür ein HTTPS-Zertifikat holt. Wähle deshalb einen neutralen Namen, der nichts über dich oder den Zweck verrät, z. B. `haushalt` oder `nas-app`. Nicht: `notvorrat`, `preposaurus-mueller`.
+
+### 3.3 Einen Auth-Schlüssel für den Tailscale-Container erzeugen
+
+Der Tailscale-Container meldet sich mit einem Auth-Schlüssel einmalig in deinem Tailnet an.
+
+1. Seite **Settings → Keys** öffnen.
+2. **Generate auth key…** wählen.
+3. **Reusable** aus, **Ephemeral** aus. Gibt es die Option **Pre-approved**, einschalten.
+4. **Generate key** und den Schlüssel (beginnt mit `tskey-auth-`) kopieren. Er wird nur einmal angezeigt.
+
+Der Schlüssel ist ein Geheimnis wie ein Passwort. Er kommt gleich in die Datei `.env` und sonst nirgendwohin.
+
+> Ohne Auth-Schlüssel geht es auch: Dann schreibt der Tailscale-Container beim ersten Start einen Anmelde-Link ins Log (`docker compose logs tailscale`), den du im Browser öffnest.
+
+## 4. Ordner und Dateien anlegen
+
+### 4.1 Einen Ordner für Preposaurus anlegen
+
+Wähle einen Ordner auf dem NAS, der von den NAS-eigenen Snapshots und Sicherungen erfasst wird. Beispiele stehen in [Abschnitt 15](#15-hinweise-je-nas-typ). Hier im Beispiel `/volume1/docker/preposaurus`:
+
+```bash
+mkdir -p /volume1/docker/preposaurus
+cd /volume1/docker/preposaurus
+```
+
+### 4.2 Die Installationsdateien herunterladen
+
+Jede Version auf der [Release-Seite](https://github.com/polygonhunter/preposaurus/releases) hat ein Archiv `preposaurus-<version>.tar.gz`. Darin stecken:
+
+- `compose.yaml` – die Dienste
+- `compose.tailscale.yaml` – der Tailscale-Container
+- `docker/tailscale/serve.json` – die HTTPS-Einstellung für Tailscale Serve
+- `env.beispiel` – die Vorlage für die Datei `.env`, mit eingetragener Version
+
+Herunterladen und entpacken (Version anpassen):
+
+```bash
+VERSION=0.1.0
+wget https://github.com/polygonhunter/preposaurus/releases/download/v$VERSION/preposaurus-$VERSION.tar.gz
+tar -xzf preposaurus-$VERSION.tar.gz --strip-components=1
+cp env.beispiel .env
+```
+
+Ohne `wget` geht `curl -LO <adresse>`. Ohne SSH: das Archiv am PC herunterladen, entpacken und den Inhalt in den Ordner auf dem NAS kopieren. Dabei `env.beispiel` in `.env` umbenennen.
+
+Erwartet: `ls -a` zeigt `.env`, `compose.yaml`, `compose.tailscale.yaml`, `docker` und `env.beispiel`.
+
+### 4.3 Die Datenordner anlegen
+
+```bash
+mkdir -p db fotos backups tailscale
+```
+
+Die App läuft aus Sicherheitsgründen **nicht als root**, sondern unter einer Nutzer-ID. Diesem Nutzer muss der Ordner `fotos` gehören. Standard ist die ID 1000. Auf vielen NAS hat dein eigener Nutzer eine andere ID, dann nimm diese:
+
+```bash
+id -u   # z. B. 1026
+id -g   # z. B. 100
+```
+
+Trag beide Zahlen in Abschnitt 5 als `PREPOSAURUS_UID` und `PREPOSAURUS_GID` ein. Wenn der Ordner `fotos` nicht deinem Nutzer gehört (z. B. weil du ihn mit `sudo` angelegt hast):
+
+```bash
+sudo chown "$(id -u):$(id -g)" fotos backups
+```
+
+Den Ordner `db` verwaltet die Datenbank selbst, er braucht keine Anpassung.
+
+## 5. Die Datei .env ausfüllen
+
+Die Datei `.env` enthält alle Einstellungen und Geheimnisse. **Sie gehört nie in ein Repository, in einen Chat oder in ein Ticket.** Bewahre eine Kopie getrennt von den Backups auf, z. B. im Passwort-Manager.
+
+Öffne sie mit einem Editor (per SSH z. B. `nano .env`, am NAS auch über den Datei-Browser).
+
+### 5.1 Geheimnisse erzeugen
+
+```bash
+openssl rand -hex 24      # für POSTGRES_PASSWORD
+openssl rand -base64 32   # für APP_SECRET
+```
+
+Erwartet: je eine lange Zufallszeile. Kopiere sie in die passenden Zeilen. Ohne `openssl` auf dem NAS geht es mit Docker:
+
+```bash
+docker run --rm alpine:3.22 sh -c "apk add -q openssl && openssl rand -base64 32"
+```
+
+### 5.2 Alle Variablen erklärt
+
+| Variable | Pflicht | Bedeutung |
+|---|---|---|
+| `COMPOSE_FILE` | ja | Welche Compose-Dateien gelten. Vorgabe `compose.yaml:compose.tailscale.yaml` (mit Tailscale-Container). Dadurch reicht überall ein einfaches `docker compose …`. Nur beim zweiten Weg ([Abschnitt 16](#16-tailscale-als-paket-auf-dem-nas-zweiter-weg)): `compose.yaml` |
+| `PREPOSAURUS_VERSION` | ja | Version der Images, immer eine feste Nummer wie `0.1.0`, nie `latest`. So ändert sich nichts ohne dein Zutun |
+| `POSTGRES_PASSWORD` | ja | Passwort der Datenbank. Nur Buchstaben und Ziffern (`openssl rand -hex 24`), weil es in einer Adresse steht. Nach dem ersten Start nicht mehr ändern, die Datenbank merkt es sich beim Anlegen |
+| `APP_SECRET` | ja | Geheimnis für die Sitzungen und für den verschlüsselt gespeicherten KI-Schlüssel, mindestens 32 Zeichen (`openssl rand -base64 32`). Ein neuer Wert meldet alle Geräte ab, ein in der App hinterlegter KI-Schlüssel muss dann neu eingetragen werden. **Getrennt von der Datenbank sichern** |
+| `PREPOSAURUS_UID`, `PREPOSAURUS_GID` | ja | Nutzer- und Gruppen-ID, der die Ordner `fotos` und `backups` gehören (aus Abschnitt 4.3). Standard 1000 |
+| `TS_HOSTNAME` | mit Tailscale-Container | Gerätename im Tailnet. Neutral wählen (Abschnitt 3.2). Ergibt die Adresse `https://<TS_HOSTNAME>.<tailnet>.ts.net` |
+| `TS_AUTHKEY` | nur beim ersten Start | Auth-Schlüssel aus Abschnitt 3.3. Nach dem ersten erfolgreichen Start darf die Zeile wieder leer sein |
+| `BACKUP_TIME` | nein | Uhrzeit der täglichen Sicherung, Standard `03:00` |
+| `TZ` | nein | Zeitzone für die Sicherung, Standard `Europe/Berlin` |
+| `LOG_LEVEL` | nein | Wie viel die App ins Log schreibt: `debug`, `info` (Standard), `warn` oder `error` |
+| `ANTHROPIC_API_KEY` | nein | Schlüssel für die Foto-Erkennung. Normalerweise trägt ihn der Admin **in der App** ein (dort verschlüsselt gespeichert). Steht er hier, hat er Vorrang. Ohne Schlüssel geht alles von Hand |
+
+Mail (SMTP) und Push-Benachrichtigungen kommen mit einer späteren Version. Beides wird optional sein.
+
+Erwartet: `docker compose config --quiet` gibt nichts aus. Fehlt ein Pflichtwert, nennt die Meldung die Variable, z. B. `APP_SECRET fehlt in .env`.
+
+## 6. Starten
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+Erwartet:
+- `pull` lädt die Images `preposaurus`, `preposaurus-backup`, `postgres` und `tailscale`.
+- `up -d` meldet nach etwa einer Minute alle Dienste als `Started` bzw. `Healthy`, `migrate` als `Exited`.
+
+Prüfen:
+
+```bash
+docker compose ps -a
+```
+
+| Dienst | erwarteter Status |
+|---|---|
+| `db` | `Up … (healthy)` |
+| `migrate` | `Exited (0)` – richtig so, er ist fertig |
+| `web` | `Up … (healthy)` |
+| `backup` | `Up` |
+| `tailscale` | `Up` |
+
+Im Log von `migrate` stehen `Migrationen eingespielt` und `Stammdaten eingespielt`:
+
+```bash
+docker compose logs migrate
+```
+
+Läuft der Tailscale-Container, erscheint das Gerät mit deinem `TS_HOSTNAME` im Admin-Bereich unter **Machines**. Dort beim Gerät über das Menü **Disable key expiry** wählen, sonst muss es sich nach einigen Monaten neu anmelden.
+
+## 7. Erster Aufruf und Ersteinrichtung
+
+1. Auf einem Gerät mit verbundener Tailscale-App im Browser öffnen: `https://<TS_HOSTNAME>.<tailnet>.ts.net`, z. B. `https://haushalt.dein-tailnet.ts.net`.
+2. Der erste Aufruf kann einige Sekunden dauern, weil Tailscale das Zertifikat holt.
+3. Kurztest ohne Anmeldung: `https://<adresse>/api/health` zeigt `{"status":"ok"}`.
+
+**Wer die App zuerst öffnet, wird Admin.** Richte sie deshalb direkt nach dem Start ein. Die Ersteinrichtung in der App fragt nach Anzeigename, Benutzername und Passwort (keine E-Mail), danach nach der Zahl der Personen im Haushalt und dem Ziel in Tagen. Das dauert etwa zwei Minuten.
+
+> In der aktuellen Entwicklungsversion zeigt die App noch eine Platzhalterseite. Die Ersteinrichtung kommt mit Meilenstein M3.
+
+Die Foto-Erkennung ist anfangs aus. Der Admin kann sie später in den Einstellungen mit einem eigenen Anthropic-Schlüssel einschalten. Fotos gehen dann zur Auswertung an Anthropic, alles andere bleibt auf dem NAS.
+
+## 8. Weitere Geräte und Haushaltsmitglieder
+
+Jedes Gerät braucht die Tailscale-App, und Tailscale muss zum Öffnen der App verbunden sein.
+
+Für weitere Personen gibt es zwei Wege:
+
+| Weg | So geht's | Gut für |
+|---|---|---|
+| **Ins eigene Tailnet einladen** | Admin-Bereich → **Users** → **Invite users**. Die Person meldet sich mit eigenem Konto an und sieht alle Geräte, die du freigibst | Familie im selben Haushalt |
+| **Nur das Gerät teilen** | Admin-Bereich → **Machines** → beim Gerät **Share…**. Die Person nutzt ihr eigenes Tailnet und sieht nur Preposaurus | Personen, die schon ein eigenes Tailnet haben |
+
+Im kostenlosen Tarif sind bis zu 6 Nutzer möglich. Danach legt der Admin für jede Person in Preposaurus einen eigenen Benutzer an (Einstellungen → Nutzer, kommt mit M3).
+
+## 9. Die App auf den Home-Bildschirm des iPhones legen
+
+1. Tailscale-App auf dem iPhone verbinden.
+2. In **Safari** die Adresse `https://<TS_HOSTNAME>.<tailnet>.ts.net` öffnen.
+3. Unten auf das **Teilen**-Symbol tippen (Quadrat mit Pfeil nach oben).
+4. **Zum Home-Bildschirm** wählen, Namen bestätigen, **Hinzufügen**.
+
+Erwartet: Preposaurus liegt als eigenes Symbol auf dem Home-Bildschirm und öffnet sich ohne Adressleiste. Benachrichtigungen gehen auf dem iPhone nur aus dieser Home-Bildschirm-App heraus. *Noch nicht am Gerät geprüft:* Kamera in der Home-Bildschirm-App, Verhalten bei ausgeschaltetem Tailscale.
+
+Auf Android geht es in Chrome über das Menü (⋮) → **Zum Startbildschirm hinzufügen**. Am PC reicht ein Lesezeichen.
+
+## 10. Backups
+
+### 10.1 Was automatisch passiert
+
+Der Dienst `backup` sichert jede Nacht um `BACKUP_TIME`:
+- die **Datenbank** mit `pg_dump` (Version 18, passend zur Datenbank) als Datei `datenbank.dump`
+- die **Fotos** als vollständigen Ordner. Unveränderte Fotos sind feste Links auf den Vortag und kosten keinen zusätzlichen Platz. Ein versehentlich gelöschtes Foto bleibt in älteren Ständen erhalten.
+
+Aufbewahrt werden **7 tägliche** und **4 wöchentliche** Stände (der Sonntag wird als Wochenstand behalten). Ältere löscht der Container selbst.
+
+```
+backups/
+├─ taeglich/
+│  ├─ 2026-11-21/  datenbank.dump, fotos/
+│  └─ 2026-11-22/  datenbank.dump, fotos/
+└─ woechentlich/
+   └─ 2026-W47/    datenbank.dump, fotos/
+```
+
+Im Log steht jede Sicherung (`docker compose logs backup`), z. B. `Sicherung fertig: taeglich/2026-11-22 (14M)`.
+
+### 10.2 Von Hand sichern und Stände ansehen
+
+```bash
+docker compose run --rm backup jetzt     # sofort sichern
+docker compose run --rm backup liste     # vorhandene Stände zeigen
+```
+
+### 10.3 Eine Probe machen
+
+Einmal nach der Einrichtung und nach größeren Updates prüfen, ob sich eine Sicherung einspielen lässt. Die Probe nutzt eine Wegwerf-Datenbank, die App läuft dabei weiter:
+
+```bash
+docker compose run --rm backup pruefen taeglich/2026-11-22
+```
+
+Erwartet: `Probe in Ordnung: taeglich/2026-11-22 lässt sich einspielen (… Tabellen, … Fotodateien).`
+
+### 10.4 Was du zusätzlich tun solltest
+
+- **Zweiter Ort, verschlüsselt:** Ein Backup nur auf demselben NAS hilft nicht, wenn das NAS ausfällt. Kopiere den Ordner `backups` regelmäßig an einen zweiten Ort, z. B. eine externe Platte oder einen Cloud-Speicher, **verschlüsselt**, denn er enthält auch Gesundheitsangaben (Allergien, Schwangerschaft) und die Passwort-Hashes. Dafür eignet sich die Sicherungs-App des NAS (z. B. Hyper Backup mit Verschlüsselung) oder ein Werkzeug wie restic.
+- **Die `.env` getrennt sichern:** Ohne `APP_SECRET` ist ein in der App hinterlegter KI-Schlüssel nach dem Einspielen verloren und alle Geräte sind abgemeldet. Die `.env` gehört nicht in denselben Ordner wie die Backups an den zweiten Ort, sondern z. B. in den Passwort-Manager.
+- **Snapshots des NAS** für die Ordner `fotos` und `backups` einschalten, falls das NAS sie bietet. Ein Snapshot des laufenden Ordners `db` ersetzt den Dump nicht, weil die Datenbank darin mitten im Schreiben eingefroren sein kann.
+
+## 11. Wiederherstellen
+
+So spielst du einen Stand zurück. **Datenbank und Fotos werden dabei vollständig durch den Stand ersetzt.**
+
+```bash
+docker compose stop web                                         # App anhalten
+docker compose run --rm backup liste                            # Stand aussuchen
+docker compose run --rm backup wiederherstellen taeglich/2026-11-22
+docker compose start web                                        # App wieder starten
+```
+
+Der Container fragt vor dem Ersetzen nach und erwartet die Eingabe `ja`. Läuft die App noch, bricht er ohne Änderung ab: `Die App ist noch verbunden. Bitte zuerst: docker compose stop web`.
+
+Erwartet: `Wiederhergestellt. Jetzt die App starten: docker compose start web`. Danach zeigt die App den Stand der Sicherung.
+
+**Auf einem neuen NAS** (das alte ist defekt):
+1. Abschnitte 4 bis 6 durchgehen, mit **derselben `.env`** (gleiches `APP_SECRET`) und derselben Version wie beim Backup.
+2. Den gesicherten Ordner `backups` vom zweiten Ort zurück in den neuen Preposaurus-Ordner kopieren.
+3. Wie oben wiederherstellen.
+
+Wer ein **altes oder fremdes** Backup einspielt, holt damit auch alte Sitzungen zurück. Dann alle Geräte abmelden. *Der Befehl dafür (`alle-abmelden`) kommt mit einer späteren Version.* Bis dahin hilft ein neues `APP_SECRET`, das alle abmeldet (ein in der App hinterlegter KI-Schlüssel muss danach neu eingetragen werden).
+
+## 12. Updates und der Weg zurück
+
+Neue Versionen stehen auf der [Release-Seite](https://github.com/polygonhunter/preposaurus/releases) mit ihren Änderungen.
+
+1. **Sichern:** `docker compose run --rm backup jetzt` und die Ausgabe merken (z. B. `taeglich/2026-11-22`).
+2. **Version eintragen:** in der `.env` die Zeile `PREPOSAURUS_VERSION=` auf die neue Nummer setzen.
+3. **Neue Dateien prüfen:** Falls das Release geänderte Compose-Dateien enthält, das neue Archiv wie in Abschnitt 4.2 entpacken (ohne `cp env.beispiel .env`, deine `.env` bleibt).
+4. **Ziehen und neu starten:**
+   ```bash
+   docker compose pull
+   docker compose up -d
+   ```
+   `migrate` bringt die Datenbank dabei automatisch auf den neuen Stand.
+5. **Prüfen:** `docker compose ps -a` wie in Abschnitt 6, dann die App öffnen.
+
+**Zurück zur alten Version:** Datenbank-Änderungen laufen nur vorwärts. Der Weg zurück ist deshalb:
+1. `docker compose stop web`
+2. Alte Nummer in `PREPOSAURUS_VERSION` eintragen, `docker compose pull`.
+3. Das Backup von vor dem Update einspielen: `docker compose run --rm backup wiederherstellen taeglich/2026-11-22` (Abschnitt 11).
+4. `docker compose up -d`
+
+Was zwischen Update und Rückweg erfasst wurde, ist danach weg.
+
+## 13. Notfall: Admin-Passwort vergessen
+
+1. **Gibt es einen zweiten Admin,** setzt er das Passwort in der App zurück (Einstellungen → Nutzer).
+2. **Sonst** auf dem NAS im Preposaurus-Ordner:
+   ```bash
+   docker compose exec web node scripts/admin.mjs passwort-zuruecksetzen <benutzername>
+   ```
+
+Erwartet:
+```
+Neues vorläufiges Passwort für „alex“: fqju-frbq-zmcw-ctek-wq52
+Es wird nur jetzt angezeigt. Alle Sitzungen und Anmeldesperren sind aufgehoben.
+```
+
+Der Befehl erzeugt das Passwort selbst und zeigt es nur einmal. Er beendet alle Sitzungen dieses Nutzers und hebt die Anmeldesperren auf (für den Namen, die Pause für alle und die Sperren je Adresse). Melde dich damit an und setze danach ein eigenes Passwort. Im Log von `web` steht eine Zeile `Passwort per Kommandozeile zurückgesetzt` ohne das Passwort.
+
+Den Befehl gibt es bewusst nur im Container, nicht als Formular oder Einstellung: Wer `docker compose exec` ausführen darf, hat ohnehin Zugriff auf alle Daten.
+
+## 14. Fehlersuche
+
+Die wichtigsten Befehle:
+
+```bash
+docker compose ps -a                 # läuft alles?
+docker compose logs --tail=100 web   # Meldungen der App
+docker compose logs db migrate       # Datenbank und Einrichtung
+docker compose logs tailscale        # Tailscale
+```
+
+| Problem | Ursache und Lösung |
+|---|---|
+| `… fehlt in .env` beim Start | Eine Pflichtvariable ist leer. Abschnitt 5 |
+| `web` startet nicht, im Log `Ungültige Umgebungsvariablen` | Ein Wert in der `.env` passt nicht, z. B. `APP_SECRET` zu kurz. Die Meldung nennt die Variable |
+| `migrate` steht auf `Exited (1)` | `docker compose logs migrate` lesen. Oft ist die Datenbank nicht erreichbar oder `POSTGRES_PASSWORD` wurde nach dem ersten Start geändert. Altes Passwort wieder eintragen |
+| `db` meldet `password authentication failed` | `POSTGRES_PASSWORD` wurde nach dem ersten Start geändert. Die Datenbank behält das erste Passwort. Altes Passwort wieder eintragen |
+| `db` meldet etwas zu `/var/lib/postgresql/data` | Der Ordner `db` stammt von PostgreSQL 17 oder älter. Neu einrichten und ein Backup einspielen |
+| Fotos lassen sich nicht speichern, im Log `EACCES` | Der Ordner `fotos` gehört nicht dem Nutzer aus `PREPOSAURUS_UID`. Abschnitt 4.3 |
+| Browser findet die Adresse nicht | Tailscale auf dem Gerät verbunden? MagicDNS an (Abschnitt 3.1)? Erscheint das Gerät unter **Machines**? |
+| Zertifikatsfehler oder langer erster Aufruf | HTTPS-Zertifikate im Admin-Bereich eingeschaltet? Der erste Aufruf holt das Zertifikat und dauert etwas. `docker compose logs tailscale` zeigt Fehler |
+| Anmeldung klappt, aber man ist sofort wieder abgemeldet | Die App wurde über `http://` statt `https://` geöffnet. Das sichere Cookie geht nur über HTTPS |
+| Kamera geht nicht | Nur über die `https://…ts.net`-Adresse. Im Browser die Kamera für die Seite erlauben |
+| „Zu viele Versuche“ bei der Anmeldung | Kurz warten (höchstens 15 Minuten) oder ein Admin setzt das Passwort zurück. Für den einzigen Admin: Abschnitt 13 |
+| Tailscale-Gerät nach Monaten offline | Schlüssel abgelaufen. In **Machines** neu anmelden und **Disable key expiry** wählen |
+| `pull` meldet `denied` oder `unauthorized` | Das Image ist (noch) nicht öffentlich. Mit einem GitHub-Token mit Leserecht für Pakete anmelden: `docker login ghcr.io` |
+| `!reset` wird nicht verstanden | Docker Compose ist älter als 2.24. Docker bzw. Container Manager aktualisieren |
+
+## 15. Hinweise je NAS-Typ
+
+Die Abschnitte 3 bis 14 gelten überall. Hier steht nur, was je Gerät anders ist. **Alle Angaben in diesem Abschnitt sind noch nicht am Gerät geprüft.**
+
+### Synology (Container Manager)
+
+*Noch nicht am Gerät geprüft.*
+- **Docker:** Paket **Container Manager** aus dem Paket-Zentrum installieren (DSM 7.2 oder neuer). Prozessor prüfen: Nur Modelle mit x86-64 oder ARM64 gehen.
+- **Ordner:** Container Manager legt den freigegebenen Ordner `docker` an. Preposaurus kommt nach `/volume1/docker/preposaurus`.
+- **SSH:** Systemsteuerung → Terminal & SNMP → SSH aktivieren. Docker-Befehle brauchen dort `sudo` (`sudo docker compose …`).
+- **Nutzer-ID:** Der erste angelegte Nutzer hat meist die ID 1026, Gruppe `users` = 100. Mit `id -u` und `id -g` prüfen und in die `.env` eintragen.
+- **Projekt anlegen:** Am zuverlässigsten per SSH wie in Abschnitt 6. In der Oberfläche: Container Manager → **Projekt** → **Erstellen**, Pfad `/docker/preposaurus`, „vorhandene compose.yaml verwenden“. Ob die Oberfläche `COMPOSE_FILE` aus der `.env` und damit die Tailscale-Datei berücksichtigt, ist offen. Im Zweifel per SSH starten.
+- **Compose-Version:** Container Manager bringt eine eigene Docker-Compose-Version mit. Mit `docker compose version` prüfen, ob sie mindestens 2.24 ist.
+- **Tailscale:** Der Tailscale-Container braucht kein Tailscale-Paket auf dem NAS und keinen freien Port 443. Das Synology-Paket aus dem Paket-Zentrum wird laut Tailscale nicht mehr unterstützt.
+- **Snapshots:** Mit dem Paket **Snapshot Replication** auf Btrfs-Volumes für den Ordner `docker` einschalten. **Hyper Backup** mit Verschlüsselung für den zweiten Ort.
+
+### QNAP (Container Station)
+
+*Noch nicht am Gerät geprüft.*
+- **Docker:** **Container Station** aus dem App Center installieren (Version 3 oder neuer bringt Docker Compose mit).
+- **Ordner:** z. B. im freigegebenen Ordner `Container`: `/share/Container/preposaurus`.
+- **SSH:** Systemsteuerung → Netzwerk- & Dateidienste → Telnet/SSH. Ob Docker dort `sudo` braucht, hängt am Nutzer.
+- **Nutzer-ID:** mit `id -u` und `id -g` prüfen.
+- **Projekt anlegen:** per SSH wie in Abschnitt 6, oder in Container Station unter **Anwendungen** → **Erstellen** mit dem Inhalt der Compose-Datei. Ob die Oberfläche die `.env` und `COMPOSE_FILE` liest, ist offen.
+- **Snapshots:** Speicher & Snapshots für das Volume. **Hybrid Backup Sync** mit Verschlüsselung für den zweiten Ort.
+
+### Unraid
+
+*Noch nicht am Gerät geprüft.*
+- **Docker Compose:** Unraid bringt Docker mit, aber kein Compose in der Oberfläche. Das Community-Plugin **Docker Compose Manager** nachinstallieren oder Compose per Terminal nutzen.
+- **Ordner:** `/mnt/user/appdata/preposaurus`.
+- **Nutzer-ID:** Unraid-Container laufen üblicherweise als `nobody` (99) mit Gruppe `users` (100). `PREPOSAURUS_UID=99` und `PREPOSAURUS_GID=100` eintragen und `chown 99:100 fotos backups`.
+- **Tailscale:** Unraid hat eine eigene Tailscale-Integration je Container. Der hier beschriebene Tailscale-Container funktioniert unabhängig davon. Bitte nur einen der beiden Wege nutzen.
+- **Backups:** Der Ordner `appdata` wird oft vom Plugin **Appdata Backup** gesichert. Das ersetzt den Datenbank-Dump nicht, ergänzt ihn aber. Den Ordner `backups` zusätzlich verschlüsselt an einen zweiten Ort kopieren.
+
+### Beliebiger Linux-Server
+
+In der CI auf Ubuntu mit Docker geprüft (ohne Tailscale-Container).
+- **Docker:** nach der offiziellen Anleitung für die Distribution installieren: [docs.docker.com/engine/install](https://docs.docker.com/engine/install/). Das Paket `docker-compose-plugin` gehört dazu.
+- **Ordner:** z. B. `/srv/preposaurus` oder `~/preposaurus`.
+- **Nutzer-ID:** Dein Nutzer hat meist 1000, dann passt der Standard.
+- **Snapshots:** je nach Dateisystem (Btrfs, ZFS, LVM). Für den zweiten Ort eignet sich restic oder borg mit Verschlüsselung.
+- **Neustart:** Die Dienste haben `restart: unless-stopped` und starten nach einem Neustart des Servers von selbst, wenn Docker beim Booten startet (`sudo systemctl enable docker`).
+
+## 16. Tailscale als Paket auf dem NAS (zweiter Weg)
+
+Wer Tailscale schon als Paket direkt auf dem NAS hat, kann auf den Tailscale-Container verzichten. *Noch nicht am Gerät geprüft.*
+
+1. In der `.env`: `COMPOSE_FILE=compose.yaml`. `TS_HOSTNAME` und `TS_AUTHKEY` werden nicht gebraucht.
+2. Starten wie in Abschnitt 6. Die App lauscht dann nur auf `127.0.0.1:3000` des NAS, also nicht im Heimnetz.
+3. Auf dem NAS Tailscale Serve einrichten:
+   ```bash
+   tailscale serve --bg 3000
+   ```
+   Erwartet: Tailscale nennt die Adresse `https://<nas-name>.<tailnet>.ts.net`.
+4. **Nie** den Port als `3000:3000` freigeben und keinen anderen Reverse-Proxy davor setzen, der `X-Forwarded-For` nicht selbst setzt (siehe Abschnitt 1).
+
+Hinweise: Der Gerätename ist hier der Name des NAS im Tailnet und landet ebenfalls im Zertifikats-Log. Auf Synology meldet das Forum Konflikte mit Port 443 und das Paket braucht eine Startaufgabe für ausgehende Verbindungen. Dort ist der Tailscale-Container der einfachere Weg.

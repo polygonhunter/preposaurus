@@ -116,6 +116,7 @@ Regeln:
 
 - **Schema in `server/db/schema/*.ts`**, eine Datei pro Bereich. Migrationen nur über `drizzle-kit generate` (`npm run db:generate`) → Review der SQL-Datei → `npm run db:migrate` (Container `migrate`). **Kein `drizzle-kit push`**, auch nicht lokal gegen die Projekt-DB [8].
   - **Umgesetzt in M1-01:** `db:migrate` ruft `src/server/db/migrate.ts` auf, das den Migrator von drizzle-orm nutzt (gleicher Code wie `createTestDb()` in den Tests). So braucht der Container später kein `drizzle-kit`, das nur Entwicklungsabhängigkeit ist. Beide Wege schreiben in dieselbe Tabelle `drizzle.__drizzle_migrations`.
+  - **Umgesetzt in M13-01:** Im Container läuft derselbe Code, vorab gebündelt mit `npm run build:cli` (esbuild) nach `scripts/migrate.mjs` und `scripts/seed.mjs`. `db/migrations` liegt im Image unter `/app/db/migrations`.
 - Migrationen sind eingecheckt und werden nach dem Merge nie mehr editiert. Eine Korrektur ist eine neue Migration.
 - Typen: Mengen als `numeric`, MHD als `date`, Zeitpunkte als `timestamptz`. Jede Tabelle hat `id`, `created_at`, `updated_at`. Fremdschlüssel bekommen ein explizites `onDelete`.
 - Spalten in `snake_case`. **Geprüft in M1-01:** drizzle-orm 0.45.4 und drizzle-kit 0.31.11 kennen `casing: 'snake_case'` weiterhin (in `drizzle()` und `defineConfig`). Wir brauchen die Option aber nicht: Tabellen und Spalten tragen deutsche Namen (UMSETZUNG Grundentscheidung 6), die Drizzle-Eigenschaften englische. Deshalb steht jeder Spaltenname ausdrücklich im Schema (`text('bezeichnung')`), und `casing` bleibt aus.

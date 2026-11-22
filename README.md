@@ -21,9 +21,9 @@ Selbst gehostete Web-App, mit der ein Haushalt seinen **Notvorrat nach offiziell
 
 - **Selbst gehostet** per Docker Compose auf dem eigenen NAS, ähnlich wie Paperless-ngx. Images für amd64 und arm64.
 - **Zugriff** im Heimnetz oder von unterwegs über [Tailscale](https://tailscale.com) (Tailscale Serve für HTTPS). Die App ist nicht für den Betrieb im offenen Internet gedacht.
-- **Backups** täglich (Datenbank und Fotos).
+- **Backups** täglich (Datenbank und Fotos), 7 tägliche und 4 wöchentliche Stände.
 
-Eine Einrichtungsanleitung folgt, sobald das MVP steht.
+**Einrichtung:** Schritt für Schritt in [`docs/INSTALLATION.md`](docs/INSTALLATION.md) (Synology, QNAP, Unraid, Linux-Server). Die Anleitung ist am echten NAS noch nicht geprüft, und die App selbst ist noch nicht nutzbar.
 
 ## Datenschutz
 
