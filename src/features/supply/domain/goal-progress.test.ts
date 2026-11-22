@@ -17,7 +17,13 @@ describe('Rechenbeispiel aus technik.html #rechnung', () => {
     ...supplyUnits(15, 'linsen', (id) => supplyUnit(id, '2028-06-30', { kcal: 405 })),
     ...supplyUnits(13, 'wasser', (id) => supplyUnit(id, '2028-12-31', { waterMl: 2000 })),
   ]
-  const result = calculateGoalProgress({ units, need, today, goal: { days: 10, targetDay } })
+  const result = calculateGoalProgress({
+    stillGoodCounts: false,
+    units,
+    need,
+    today,
+    goal: { days: 10, targetDay },
+  })
   if (!result.ok) throw new Error('Rechnung fehlgeschlagen')
   const progress = result.value
 
@@ -59,7 +65,13 @@ describe('calculateGoalProgress', () => {
 
   it('meldet ein erreichtes oder übertroffenes Ziel', () => {
     const units = [supplyUnit('vorrat', '2028-01-31', { kcal: 24000, waterMl: 24000 })]
-    const result = calculateGoalProgress({ units, need, today, goal: { days: 10, targetDay } })
+    const result = calculateGoalProgress({
+      stillGoodCounts: false,
+      units,
+      need,
+      today,
+      goal: { days: 10, targetDay },
+    })
 
     expect(result.ok && result.value.isGoalReached).toBe(true)
     expect(result.ok && result.value.atTarget.days).toBe(12)
@@ -67,7 +79,13 @@ describe('calculateGoalProgress', () => {
 
   it('zählt am Zieldatum eine Einheit mit genau diesem MHD noch mit', () => {
     const units = [supplyUnit('knapp', '2027-03-31', { kcal: 20000, waterMl: 20000 })]
-    const result = calculateGoalProgress({ units, need, today, goal: { days: 10, targetDay } })
+    const result = calculateGoalProgress({
+      stillGoodCounts: false,
+      units,
+      need,
+      today,
+      goal: { days: 10, targetDay },
+    })
 
     expect(result.ok && result.value.atTarget.days).toBe(10)
     expect(result.ok && result.value.expiringBeforeTarget).toEqual([])
@@ -90,7 +108,7 @@ describe('calculateGoalProgress', () => {
     })
 
     it('zählt ohne Einstellung weder heute noch am Zieldatum', () => {
-      const result = calculateGoalProgress({ units, need, today, goal })
+      const result = calculateGoalProgress({ stillGoodCounts: false, units, need, today, goal })
 
       expect(result.ok && result.value.today.days).toBe(0)
       expect(result.ok && result.value.expiringBeforeTarget).toEqual([])
@@ -99,6 +117,7 @@ describe('calculateGoalProgress', () => {
 
   it('erlaubt das Zieldatum heute', () => {
     const result = calculateGoalProgress({
+      stillGoodCounts: false,
       units: [],
       need,
       today,
@@ -109,15 +128,18 @@ describe('calculateGoalProgress', () => {
 
   it('lehnt ein Zieldatum in der Vergangenheit ab', () => {
     const goal = { days: 10, targetDay: toCalendarDay('2026-11-21') }
-    expect(calculateGoalProgress({ units: [], need, today, goal })).toEqual({
-      ok: false,
-      error: { kind: 'target-in-past' },
-    })
+    expect(calculateGoalProgress({ stillGoodCounts: false, units: [], need, today, goal })).toEqual(
+      {
+        ok: false,
+        error: { kind: 'target-in-past' },
+      },
+    )
   })
 
   it('reicht den Fehler „kein Bedarf“ durch', () => {
     const noNeed = { kcalPerDay: 0, waterMlPerDay: 0 }
     const result = calculateGoalProgress({
+      stillGoodCounts: false,
       units: [],
       need: noNeed,
       today,
@@ -136,7 +158,13 @@ describe('Gemischter Bestand mit „Datum fehlt“', () => {
     supplyUnit('ohne-verbraucht', null, { kcal: 9000, status: 'consumed' }),
     supplyUnit('laeuft-ab', '2027-01-31', { kcal: 2000, waterMl: 2000 }),
   ]
-  const result = calculateGoalProgress({ units, need, today, goal: { days: 5, targetDay } })
+  const result = calculateGoalProgress({
+    stillGoodCounts: false,
+    units,
+    need,
+    today,
+    goal: { days: 5, targetDay },
+  })
   if (!result.ok) throw new Error('Rechnung fehlgeschlagen')
   const progress = result.value
 
@@ -157,6 +185,7 @@ describe('Gemischter Bestand mit „Datum fehlt“', () => {
   it('erreicht das Ziel nicht allein durch Einheiten ohne Datum', () => {
     const onlyUndated = [supplyUnit('ohne', null, { kcal: 100000, waterMl: 100000 })]
     const run = calculateGoalProgress({
+      stillGoodCounts: false,
       units: onlyUndated,
       need,
       today,
@@ -169,7 +198,7 @@ describe('Gemischter Bestand mit „Datum fehlt“', () => {
 
 describe('unitsExpiringBefore', () => {
   it('übergeht Einheiten ohne Datum', () => {
-    expect(unitsExpiringBefore([supplyUnit('ohne', null)], { today, targetDay })).toEqual([])
+    expect(unitsExpiringBefore([supplyUnit('ohne', null)], { today, targetDay }, false)).toEqual([])
   })
 
   it('nennt nur Einheiten, die heute zählen und am Zieldatum nicht mehr', () => {
@@ -179,7 +208,7 @@ describe('unitsExpiringBefore', () => {
       supplyUnit('verbraucht', '2027-01-31', { status: 'consumed' }),
       supplyUnit('haelt', '2027-06-30'),
     ]
-    expect(unitsExpiringBefore(units, { today, targetDay }).map((unit) => unit.id)).toEqual([
+    expect(unitsExpiringBefore(units, { today, targetDay }, false).map((unit) => unit.id)).toEqual([
       'laeuft-ab',
     ])
   })

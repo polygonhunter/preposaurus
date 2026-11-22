@@ -33,7 +33,13 @@ function unit(
 }
 
 const progressFor = (units: GroupUnit[]) =>
-  calculateGroupProgress({ units, targets, goalDays: 10, reference: { day: today, kind: 'today' } })
+  calculateGroupProgress({
+    stillGoodCounts: false,
+    units,
+    targets,
+    goalDays: 10,
+    reference: { day: today, kind: 'today' },
+  })
 
 describe('calculateGroupProgress', () => {
   const units = [
@@ -85,7 +91,7 @@ describe('Warengruppen mit „Datum fehlt“', () => {
   const targetDay = toCalendarDay('2027-03-31')
   const units = [unit('getreide', 1500), unit('getreide', 1500, null), unit('wasser', 40000, null)]
   const at = (reference: { day: typeof today; kind: 'today' | 'target' }) =>
-    calculateGroupProgress({ units, targets, goalDays: 10, reference })
+    calculateGroupProgress({ stillGoodCounts: false, units, targets, goalDays: 10, reference })
 
   it('zählen heute im Fortschritt mit', () => {
     const progress = at({ day: today, kind: 'today' })
@@ -141,6 +147,7 @@ describe('calculateGoalGap', () => {
 
   it('lässt eine Lücke von knapp unter 1 g auch bei kleinem Ziel weg', () => {
     const small = calculateGroupProgress({
+      stillGoodCounts: false,
       units: [unit('salz', 9.5)],
       targets: [{ groupKey: 'salz', unit: 'g', amount: 10 }],
       goalDays: 10,
