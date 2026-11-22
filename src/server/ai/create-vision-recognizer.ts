@@ -16,7 +16,8 @@ const MAX_CONCURRENT_AI_CALLS = 2
 const processLimit = createConcurrencyLimit(MAX_CONCURRENT_AI_CALLS)
 
 export interface ProviderConnection {
-  provider: (typeof AI_PROVIDERS)[number]
+  /** fake: feste Verbindung bei AI_PROVIDER=fake, ganz ohne Schlüssel */
+  provider: (typeof AI_PROVIDERS)[number] | 'fake'
   apiKey: SecretValue
   baseUrl: string | null
 }
@@ -25,7 +26,7 @@ export function createVisionRecognizer(
   env: Pick<Env, 'AI_PROVIDER'>,
   connection: ProviderConnection,
 ): VisionRecognizer & ConnectionTester {
-  if (env.AI_PROVIDER === 'fake') {
+  if (env.AI_PROVIDER === 'fake' || connection.provider === 'fake') {
     return { ...createFakeVisionRecognizer(), testConnection: () => Promise.resolve(ok(null)) }
   }
   // Bisher gibt es nur Anthropic (AI_PROVIDERS). Ein weiterer Anbieter verzweigt hier.

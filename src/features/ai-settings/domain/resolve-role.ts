@@ -3,8 +3,9 @@
 // 1. Ist die KI im Haushalt aus (ki_aktiv), läuft keine Rolle.
 // 2. Eine Zuweisung mit aktiv = false schaltet die Rolle ab, z. B. den MHD-Zweitversuch.
 // 3. Das Modell kommt aus der Zuweisung, ohne Zuweisung aus der Empfehlung (ai-roles.ts).
-// 4. Ein Schlüssel aus der Umgebung hat Vorrang: Er ist die feste Verbindung „aus
-//    Umgebungsvariable“ für alle Rollen. Die Verbindung der Zuweisung tritt dann zurück.
+// 4. Eine feste Verbindung aus der Umgebung hat Vorrang: ein Schlüssel in ANTHROPIC_API_KEY
+//    („aus Umgebungsvariable“) oder AI_PROVIDER=fake für die Entwicklung ohne Schlüssel. Sie gilt
+//    für alle Rollen, die Verbindung der Zuweisung tritt dann zurück.
 // 5. Sonst braucht die Rolle eine Zuweisung auf eine aktive Verbindung mit Schlüssel.
 import type { AiRole } from '@/shared/config/ai-roles'
 

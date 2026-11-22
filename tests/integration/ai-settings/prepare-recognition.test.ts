@@ -49,6 +49,8 @@ describe('Erkennung vorbereiten und protokollieren (#59, #108)', () => {
       connectionId,
       model: 'claude-sonnet-5-5',
     })
+    // Der Fake ist eine feste Verbindung aus der Umgebung: Modell und aktiv kommen aus der
+    // Zuweisung, im Protokoll steht keine Verbindungs-ID.
     const deps = { db: testDb.db, env: fakeEnv }
     const input = {
       householdId,
@@ -72,7 +74,7 @@ describe('Erkennung vorbereiten und protokollieren (#59, #108)', () => {
       expect.objectContaining({
         role: 'mhd',
         attempt: 1,
-        connectionId,
+        connectionId: null,
         model: 'claude-haiku-5-5',
         isSuccess: true,
         confidence: 'niedrig',
@@ -80,7 +82,7 @@ describe('Erkennung vorbereiten und protokollieren (#59, #108)', () => {
       expect.objectContaining({
         role: 'mhd_zweitversuch',
         attempt: 2,
-        connectionId,
+        connectionId: null,
         model: 'claude-sonnet-5-5',
       }),
     ])
@@ -110,9 +112,31 @@ describe('Erkennung vorbereiten und protokollieren (#59, #108)', () => {
     const { householdId } = await setup()
     const input = { householdId, photoId: null, required: ['verpackung'] } as const
 
-    expect(await prepareRecognition({ db: testDb.db, env: fakeEnv }, input)).toEqual({
+    expect(await prepareRecognition({ db: testDb.db, env: envWith() }, input)).toEqual({
       ok: false,
       error: { kind: 'not-configured' },
+    })
+  })
+
+  it('läuft mit AI_PROVIDER=fake ohne Schlüssel und ohne Verbindung, mit den Empfehlungen', async () => {
+    const householdId = await insertHousehold(testDb.db)
+    const input = { householdId, photoId: null, required: ['verpackung', 'mhd'] } as const
+
+    const prepared = await prepareRecognition({ db: testDb.db, env: fakeEnv }, input)
+
+    expect(prepared.ok && prepared.value.models).toEqual({
+      verpackung: 'claude-haiku-5-5',
+      mhd: 'claude-haiku-5-5',
+    })
+  })
+
+  it('respektiert auch mit dem Fake den Haushaltsschalter', async () => {
+    const householdId = await insertHousehold(testDb.db, false)
+    const input = { householdId, photoId: null, required: ['mhd'] } as const
+
+    expect(await prepareRecognition({ db: testDb.db, env: fakeEnv }, input)).toEqual({
+      ok: false,
+      error: { kind: 'ai-disabled' },
     })
   })
 })
