@@ -1,0 +1,104 @@
+import { describe, expect, it } from 'vitest'
+import { formatQuantity } from '@/shared/lib/quantities'
+import { toCalendarDay } from '@/shared/lib/dates'
+import { calculateGoalGap } from './goal-gap'
+import { calculateGroupProgress, findTightestGroup, type GroupUnit } from './group-progress'
+import type { HouseholdGroupTarget } from './group-targets'
+
+const today = toCalendarDay('2026-11-22')
+
+// TESTDATEN: Haushaltsziele für 10 Tage, frei gewählt
+const targets: HouseholdGroupTarget[] = [
+  { groupKey: 'getreide', unit: 'g', amount: 3000 },
+  { groupKey: 'gemuese', unit: 'g', amount: 6000 },
+  { groupKey: 'fleisch', unit: 'g', amount: 0 },
+  { groupKey: 'wasser', unit: 'ml', amount: 40000 },
+]
+
+function unit(groupKey: string | null, amount: number, bestBefore = '2028-01-31'): GroupUnit {
+  return {
+    groupKey,
+    amount,
+    status: 'stock',
+    bestBefore: { date: toCalendarDay(bestBefore), precision: 'month', isEstimated: false },
+    checkedAt: null,
+  }
+}
+
+const progressFor = (units: GroupUnit[]) =>
+  calculateGroupProgress({ units, targets, goalDays: 10, referenceDay: today })
+
+describe('calculateGroupProgress', () => {
+  const units = [
+    unit('getreide', 1000),
+    unit('getreide', 2600),
+    unit('gemuese', 1500),
+    unit('wasser', 26000),
+    unit('wasser', 6000, '2026-01-31'),
+    unit(null, 5000),
+  ]
+  const progress = progressFor(units)
+
+  it('zeigt je Warengruppe „X von Y Tagen“', () => {
+    expect(progress.map((group) => [group.groupKey, group.days, group.goalDays])).toEqual([
+      ['getreide', 12, 10],
+      ['gemuese', 2.5, 10],
+      ['wasser', 6.5, 10],
+    ])
+  })
+
+  it('zeigt Übererfüllung über 100 %', () => {
+    expect(progress[0]).toMatchObject({ stock: 3600, target: 3000, percent: 120 })
+  })
+
+  it('lässt Gruppen ohne Ziel weg', () => {
+    expect(progress.map((group) => group.groupKey)).not.toContain('fleisch')
+  })
+
+  it('zählt abgelaufene Einheiten und solche ohne Warengruppe nicht', () => {
+    expect(progress[2]?.stock).toBe(26000)
+  })
+
+  it('zeigt eine Gruppe ohne Bestand mit 0 Tagen', () => {
+    const empty = progressFor([unit('getreide', 3000)])
+
+    expect(empty.find((group) => group.groupKey === 'gemuese')).toMatchObject({
+      stock: 0,
+      days: 0,
+      percent: 0,
+    })
+  })
+
+  it('findet die knappste Warengruppe', () => {
+    expect(findTightestGroup(progress)?.groupKey).toBe('gemuese')
+  })
+})
+
+describe('findTightestGroup', () => {
+  it('nimmt bei Gleichstand die zuerst genannte Gruppe', () => {
+    const tied = progressFor([])
+    expect(findTightestGroup(tied)?.groupKey).toBe('getreide')
+  })
+
+  it('liefert null ohne Gruppen', () => {
+    expect(findTightestGroup([])).toBeNull()
+  })
+})
+
+describe('calculateGoalGap', () => {
+  it('nennt die fehlende Menge je Warengruppe in kg oder l', () => {
+    const gaps = calculateGoalGap(progressFor([unit('getreide', 3600), unit('wasser', 26000)]))
+
+    expect(gaps.map((gap) => [gap.groupKey, formatQuantity(gap.missing)])).toEqual([
+      ['gemuese', '6 kg'],
+      ['wasser', '14 l'],
+    ])
+  })
+
+  it('lässt geschlossene und übererfüllte Gruppen weg', () => {
+    const gaps = calculateGoalGap(
+      progressFor([unit('getreide', 3000), unit('gemuese', 7000), unit('wasser', 40000)]),
+    )
+    expect(gaps).toEqual([])
+  })
+})

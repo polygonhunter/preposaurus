@@ -31,9 +31,14 @@ export interface DailyNeed {
   uncounted: UncountedMembers[]
 }
 
+/** Zählt diese Personengruppe im Bedarf und in den Zielmengen mit? */
+export function isCountedMemberType(type: MemberType): boolean {
+  return !MEMBER_TYPES_WITHOUT_NEED.includes(type)
+}
+
 /** Bedarf einer Person oder null, wenn ihre Personengruppe nicht mitzählt. */
 export function needFor(type: MemberType, needs: NeedsByMemberType): PersonNeed | null {
-  if (MEMBER_TYPES_WITHOUT_NEED.includes(type)) return null
+  if (!isCountedMemberType(type)) return null
   return needs[type] ?? null
 }
 
