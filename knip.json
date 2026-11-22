@@ -9,8 +9,7 @@
     "src/features/ai-settings/application/*.ts!",
     "src/features/auth/actions/*.ts!",
     "src/server/auth/guards.ts!",
-    "scripts/admin.ts!",
-    "scripts/admin/*.ts!"
+    "scripts/admin.ts!"
   ],
   "project": [
     "src/**/*.{ts,tsx,css}!",
@@ -25,7 +24,9 @@
     "!db/seeds/{demo*,factories}.ts!",
     "tests/**/*.{ts,tsx}",
     "eslint/**/*.mjs",
-    "scripts/**/*.ts"
+    "scripts/*.ts",
+    "scripts/admin/*.test.ts",
+    "scripts/admin/*.ts!"
   ],
   "ignore": ["tests/lint/fixtures/**"]
 }
