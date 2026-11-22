@@ -14,7 +14,7 @@
     "start:standalone": "node scripts/start-standalone.ts",
     "build:cli": "node scripts/build-cli.ts",
     "typecheck": "next typegen && tsc --noEmit",
-    "lint": "eslint . --max-warnings=0",
+    "lint": "next typegen && eslint . --max-warnings=0",
     "lint:budget": "eslint src --rule \"max-lines: [warn, {max: 200, skipBlankLines: true, skipComments: true}]\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

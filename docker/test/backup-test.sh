@@ -38,9 +38,11 @@ echo "foto-1" > fotos/haushalt/eins.jpg
 before=$(psql_value "$ROW_COUNTS")
 
 # Täglicher Lauf wie aus dem Zeitplan, am Stichtag mit Wochenstand. Ein Rest eines abgebrochenen
-# Laufs wird dabei aufgeräumt.
+# Laufs wird dabei aufgeräumt. Den Wochentag bestimmt der Container selbst, in derselben Zeitzone
+# (TZ), mit der backup.sh vergleicht; der Runner läuft in UTC (#181).
 mkdir -p backups/taeglich/.laufend-alt
-backup -e WEEKLY_DAY="$(date +%u)" backup zeitplan-lauf
+weekly_day=$(backup --entrypoint date backup +%u)
+backup -e WEEKLY_DAY="$weekly_day" backup zeitplan-lauf
 stand=$(newest taeglich)
 [ -n "$stand" ] || fail "Kein täglicher Stand angelegt"
 [ ! -e backups/taeglich/.laufend-alt ] || fail "Der halbe Stand eines alten Laufs ist noch da"

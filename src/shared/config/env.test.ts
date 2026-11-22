@@ -100,6 +100,14 @@ describe('isPatternPageEnabled', () => {
     expect(loadEnv({ ...insecure, CI: 'true' }).CI).toBe(true)
   })
 
+  it('lässt E2E_DEMO_STOCK im Produktionsbuild nur in der CI zu', () => {
+    const demo = { ...minimal, NODE_ENV: 'production', E2E_DEMO_STOCK: 'true' }
+    expect(loadEnv(minimal).E2E_DEMO_STOCK).toBe(false)
+    expect(() => loadEnv(demo)).toThrow(/E2E_DEMO_STOCK gilt nur/)
+    expect(loadEnv({ ...demo, CI: 'true' }).E2E_DEMO_STOCK).toBe(true)
+    expect(loadEnv({ ...minimal, E2E_DEMO_STOCK: 'true' }).E2E_DEMO_STOCK).toBe(true)
+  })
+
   it('zeigt sie im Produktionsbuild nur mit SHOW_PATTERN_PAGE', () => {
     expect(isPatternPageEnabled({ NODE_ENV: 'production', SHOW_PATTERN_PAGE: false })).toBe(false)
     expect(isPatternPageEnabled({ NODE_ENV: 'production', SHOW_PATTERN_PAGE: true })).toBe(true)

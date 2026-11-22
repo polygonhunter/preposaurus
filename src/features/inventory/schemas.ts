@@ -23,7 +23,7 @@ const namedRef = z.object({ id, name: z.string() })
 // ---------- Eingaben ----------
 
 /** Zeile im Vorrat: eine Lebensmittelart oder ein Produkt ohne Lebensmittelart. */
-const stockTargetSchema = z.object({ kind: z.enum(['food-type', 'product']), id })
+export const stockTargetSchema = z.object({ kind: z.enum(['food-type', 'product']), id })
 
 export const stockFilterSchema = z.object({
   status: z.enum(STOCK_STATUS_FILTERS).default('in-stock'),
@@ -35,6 +35,14 @@ export const stockFilterSchema = z.object({
 })
 
 export const dueSortSchema = z.enum(['date', 'location']).default('date')
+
+/** „Verbraucht“: eine bestimmte Packung oder die nächste nach MHD aus einer Zeile („−1“, #46). */
+export const consumeRequestSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('unit'), unitId: id }),
+  z.object({ kind: z.literal('target'), target: stockTargetSchema }),
+])
+
+export const unitIdSchema = id
 
 // ---------- Bausteine ----------
 
@@ -213,6 +221,10 @@ export const stockSearchSchema = z.object({
 export type StockTarget = z.infer<typeof stockTargetSchema>
 export type StockFilter = z.infer<typeof stockFilterSchema>
 export type DueSort = z.infer<typeof dueSortSchema>
+export type ConsumeRequest = z.infer<typeof consumeRequestSchema>
+export type BestBeforeDto = z.infer<typeof bestBeforeSchema>
+export type UnitStateDto = z.infer<typeof unitStateSchema>
+export type DueGroupDto = z.infer<typeof dueGroupSchema>
 export type NodeTotalsDto = z.infer<typeof nodeTotalsSchema>
 export type StockRowDto = z.infer<typeof stockRowSchema>
 export type StockOverview = z.infer<typeof stockOverviewSchema>
