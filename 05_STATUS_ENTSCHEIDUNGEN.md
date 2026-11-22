@@ -67,7 +67,7 @@ Beim Umsetzen der Fachlogik getroffen, jeweils als benannte Konstante, damit ein
 - **MHD-Parsing:** Zweistellige Jahre bei Tagesdaten (`30.09.27`) gelten als 20JJ. Nur Jahre 2000 bis 2099. `09/27` ist mehrdeutig und wird abgelehnt, `30.09` ohne Jahr ebenso. Eine Uhrzeit hinter dem Datum wird ignoriert.
 - **Mengen:** `1.000 g` ist deutsch 1000 g, `1.5 l` wird als 1,5 l gelesen. Einheiten g, kg, ml, cl, l und Stück.
 - **Geschätztes MHD** („Ohne Datum“) = heute + übliche Haltbarkeit der Kategorie, Genauigkeit Tag, immer mit Kennzeichen. Ohne üblichen Wert gibt es keine Schätzung.
-- **Ernährungsform:** Die Verschiebung zwischen Warengruppen ist mengengleich (g bzw. ml). Ob dabei auch die kcal-Summe gleich bleibt, hängt an den geprüften Ersatzregeln (U3).
+- **Ernährungsform:** Die Verschiebung zwischen Warengruppen ist mengengleich je Einheit (g bzw. ml). Verteilungsdaten werden vor dem Rechnen geprüft: unbekannte Gruppe, Anteile ≠ 1 oder ein Wechsel zwischen g und ml ergeben einen Fehlerwert. Ob dabei auch die kcal-Summe gleich bleibt, hängt an den geprüften Ersatzregeln (U3).
 - **FIFO und knappste Warengruppe:** Bei Gleichstand gewinnt die zuerst genannte Einheit bzw. Gruppe.
 
 ## Offene Fragen an den Maintainer (endgültige Entscheidung steht noch aus)
