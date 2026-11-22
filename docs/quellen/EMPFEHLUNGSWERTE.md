@@ -140,7 +140,7 @@ Ausgangspunkt ist die vegetarische BLE-Tabelle. Ziel: gleiche Masse je Gruppe, w
   - **KH = Kohlenhydrate (by difference) − Ballaststoffe**
   - **kcal (LMIV) = 4 × Eiweiß + 4 × KH + 9 × Fett + 2 × Ballaststoffe**
   - Die USDA-kcal stehen zum Vergleich daneben. Große Unterschiede gibt es nur bei ballaststoffreichen Produkten (Kakao 359 statt 228).
-- **Haltbarkeit:** USDA FSIS **FoodKeeper** (CC0), Spalte „Pantry, ab Kauf“. Vorgeschlagen ist jeweils der **obere** Wert der Spanne in Monaten, damit die Plausibilitätsprüfung (MHD mehr als doppelt so weit wie üblich, `FAR_FROM_TYPICAL_FACTOR = 2`) nicht bei normaler Ware anschlägt. Die Spanne steht in der Quelle-Spalte.
+- **Haltbarkeit:** USDA FSIS **FoodKeeper** (CC0), Spalte „Pantry, ab Kauf“. **Annahme:** Vorgeschlagen ist jeweils der **obere** Wert der Spanne in Monaten (diese Regel steht in keiner Quelle), damit die Plausibilitätsprüfung (MHD mehr als doppelt so weit wie üblich, `FAR_FROM_TYPICAL_FACTOR = 2`) nicht bei normaler Ware anschlägt. Die Spanne steht in der Quelle-Spalte.
   - **Einschränkung:** Die Original-Datei `fsis.usda.gov/shared/data/EN/foodkeeper.json` blockt automatische Abrufe (HTTP 403). Die Werte stammen aus einer Kopie des Datensatzes auf GitHub (`FlamingLasrSwrd/structr-recipe`, `data/foodkeeper/foodkeeper.json`, Kopf nennt FSIS als Quelle, Stand 09-06-2018, 128 Produkte). **Vor der Freigabe in der FoodKeeper-App (foodsafety.gov) stichprobenartig gegenprüfen.**
   - FoodKeeper beschreibt US-Lagerung. Für deutsche Supermarkt-Konserven nennt die Verbraucherzentrale Sachsen ein MHD von **meist 18 Monaten nach Abfüllung** (Marktcheck „Lebensmittelvorrat“, Februar 2025, Abschnitt 6.1.1, PDF-S. 11, https://verbraucherzentrale-sachsen.de/sites/default/files/2025-02/250206_marktcheck_notfallvorrat_vzs.pdf). FoodKeeper sagt für Konserven mit wenig Säure 2–5 Jahre. Für den Hinweistext „üblich“ ist 18 Monate realistischer, für die Plausibilität 60. **Entscheidung nötig** (Checkliste).
 - **Leer gelassen** wurde, wo kein passender Eintrag existiert, die Art zu breit ist (Sammelarten) oder US-Ware deutlich anders ist als deutsche.
@@ -160,7 +160,7 @@ Werte je 100 g bzw. 100 ml. kcal (LMIV) und KH sind **abgeleitet**, Eiweiß, Fet
 | `haferflocken` | Haferflocken | 362 | 379 | 13,2 | 57,6 | 6,5 | 12 | FDC 173904 (Cereals, oats, regular and quick, not fortified, dry) | Cereal, cook before eating (12 Mon.) |  |
 | `knaeckebrot` | Knäckebrot | 339 | 366 | 7,9 | 65,7 | 1,3 |  | FDC 172739 (Crackers, crispbread, rye) | – | Roggenknäcke; Haltbarkeit nicht im Datensatz |
 | `zwieback` | Zwieback | 420 | 426 | 10,1 | 71,7 | 9,7 |  | FDC 171372 (Zwieback) | – | Haltbarkeit nicht im Datensatz |
-| `mehl` | Mehl | 350 | 364 | 10,3 | 73,6 | 1 | 12 | FDC 169761 (Wheat flour, white, all-purpose, unenriched) | Flour, white (6–12 Mon.) | US-Weißmehl, etwa Type 405/550 |
+| `mehl` | Mehl | 350 | 364 | 10,3 | 73,6 | 1 | 12 | FDC 169761 (Wheat flour, white, all-purpose, unenriched) | Flour, white (6–12 Mon.) | US-Weißmehl; *Einschätzung:* etwa Type 405/550 |
 | `griess` | Grieß | 344 | 360 | 12,7 | 68,9 | 1,1 |  | FDC 168933 (Semolina, unenriched) | – | Hartweizengrieß; Weichweizengrieß weicht leicht ab |
 | `couscous` | Couscous | 357 | 376 | 12,8 | 72,4 | 0,6 |  | FDC 169699 (Couscous, dry) | – |  |
 | `kartoffelpueree_pulver` | Kartoffelpüree (Pulver) | 349 | 354 | 8,3 | 74,6 | 0,4 |  | FDC 170445 (Potatoes, mashed, dehydrated, flakes without milk, dry form) | – | Flocken ohne Milch, trocken |
@@ -174,11 +174,11 @@ Werte je 100 g bzw. 100 ml. kcal (LMIV) und KH sind **abgeleitet**, Eiweiß, Fet
 | `mais` | Mais | 74 | 67 | 2,3 | 12,3 | 1,2 | 60 | FDC 169214 (Corn, sweet, yellow, canned, whole kernel, drained solids) | Canned goods, low acid (2–5 J.) | Konserve, abgetropft |
 | `erbsen_moehren` | Erbsen & Möhren | 41 | 38 | 2,2 | 6,5 | 0,3 | 60 | FDC 170424 (Peas and carrots, canned, regular pack, solids and liquids) | Canned goods, low acid (2–5 J.) | Konserve mit Aufguss |
 | `tomaten_gehackt` | Tomaten gehackt | 15 | 16 | 0,8 | 1,6 | 0,2 | 18 | FDC 170051 (Tomatoes, red, ripe, canned, packed in tomato juice) | Canned goods, high acid (12–18 Mon.) | in Tomatensaft |
-| `passierte_tomaten` | Passierte Tomaten | 41 | 38 | 1,6 | 7,1 | 0,2 | 18 | FDC 170460 (Tomato products, canned, puree, without salt added) | Canned goods, high acid (12–18 Mon.) | US-Püree, etwas dicker als Passata |
-| `tomatenmark` | Tomatenmark | 89 | 82 | 4,3 | 14,8 | 0,5 | 27 | FDC 170459 (Tomato products, canned, paste, without salt added (Includes foods for USDA's Food Distribution Program)) | Tomato paste (27 Mon.) | US-Paste, etwa zweifach konzentriert |
+| `passierte_tomaten` | Passierte Tomaten | 41 | 38 | 1,6 | 7,1 | 0,2 | 18 | FDC 170460 (Tomato products, canned, puree, without salt added) | Canned goods, high acid (12–18 Mon.) | US-Püree; *Einschätzung:* etwas dicker als Passata |
+| `tomatenmark` | Tomatenmark | 89 | 82 | 4,3 | 14,8 | 0,5 | 27 | FDC 170459 (Tomato products, canned, paste, without salt added (Includes foods for USDA's Food Distribution Program)) | Tomato paste (27 Mon.) | US-Paste; *Einschätzung:* etwa zweifach konzentriert |
 | `sauerkraut` | Sauerkraut | 16 | 19 | 0,9 | 1,4 | 0,1 | 18 | FDC 169279 (Sauerkraut, canned, solids and liquids) | Canned goods, high acid (12–18 Mon.) | Konserve mit Aufguss |
-| `rote_bete` | Rote Bete | | | | | |  | – | – | US-Wert ohne Zucker/Essig; deutsche Ware meist süßsauer, daher leer |
-| `gewuerzgurken` | Gewürzgurken | | | | | | 12 | – | Pickles (1 J.) | US-Gurken (sauer bzw. sehr süß) passen nicht zu deutscher Ware, Nährwerte leer |
+| `rote_bete` | Rote Bete | | | | | |  | – | – | US-Wert ohne Zucker/Essig; *Einschätzung:* deutsche Ware meist süßsauer, daher leer |
+| `gewuerzgurken` | Gewürzgurken | | | | | | 12 | – | Pickles (1 J.) | *Einschätzung:* US-Gurken (sauer bzw. sehr süß) passen nicht zu deutscher Ware, Nährwerte leer |
 | `apfelmus` | Apfelmus | 70 | 68 | 0,2 | 16,3 | 0,2 | 18 | FDC 171696 (Applesauce, canned, sweetened, without salt) | Canned goods, high acid (12–18 Mon.) | gezuckert; ungezuckert: 42 kcal (FDC 171695) |
 | `pfirsiche` | Pfirsiche | 58 | 54 | 0,5 | 13,2 | 0 | 18 | FDC 169111 (Peaches, canned, light syrup pack, solids and liquids) | Canned goods, high acid (12–18 Mon.) | leichter Sirup, mit Saft |
 | `ananas` | Ananas | 64 | 60 | 0,4 | 14,9 | 0,1 | 18 | FDC 169126 (Pineapple, canned, juice pack, solids and liquids) | Canned goods, high acid (12–18 Mon.) | im eigenen Saft, mit Saft |
@@ -187,12 +187,12 @@ Werte je 100 g bzw. 100 ml. kcal (LMIV) und KH sind **abgeleitet**, Eiweiß, Fet
 | `trockenobst` | Trockenobst | | | | | | 6 | – | Fruits, dried (6 Mon.) | Sammelart, Nährwerte streuen zu stark |
 | `walnuesse` | Walnüsse | 689 | 654 | 15,2 | 7 | 65,2 |  | FDC 170187 (Nuts, walnuts, english) | – | FoodKeeper nennt nur 2–4 Wochen (US, ohne Verpackungsbezug), nicht übernommen |
 | `haselnuesse` | Haselnüsse | 654 | 628 | 14,9 | 7 | 60,8 |  | FDC 170581 (Nuts, hazelnuts or filberts) | – | Haltbarkeit nicht im Datensatz |
-| `mandeln` | Mandeln | 595 | 579 | 21,1 | 9,1 | 49,9 |  | FDC 170567 (Nuts, almonds) | – | FoodKeeper nennt 4 Monate, deutlich kürzer als übliche Packungsangaben, nicht übernommen |
+| `mandeln` | Mandeln | 595 | 579 | 21,1 | 9,1 | 49,9 |  | FDC 170567 (Nuts, almonds) | – | FoodKeeper nennt 4 Monate; *Einschätzung:* deutlich kürzer als übliche Packungsangaben, nicht übernommen |
 | `erdnuesse` | Erdnüsse und Erdnussbutter | 613 | 587 | 24,4 | 12,9 | 49,7 | 24 | FDC 173806 (Peanuts, all types, dry-roasted, without salt) | Peanut butter (6–24 Mon.) | Erdnüsse geröstet; Erdnussbutter 598 kcal (FDC 172470). Haltbarkeit gilt für Erdnussbutter |
 | `h_milch` | H-Milch | 61 | 61 | 3,1 | 4,8 | 3,3 |  | FDC 172217 (Milk, whole, 3.25% milkfat, without added vitamin A and vitamin D) | – | US-Vollmilch 3,25 % Fett (deutsche H-Milch 3,5 %) |
 | `haferdrink` | Haferdrink | | | | | |  | – | – | nicht in SR Legacy |
 | `sojadrink` | Sojadrink | 53 | 54 | 3,3 | 5,7 | 1,8 |  | FDC 172446 (Soymilk, original and vanilla, unfortified) | – | nicht angereichert |
-| `kondensmilch` | Kondensmilch | 135 | 134 | 6,8 | 10 | 7,6 |  | FDC 171276 (Milk, canned, evaporated, with added vitamin D and without added vitamin A) | – | ungezuckert (evaporated, etwa 7,5 % Fett) |
+| `kondensmilch` | Kondensmilch | 135 | 134 | 6,8 | 10 | 7,6 |  | FDC 171276 (Milk, canned, evaporated, with added vitamin D and without added vitamin A) | – | ungezuckert (evaporated, 7,6 g Fett laut FDC; *Einschätzung:* entspricht deutscher Kondensmilch 7,5 %) |
 | `milchpulver` | Milchpulver | 499 | 496 | 26,3 | 38,4 | 26,7 |  | FDC 173454 (Milk, dry, whole, without added vitamin D) | – | Vollmilchpulver |
 | `hartkaese` | Hartkäse | 393 | 393 | 27 | 1,4 | 31 |  | FDC 171251 (Cheese, swiss) | – | Stellvertreter: Swiss (Emmentaler-Art); Parmesan 392 kcal (FDC 170848) |
 | `thunfisch` | Thunfisch | 109 | 116 | 25,5 | 0 | 0,8 | 60 | FDC 171986 (Fish, tuna, light, canned in water, without salt, drained solids) | Canned goods, low acid (2–5 J.) | in Wasser, abgetropft. Andere FDC-Einträge: 86 kcal (15121, Wasser), 198 kcal (173708, Öl) |
@@ -225,7 +225,7 @@ Werte je 100 g bzw. 100 ml. kcal (LMIV) und KH sind **abgeleitet**, Eiweiß, Fet
 Zusammenfassung: 70 Arten. Nährwerte für 60 (davon 2 als Annahme: Tee, Kaffee), leer für 10. Haltbarkeit vorgeschlagen für 40, leer für 30.
 
 ### 4.3 Gegenprobe mit der BLE-Tabelle (BLS 3.02)
-Die BLE-Tabelle Mischkost nennt je Beispiel den Energiegehalt je 100 g aus dem BLS 3.02. Zum Vergleich mit den USDA-Werten (kcal LMIV) aus §4.2. Die BLE-Werte sind **nicht** als Seed vorgeschlagen (Lizenz siehe §5), sie zeigen nur die Größenordnung.
+Die BLE-Tabelle Mischkost nennt je Beispiel den Energiegehalt je 100 g aus dem BLS 3.02. Zum Vergleich mit den USDA-Werten (kcal LMIV) aus §4.2. Die BLE-Werte sind **nicht** als Seed vorgeschlagen (Lizenz siehe §5), sie zeigen nur die Größenordnung. **BLE-kcal stehen nur zum Vergleich im Prüfblatt, nicht in Code oder Seed.**
 
 | Art | BLE (BLS 3.02) kcal/100 g | USDA, LMIV-Rechnung | Bemerkung |
 |---|---|---|---|
@@ -247,10 +247,12 @@ Die BLE-Tabelle Mischkost nennt je Beispiel den Energiegehalt je 100 g aus dem B
 | Thunfisch ohne Öl (abgetropft) | 100 | 109 | ✓ |
 | Ölsardinen (abgetropft) | 221 | 202 | ✓ |
 | Heringsfilet in Soße | 204 | – (leer) | kcal ließe sich aus der BLE übernehmen |
-| Bockwürstchen, Konserve | 271 | 227 (Vienna sausage) | deutsche Würstchen fetter |
+| Bockwürstchen, Konserve | 271 | 227 (Vienna sausage) | *Einschätzung:* deutsche Würstchen fetter |
 | Speiseöl (Rapsöl) | 884 | 900 | USDA-Eigenwert ist 884 |
 
 Ergebnis: Bei Grundnahrungsmitteln liegen beide Quellen meist innerhalb von 5 %. Größere Abstände gibt es bei Würstchen, Zwieback und überall, wo die Bezugsbasis abweicht (Abtropfgewicht vs. mit Aufguss).
+
+Randnotiz: Auf der BLE-Webseite „Vorratstabelle vegetarisch“ steht bei Kartoffeln, roh (710 g, 76 kcal/100 g) als Gesamtwert **450 kcal**. Rechnerisch ergeben sich etwa 540 kcal, wie in der Mischkost-Tabelle. Vermutlich ein Zahlendreher auf der BLE-Seite. Für Preposaurus ohne Folgen, weil keine BLE-kcal übernommen werden.
 
 ## 5. Lizenz: Dürfen die Werte in ein AGPL-Repo?
 
