@@ -1,31 +1,24 @@
 import { describe, expect, it } from 'vitest'
 import {
+  IP_RULE,
+  NAME_RULE,
   ipLockKey,
+  minutesUntil,
   nameLockDurationMs,
   nameLockKey,
-  registerIpFailure,
-  registerNameFailure,
-  remainingLockMinutes,
-  type LockState,
 } from './sign-in-brake'
 
 const MINUTE = 60_000
 const now = new Date('2026-11-22T10:00:00Z')
 const later = (ms: number) => new Date(now.getTime() + ms)
 
-function repeat(times: number, step: (state: LockState | null) => LockState): LockState | null {
-  let state: LockState | null = null
-  for (let index = 0; index < times; index += 1) state = step(state)
-  return state
-}
-
 describe('Bremse je Benutzername', () => {
-  it('bremst erst ab dem fünften Fehlversuch', () => {
+  it('sperrt erst ab dem fünften Versuch', () => {
     expect(nameLockDurationMs(4)).toBe(0)
     expect(nameLockDurationMs(5)).toBe(MINUTE)
   })
 
-  it('verdoppelt die Wartezeit je Fehlversuch bis höchstens 15 Minuten', () => {
+  it('verdoppelt die Wartezeit je Versuch bis höchstens 15 Minuten', () => {
     expect([6, 7, 8, 9, 20].map(nameLockDurationMs)).toEqual([
       2 * MINUTE,
       4 * MINUTE,
@@ -35,45 +28,26 @@ describe('Bremse je Benutzername', () => {
     ])
   })
 
-  it('zählt Fehlversuche in Folge und setzt die Sperre ab dem fünften', () => {
-    const fourth = repeat(4, (state) => registerNameFailure(state, now))
-    const fifth = registerNameFailure(fourth, now)
-
-    expect(fourth).toMatchObject({ failedAttempts: 4, lockedUntil: null, lastFailedAt: now })
-    expect(fifth).toMatchObject({ failedAttempts: 5, lockedUntil: later(MINUTE) })
+  it('zählt ohne Zeitfenster bis zum nächsten Erfolg', () => {
+    expect(NAME_RULE.windowMs).toBeNull()
+    expect(NAME_RULE.lockMsAfter(4)).toBe(0)
+    expect(NAME_RULE.lockMsAfter(5)).toBe(MINUTE)
   })
 })
 
 describe('Bremse je Adresse', () => {
-  it('sperrt beim zwanzigsten Fehlversuch innerhalb von 10 Minuten für 10 Minuten', () => {
-    const nineteenth = repeat(19, (state) => registerIpFailure(state, now))
-    const twentieth = registerIpFailure(nineteenth, now)
-
-    expect(nineteenth?.lockedUntil).toBeNull()
-    expect(twentieth).toMatchObject({ failedAttempts: 20, lockedUntil: later(10 * MINUTE) })
-  })
-
-  it('fängt nach 10 Minuten Ruhe wieder bei 1 an', () => {
-    const old = { failedAttempts: 19, lastFailedAt: now, lockedUntil: null }
-
-    expect(registerIpFailure(old, later(10 * MINUTE)).failedAttempts).toBe(1)
-    expect(registerIpFailure(old, later(10 * MINUTE - 1)).failedAttempts).toBe(20)
+  it('sperrt beim zwanzigsten Versuch im 10-Minuten-Fenster für 10 Minuten', () => {
+    expect(IP_RULE.windowMs).toBe(10 * MINUTE)
+    expect(IP_RULE.lockMsAfter(19)).toBe(0)
+    expect(IP_RULE.lockMsAfter(20)).toBe(10 * MINUTE)
   })
 })
 
-describe('remainingLockMinutes', () => {
-  it('liefert 0 ohne Sperre oder nach ihrem Ende', () => {
-    const ended = { failedAttempts: 5, lastFailedAt: now, lockedUntil: now }
-
-    expect(remainingLockMinutes([null], now)).toBe(0)
-    expect(remainingLockMinutes([ended], later(1))).toBe(0)
-  })
-
-  it('rundet die längste Sperre auf ganze Minuten auf', () => {
-    const short = { failedAttempts: 5, lastFailedAt: now, lockedUntil: later(MINUTE) }
-    const long = { failedAttempts: 20, lastFailedAt: now, lockedUntil: later(4 * MINUTE + 1) }
-
-    expect(remainingLockMinutes([short, null, long], now)).toBe(5)
+describe('minutesUntil', () => {
+  it('rundet auf ganze Minuten auf und nennt mindestens 1', () => {
+    expect(minutesUntil(later(4 * MINUTE + 1), now)).toBe(5)
+    expect(minutesUntil(later(MINUTE), now)).toBe(1)
+    expect(minutesUntil(now, now)).toBe(1)
   })
 })
 
