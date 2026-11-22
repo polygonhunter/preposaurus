@@ -41,7 +41,14 @@ export interface HouseholdAiConfig {
   forRole: (role: AiRole) => Result<RoleConfig, AiConfigError>
 }
 
+/**
+ * Feste Verbindung aus der Umgebung mit Vorrang vor den Verbindungen in der App: ein Schlüssel in
+ * ANTHROPIC_API_KEY oder, für die Entwicklung ohne Schlüssel, AI_PROVIDER=fake.
+ */
 export function envConnection(env: AiConfigEnv): ProviderConnection | null {
+  if (env.AI_PROVIDER === 'fake') {
+    return { provider: 'fake', apiKey: new SecretValue(''), baseUrl: null }
+  }
   if (env.ANTHROPIC_API_KEY === undefined) return null
   return { provider: 'anthropic', apiKey: new SecretValue(env.ANTHROPIC_API_KEY), baseUrl: null }
 }

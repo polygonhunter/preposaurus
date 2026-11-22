@@ -106,6 +106,18 @@ describe('Use-Case Verbindung testen (#108)', () => {
     expect(seen).toEqual([{ model: 'x', apiKey: 'sk-ant-umgebung' }])
   })
 
+  it('testet mit AI_PROVIDER=fake ohne Schlüssel und ohne Anfrage beim Anbieter', async () => {
+    const { householdId } = await setup()
+    const env = { ...envWith(), AI_PROVIDER: 'fake' as const }
+
+    const result = await testAiConnection(
+      { db: testDb.db, env, now: () => TESTED_AT },
+      { householdId, connection: 'env' },
+    )
+
+    expect(result.ok && result.value.status).toBe('ok')
+  })
+
   it('meldet not-found ohne Schlüssel in der Umgebung oder für eine fremde Verbindung', async () => {
     const own = await setup()
     const foreign = await setup()
