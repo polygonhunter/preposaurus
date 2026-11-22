@@ -15,8 +15,9 @@ const signedIn = { storageState: ADMIN_STORAGE_STATE }
 const afterSetup = ['einrichtung']
 
 // Jeder Lauf beginnt mit einer leeren, migrierten Datenbank, damit die Ersteinrichtung testbar ist.
+// Dazu nur die Stammdaten (Lebensmittelarten, Behälter) wie im Container, ohne Haushalt.
 const E2E_DATA_DIR = '.data/e2e'
-const freshDatabase = `rm -rf ${E2E_DATA_DIR} && npm run db:migrate`
+const freshDatabase = `rm -rf ${E2E_DATA_DIR} && npm run db:migrate && npm run db:seed`
 const startServer = isCi ? 'npm run start:standalone' : `npm run dev -- -p ${String(PORT)}`
 
 export default defineConfig({
