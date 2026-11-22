@@ -7,12 +7,22 @@ export interface GoalGap {
   missing: Quantity
 }
 
-/** Lücke = Ziel minus Bestand. Ist die Lücke geschlossen oder übererfüllt, entfällt die Gruppe. */
+// Zielmengen aus Anteilen erzeugen Rauschen wie 839,9999999. Mini-Lücken gehören nicht auf die Liste.
+/** Lücken unter diesem Anteil des Ziels entfallen. */
+const MIN_GAP_SHARE_OF_TARGET = 0.01
+/** Lücken unter dieser Menge in g bzw. ml entfallen. */
+const MIN_GAP_AMOUNT = 1
+
+const isRelevantGap = (missing: number, target: number) =>
+  missing >= MIN_GAP_AMOUNT && missing >= target * MIN_GAP_SHARE_OF_TARGET
+
+/** Lücke = Ziel minus Bestand. Geschlossene, übererfüllte und winzige Lücken entfallen. */
 export function calculateGoalGap(progress: readonly GroupProgress[]): GoalGap[] {
   return progress
-    .filter((group) => group.stock < group.target)
-    .map((group) => ({
+    .map((group) => ({ group, missing: group.target - group.stock }))
+    .filter(({ group, missing }) => isRelevantGap(missing, group.target))
+    .map(({ group, missing }) => ({
       groupKey: group.groupKey,
-      missing: { value: group.target - group.stock, unit: group.unit },
+      missing: { value: missing, unit: group.unit },
     }))
 }

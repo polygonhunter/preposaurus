@@ -95,6 +95,23 @@ describe('calculateGoalGap', () => {
     ])
   })
 
+  it('lässt Mini-Lücken unter 1 % des Ziels oder unter 1 g bzw. ml weg', () => {
+    const gaps = calculateGoalGap(
+      progressFor([unit('getreide', 2999.9999999), unit('gemuese', 5950), unit('wasser', 39500)]),
+    )
+    expect(gaps.map((gap) => gap.groupKey)).toEqual(['wasser'])
+  })
+
+  it('lässt eine Lücke von knapp unter 1 g auch bei kleinem Ziel weg', () => {
+    const small = calculateGroupProgress({
+      units: [unit('salz', 9.5)],
+      targets: [{ groupKey: 'salz', unit: 'g', amount: 10 }],
+      goalDays: 10,
+      referenceDay: today,
+    })
+    expect(calculateGoalGap(small)).toEqual([])
+  })
+
   it('lässt geschlossene und übererfüllte Gruppen weg', () => {
     const gaps = calculateGoalGap(
       progressFor([unit('getreide', 3000), unit('gemuese', 7000), unit('wasser', 40000)]),
