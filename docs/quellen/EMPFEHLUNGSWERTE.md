@@ -147,6 +147,8 @@ Ausgangspunkt ist die vegetarische BLE-Tabelle. Ziel: gleiche Masse je Gruppe, w
 - **Bezugsbasis:** Werte gelten je 100 g wie im Eintrag beschrieben. „abgetropft“ = Abtropfgewicht, „mit Aufguss/Saft“ = Füllmenge. Das muss zu `nutritionBase` passen (Abtropfgewicht, falls gesetzt).
 
 ### 4.2 Tabelle (70 Arten aus `db/seeds/stammdaten/lebensmittelarten.ts`)
+
+> **Stand Startliste v2:** Die Tabelle bezieht sich auf die erste Startliste. Welche Werte in die zusammengelegten Arten der v2 übernommen wurden und welche leer bleiben, steht in `LEBENSMITTELARTEN.md` §7.1.
 Werte je 100 g bzw. 100 ml. kcal (LMIV) und KH sind **abgeleitet**, Eiweiß, Fett und kcal USDA stammen direkt aus FDC.
 
 | Schlüssel | Art | kcal (LMIV) | kcal USDA | Eiweiß g | KH g | Fett g | Haltbarkeit Monate | Quelle Nährwerte | Quelle Haltbarkeit (FoodKeeper) | Hinweis |
@@ -291,6 +293,8 @@ Bitte je Punkt bestätigen oder korrigieren:
 15. [ ] Danach: `quelle_version.geprueft = true` für die Fassung „BBK 11/2025 + BLE 2024“ und Seed in M1-09.
 
 ## 7. Für #128 (Startliste) aufgefallen
+
+> Umgesetzt in der Startliste v2 (`LEBENSMITTELARTEN.md`): Tofu und Fleischersatz als eigene Kategorie, Kartoffeln als Arten, Sammelarten bleiben ohne Nährwerte.
 - Für vegetarisch und vegan fehlt eine Art für **Tofu bzw. Fleischersatz** in der Kategorie `fleisch_fisch_eier`. Die BLE-Tabelle vegetarisch zählt genau diese Produkte dorthin.
 - **Sammelarten** (Trockenobst, Fleischkonserve, Eintopf, Suppe, Müsli) bekommen keine seriösen Richtwerte. Entweder ohne Richtwert lassen (zählt dann mit 0, UX §4) oder in konkrete Arten aufteilen.
 - **Hülsenfrüchte-Konserven und getrocknete Ware** unterscheiden sich um den Faktor 3 in kcal. Die Trennung im Seed ist richtig und wichtig.
