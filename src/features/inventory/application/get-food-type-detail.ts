@@ -3,7 +3,8 @@
 // im Vorrat bleibt die Seite erreichbar. Ein Produkt ohne Lebensmittelart hat seine eigene Seite.
 import 'server-only'
 import { pickFifoUnit } from '../domain/fifo'
-import type { ProductFilter, StockProduct } from '../domain/stock-entry'
+import type { StockProduct } from '../domain/stock-entry'
+import { productFilterFor } from './stock-model'
 import type { CalendarDay } from '@/shared/lib/dates'
 import { err, ok, type Result } from '@/shared/lib/result'
 import type { FoodTypeDetail, StockTarget } from '../schemas'
@@ -24,9 +25,6 @@ interface DetailInput {
   today: CalendarDay
   target: StockTarget
 }
-
-const filterFor = (target: StockTarget): ProductFilter =>
-  target.kind === 'food-type' ? { foodTypeId: target.id } : { productId: target.id }
 
 function productsOf(
   context: ReadContext,
@@ -55,7 +53,7 @@ export async function getFoodTypeDetail(
   reader: StockReader,
   { householdId, today, target }: DetailInput,
 ): Promise<Result<FoodTypeDetail, NotFound>> {
-  const products = await reader.loadProducts(householdId, filterFor(target))
+  const products = await reader.loadProducts(householdId, productFilterFor(target))
   const [first] = products
   if (first === undefined) return err({ kind: 'not-found' })
   const productIds = products.map((product) => product.id)

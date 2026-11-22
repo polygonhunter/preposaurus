@@ -15,6 +15,8 @@ const elements = [
   { type: 'worker', pattern: 'src/worker' },
   // Test-Helfer (Fabriken, Fakes) liegen außerhalb von src/ und werden nicht ausgeliefert
   { type: 'test-helpers', pattern: 'tests/helpers' },
+  // Stammdaten und Beispielhaushalt (Skripte npm run db:seed…), nicht Teil der App
+  { type: 'seeds', pattern: 'db/seeds' },
 ]
 
 // schemas.ts ist eine Datei, kein Ordner. Darum ein Datei-Deskriptor statt eines Elements.
@@ -24,6 +26,8 @@ const files = [
   { pattern: '**/src/instrumentation.ts', category: 'instrumentation' },
   // Proxy von Next vor jeder Anfrage (optimistische Prüfung des Sitzungs-Cookies, #33)
   { pattern: '**/src/proxy.ts', category: 'proxy' },
+  // Einzige Stelle der App mit Zugriff auf die Seeds: Beispielvorrat für die E2E-Tests (E2E_DEMO_STOCK)
+  { pattern: '**/src/app/api/e2e/**', category: 'e2e-seed-route' },
 ]
 
 const element = (type, captured) => ({ element: captured ? { type, captured } : { type } })
@@ -44,6 +48,16 @@ const policies = [
   },
   { from: schemas, allow: [to({ module: { origin: ['external', 'core'] } }), to(anyShared)] },
   { from: { file: { categories: 'instrumentation' } }, allow: [to(anyShared)] },
+  { from: { file: { categories: 'e2e-seed-route' } }, allow: [to(element('seeds'))] },
+  {
+    from: element('seeds'),
+    allow: [
+      to({ module: { origin: ['external', 'core'] } }),
+      to(element('seeds')),
+      to(element('server')),
+      to(anyShared),
+    ],
+  },
   {
     from: { file: { categories: 'proxy' } },
     allow: [to({ module: { origin: ['external', 'core'] } }), to(anyShared)],
@@ -119,7 +133,7 @@ const policies = [
     from: element('test-helpers'),
     allow: [
       to({ module: { origin: ['external', 'core'] } }),
-      to(element(['test-helpers', 'domain'])),
+      to(element(['test-helpers', 'domain', 'seeds'])),
       // Test-DB, Schema und Fixtures für die Integrationstests (M1)
       to(serverModule('db')),
       // Fake-Adapter brauchen den Port, den sie nachbilden
