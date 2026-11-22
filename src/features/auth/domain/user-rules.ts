@@ -1,6 +1,7 @@
 import { err, ok, type Result } from '@/shared/lib/result'
 
 // Regeln der Nutzerverwaltung. Grundregel: Es bleibt immer mindestens ein aktiver Admin.
+// Nutzer werden nie gelöscht, nur deaktiviert (CODE_PRINZIPIEN §8), deshalb gibt es kein „entfernen“.
 
 export type Role = 'admin' | 'member'
 
@@ -54,12 +55,6 @@ export function setUserActive<T extends AppUser>(
 ): UserResult<T> {
   const error = guardLastAdmin(users, userId, !isActive)
   return error ? err(error) : ok(patch(users, userId, { isActive }))
-}
-
-/** Der letzte aktive Admin kann nicht entfernt werden. */
-export function removeUser<T extends AppUser>(users: readonly T[], userId: string): UserResult<T> {
-  const error = guardLastAdmin(users, userId, true)
-  return error ? err(error) : ok(users.filter((user) => user.id !== userId))
 }
 
 /** Ein Mitglied gehört höchstens zu einem Nutzer: Eine neue Verknüpfung löst die alte. */
