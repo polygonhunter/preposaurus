@@ -1,0 +1,4 @@
+ALTER TABLE "ki_rollen_zuweisung" DROP CONSTRAINT "ki_rollen_zuweisung_rolle_check";--> statement-breakpoint
+ALTER TABLE "ki_aufruf" DROP CONSTRAINT "ki_aufruf_rolle_check";--> statement-breakpoint
+ALTER TABLE "ki_rollen_zuweisung" ADD CONSTRAINT "ki_rollen_zuweisung_rolle_check" CHECK ("ki_rollen_zuweisung"."rolle" in ('verpackung', 'naehrwerte', 'naehrwerte_schaetzen', 'mhd', 'mhd_zweitversuch', 'mhd_schaetzen'));--> statement-breakpoint
+ALTER TABLE "ki_aufruf" ADD CONSTRAINT "ki_aufruf_rolle_check" CHECK ("ki_aufruf"."rolle" in ('verpackung', 'naehrwerte', 'naehrwerte_schaetzen', 'mhd', 'mhd_zweitversuch', 'mhd_schaetzen'));

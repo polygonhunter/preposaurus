@@ -15,6 +15,7 @@ const CONTEXTS: RoleContexts = {
   naehrwerte_schaetzen: { foodType: null, productName: null },
   mhd: {},
   mhd_zweitversuch: {},
+  mhd_schaetzen: { foodType: null, productName: null },
 }
 
 const packaging = {
@@ -77,6 +78,15 @@ describe('KI-Schemas', () => {
     expect(parseAnswer(request, { ...valid, sicherheit: 'niedrig' }).ok).toBe(true)
     expect(parseAnswer(request, valid).ok).toBe(false)
     expect(parseAnswer(request, { ...valid, sicherheit: 'hoch', marke: 'X' }).ok).toBe(false)
+  })
+
+  it('nimmt bei der MHD-Schätzung kein Datum an, nur Monate', () => {
+    const request = { role: 'mhd_schaetzen', context: CONTEXTS.mhd_schaetzen } as const
+    const valid = { haltbar_monate: 18, genauigkeit: 'monat', sicherheit: 'mittel' }
+
+    expect(parseAnswer(request, valid).ok).toBe(true)
+    expect(parseAnswer(request, { ...valid, datum: '2028-05-31' }).ok).toBe(false)
+    expect(parseAnswer(request, { ...valid, genauigkeit: 'tag' }).ok).toBe(false)
   })
 
   it('beschreibt einen Schema-Verstoß lesbar für das Protokoll', () => {

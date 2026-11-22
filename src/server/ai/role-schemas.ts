@@ -4,6 +4,7 @@ import { z } from 'zod'
 import type { AiRole } from '@/shared/config/ai-roles'
 import {
   bestBeforeAnswerSchema,
+  bestBeforeEstimateAnswerSchema,
   nutritionAnswerSchema,
   nutritionEstimateAnswerSchema,
   packagingAnswerSchema,
@@ -21,6 +22,7 @@ const SCHEMA_BUILDERS: SchemaBuilders = {
   naehrwerte_schaetzen: () => nutritionEstimateAnswerSchema,
   mhd: () => bestBeforeAnswerSchema,
   mhd_zweitversuch: () => bestBeforeAnswerSchema,
+  mhd_schaetzen: () => bestBeforeEstimateAnswerSchema,
 }
 
 type SchemaInput<R extends AiRole> = Pick<RecognitionRequest<R>, 'role' | 'context'>

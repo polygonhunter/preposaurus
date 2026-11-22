@@ -8,6 +8,8 @@ export const AI_ROLES = [
   'naehrwerte_schaetzen',
   'mhd',
   'mhd_zweitversuch',
+  // MHD schätzen bei „Datum fehlt“, nur auf ausdrückliche Wahl (#124)
+  'mhd_schaetzen',
 ] as const
 
 export type AiRole = (typeof AI_ROLES)[number]
@@ -22,4 +24,5 @@ export const AI_ROLE_DEFAULT_MODELS: Readonly<Record<AiRole, string>> = {
   naehrwerte_schaetzen: HAIKU,
   mhd: HAIKU,
   mhd_zweitversuch: SONNET,
+  mhd_schaetzen: HAIKU,
 }

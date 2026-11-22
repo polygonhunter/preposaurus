@@ -39,6 +39,13 @@ export interface AiNutritionEstimateAnswer {
   sicherheit: AiConfidence
 }
 
+/** MHD-Schätzung bei „Datum fehlt“ (#124): Haltbarkeit ab heute, nie ein Datum */
+export interface AiBestBeforeEstimateAnswer {
+  haltbar_monate: number | null
+  genauigkeit: 'monat' | 'jahr'
+  sicherheit: AiConfidence
+}
+
 /** Schema C · MHD, gleich für den Zweitversuch */
 export interface AiBestBeforeAnswer {
   roh_text: string | null

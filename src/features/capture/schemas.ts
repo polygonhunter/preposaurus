@@ -84,10 +84,25 @@ export const bestBeforeAnswerSchema = z.strictObject({
   sicherheit: confidence,
 })
 
+/**
+ * MHD-Schätzung bei „Datum fehlt“ (#124), nur auf ausdrückliche Wahl. Die KI nennt nie ein Datum,
+ * nur eine Haltbarkeit ab heute. Das Datum rechnet die App (Monats- bzw. Jahresende).
+ */
+export const bestBeforeEstimateAnswerSchema = z.strictObject({
+  haltbar_monate: nullableNumber(
+    'Geschätzte Haltbarkeit ab heute in ganzen Monaten, null wenn nicht sinnvoll schätzbar',
+  ),
+  genauigkeit: z
+    .enum(['monat', 'jahr'])
+    .describe('Wie genau die Schätzung gemeint ist: auf den Monat oder nur auf das Jahr'),
+  sicherheit: confidence,
+})
+
 export type PackagingAnswer = z.infer<ReturnType<typeof packagingAnswerSchema>>
 export type NutritionAnswer = z.infer<typeof nutritionAnswerSchema>
 export type NutritionEstimateAnswer = z.infer<typeof nutritionEstimateAnswerSchema>
 export type BestBeforeAnswer = z.infer<typeof bestBeforeAnswerSchema>
+export type BestBeforeEstimateAnswer = z.infer<typeof bestBeforeEstimateAnswerSchema>
 
 // ---------- Speichern einer Erfassung (#51) ----------
 // Eingabe von createStockAction. Die Grenzen folgen den Spalten: Mengen numeric(9,2),
