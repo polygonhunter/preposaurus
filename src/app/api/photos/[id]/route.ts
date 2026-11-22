@@ -4,7 +4,7 @@
 import { requireCaptureActor } from '@/features/capture/application/capture-actor'
 import { loadCaptureDeps } from '@/features/capture/application/capture-deps'
 import { readPhoto, type PhotoContent } from '@/features/capture/application/read-photo'
-import { photoRequestSchema } from '@/features/capture/schemas'
+import { photoRequestSchema } from '@/features/capture/schemas/photos'
 import { errorResponse } from '@/shared/lib/http'
 import { accessErrorResponse } from '../access-error-response'
 

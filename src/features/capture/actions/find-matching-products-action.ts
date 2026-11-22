@@ -4,7 +4,7 @@
 import { requireHouseholdUser } from '@/server/auth/guards'
 import type { ProductMatch } from '../application/find-matching-products'
 import { findMatchingProductsForHousehold } from '../application/stock-request'
-import { productMatchQuerySchema } from '../schemas'
+import { productMatchQuerySchema } from '../schemas/stock'
 
 export async function findMatchingProductsAction(input: unknown): Promise<ProductMatch[]> {
   const user = await requireHouseholdUser()

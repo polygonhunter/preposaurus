@@ -19,9 +19,11 @@ const elements = [
   { type: 'seeds', pattern: 'db/seeds' },
 ]
 
-// schemas.ts ist eine Datei, kein Ordner. Darum ein Datei-Deskriptor statt eines Elements.
+// schemas.ts ist eine Datei, kein Ordner. Darum ein Datei-Deskriptor statt eines Elements. Wird sie
+// zu groß, teilt ein Ordner schemas/ sie in mehrere Dateien derselben Schicht auf (#175).
 const files = [
   { pattern: '**/src/features/*/schemas.ts', category: 'schemas', capture: ['root', 'feature'] },
+  { pattern: '**/src/features/*/schemas/*.ts', category: 'schemas', capture: ['root', 'feature'] },
   // Einstieg von Next beim Serverstart (prüft env, startet Logger)
   { pattern: '**/src/instrumentation.ts', category: 'instrumentation' },
   // Proxy von Next vor jeder Anfrage (optimistische Prüfung des Sitzungs-Cookies, #33)
@@ -46,7 +48,10 @@ const policies = [
     from: element(['app', 'ui', 'actions', 'application', 'data', 'server', 'shared', 'worker']),
     allow: to({ module: { origin: ['external', 'core'] } }),
   },
-  { from: schemas, allow: [to({ module: { origin: ['external', 'core'] } }), to(anyShared)] },
+  {
+    from: schemas,
+    allow: [to({ module: { origin: ['external', 'core'] } }), to(schemas), to(anyShared)],
+  },
   { from: { file: { categories: 'instrumentation' } }, allow: [to(anyShared)] },
   { from: { file: { categories: 'e2e-seed-route' } }, allow: [to(element('seeds'))] },
   {

@@ -1,6 +1,6 @@
 // Anthropic-Adapter (M6-05, #59): einzige Datei, die das SDK kennt. Je Foto-Rolle ein Aufruf mit
-// Structured Outputs (output_config.format, Schema aus capture/schemas.ts), Foto als Base64 vor dem
-// Text. Denken und Effort je Modell (model-reasoning.ts). Zeitlimit je Versuch und für die ganze
+// Structured Outputs (output_config.format, Schema aus capture/schemas/ai-answers.ts), Foto als
+// Base64 vor dem Text. Denken und Effort je Modell (model-reasoning.ts). Zeitlimit je Versuch und für die ganze
 // Erkennung, höchstens eine Wiederholung bei 429 und 5xx außer 504 (die eingebaute Wiederholung des
 // SDK ist aus, weil sie auch Zeitüberschreitungen wiederholt), begrenzte Gleichzeitigkeit nur für
 // laufende Anfragen. Fehler werden auf AiFailure abgebildet. Der Schlüssel steht nie in einer

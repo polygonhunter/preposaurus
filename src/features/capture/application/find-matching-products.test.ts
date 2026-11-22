@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createFakeStockWriter } from '../../../../tests/helpers/fake-stock-writer'
 import type { ProductCandidate } from '../domain/stock-records'
-import type { ProductMatchQuery } from '../schemas'
+import type { ProductMatchQuery } from '../schemas/stock'
 import { findMatchingProducts } from './find-matching-products'
 
 const NOODLES = '00000000-0000-4000-8000-000000000001'
