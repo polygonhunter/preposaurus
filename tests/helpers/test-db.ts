@@ -25,7 +25,6 @@ async function createPostgresTestDb(baseUrl: string): Promise<TestDb> {
   const url = new URL(baseUrl)
   url.pathname = `/${name}`
   const connection = await connectDatabase(url.toString())
-  await connection.migrate()
   return {
     ...connection,
     close: async () => {
@@ -35,12 +34,17 @@ async function createPostgresTestDb(baseUrl: string): Promise<TestDb> {
   }
 }
 
-export async function createTestDb(): Promise<TestDb> {
+/** Leere Datenbank ohne Migrationen, z. B. um eine einzelne Migration auf alten Daten zu prüfen. */
+export async function createEmptyTestDb(): Promise<TestDb> {
   // Werkzeug, nicht App: Welcher Server getestet wird, entscheidet allein die CI.
   // eslint-disable-next-line no-restricted-properties -- Testumgebung wählt den Treiber, die App liest weiter nur env.ts
   const baseUrl = process.env['DATABASE_URL']
   if (baseUrl !== undefined && POSTGRES_URL.test(baseUrl)) return createPostgresTestDb(baseUrl)
-  const connection = await connectDatabase('pglite://memory')
+  return connectDatabase('pglite://memory')
+}
+
+export async function createTestDb(): Promise<TestDb> {
+  const connection = await createEmptyTestDb()
   await connection.migrate()
   return connection
 }

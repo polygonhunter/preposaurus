@@ -75,7 +75,10 @@ describe('parseContentQuantity – Inhalt einer Packung', () => {
   it.each<[string, ContentParseError['kind']]>([
     ['6 Stück', 'piece-not-content'],
     ['1 St.', 'piece-not-content'],
-    ['1,5 Stück', 'fractional-pieces'],
+    ['1,5 Stück', 'piece-not-content'],
+    ['0 Stück', 'piece-not-content'],
+    ['-2 Stk.', 'piece-not-content'],
+    ['0 g', 'not-positive'],
     ['500', 'unknown-unit'],
     ['', 'empty'],
   ])('%j ergibt den Fehler %s', (text, kind) => {
