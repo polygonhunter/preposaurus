@@ -6,6 +6,7 @@
 import { boolean, check, index, pgTable, text, uuid } from 'drizzle-orm/pg-core'
 import { USER_ROLES } from '../../../shared/config/constants'
 import { id, isOneOf, timestamps, timestampTz } from './columns'
+import { households, members } from './household'
 
 export const users = pgTable(
   'nutzer',
@@ -17,8 +18,11 @@ export const users = pgTable(
     image: text('image'),
     role: text('rolle', { enum: USER_ROLES }).notNull().default('mitglied'),
     isActive: boolean('aktiv').notNull().default(true),
-    householdId: uuid('haushalt_id'),
-    memberId: uuid('mitglied_id').unique(),
+    // Leer erlaubt, damit Better Auth den Nutzer anlegen kann, bevor die Einrichtung ihn zuordnet (M3).
+    householdId: uuid('haushalt_id').references(() => households.id, { onDelete: 'cascade' }),
+    memberId: uuid('mitglied_id')
+      .unique()
+      .references(() => members.id, { onDelete: 'set null' }),
     ...timestamps(),
   },
   (table) => [check('nutzer_rolle_check', isOneOf(table.role, USER_ROLES))],
