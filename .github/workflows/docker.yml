@@ -1,7 +1,7 @@
 name: Docker
 
 # Baut die Images für amd64 und arm64 ohne Push und startet compose.yaml wie auf dem NAS
-# (UMSETZUNG M13-01, M13-02). Jede Architektur läuft auf einem eigenen, nativen Runner.
+# (UMSETZUNG M13-01 bis M13-03). Jede Architektur läuft auf einem eigenen, nativen Runner.
 
 on:
   pull_request:
@@ -40,9 +40,19 @@ jobs:
           tags: ghcr.io/polygonhunter/preposaurus:ci
           cache-from: type=gha,scope=app-${{ matrix.arch }}
           cache-to: type=gha,mode=max,scope=app-${{ matrix.arch }}
+      - name: Backup-Image bauen
+        uses: docker/build-push-action@v7
+        with:
+          context: docker/backup
+          load: true
+          tags: ghcr.io/polygonhunter/preposaurus-backup:ci
+          cache-from: type=gha,scope=backup-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=backup-${{ matrix.arch }}
       - name: sharp lädt im Image
         run: >-
           docker run --rm --entrypoint node ghcr.io/polygonhunter/preposaurus:ci
           -e "require('sharp'); console.log('sharp ok auf', process.arch)"
       - name: Compose bis /api/health
         run: docker/test/compose-test.sh
+      - name: Sichern, zurückspielen, vergleichen
+        run: docker/test/backup-test.sh

@@ -80,3 +80,27 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
+
+  # Tägliche Sicherung von Datenbank und Fotos nach ./backups (7 tägliche, 4 wöchentliche Stände).
+  #   sofort sichern:    docker compose run --rm backup jetzt
+  #   Stände zeigen:     docker compose run --rm backup liste
+  #   Probe einspielen:  docker compose run --rm backup pruefen <stand>
+  #   zurückspielen:     docker compose stop web && docker compose run --rm backup wiederherstellen <stand>
+  backup:
+    image: ghcr.io/polygonhunter/preposaurus-backup:${PREPOSAURUS_VERSION:?PREPOSAURUS_VERSION fehlt in .env}
+    environment:
+      PGHOST: db
+      PGUSER: preposaurus
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD fehlt in .env}
+      PGDATABASE: preposaurus
+      BACKUP_TIME: ${BACKUP_TIME:-03:00}
+      TZ: ${TZ:-Europe/Berlin}
+      # Die Stände gehören danach demselben Nutzer wie der Ordner fotos.
+      BACKUP_OWNER: '${PREPOSAURUS_UID:-1000}:${PREPOSAURUS_GID:-1000}'
+    volumes:
+      - ./backups:/backups
+      - ./fotos:/fotos
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
