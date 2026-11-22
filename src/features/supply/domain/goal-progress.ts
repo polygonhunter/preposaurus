@@ -22,6 +22,8 @@ export interface GoalProgress<T extends SupplyUnit> {
   isGoalReached: boolean
   /** Heute haltbar, am Zieldatum nicht mehr: Hinweis „läuft vor Zieldatum ab“ */
   expiringBeforeTarget: T[]
+  /** „Datum fehlt“: zählt heute, fürs Ziel nicht, läuft aber nicht nachweislich ab (#116) */
+  withoutDate: T[]
 }
 
 export type GoalProgressError = SupplyError | { kind: 'target-in-past' }
@@ -32,7 +34,10 @@ interface GoalProgressInput<T extends SupplyUnit> extends Omit<SupplyInput, 'ref
   goal: Goal
 }
 
-/** Einheiten, die heute zählen, am Zieldatum aber nicht mehr. */
+/**
+ * Einheiten mit Datum, die heute zählen, am Zieldatum aber nicht mehr. Einheiten ohne Datum
+ * fehlen hier bewusst: Von ihnen weiß niemand, dass sie ablaufen.
+ */
 export function unitsExpiringBefore<T extends SupplyUnit>(
   units: readonly T[],
   period: { today: CalendarDay; targetDay: CalendarDay },
@@ -40,6 +45,7 @@ export function unitsExpiringBefore<T extends SupplyUnit>(
 ): T[] {
   return units.filter(
     (unit) =>
+      unit.bestBefore !== null &&
       isCountedOn(unit, { day: period.today, kind: 'today' }, stillGoodCounts) &&
       !isCountedOn(unit, { day: period.targetDay, kind: 'target' }),
   )
@@ -67,5 +73,6 @@ export function calculateGoalProgress<T extends SupplyUnit>(
       { today, targetDay: goal.targetDay },
       input.stillGoodCounts,
     ),
+    withoutDate: input.units.filter((unit) => unit.status === 'stock' && unit.bestBefore === null),
   })
 }

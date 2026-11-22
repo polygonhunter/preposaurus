@@ -25,6 +25,7 @@ const countsAsStillGood = (
 
 /**
  * Zählt die Einheit am Stichtag? Nur im Vorrat und am Stichtag noch haltbar (MHD ≥ Stichtag).
+ * Ohne Datum zählt sie heute, am Zieldatum nicht.
  * `stillGoodCounts` ist die Haushalts-Einstellung „Noch gut zählt mit“ (Standard aus, #117) und
  * gilt nur für heute.
  */
@@ -34,6 +35,8 @@ export function isCountedOn(
   stillGoodCounts = false,
 ): boolean {
   if (unit.status !== 'stock') return false
+  // „Datum fehlt“: Die Packung ist da, aber niemand weiß, ob sie am Zieldatum noch hält (#116)
+  if (unit.bestBefore === null) return reference.kind === 'today'
   if (unit.bestBefore.date >= reference.day) return true
   return countsAsStillGood(unit, reference, stillGoodCounts)
 }

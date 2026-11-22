@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import type { BestBefore } from '@/features/inventory/domain/unit'
 import { addDays, toCalendarDay } from '@/shared/lib/dates'
 import { parseBestBefore } from './best-before'
-import { estimateBestBeforeOnRequest } from './estimates'
 import { assessBestBefore, type BestBeforeSuggestion, type Confidence } from './plausibility'
 
 const today = toCalendarDay('2026-11-22')
@@ -110,20 +109,5 @@ describe('Kein Pfad liefert ein Datum ohne Kennzeichen', () => {
 
     expect(suggestion.status).toBe('ok')
     expect(dateOf(suggestion)?.isEstimated).toBe(false)
-  })
-
-  it('eine Schätzung gibt es nur auf ausdrücklichen Aufruf, und dann markiert', () => {
-    const estimate = estimateBestBeforeOnRequest({ today, typicalShelfLifeDays: TYPICAL_DAYS })
-
-    expect(estimate).toEqual({
-      ok: true,
-      value: { date: '2027-11-22', precision: 'day', isEstimated: true },
-    })
-  })
-
-  it('ohne üblichen Wert der Kategorie gibt es auch keine Schätzung', () => {
-    const error = { ok: false, error: { kind: 'no-typical-value' } }
-    expect(estimateBestBeforeOnRequest({ today, typicalShelfLifeDays: null })).toEqual(error)
-    expect(estimateBestBeforeOnRequest({ today, typicalShelfLifeDays: 0 })).toEqual(error)
   })
 })

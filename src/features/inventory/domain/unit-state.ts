@@ -2,8 +2,12 @@ import { daysBetween, type CalendarDay } from '@/shared/lib/dates'
 import { err, ok, type Result } from '@/shared/lib/result'
 import type { DateKind } from './unit'
 
-/** Ampel einer Einheit. Sie wird bei jeder Anzeige berechnet und nie gespeichert. */
-export type UnitState = 'good' | 'soon' | 'urgent' | 'expired'
+/**
+ * Ampel einer Einheit. Sie wird bei jeder Anzeige berechnet und nie gespeichert.
+ * „Datum fehlt“ ist ein eigener Zustand ohne Ampelfarbe: Ohne Datum lässt sich weder ein Ablauf
+ * behaupten noch Entwarnung geben (#116). Die Einheit landet im Filter „Unvollständig“.
+ */
+export type UnitState = 'good' | 'soon' | 'urgent' | 'expired' | 'date-missing'
 
 /** Resttage, ab denen eine Einheit gelb (bald fällig) bzw. orange (dringend) wird. */
 export interface AmpelThresholds {
@@ -17,12 +21,14 @@ export const DEFAULT_AMPEL_THRESHOLDS: AmpelThresholds = { soonDays: 90, urgentD
 export type ThresholdError = { kind: 'not-a-whole-number' } | { kind: 'urgent-above-soon' }
 
 interface UnitStateInput {
-  bestBefore: CalendarDay
+  /** null heißt „Datum fehlt“ */
+  bestBefore: CalendarDay | null
   today: CalendarDay
   thresholds: AmpelThresholds
 }
 
 export function unitStateFor({ bestBefore, today, thresholds }: UnitStateInput): UnitState {
+  if (bestBefore === null) return 'date-missing'
   const daysLeft = daysBetween(today, bestBefore)
   if (daysLeft < 0) return 'expired'
   if (daysLeft <= thresholds.urgentDays) return 'urgent'

@@ -11,15 +11,19 @@ interface TestUnitOptions {
 }
 
 /** Baut Einheiten für die Tests der Rechnung. Alle Zahlen sind frei gewählte Testwerte. */
-export function supplyUnit(id: string, bestBefore: string, options: TestUnitOptions = {}) {
+/** `bestBefore` null heißt „Datum fehlt“. */
+export function supplyUnit(id: string, bestBefore: string | null, options: TestUnitOptions = {}) {
   return {
     id,
     status: options.status ?? 'stock',
-    bestBefore: {
-      date: toCalendarDay(bestBefore),
-      precision: 'day',
-      isEstimated: options.isBestBeforeEstimated ?? false,
-    },
+    bestBefore:
+      bestBefore === null
+        ? null
+        : {
+            date: toCalendarDay(bestBefore),
+            precision: 'day' as const,
+            isEstimated: options.isBestBeforeEstimated ?? false,
+          },
     checkedAt: options.checkedAt === undefined ? null : toCalendarDay(options.checkedAt),
     kcal: options.kcal ?? 0,
     isKcalEstimated: options.isKcalEstimated ?? false,
