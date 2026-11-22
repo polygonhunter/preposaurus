@@ -181,6 +181,16 @@ describe('Entwurf sichern, fortsetzen, verwerfen', () => {
     expect(await testDb.db.select().from(captureDrafts)).toHaveLength(0)
   })
 
+  it('lässt beim Verwerfen während eines Uploads kein Entwurfsfoto ohne Entwurf zurück', async () => {
+    const { entwurfId } = await uploadPhoto()
+
+    await Promise.all([uploadPhoto('mhd'), discardDraftAction({ entwurfId })])
+
+    const rows = await testDb.db.select().from(photos)
+    expect(rows.every((row) => row.draftId !== null)).toBe(true)
+    expect(await deps().storage.list()).toHaveLength(rows.length * 2)
+  })
+
   it('meldet einen schon verworfenen Entwurf ruhig als nicht mehr vorhanden', async () => {
     const { entwurfId } = await uploadPhoto()
     await discardDraftAction({ entwurfId })
