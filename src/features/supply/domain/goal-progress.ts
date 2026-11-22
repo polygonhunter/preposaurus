@@ -1,6 +1,6 @@
 import type { CalendarDay } from '@/shared/lib/dates'
 import { isInStockWithoutDate } from '@/shared/lib/stock-unit'
-import { err, ok, type Result } from '@/shared/lib/result'
+import { ok, type Result } from '@/shared/lib/result'
 import {
   calculateSupplyDays,
   type SupplyDays,
@@ -15,19 +15,34 @@ interface Goal {
   targetDay: CalendarDay
 }
 
-/** Die beiden Kennzahlen der Übersicht: „Heute versorgt“ und „Ziel <Datum>: X von Y Tagen“. */
-export interface GoalProgress<T extends SupplyUnit> {
-  today: SupplyDays
+/** Kennzahlen am Zieldatum: „Ziel <Datum>: X von Y Tagen“. */
+interface TargetReachable<T extends SupplyUnit> {
+  kind: 'valid'
   atTarget: SupplyDays
-  goalDays: number
   isGoalReached: boolean
   /** Heute haltbar, am Zieldatum nicht mehr: Hinweis „läuft vor Zieldatum ab“ */
   expiringBeforeTarget: T[]
+}
+
+/**
+ * Das Zieldatum ist vorbei. Kein Fehler: Die Übersicht rechnet ohne Zielzeile weiter, und die UI
+ * fragt freundlich nach einem neuen Datum (DATENKATALOG §5 Nr. 14).
+ */
+interface TargetInPast {
+  kind: 'target-in-past'
+  targetDay: CalendarDay
+}
+
+export type TargetOutlook<T extends SupplyUnit> = TargetReachable<T> | TargetInPast
+
+/** Die beiden Kennzahlen der Übersicht: „Heute versorgt“ und der Stand am Zieldatum. */
+export interface GoalProgress<T extends SupplyUnit> {
+  today: SupplyDays
+  goalDays: number
+  target: TargetOutlook<T>
   /** „Datum fehlt“: zählt heute, fürs Ziel nicht, läuft aber nicht nachweislich ab (#116) */
   withoutDate: T[]
 }
-
-export type GoalProgressError = SupplyError | { kind: 'target-in-past' }
 
 interface GoalProgressInput<T extends SupplyUnit> extends Omit<SupplyInput, 'reference'> {
   units: readonly T[]
@@ -52,24 +67,37 @@ export function unitsExpiringBefore<T extends SupplyUnit>(
   )
 }
 
-export function calculateGoalProgress<T extends SupplyUnit>(
+function outlookAt<T extends SupplyUnit>(
   input: GoalProgressInput<T>,
-): Result<GoalProgress<T>, GoalProgressError> {
+): Result<TargetOutlook<T>, SupplyError> {
   const { today, goal, ...rest } = input
-  if (goal.targetDay < today) return err({ kind: 'target-in-past' })
-  const now = calculateSupplyDays({ ...rest, reference: { day: today, kind: 'today' } })
+  if (goal.targetDay < today) return ok({ kind: 'target-in-past', targetDay: goal.targetDay })
   const atTarget = calculateSupplyDays({
     ...rest,
     reference: { day: goal.targetDay, kind: 'target' },
   })
-  if (!now.ok) return now
   if (!atTarget.ok) return atTarget
   return ok({
-    today: now.value,
+    kind: 'valid',
     atTarget: atTarget.value,
-    goalDays: goal.days,
     isGoalReached: atTarget.value.days >= goal.days,
     expiringBeforeTarget: unitsExpiringBefore(input.units, { today, targetDay: goal.targetDay }),
+  })
+}
+
+/** Ein Zieldatum in der Vergangenheit ist ein Ergebnis mit Hinweis, kein Fehler. */
+export function calculateGoalProgress<T extends SupplyUnit>(
+  input: GoalProgressInput<T>,
+): Result<GoalProgress<T>, SupplyError> {
+  const { today, goal, ...rest } = input
+  const now = calculateSupplyDays({ ...rest, reference: { day: today, kind: 'today' } })
+  if (!now.ok) return now
+  const target = outlookAt(input)
+  if (!target.ok) return target
+  return ok({
+    today: now.value,
+    goalDays: goal.days,
+    target: target.value,
     withoutDate: input.units.filter(isInStockWithoutDate),
   })
 }
