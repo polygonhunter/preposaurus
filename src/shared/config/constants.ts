@@ -20,3 +20,6 @@ export const MEMBER_CONDITIONS = ['schwanger', 'stillend'] as const
 
 export const DEFAULT_AMPEL_YELLOW_DAYS = 90
 export const DEFAULT_AMPEL_ORANGE_DAYS = 28
+
+// Maßeinheit für Inhalt und Empfehlungsmengen. Wasser und Getränke in ml, sonst g.
+export const QUANTITY_UNITS = ['g', 'ml'] as const
