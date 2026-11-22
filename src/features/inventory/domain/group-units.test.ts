@@ -50,15 +50,46 @@ describe('groupByBestBefore', () => {
       bestBefore('2027-12-31', 'month'),
       bestBefore('2027-12-31', 'day'),
     ])
-    expect(groups.map((group: BestBeforeGroup) => group.precision)).toEqual([
-      'day',
-      'month',
-      'year',
-    ])
+    expect(
+      groups.map((group: BestBeforeGroup) => group.kind === 'dated' && group.precision),
+    ).toEqual(['day', 'month', 'year'])
   })
 
   it('liefert für eine leere Liste keine Gruppe', () => {
     expect(groupByBestBefore([])).toEqual([])
+  })
+})
+
+describe('groupByBestBefore mit „Datum fehlt“', () => {
+  it('sammelt Einheiten ohne Datum in einer eigenen Gruppe nach den datierten', () => {
+    const groups = groupByBestBefore([
+      null,
+      bestBefore('2027-11-30'),
+      null,
+      bestBefore('2027-09-30', 'month', true),
+    ])
+    expect(groups.map(formatBestBeforeGroup)).toEqual([
+      '09/2027 (1×, geschätzt)',
+      '11/2027 (1×)',
+      'Datum fehlt (2×)',
+    ])
+  })
+
+  it('liefert nur die Gruppe „Datum fehlt“, wenn keine Einheit ein Datum hat', () => {
+    expect(groupByBestBefore([null, null, null])).toEqual([{ kind: 'no-date', count: 3 }])
+  })
+
+  it('legt ohne fehlendes Datum keine leere Gruppe „Datum fehlt“ an', () => {
+    const groups = groupByBestBefore([bestBefore('2027-09-30')])
+    expect(groups).toEqual([
+      {
+        kind: 'dated',
+        date: toCalendarDay('2027-09-30'),
+        precision: 'month',
+        isEstimated: false,
+        count: 1,
+      },
+    ])
   })
 })
 
