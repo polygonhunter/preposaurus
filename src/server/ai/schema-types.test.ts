@@ -3,6 +3,7 @@
 import { describe, expectTypeOf, it } from 'vitest'
 import type {
   AiBestBeforeAnswer,
+  AiBestBeforeEstimateAnswer,
   AiNutritionAnswer,
   AiNutritionEstimateAnswer,
   AiPackagingAnswer,
@@ -10,6 +11,7 @@ import type {
 import type { AiRole } from '@/shared/config/ai-roles'
 import type {
   BestBeforeAnswer,
+  BestBeforeEstimateAnswer,
   NutritionAnswer,
   NutritionEstimateAnswer,
   PackagingAnswer,
@@ -22,6 +24,7 @@ describe('Typen der KI-Antworten', () => {
     expectTypeOf<NutritionAnswer>().toEqualTypeOf<AiNutritionAnswer>()
     expectTypeOf<NutritionEstimateAnswer>().toEqualTypeOf<AiNutritionEstimateAnswer>()
     expectTypeOf<BestBeforeAnswer>().toEqualTypeOf<AiBestBeforeAnswer>()
+    expectTypeOf<BestBeforeEstimateAnswer>().toEqualTypeOf<AiBestBeforeEstimateAnswer>()
   })
 
   it('decken jede Foto-Rolle ab', () => {
