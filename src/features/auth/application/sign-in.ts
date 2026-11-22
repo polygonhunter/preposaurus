@@ -7,7 +7,7 @@ import 'server-only'
 import { APIError } from 'better-auth/api'
 import type { Auth } from '@/server/auth/auth'
 import { err, ok, type Result } from '@/shared/lib/result'
-import type { BrakeRequest, SignInLockRepository } from '../data/sign-in-lock-repository'
+import type { BrakeRequest, LocksSet, SignInLockRepository } from '../data/sign-in-lock-repository'
 import {
   GLOBAL_LOCK_KEY,
   GLOBAL_RULE,
@@ -59,9 +59,13 @@ const loggableUsername = (username: string) =>
 
 // Ein Erfolg setzt die Bremse des Namens zurück. Die übrigen Zähler bleiben, nur dieser eine
 // reservierte Versuch zählt nicht als Fehlversuch.
-async function releaseAfterSuccess(deps: SignInDeps, requests: readonly BrakeRequest[]) {
+async function releaseAfterSuccess(
+  deps: SignInDeps,
+  requests: readonly BrakeRequest[],
+  locksSet: LocksSet,
+) {
   const [name, ...shared] = requests.map((request) => request.key)
-  await deps.locks.release(name === undefined ? [] : [name], shared)
+  await deps.locks.release(name === undefined ? [] : [name], shared, locksSet)
 }
 
 export async function signIn(
@@ -71,16 +75,16 @@ export async function signIn(
   const requests = brakeRequests(deps, input)
   const logContext = { username: loggableUsername(input.username), ip: deps.clientIp }
   const now = deps.now()
-  const lockedUntil = await deps.locks.reserve(requests, now)
-  if (lockedUntil !== null) {
+  const reservation = await deps.locks.reserve(requests, now)
+  if (reservation.blockedUntil !== null) {
     deps.logWarning('Anmeldung gebremst', logContext)
-    return err({ kind: 'throttled', minutes: minutesUntil(lockedUntil, now) })
+    return err({ kind: 'throttled', minutes: minutesUntil(reservation.blockedUntil, now) })
   }
   const userId = await tryBetterAuth(deps, input)
   if (userId === null) {
     deps.logWarning('Anmeldung fehlgeschlagen', logContext)
     return err({ kind: 'invalid-credentials' })
   }
-  await releaseAfterSuccess(deps, requests)
+  await releaseAfterSuccess(deps, requests, reservation.locksSet)
   return ok({ userId })
 }

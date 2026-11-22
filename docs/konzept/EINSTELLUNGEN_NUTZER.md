@@ -183,7 +183,7 @@ docker compose exec web node scripts/admin.mjs passwort-zuruecksetzen <benutzern
 |---|---|---|
 | Zugang | Nur als Befehl im Container. **Keine** Route, kein Formular, keine Umgebungsvariable | Wer `docker compose exec` darf, hat ohnehin DB, Fotos und `.env`. Es entsteht kein neuer Angriffsweg übers Netz |
 | Passwort | Wird erzeugt und einmal im Terminal ausgegeben. Nie als Argument | Argumente landen im Shell-Verlauf und in der Prozessliste |
-| Wirkung | Neuer Hash, `passwort_vorlaeufig = true`, alle Sitzungen des Nutzers beendet, Anmeldesperre aufgehoben | Wie das Zurücksetzen in der App |
+| Wirkung | Neuer Hash, `passwort_vorlaeufig = true`, alle Sitzungen des Nutzers beendet, Anmeldesperre aufgehoben: in `anmelde_sperre` die Zeile `name:<benutzername>`, dazu `global` und alle `ip:`-Zeilen | Wie das Zurücksetzen in der App. `global` und `ip:` mit, weil der Admin sonst trotz neuem Passwort in einer laufenden Pause oder Adress-Sperre hängen kann (Review #138) |
 | Spur | Eine Zeile im Server-Log **ohne** Passwort. Am Konto steht „zuletzt geändert … per Kommandozeile“ | Ein Zurücksetzen bleibt nicht unbemerkt |
 | Weitere Befehle | `nutzer-auflisten` · `admin-machen <benutzername>` (reaktiviert und setzt die Rolle) · `alle-abmelden` | Deckt „einziger Admin ist weg“ und „Backup eingespielt“ ab |
 | Technik | Nutzt dieselben Use-Cases wie die Oberfläche. Muss im Standalone-Image enthalten sein (eigener Build-Schritt) | Keine zweite Logik, die Regeln gelten auch hier |
@@ -214,7 +214,7 @@ Auch im Heimnetz sinnvoll: Ein befallenes Gerät im WLAN oder ein neugieriges Ki
 |---|---|
 | Bremse je Benutzername | Ab 5 Fehlversuchen in Folge wartet dieser Name 1 Minute, danach verdoppelt sich die Wartezeit je Fehlversuch bis höchstens 15 Minuten. Erfolg setzt zurück. **Keine Dauersperre**, sonst könnte jemand den Admin aussperren |
 | Bremse je Adresse | Höchstens 20 Fehlversuche je IP in 10 Minuten, über alle Namen. Bremst das Durchprobieren vieler Namen. Hinter Tailscale Serve kommt die IP aus `X-Forwarded-For` (geprüft in M3-01, §4.5) Ohne verwertbare Adresse (Header fehlt oder enthält eine Liste) teilen sich alle Geräte den Zähler `ip:unbekannt` |
-| Obergrenze für alle | Höchstens 100 Versuche in 10 Minuten über alle Namen und Adressen, danach 1 Minute Pause für alle (Schlüssel `global`). Hält auch einen Angreifer auf, der die Adresse je Anfrage fälscht (Sicherheits-Review #138) |
+| Obergrenze für alle | Höchstens 100 Versuche in 10 Minuten über alle Namen und Adressen, danach 1 Minute Pause für alle (Schlüssel `global`). Nach Ende einer Pause bzw. Adress-Sperre beginnt die Zählung wieder bei 1, sonst erneuerte ein Versuch je Minute die Pause dauerhaft. Nur der Name verdoppelt weiter. Ein Erfolg, der selbst die Grenze erreicht hätte, nimmt seine Sperre zurück. Hält auch einen Angreifer auf, der die Adresse je Anfrage fälscht (Sicherheits-Review #138) |
 | Zählen vor dem Prüfen | Jeder Versuch wird atomar gezählt, **bevor** das Passwort geprüft wird. Erreicht der Stand eine Grenze, gilt die Sperre sofort, auch für parallele Anfragen. Ein Erfolg nimmt die Zählung zurück (Review #138) |
 | Gleiches Verhalten für unbekannte Namen | Gezählt wird der eingegebene Name, ob es ihn gibt oder nicht. Auch dann wird ein Hash gerechnet. Antwort und Dauer verraten nichts |
 | Meldungen | Falsch: „Benutzername oder Passwort stimmt nicht.“ Gebremst: „Zu viele Versuche. Bitte in 5 Minuten noch einmal.“ Deaktiviert: dieselbe Meldung wie falsch |
