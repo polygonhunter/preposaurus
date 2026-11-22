@@ -1,21 +1,20 @@
 import type { CalendarDay } from '@/shared/lib/dates'
-import { isInStockWithoutDate } from '@/shared/lib/stock-unit'
 import { timeGroupFor, type TimeGroup } from './time-group'
 import type { AmpelThresholds } from './unit-state'
 import type { BestBefore, DateKind, StockUnit } from './unit'
 
-// Seite Bald fällig (UX-Konzept §8.2, #125): Zeitgruppen aus `timeGroupFor`, dazu eine eigene
-// Gruppe „Datum fehlt“ am Ende. Ein Eintrag bündelt die Packungen einer Lebensmittelart mit
-// demselben Datum (gleiche Genauigkeit, Schätz-Kennzeichen und Datumsart).
+// Seite Bald fällig (UX-Konzept §8.2, #125): Zeitgruppen aus `timeGroupFor`. „Datum fehlt“ steht
+// in keiner Gruppe, nur im Filter „Unvollständig“ (DATENKATALOG A11). Ein Eintrag bündelt die
+// Packungen einer Lebensmittelart mit demselben Datum (gleiche Genauigkeit, Schätz-Kennzeichen
+// und Datumsart).
 
-export type DueGroup = Exclude<TimeGroup, 'later'> | 'no-date'
+export type DueGroup = Exclude<TimeGroup, 'later'>
 
 export const DUE_GROUP_ORDER: readonly DueGroup[] = [
   'expired',
   'this-week',
   'this-month',
   'next-three-months',
-  'no-date',
 ]
 
 export interface DueUnit extends Pick<
@@ -39,9 +38,11 @@ interface DueContext {
   thresholds: AmpelThresholds
 }
 
-/** Gruppe einer Packung auf Bald fällig. null: später fällig, entschieden oder nicht im Vorrat. */
+/**
+ * Gruppe einer Packung auf Bald fällig. null: später fällig, ohne Datum, entschieden („Noch gut“)
+ * oder nicht im Vorrat.
+ */
 export function dueGroupOf(unit: DueUnit, { today, thresholds }: DueContext): DueGroup | null {
-  if (isInStockWithoutDate(unit)) return 'no-date'
   const group = timeGroupFor(unit, today, thresholds)
   return group === null || group === 'later' ? null : group
 }

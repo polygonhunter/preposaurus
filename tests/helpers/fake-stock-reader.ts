@@ -66,8 +66,8 @@ function matchesProduct(product: StockProduct, filter: ProductFilter): boolean {
 function matchesUnit(unit: StockProductUnit, query: UnitQuery): boolean {
   if (query.productIds !== undefined && !query.productIds.includes(unit.productId)) return false
   if (!query.statuses.includes(unit.status)) return false
-  if (query.dueUntil === undefined || unit.bestBefore === null) return true
-  return unit.bestBefore.date <= query.dueUntil
+  if (query.dueUntil === undefined) return true
+  return unit.bestBefore !== null && unit.bestBefore.date <= query.dueUntil
 }
 
 export function createFakeStockReader(data: FakeData) {

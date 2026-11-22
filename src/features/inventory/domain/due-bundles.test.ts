@@ -35,15 +35,16 @@ function unit(bundleKey: string, bestBefore: string | null, options: Options = {
 }
 
 describe('dueGroupOf', () => {
-  it('ordnet nach Zeitgruppe, ohne Datum in „Datum fehlt“', () => {
+  it('ordnet nach Zeitgruppe', () => {
     expect(dueGroupOf(unit('a', '2026-11-21'), context)).toBe('expired')
     expect(dueGroupOf(unit('a', '2026-11-29'), context)).toBe('this-week')
     expect(dueGroupOf(unit('a', '2026-12-20'), context)).toBe('this-month')
     expect(dueGroupOf(unit('a', '2027-02-20'), context)).toBe('next-three-months')
-    expect(dueGroupOf(unit('a', null), context)).toBe('no-date')
   })
 
-  it('lässt später Fälliges, Entschiedenes und Entnommenes weg', () => {
+  it('lässt später Fälliges, „Datum fehlt“, Entschiedenes und Entnommenes weg', () => {
+    // „Datum fehlt“ steht nur im Filter „Unvollständig“ (DATENKATALOG A11)
+    expect(dueGroupOf(unit('a', null), context)).toBeNull()
     expect(dueGroupOf(unit('a', '2027-06-30'), context)).toBeNull()
     expect(dueGroupOf(unit('a', '2026-11-21', { checkedAt: '2026-11-22' }), context)).toBeNull()
     expect(dueGroupOf(unit('a', null, { status: 'consumed' }), context)).toBeNull()
@@ -69,7 +70,6 @@ describe('bundleDueUnits', () => {
       ['this-week', 'milch', 1],
       ['this-week', 'spaghetti', 2],
       ['this-month', 'spaghetti', 1],
-      ['no-date', 'spaghetti', 1],
     ])
   })
 

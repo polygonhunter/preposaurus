@@ -1,6 +1,7 @@
 // Use-Case 4 · Bald fällig (UX-Konzept §8.2, #125, DATENKATALOG `getDueUnits`): Zeitgruppen
-// über `timeGroupFor`, gebündelt je Lebensmittelart und Datum, dazu die Gruppe „Datum fehlt“.
-// Geladen wird nur bis zur Gelb-Schwelle und ohne Datum (Teilindex einheit_mhd_vorrat_idx).
+// über `timeGroupFor`, gebündelt je Lebensmittelart und Datum. „Datum fehlt“ gehört nicht hierher,
+// sondern in den Filter „Unvollständig“ (DATENKATALOG A11). Geladen wird nur bis zur
+// Gelb-Schwelle (Teilindex einheit_mhd_vorrat_idx).
 import 'server-only'
 import { addDays, daysBetween, type CalendarDay } from '@/shared/lib/dates'
 import {

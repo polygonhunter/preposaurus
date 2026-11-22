@@ -40,7 +40,7 @@ const reader = createFakeStockReader({
 })
 
 describe('getDueUnits', () => {
-  it('zählt Packungen je Zeitgruppe, „Datum fehlt“ eigens, später fällig nicht', async () => {
+  it('zählt Packungen je Zeitgruppe, ohne „Datum fehlt“ und später Fälliges', async () => {
     const due = await getDueUnits(reader, { householdId, today, sort: 'date' })
 
     expect(due.counts).toEqual({
@@ -48,14 +48,12 @@ describe('getDueUnits', () => {
       'this-week': 3,
       'this-month': 1,
       'next-three-months': 1,
-      'no-date': 1,
     })
     expect(due.groups.map((group) => group.group)).toEqual([
       'expired',
       'this-week',
       'this-month',
       'next-three-months',
-      'no-date',
     ])
   })
 
