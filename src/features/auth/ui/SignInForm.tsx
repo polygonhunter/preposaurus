@@ -1,5 +1,6 @@
 'use client'
 import { useActionState } from 'react'
+import { useFocusFirstInvalid } from '@/shared/hooks/use-focus-first-invalid'
 import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import { LiveMessage } from '@/shared/ui/LiveMessage'
@@ -17,8 +18,9 @@ const INITIAL_STATE: SignInState = { message: null, username: '' }
 // falsch war (EINSTELLUNGEN §4.3).
 export function SignInForm({ returnTo }: SignInFormProps) {
   const [state, formAction, isPending] = useActionState(signInAction, INITIAL_STATE)
+  const formRef = useFocusFirstInvalid(state)
   return (
-    <form action={formAction} className="mx-4 flex flex-col gap-4 pt-6 breit:mx-6">
+    <form ref={formRef} action={formAction} className="mx-4 flex flex-col gap-4 pt-6 breit:mx-6">
       <input type="hidden" name="weiter" value={returnTo} />
       <Field
         label="Benutzername"

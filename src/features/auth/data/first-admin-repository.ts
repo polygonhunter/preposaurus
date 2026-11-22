@@ -16,6 +16,7 @@ import { CREDENTIAL_PROVIDER } from './credential'
 const ACCOUNT_STEP = 1
 
 type NewFirstAdmin = Readonly<{
+  displayName: string
   username: string
   passwordHash: string
   householdName: string
@@ -48,8 +49,7 @@ async function insertAdmin(tx: Database, admin: NewFirstAdmin, householdId: stri
   const id = crypto.randomUUID()
   await tx.insert(users).values({
     id,
-    // Anzeigename vorerst wie der Benutzername, änderbar unter „Mein Konto“
-    name: admin.username,
+    name: admin.displayName,
     username: admin.username,
     email: `${id}@nutzer.invalid`,
     role: 'admin',

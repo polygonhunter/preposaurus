@@ -8,24 +8,35 @@ import { expectAccessibleLayout } from '../helpers/page-checks'
 
 async function setUpViaUi(page: Page) {
   await expect(page.getByRole('heading', { level: 1, name: 'Willkommen' })).toBeVisible()
-  await expect(page.getByLabel('Name des Haushalts')).toHaveValue('Unser Haushalt')
   await expectAccessibleLayout(page)
 
-  await page.getByLabel('Benutzername').fill(E2E_ADMIN.username)
-  await page.getByLabel('Passwort', { exact: true }).fill(E2E_ADMIN.password)
-  await page.getByLabel('Passwort wiederholen').fill('etwas anderes als oben')
-  await page.getByLabel('Name des Haushalts').fill(E2E_ADMIN.householdName)
-  await page.getByRole('button', { name: 'Einrichten' }).click()
+  // Der Benutzername folgt dem Anzeigenamen, bis er selbst geändert wird (ONBOARDING §2.2)
+  const username = page.getByLabel('Benutzername')
+  await page.getByLabel('Anzeigename').fill('Alex Beispiel')
+  await expect(username).toHaveValue('alex')
+  await page.getByLabel('Anzeigename').fill(E2E_ADMIN.displayName)
+  await username.fill(E2E_ADMIN.username)
 
-  // Fehler steht am Feld, die übrigen Eingaben bleiben
-  const repeat = page.getByLabel('Passwort wiederholen')
-  await expect(repeat).toHaveAccessibleDescription('Die beiden Passwörter sind nicht gleich.')
-  await expect(page.getByLabel('Benutzername')).toHaveValue(E2E_ADMIN.username)
+  const password = page.getByLabel('Passwort', { exact: true })
+  await password.fill(`${E2E_ADMIN.username} mag Hafer`)
+  await page.getByRole('button', { name: 'Weiter' }).click()
+
+  // Fehler steht am Feld, der Fokus springt hin, die übrigen Eingaben bleiben
+  await expect(password).toHaveAccessibleDescription(/Bitte ein Passwort ohne den Benutzernamen\.$/)
+  await expect(password).toBeFocused()
+  await expect(page.getByLabel('Anzeigename')).toHaveValue(E2E_ADMIN.displayName)
+  await expect(username).toHaveValue(E2E_ADMIN.username)
   await expectAccessibleLayout(page)
 
-  await page.getByLabel('Passwort', { exact: true }).fill(E2E_ADMIN.password)
-  await repeat.fill(E2E_ADMIN.password)
-  await page.getByRole('button', { name: 'Einrichten' }).click()
+  // „Anzeigen“ statt eines zweiten Passwortfelds
+  const show = page.getByRole('button', { name: 'Anzeigen' })
+  await expect(password).toHaveAttribute('type', 'password')
+  await show.click()
+  await expect(show).toHaveAttribute('aria-pressed', 'true')
+  await expect(password).toHaveAttribute('type', 'text')
+
+  await password.fill(E2E_ADMIN.password)
+  await page.getByRole('button', { name: 'Weiter' }).click()
 }
 
 setup('Ersteinrichtung bis zur Übersicht', async ({ page }) => {

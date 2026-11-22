@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { findPasswordProblem } from './password-rules'
 
-const context = { username: 'sam.beispiel', householdName: 'Unser Haushalt' }
+const context = {
+  username: 'sam.beispiel',
+  displayName: 'Sam B.',
+  householdName: 'Unser Haushalt',
+}
 
 describe('findPasswordProblem', () => {
   it('lässt ein Passwort ohne bekannte Namen durch', () => {
@@ -14,6 +18,10 @@ describe('findPasswordProblem', () => {
 
   it('lehnt den Benutzernamen als Bestandteil ab, ohne Rücksicht auf Satzzeichen', () => {
     expect(findPasswordProblem('mein-sambeispiel-passwort', context)).toBe('contains-username')
+  })
+
+  it('lehnt den Anzeigenamen ab, ohne Rücksicht auf Leer- und Satzzeichen', () => {
+    expect(findPasswordProblem('ich bin SAMB und mag Hafer', context)).toBe('contains-display-name')
   })
 
   it('lehnt den Haushaltsnamen ab, auch mit anderen Leerzeichen', () => {

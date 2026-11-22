@@ -16,10 +16,9 @@ import { createTestAuth } from './auth-fixtures'
 
 const PASSWORD = 'Hafer Linse Regal Wolke'
 const input: SetupInput = {
+  displayName: 'Kim Test',
   username: 'kim.test',
   password: PASSWORD,
-  passwordRepeat: PASSWORD,
-  householdName: 'Testhaushalt',
 }
 
 describe('Ersteinrichtung: erster Admin und Haushalt', () => {
@@ -48,7 +47,7 @@ describe('Ersteinrichtung: erster Admin und Haushalt', () => {
     await testDb.close()
   })
 
-  it('legt Admin, Haushalt, Einstellungen und Ziel an, das Passwort nur als Hash', async () => {
+  it('legt Admin, Haushalt („Unser Haushalt“), Einstellungen und Ziel an, Passwort nur als Hash', async () => {
     expect(await createFirstAdminRepository(testDb.db).hasAnyUser()).toBe(false)
 
     expect(await setupFirstAdmin(await deps(), input)).toEqual({ ok: true, value: null })
@@ -56,8 +55,9 @@ describe('Ersteinrichtung: erster Admin und Haushalt', () => {
     const [household] = await testDb.db.select().from(households)
     const [user] = await testDb.db.select().from(users)
     const [account] = await testDb.db.select().from(accounts)
-    expect(household?.name).toBe('Testhaushalt')
+    expect(household?.name).toBe('Unser Haushalt')
     expect(user).toMatchObject({
+      name: 'Kim Test',
       username: 'kim.test',
       role: 'admin',
       isActive: true,
@@ -105,6 +105,7 @@ describe('Ersteinrichtung: erster Admin und Haushalt', () => {
   it('von zwei gleichzeitigen Aufrufen gewinnt genau einer', async () => {
     const repository = createFirstAdminRepository(testDb.db)
     const admin = (username: string) => ({
+      displayName: username,
       username,
       passwordHash: 'hash',
       householdName: 'Testhaushalt',

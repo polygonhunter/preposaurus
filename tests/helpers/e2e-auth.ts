@@ -7,9 +7,9 @@ import { expect, type Page } from '@playwright/test'
 
 /** Erfundener Testnutzer, nur für die Wegwerf-Datenbank der E2E-Tests */
 export const E2E_ADMIN = {
+  displayName: 'Test Admin',
   username: 'testadmin',
   password: 'Hafer Linse Regal Wolke',
-  householdName: 'Testhaushalt',
 } as const
 
 export const ADMIN_STORAGE_STATE = '.data/e2e-auth/admin.json'

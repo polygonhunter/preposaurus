@@ -9,7 +9,7 @@ import {
 } from '@/shared/config/constants'
 
 const USERNAME_PATTERN = new RegExp(USERNAME_PATTERN_SOURCE)
-const HOUSEHOLD_NAME_MAX_LENGTH = 60
+const DISPLAY_NAME_MAX_LENGTH = 60
 
 export const usernameSchema = z.string().trim().toLowerCase().regex(USERNAME_PATTERN, {
   error: 'Der Benutzername hat 3 bis 30 Zeichen: Buchstaben, Ziffern, Punkt oder Unterstrich.',
@@ -31,22 +31,17 @@ const newPasswordSchema = z
   .min(PASSWORD_MIN_LENGTH, { error: 'Bitte mindestens 10 Zeichen.' })
   .max(PASSWORD_MAX_LENGTH, { error: 'Bitte höchstens 128 Zeichen.' })
 
-// Ersteinrichtung (#34): erster Admin und Name des Haushalts. Was ein Passwort nicht enthalten
-// darf, prüft domain/password-rules.ts, weil Schemas keine Fachlogik importieren.
-export const setupSchema = z
-  .object({
-    username: usernameSchema,
-    password: newPasswordSchema,
-    passwordRepeat: z.string(),
-    householdName: z
-      .string()
-      .trim()
-      .min(1, { error: 'Bitte gebt eurem Haushalt einen Namen.' })
-      .max(HOUSEHOLD_NAME_MAX_LENGTH, { error: 'Bitte höchstens 60 Zeichen.' }),
-  })
-  .refine((input) => input.password === input.passwordRepeat, {
-    path: ['passwordRepeat'],
-    error: 'Die beiden Passwörter sind nicht gleich.',
-  })
+// Ersteinrichtung, Schritt „Willkommen und Konto“ (ONBOARDING §2.2): Anzeigename, Benutzername,
+// Passwort. Was ein Passwort nicht enthalten darf, prüft domain/password-rules.ts, weil Schemas
+// keine Fachlogik importieren.
+export const setupSchema = z.object({
+  displayName: z
+    .string()
+    .trim()
+    .min(1, { error: 'Bitte einen Namen eintragen.' })
+    .max(DISPLAY_NAME_MAX_LENGTH, { error: 'Bitte höchstens 60 Zeichen.' }),
+  username: usernameSchema,
+  password: newPasswordSchema,
+})
 
 export type SetupInput = z.infer<typeof setupSchema>
