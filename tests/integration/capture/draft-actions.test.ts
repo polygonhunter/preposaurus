@@ -11,7 +11,7 @@ import type { Result } from '../../../src/shared/lib/result'
 import { insertBasics } from '../../helpers/db-fixtures'
 import { createMemoryPhotoStorage } from '../../helpers/memory-photo-storage'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
-import { insertUser, sessionUser, testJpeg, uploadRequest } from './photo-fixtures'
+import { FAKE_AI_ENV, insertUser, sessionUser, testJpeg, uploadRequest } from './photo-fixtures'
 
 const state = vi.hoisted(() => ({
   session: null as Result<SessionUser, AccessError> | null,
@@ -74,6 +74,7 @@ describe('Entwurf sichern, fortsetzen, verwerfen', () => {
       db: testDb.db,
       storage: createMemoryPhotoStorage(),
       processor: createSharpPhotoProcessor(),
+      env: FAKE_AI_ENV,
     }
     signIn(owner)
   })

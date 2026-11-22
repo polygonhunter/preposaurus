@@ -18,7 +18,7 @@
     "!src/shared/lib/{dates,quantities,slug,stock-unit}.ts!",
     "!src/server/{ai,crypto,storage}/**!",
     "!src/features/ai-settings/{application,data}/**!",
-    "!src/features/capture/{application/{recognize-best-before,find-open-draft}.ts,schemas.ts}!",
+    "!src/features/capture/{application/find-open-draft.ts,schemas.ts}!",
     "!src/features/inventory/{application/**,data/**,schemas.ts}!",
     "!src/features/supply/application/**!",
     "db/**/*.ts!",

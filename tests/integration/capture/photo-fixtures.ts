@@ -8,6 +8,13 @@ import type { SessionUser } from '../../../src/server/auth/session'
 
 const ORIGIN = 'https://preposaurus.test'
 
+/** KI in Tests immer als Fake (UMSETZUNG Grundentscheidung 12). */
+export const FAKE_AI_ENV = {
+  APP_SECRET: 'test-nur-zum-testen-kein-geheimnis-0000',
+  AI_PROVIDER: 'fake',
+  ANTHROPIC_API_KEY: undefined,
+} as const
+
 /** Einfarbiges JPEG mit GPS im EXIF, wie ein Handyfoto. */
 export async function testJpeg(width = 800, height = 600): Promise<Uint8Array> {
   const data = await sharp({ create: { width, height, channels: 3, background: '#7a9' } })

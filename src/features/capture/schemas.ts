@@ -105,6 +105,17 @@ export const photoRequestSchema = z.object({
     .transform((variant) => (variant === 'vorschau' ? 'thumbnail' : 'full')),
 })
 
+/** Body von `POST /api/recognize`. `schaetzung` nur auf ausdrückliche Wahl „keine Tabelle“ (#124). */
+export const recognizeRequestSchema = z.strictObject({
+  fotoId: z.uuid(),
+  schaetzung: z
+    .strictObject({
+      lebensmittelart: z.string().max(80).nullable(),
+      bezeichnung: z.string().trim().max(120).nullable(),
+    })
+    .optional(),
+})
+
 // Entwurf der Erfassung (M6-03): der Stand der Maske, gesichert bei jedem Schrittwechsel.
 // Vorläufig, bis die Schritte (M6-08 bis M6-11) stehen: alles optional, aber mit festen Grenzen,
 // damit kein beliebiges JSON in `erfassung_entwurf.daten` landet. Fotos hängen über

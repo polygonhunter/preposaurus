@@ -39,6 +39,27 @@ export async function listDraftPhotos(db: Database, draftId: string): Promise<Dr
     .orderBy(asc(photos.createdAt))
 }
 
+/** Foto aus einem Entwurf des Nutzers (für die Erkennung), sonst null. */
+export async function findOwnDraftPhoto(
+  db: Database,
+  owner: DraftOwner,
+  photoId: string,
+): Promise<DraftPhoto | null> {
+  const [row] = await db
+    .select({ id: photos.id, householdId: photos.householdId, role: photos.role })
+    .from(photos)
+    .innerJoin(captureDrafts, eq(captureDrafts.id, photos.draftId))
+    .where(
+      and(
+        eq(photos.id, photoId),
+        eq(photos.status, 'entwurf'),
+        eq(captureDrafts.householdId, owner.householdId),
+        eq(captureDrafts.userId, owner.userId),
+      ),
+    )
+  return row ?? null
+}
+
 export async function deleteDraftPhotos(db: Database, draftId: string): Promise<void> {
   await db.delete(photos).where(isDraftPhotoOf(draftId))
 }
