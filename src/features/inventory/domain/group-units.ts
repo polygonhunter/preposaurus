@@ -2,12 +2,23 @@ import { dayParts, type CalendarDay } from '@/shared/lib/dates'
 import type { BestBefore, BestBeforePrecision } from './unit'
 
 /** Einheiten mit gleichem Datum, gleicher Genauigkeit und gleichem Schätz-Kennzeichen. */
-export interface BestBeforeGroup {
+interface DatedGroup {
+  kind: 'dated'
   date: CalendarDay
   precision: BestBeforePrecision
   isEstimated: boolean
   count: number
 }
+
+/** Einheiten mit „Datum fehlt“ (#116), eine eigene Gruppe statt eines erfundenen Datums. */
+interface NoDateGroup {
+  kind: 'no-date'
+  count: number
+}
+
+export type BestBeforeGroup = DatedGroup | NoDateGroup
+
+const NO_DATE_LABEL = 'Datum fehlt'
 
 const PRECISION_ORDER: Record<BestBeforePrecision, number> = { day: 0, month: 1, year: 2 }
 
@@ -24,26 +35,40 @@ export function formatBestBefore({ date, precision }: Omit<BestBefore, 'isEstima
 const groupKey = (entry: BestBefore) =>
   `${entry.date}|${entry.precision}|${String(entry.isEstimated)}`
 
-function compareGroups(a: BestBeforeGroup, b: BestBeforeGroup): number {
+function compareGroups(a: DatedGroup, b: DatedGroup): number {
   if (a.date !== b.date) return a.date < b.date ? -1 : 1
   if (a.precision !== b.precision)
     return PRECISION_ORDER[a.precision] - PRECISION_ORDER[b.precision]
   return Number(a.isEstimated) - Number(b.isEstimated)
 }
 
-/** Fasst gleiche Daten zusammen, nach Datum sortiert, z. B. 09/2027 (6×), 11/2027 (4×). */
-export function groupByBestBefore(entries: readonly BestBefore[]): BestBeforeGroup[] {
-  const groups = new Map<string, BestBeforeGroup>()
+/**
+ * Fasst gleiche Daten zusammen, nach Datum sortiert, z. B. 09/2027 (6×), 11/2027 (4×).
+ * Einheiten ohne Datum (null) stehen gesammelt zuletzt, wie beim Entnehmen (FIFO).
+ */
+export function groupByBestBefore(entries: readonly (BestBefore | null)[]): BestBeforeGroup[] {
+  const groups = new Map<string, DatedGroup>()
+  let withoutDate = 0
   for (const entry of entries) {
+    if (entry === null) {
+      withoutDate += 1
+      continue
+    }
     const existing = groups.get(groupKey(entry))
     if (existing) existing.count += 1
-    else groups.set(groupKey(entry), { ...entry, count: 1 })
+    else groups.set(groupKey(entry), { kind: 'dated', ...entry, count: 1 })
   }
-  return [...groups.values()].sort(compareGroups)
+  const dated: BestBeforeGroup[] = [...groups.values()].sort(compareGroups)
+  return withoutDate > 0 ? [...dated, { kind: 'no-date', count: withoutDate }] : dated
 }
 
-/** „09/2027 (6×)“, ein geschätztes Datum mit Vermerk: „09/2027 (2×, geschätzt)“. */
+/**
+ * „09/2027 (6×)“, ein geschätztes Datum mit Vermerk: „09/2027 (2×, geschätzt)“, ohne Datum
+ * „Datum fehlt (2×)“.
+ */
 export function formatBestBeforeGroup(group: BestBeforeGroup): string {
+  const count = `${String(group.count)}×`
+  if (group.kind === 'no-date') return `${NO_DATE_LABEL} (${count})`
   const estimated = group.isEstimated ? ', geschätzt' : ''
-  return `${formatBestBefore(group)} (${String(group.count)}×${estimated})`
+  return `${formatBestBefore(group)} (${count}${estimated})`
 }
