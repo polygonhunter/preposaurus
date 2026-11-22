@@ -1,7 +1,9 @@
 // Lebensmittelart: feste Ebene unter der Kategorie (Maintainer-Entscheidung zu M1).
 // Baum: Warengruppe → Kategorie → Lebensmittelart → Produkt → Einheit.
 // System-Arten kommen als Seed ohne Haushalt, eigene Arten gehören einem Haushalt (wie kategorie).
-// kcal_100 und uebliche_haltbarkeit_monate sind reine Anzeige-Richtwerte und werden nie als MHD verwendet.
+// Richtwerte je 100 g bzw. ml (kcal und Makros, E-8/E-9) rechnen mit „ca.“, wenn am Produkt keine
+// Nährwerte stehen. Sie werden live gelesen, nicht ins Produkt kopiert (E-5).
+// uebliche_haltbarkeit_monate wird nie automatisch als MHD verwendet.
 import { sql } from 'drizzle-orm'
 import {
   boolean,
@@ -38,6 +40,9 @@ export const foodTypes = pgTable(
     isHidden: boolean('ausgeblendet').notNull().default(false),
     sortOrder: integer('sortierung').notNull().default(0),
     kcalPer100: numeric('kcal_100', { precision: 6, scale: 1 }),
+    proteinPer100: numeric('eiweiss_100', { precision: 6, scale: 1 }),
+    carbsPer100: numeric('kh_100', { precision: 6, scale: 1 }),
+    fatPer100: numeric('fett_100', { precision: 6, scale: 1 }),
     typicalShelfLifeMonths: integer('uebliche_haltbarkeit_monate'),
     ...timestamps(),
   },
@@ -61,6 +66,10 @@ export const foodTypes = pgTable(
     ),
     check('lebensmittelart_schluessel_check', sql`${table.key} ~ '^[a-z0-9_]{2,60}$'`),
     check('lebensmittelart_kcal_check', sql`${table.kcalPer100} >= 0`),
+    check(
+      'lebensmittelart_makros_check',
+      sql`${table.proteinPer100} >= 0 and ${table.carbsPer100} >= 0 and ${table.fatPer100} >= 0`,
+    ),
     check('lebensmittelart_haltbarkeit_check', sql`${table.typicalShelfLifeMonths} > 0`),
   ],
 )

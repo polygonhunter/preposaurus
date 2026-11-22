@@ -44,7 +44,17 @@ describe('Schema Haushalt', () => {
       weeklySummaryTime: '10:00:00',
       urgentEnabled: true,
       setupCompletedAt: null,
+      setupStep: null,
     })
+  })
+
+  it('lehnt einen negativen Einrichtungsschritt ab', async () => {
+    const otherId = await insertHousehold('Einrichtungs-Haushalt')
+
+    await expectConstraintViolation(
+      testDb.db.insert(householdSettings).values({ householdId: otherId, setupStep: -1 }),
+      'haushalt_einstellung_einrichtung_schritt_check',
+    )
   })
 
   it('lehnt einen Wochentag außerhalb von 1 bis 7 ab', async () => {

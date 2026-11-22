@@ -1,2 +1,0 @@
-ALTER TABLE "einheit" ALTER COLUMN "mhd" DROP NOT NULL;--> statement-breakpoint
-ALTER TABLE "einheit" ADD CONSTRAINT "einheit_mhd_geschaetzt_check" CHECK (not "einheit"."mhd_geschaetzt" or "einheit"."mhd" is not null);

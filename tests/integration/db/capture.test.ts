@@ -1,6 +1,8 @@
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { captureDrafts, photos } from '../../../src/server/db/schema/capture'
+import { buildUser } from '../../../db/seeds/factories'
+import { users } from '../../../src/server/db/schema/account'
+import { aiCalls, captureDrafts, photos } from '../../../src/server/db/schema/capture'
 import { notificationSettings } from '../../../src/server/db/schema/reminders'
 import { restockItems } from '../../../src/server/db/schema/restock'
 import { expectConstraintViolation } from '../../helpers/db-errors'
@@ -26,9 +28,14 @@ describe('Schema Erfassung, Nachkaufen, Erinnerungen', () => {
     householdId,
     role: 'verpackung' as const,
     path,
-    hash: 'sha256-test',
-    sizeBytes: 1024,
     mimeType: 'image/jpeg',
+  })
+
+  const aiCall = () => ({
+    householdId,
+    role: 'mhd' as const,
+    model: 'claude-haiku-5-5',
+    isSuccess: true,
   })
 
   it('lässt beim Löschen eines Entwurfs ein festes Foto stehen und entfernt nur den Verweis', async () => {
@@ -59,6 +66,38 @@ describe('Schema Erfassung, Nachkaufen, Erinnerungen', () => {
       // @ts-expect-error -- absichtlich ungültige Rolle, die nur die DB abfangen soll
       testDb.db.insert(photos).values({ ...photo('fotos/rolle.jpg'), role: 'kassenbon' }),
       'foto_rolle_check',
+    )
+  })
+
+  it('merkt sich, wer ein Foto hochgeladen hat, und leert den Verweis ohne den Nutzer', async () => {
+    const uploader = buildUser({ householdId, username: 'foto.nutzer' })
+    await testDb.db.insert(users).values(uploader)
+    await testDb.db.insert(photos).values({ ...photo('fotos/von.jpg'), userId: uploader.id })
+
+    await testDb.db.delete(users).where(eq(users.id, uploader.id))
+
+    const [kept] = await testDb.db.select().from(photos).where(eq(photos.path, 'fotos/von.jpg'))
+    expect(kept?.userId).toBeNull()
+  })
+
+  it('protokolliert einen KI-Aufruf als ersten Versuch ohne Sicherheit', async () => {
+    const [call] = await testDb.db.insert(aiCalls).values(aiCall()).returning()
+
+    expect(call).toMatchObject({ attempt: 1, confidence: null })
+  })
+
+  it('lehnt einen dritten Versuch ab', async () => {
+    await expectConstraintViolation(
+      testDb.db.insert(aiCalls).values({ ...aiCall(), attempt: 3 }),
+      'ki_aufruf_versuch_check',
+    )
+  })
+
+  it('lehnt eine unbekannte Sicherheit ab', async () => {
+    await expectConstraintViolation(
+      // @ts-expect-error -- absichtlich ungültige Sicherheit, die nur die DB abfangen soll
+      testDb.db.insert(aiCalls).values({ ...aiCall(), confidence: 'sehr_hoch' }),
+      'ki_aufruf_sicherheit_check',
     )
   })
 

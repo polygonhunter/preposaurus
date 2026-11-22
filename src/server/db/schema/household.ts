@@ -30,17 +30,20 @@ import {
   SEXES,
 } from '../../../shared/config/constants'
 import { id, isOneOf, timestamps, timestampTz } from './columns'
-import { sources } from './recommendation'
+import { sourceVersions } from './recommendation'
 
 export const households = pgTable(
   'haushalt',
   {
     id: id(),
     name: text('name').notNull(),
-    // Rückverweis auf recommendation.ts: Der Typ steht fest, sonst wäre die Typableitung zirkulär.
-    activeSourceId: uuid('aktive_quelle_id').references((): AnyPgColumn => sources.id, {
-      onDelete: 'set null',
-    }),
+    // Genutzte Fassung der Empfehlung, damit „So wird gerechnet“ Stand und Link nennen kann.
+    // Leer bis zur Einrichtung. Rückverweis auf recommendation.ts: Der Typ steht fest, sonst wäre
+    // die Typableitung zirkulär.
+    activeSourceVersionId: uuid('aktive_quelle_version_id').references(
+      (): AnyPgColumn => sourceVersions.id,
+      { onDelete: 'set null' },
+    ),
     calculationMode: text('rechenmodus', { enum: CALCULATION_MODES })
       .notNull()
       .default('offiziell'),
@@ -76,6 +79,9 @@ export const householdSettings = pgTable(
       .default(DEFAULT_WEEKLY_SUMMARY_TIME),
     urgentEnabled: boolean('dringend_aktiv').notNull().default(true),
     setupCompletedAt: timestampTz('einrichtung_abgeschlossen_am'),
+    // Zuletzt erledigter Schritt der Ersteinrichtung, damit sie nach einem Abbruch dort weitergeht
+    // (ONBOARDING §2.3). Bewusst ohne Obergrenze, damit ein weiterer Schritt keine Migration braucht.
+    setupStep: smallint('einrichtung_schritt'),
     ...timestamps(),
   },
   (table) => [
@@ -88,6 +94,7 @@ export const householdSettings = pgTable(
       'haushalt_einstellung_wochentag_check',
       sql`${table.weeklySummaryWeekday} between 1 and 7`,
     ),
+    check('haushalt_einstellung_einrichtung_schritt_check', sql`${table.setupStep} >= 0`),
   ],
 )
 
@@ -99,7 +106,6 @@ export const members = pgTable(
       .notNull()
       .references(() => households.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
-    pictogram: text('piktogramm'),
     type: text('typ', { enum: MEMBER_TYPES }).notNull(),
     birthDate: date('geburtsdatum'),
     sex: text('geschlecht', { enum: SEXES }),

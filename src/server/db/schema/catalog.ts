@@ -1,18 +1,8 @@
 // Ordnung des Vorrats: Kategorie, Behälter, Lagerort (UMSETZUNG M1-05, 01 „Ordnungssystem“).
 // System-Kategorien und Behälter kommen als Seed ohne Haushalt (db/seeds). Eigene Kategorien
-// gehören einem Haushalt. tag und produkt_tag kommen später (Grundentscheidung 7).
+// gehören einem Haushalt. Richtwerte (kcal, Haltbarkeit) stehen an der Lebensmittelart, nicht hier. tag und produkt_tag kommen später (Grundentscheidung 7).
 import { sql } from 'drizzle-orm'
-import {
-  boolean,
-  check,
-  index,
-  integer,
-  numeric,
-  pgTable,
-  text,
-  unique,
-  uuid,
-} from 'drizzle-orm/pg-core'
+import { boolean, check, index, integer, pgTable, text, unique, uuid } from 'drizzle-orm/pg-core'
 import { id, timestamps } from './columns'
 import { households } from './household'
 import { productGroups } from './recommendation'
@@ -34,9 +24,6 @@ export const categories = pgTable(
       .references(() => productGroups.id, { onDelete: 'restrict' }),
     isHidden: boolean('ausgeblendet').notNull().default(false),
     sortOrder: integer('sortierung').notNull().default(0),
-    // Ersatzwerte für fehlende Angaben, als „geschätzt“ markiert. Werte kommen mit M1-08.
-    averageKcalPer100: numeric('kcal_durchschnitt_100', { precision: 6, scale: 1 }),
-    typicalShelfLifeMonths: integer('uebliche_haltbarkeit_monate'),
     ...timestamps(),
   },
   (table) => [
@@ -47,8 +34,6 @@ export const categories = pgTable(
       'kategorie_herkunft_check',
       sql`${table.isSystem} = (${table.householdId} is null) and ${table.isSystem} = (${table.key} is not null)`,
     ),
-    check('kategorie_kcal_check', sql`${table.averageKcalPer100} >= 0`),
-    check('kategorie_haltbarkeit_check', sql`${table.typicalShelfLifeMonths} > 0`),
   ],
 )
 
@@ -68,6 +53,8 @@ export const storageLocations = pgTable(
       .notNull()
       .references(() => households.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
+    // Ausgeblendet wird statt gelöscht, damit kein Produkt ins Leere zeigt (EIN-04).
+    isHidden: boolean('ausgeblendet').notNull().default(false),
     sortOrder: integer('sortierung').notNull().default(0),
     ...timestamps(),
   },

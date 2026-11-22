@@ -14,7 +14,7 @@ import {
   unique,
   uuid,
 } from 'drizzle-orm/pg-core'
-import { DIETS, QUANTITY_UNITS } from '../../../shared/config/constants'
+import { DIETS, MEMBER_TYPES, QUANTITY_UNITS } from '../../../shared/config/constants'
 import { id, isOneOf, timestamps } from './columns'
 import { households } from './household'
 
@@ -47,7 +47,8 @@ export const sourceVersions = pgTable(
   ],
 )
 
-// Bedarf je Personengruppe für den Modus „offiziell“ (z. B. erwachsen, kind).
+// Bedarf je Personentyp für den Modus „offiziell“: eine Zeile je Typ aus MEMBER_TYPES, damit jedes
+// Mitglied über mitglied.typ genau einen Bedarf findet. Wasser in ml wie überall in der Fachlogik.
 export const sourceNeeds = pgTable(
   'quelle_bedarf',
   {
@@ -55,16 +56,17 @@ export const sourceNeeds = pgTable(
     sourceVersionId: uuid('quelle_version_id')
       .notNull()
       .references(() => sourceVersions.id, { onDelete: 'cascade' }),
-    personGroup: text('personengruppe').notNull(),
+    personGroup: text('personengruppe', { enum: MEMBER_TYPES }).notNull(),
     kcalPerDay: numeric('kcal_tag', { precision: 7, scale: 1 }).notNull(),
-    waterLitersPerDay: numeric('wasser_l_tag', { precision: 4, scale: 2 }).notNull(),
+    waterMlPerDay: integer('wasser_ml_tag').notNull(),
     ...timestamps(),
   },
   (table) => [
     unique('quelle_bedarf_eindeutig').on(table.sourceVersionId, table.personGroup),
+    check('quelle_bedarf_personengruppe_check', isOneOf(table.personGroup, MEMBER_TYPES)),
     check(
       'quelle_bedarf_werte_check',
-      sql`${table.kcalPerDay} >= 0 and ${table.waterLitersPerDay} >= 0`,
+      sql`${table.kcalPerDay} >= 0 and ${table.waterMlPerDay} >= 0`,
     ),
   ],
 )

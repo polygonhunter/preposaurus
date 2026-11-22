@@ -48,13 +48,20 @@ describe('Schema Konto', () => {
     )
   })
 
-  it.each(['ab', 'mit leerzeichen', 'gross_A', 'a'.repeat(31)])(
+  it.each(['ab', 'mit leerzeichen', 'gross_A', 'a'.repeat(31), '...', '._.', '_alex', 'alex-m'])(
     'lehnt den Benutzernamen „%s“ ab',
     async (username) => {
       await expectConstraintViolation(
         testDb.db.insert(users).values(buildUser({ username })),
         'nutzer_benutzername_check',
       )
+    },
+  )
+
+  it.each(['alex.m', 'a.b', 'sam_1', '1kim'])(
+    'nimmt den Benutzernamen „%s“ an',
+    async (username) => {
+      await expect(testDb.db.insert(users).values(buildUser({ username }))).resolves.toBeDefined()
     },
   )
 

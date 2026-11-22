@@ -29,7 +29,8 @@ export const users = pgTable(
     id: id(),
     // Anzeigename
     name: text('name').notNull(),
-    // Klein gespeichert (das Plugin normalisiert), 3–30 Zeichen: a–z, 0–9, Punkt, Unterstrich.
+    // Klein gespeichert (das Plugin normalisiert), 3–30 Zeichen: a–z, 0–9, Punkt, Unterstrich,
+    // vorne ein Buchstabe oder eine Ziffer (nicht nur Satzzeichen wie „...“).
     username: text('benutzername').notNull(),
     email: text('email').notNull().unique(),
     emailVerified: boolean('email_verified').notNull().default(false),
@@ -55,7 +56,7 @@ export const users = pgTable(
   },
   (table) => [
     check('nutzer_rolle_check', isOneOf(table.role, USER_ROLES)),
-    check('nutzer_benutzername_check', sql`${table.username} ~ '^[a-z0-9._]{3,30}$'`),
+    check('nutzer_benutzername_check', sql`${table.username} ~ '^[a-z0-9][a-z0-9._]{2,29}$'`),
     // Eindeutig ohne Rücksicht auf Groß- und Kleinschreibung, auch wenn ein Weg am Plugin vorbei schreibt.
     uniqueIndex('nutzer_benutzername_eindeutig').on(sql`lower(${table.username})`),
   ],

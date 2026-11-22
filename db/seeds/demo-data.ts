@@ -11,14 +11,15 @@ export type DemoProduct = Readonly<{
   location: 'Keller' | 'Küche'
   contentAmount: string
   contentUnit: 'g' | 'ml'
-  kcalPer100: string
+  // Leer wie bei einer Packung ohne Nährwerttabelle: Dann rechnet der Richtwert der Art (live).
+  kcalPer100?: string
   units: readonly DemoUnitStage[]
 }>
 
 export const DEMO_MEMBERS = [
-  { name: 'Alex', type: 'erwachsen', pictogram: '🧑', birthDate: '1984-01-01' },
-  { name: 'Sam', type: 'erwachsen', pictogram: '👩', birthDate: '1987-01-01' },
-  { name: 'Kim', type: 'kind', pictogram: '👦', birthDate: '2016-01-01', diet: 'vegetarisch' },
+  { name: 'Alex', type: 'erwachsen', birthDate: '1984-01-01' },
+  { name: 'Sam', type: 'erwachsen', birthDate: '1987-01-01' },
+  { name: 'Kim', type: 'kind', birthDate: '2016-01-01', diet: 'vegetarisch' },
 ] as const
 
 // Alex ist Admin, Sam Mitglied, Kim hat keinen Login (wie im Prototyp).
@@ -63,7 +64,6 @@ export const DEMO_PRODUCTS: readonly DemoProduct[] = [
     container: 'beutel',
     location: 'Küche',
     contentAmount: '200',
-    kcalPer100: '654',
     units: ['rot'],
   }),
   product('H-Milch', {

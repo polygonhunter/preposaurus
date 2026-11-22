@@ -29,6 +29,7 @@ import {
   UNIT_STATUSES,
 } from '../../../shared/config/constants'
 import { users } from './account'
+import { captures } from './confirmed-captures'
 import { categories, containers, storageLocations } from './catalog'
 import { id, isOneOf, timestamps, timestampTz } from './columns'
 import { foodTypes } from './food-types'
@@ -59,12 +60,10 @@ export const products = pgTable(
     proteinPer100: per100('eiweiss_100'),
     carbsPer100: per100('kh_100'),
     fatPer100: per100('fett_100'),
-    // Leer, solange es keine Nährwerte gibt. Geschätzte Werte (ki_schaetzung, richtwert) zeigt die
-    // App als „ca.“, bis jemand sie bestätigt hat.
+    // Leer genau dann, wenn alle vier Nährwerte leer sind. Geschätzte Werte (ki_schaetzung,
+    // richtwert) zeigt die App als „ca.“, bis jemand sie bestätigt hat.
     nutritionSource: text('naehrwerte_quelle', { enum: NUTRITION_SOURCES }),
     nutritionConfirmedAt: timestampTz('naehrwerte_bestaetigt_am'),
-    // Idempotenz-Schlüssel der Erfassung: Ein doppelt gesendetes Bestätigen legt nichts doppelt an.
-    captureId: uuid('erfassung_id').unique(),
     ...timestamps(),
   },
   (table) => [
@@ -88,6 +87,12 @@ export const products = pgTable(
       'produkt_naehrwerte_bestaetigt_check',
       sql`${table.nutritionConfirmedAt} is null or ${table.nutritionSource} is not null`,
     ),
+    check(
+      'produkt_naehrwerte_vollstaendig_check',
+      sql`(${table.nutritionSource} is null) = (${table.kcalPer100} is null
+        and ${table.proteinPer100} is null and ${table.carbsPer100} is null
+        and ${table.fatPer100} is null)`,
+    ),
   ],
 )
 
@@ -101,18 +106,24 @@ export const units = pgTable(
     // Leer heißt „Datum fehlt“ und lässt sich später von Hand nachtragen. Die App erfindet nie ein
     // Datum: Eine KI-Schätzung gibt es nur auf ausdrückliche Wahl, dann mit mhd_geschaetzt markiert.
     bestBefore: date('mhd'),
-    bestBeforePrecision: text('mhd_genauigkeit', { enum: BEST_BEFORE_PRECISIONS })
-      .notNull()
-      .default('tag'),
+    // Leer genau dann, wenn das Datum fehlt.
+    bestBeforePrecision: text('mhd_genauigkeit', { enum: BEST_BEFORE_PRECISIONS }),
     bestBeforeKind: text('mhd_art', { enum: BEST_BEFORE_KINDS }).notNull().default('mhd'),
     isBestBeforeEstimated: boolean('mhd_geschaetzt').notNull().default(false),
     status: text('status', { enum: UNIT_STATUSES }).notNull().default('vorrat'),
     takenAt: timestampTz('entnommen_am'),
     takenBy: uuid('entnommen_von').references(() => users.id, { onDelete: 'set null' }),
     checkedAt: date('geprueft_am'),
+    // Erfassung, mit der die Packung dazukam (Idempotenz auch beim Nachschub, Verlauf „hinzugefügt“).
+    // CASCADE statt NO ACTION: Eine Erfassung verschwindet nur mit ihrem Haushalt. Dort prüfte NO
+    // ACTION, bevor die Einheiten über Haushalt → Produkt → Einheit (eine Ebene tiefer) weg sind.
+    captureId: uuid('erfassung_id')
+      .notNull()
+      .references(() => captures.id, { onDelete: 'cascade' }),
     ...timestamps(),
   },
   (table) => [
+    index('einheit_erfassung_id_idx').on(table.captureId),
     index('einheit_produkt_status_mhd_idx').on(table.productId, table.status, table.bestBefore),
     // „Bald fällig“ und „Abgelaufen“ über den ganzen Vorrat, ohne die Historie zu durchsuchen
     index('einheit_mhd_vorrat_idx')
@@ -122,6 +133,10 @@ export const units = pgTable(
     check(
       'einheit_mhd_genauigkeit_check',
       isOneOf(table.bestBeforePrecision, BEST_BEFORE_PRECISIONS),
+    ),
+    check(
+      'einheit_mhd_genauigkeit_leer_check',
+      sql`(${table.bestBefore} is null) = (${table.bestBeforePrecision} is null)`,
     ),
     check('einheit_mhd_art_check', isOneOf(table.bestBeforeKind, BEST_BEFORE_KINDS)),
     // Geschätzt kann nur ein Datum sein, das es gibt.

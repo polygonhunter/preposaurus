@@ -5,6 +5,7 @@
 import { randomUUID } from 'node:crypto'
 import type { users } from '../../src/server/db/schema/account'
 import type { storageLocations } from '../../src/server/db/schema/catalog'
+import type { captures } from '../../src/server/db/schema/confirmed-captures'
 import type { householdSettings, households, members } from '../../src/server/db/schema/household'
 import type { products, units } from '../../src/server/db/schema/inventory'
 import type { goals } from '../../src/server/db/schema/recommendation'
@@ -48,7 +49,6 @@ export function buildMember(
   return {
     name: 'Alex',
     type: 'erwachsen',
-    pictogram: '🧑',
     ...overrides,
     id: overrides.id ?? randomUUID(),
   }
@@ -95,10 +95,23 @@ export function buildProduct(
   }
 }
 
+export function buildCapture(
+  overrides: Partial<Insert<typeof captures>> & { householdId: string; userId: string },
+): WithId<Insert<typeof captures>> {
+  return { method: 'manuell', ...overrides, id: overrides.id ?? randomUUID() }
+}
+
+// Mit Datum standardmäßig taggenau, ohne Datum ohne Genauigkeit (CHECK einheit_mhd_genauigkeit_leer_check).
 export function buildUnit(
-  overrides: Partial<Insert<typeof units>> & { productId: string },
+  overrides: Partial<Insert<typeof units>> & { productId: string; captureId: string },
 ): WithId<Insert<typeof units>> {
-  return { status: 'vorrat', ...overrides, id: overrides.id ?? randomUUID() }
+  const hasDate = overrides.bestBefore !== undefined && overrides.bestBefore !== null
+  return {
+    status: 'vorrat',
+    bestBeforePrecision: hasDate ? 'tag' : null,
+    ...overrides,
+    id: overrides.id ?? randomUUID(),
+  }
 }
 
 export function buildRestockItem(
