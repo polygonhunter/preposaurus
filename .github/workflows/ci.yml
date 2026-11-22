@@ -56,8 +56,8 @@ jobs:
       - uses: ./.github/actions/setup
       - run: npm run test
 
-  # Platzhalter bis M1-01: Bis dahin gibt es keine DB-Tests, der Job prüft nur, dass Dienst und
-  # Suite gegen eine postgres://-URL laufen. Ab M1 laufen hier die Integrationstests gegen PostgreSQL 18.
+  # Dieselbe Suite gegen PostgreSQL 18: tests/helpers/test-db.ts legt je Testdatei eine eigene
+  # Datenbank auf diesem Dienst an, spielt alle Migrationen ein und löscht sie danach wieder.
   test-pg:
     runs-on: ubuntu-latest
     timeout-minutes: 10
