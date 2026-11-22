@@ -17,6 +17,6 @@
   {
     "package": "fast-sha256",
     "license": "Unlicense",
-    "reason": "Kommt über standardwebhooks, eine Abhängigkeit von @anthropic-ai/sdk (Anthropic-Adapter M6-05, #59). Die App nutzt die Webhook-Helfer des SDK nicht. Unlicense gibt den Code in die Gemeinfreiheit und ist laut FSF mit GPL und AGPL vereinbar. Freigabe durch den Maintainer offen."
+    "reason": "Kommt über standardwebhooks, eine Abhängigkeit von @anthropic-ai/sdk (Anthropic-Adapter M6-05, #59). Das SDK lädt standardwebhooks beim Import, deshalb landet fast-sha256 im Server-Bundle und ab M6-06 auch im Standalone-Image, auch wenn die App die Webhook-Helfer nicht aufruft. Unlicense gibt den Code in die Gemeinfreiheit und ist mit der AGPL vereinbar (laut FSF GPL-kompatibel). Freigabe durch den Maintainer offen."
   }
 ]
