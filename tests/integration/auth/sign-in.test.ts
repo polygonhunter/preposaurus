@@ -18,6 +18,7 @@ describe('Anmelden mit Bremse', () => {
   let householdId: string
   let userId: string
   const warnings: string[] = []
+  const loggedNames: unknown[] = []
 
   const deps = (clientIp: string | null = '100.64.0.7'): SignInDeps => ({
     auth,
@@ -25,7 +26,10 @@ describe('Anmelden mit Bremse', () => {
     headers: new Headers(),
     clientIp,
     now: () => now,
-    logWarning: (message) => warnings.push(message),
+    logWarning: (message, context) => {
+      warnings.push(message)
+      loggedNames.push(context['username'])
+    },
   })
 
   const attempt = (password: string, username = 'alex', clientIp?: string | null) =>
@@ -43,6 +47,7 @@ describe('Anmelden mit Bremse', () => {
     await testDb.db.delete(sessions)
     await testDb.db.update(users).set({ isActive: true }).where(eq(users.id, userId))
     warnings.length = 0
+    loggedNames.length = 0
   })
 
   afterAll(async () => {
@@ -79,6 +84,13 @@ describe('Anmelden mit Bremse', () => {
       ['name:alex', 1],
     ])
     expect(warnings).toEqual(['Anmeldung fehlgeschlagen'])
+  })
+
+  it('schreibt einen Namen außerhalb des Musters nicht ins Log', async () => {
+    await attempt('falsch-falsch', 'mein geheimes passwort')
+    await attempt('falsch-falsch', 'alex')
+
+    expect(loggedNames).toEqual(['<ungültig>', 'alex'])
   })
 
   it('zählt auch unbekannte Namen und antwortet gleich', async () => {
