@@ -40,7 +40,7 @@ describe('Bald fällig und „Noch gut“ gegen die Datenbank', () => {
     return overview.groups.find((group) => group.key === 'fleisch_fisch_eier')?.totals
   }
 
-  it('ordnet die Demo-Packungen den Zeitgruppen zu, „Datum fehlt“ als eigene Gruppe', async () => {
+  it('ordnet die Demo-Packungen den Zeitgruppen zu, „Datum fehlt“ in keine', async () => {
     const due = await getDueUnits(reader, { householdId, today, sort: 'date' })
 
     expect(due.counts).toEqual({
@@ -48,9 +48,10 @@ describe('Bald fällig und „Noch gut“ gegen die Datenbank', () => {
       'this-week': 0,
       'this-month': 2,
       'next-three-months': 3,
-      'no-date': 1,
     })
-    expect(await namesIn('no-date')).toEqual([['Haferflocken', 1]])
+    expect(
+      due.groups.flatMap((group) => group.entries).every((entry) => entry.bestBefore !== null),
+    ).toBe(true)
     expect(await namesIn('this-month')).toEqual([
       ['H-Milch', 1],
       ['Haferflocken', 1],
@@ -59,7 +60,6 @@ describe('Bald fällig und „Noch gut“ gegen die Datenbank', () => {
 
   it('liefert einem fremden Haushalt nur seine eigenen fälligen Packungen', async () => {
     expect(await namesIn('this-week', foreignId)).toEqual([['Spaghetti', 1]])
-    expect(await namesIn('no-date', foreignId)).toEqual([['Spaghetti', 1]])
     expect(await namesIn('expired', foreignId)).toEqual([])
   })
 

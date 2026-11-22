@@ -174,13 +174,7 @@ export const foodTypeDetailSchema = z.object({
 
 // ---------- 4 · Bald fällig ----------
 
-const dueGroupSchema = z.enum([
-  'expired',
-  'this-week',
-  'this-month',
-  'next-three-months',
-  'no-date',
-])
+const dueGroupSchema = z.enum(['expired', 'this-week', 'this-month', 'next-three-months'])
 
 const dueEntrySchema = z.object({
   target: stockTargetSchema,

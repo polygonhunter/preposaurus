@@ -2,7 +2,7 @@
 // auch wenn die Produkt-IDs schon aus dem eigenen Haushalt stammen. Die Abfrage nutzt
 // einheit_produkt_status_mhd_idx bzw. für Bald fällig den Teilindex einheit_mhd_vorrat_idx.
 import 'server-only'
-import { and, asc, count, eq, inArray, isNull, lte, or, type SQL } from 'drizzle-orm'
+import { and, asc, count, eq, inArray, lte, type SQL } from 'drizzle-orm'
 import type { StockProductUnit, UnitQuery } from '@/features/inventory/domain/stock-entry'
 import type { UnitStatus } from '@/features/inventory/domain/unit'
 import type { Database } from '@/server/db/connection'
@@ -26,7 +26,8 @@ function productCondition(productIds: readonly string[] | undefined): SQL | unde
 
 function dueCondition(query: UnitQuery): SQL | undefined {
   if (query.dueUntil === undefined) return undefined
-  return or(lte(units.bestBefore, query.dueUntil), isNull(units.bestBefore))
+  // Ohne Datum fällt eine Packung heraus: lte ist für null nie wahr
+  return lte(units.bestBefore, query.dueUntil)
 }
 
 /** Nach MHD sortiert (frühestes zuerst, ohne Datum zuletzt), damit FIFO und Gruppen stabil sind. */

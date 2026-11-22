@@ -63,7 +63,7 @@ export interface UnitQuery {
   /** Nur Einheiten dieser Produkte. Fehlt die Liste, gilt der ganze Haushalt */
   productIds?: readonly string[] | undefined
   statuses: readonly UnitStatus[]
-  /** Nur Einheiten mit MHD bis zu diesem Tag oder ohne Datum (Seite Bald fällig) */
+  /** Nur Einheiten mit MHD bis zu diesem Tag, ohne Datum nie (Seite Bald fällig) */
   dueUntil?: CalendarDay | undefined
 }
 
