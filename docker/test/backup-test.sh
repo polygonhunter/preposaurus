@@ -122,6 +122,16 @@ backup backup wiederherstellen vor-wiederherstellung/2026-01-01_000000 --ja ||
 [ "$(backup backup liste | grep -c '^vor-wiederherstellung/')" = "5" ] ||
   fail "Nach dem Zurückspielen sollen fünf Stände vor-wiederherstellung bleiben"
 
+# Scheitert der Foto-Abgleich am Ende (hier: der Stand hat keinen Ordner fotos), nennt die Meldung
+# den Stand von vor dem Zurückspielen.
+mkdir -p backups/manuell/2026-01-02_000000
+cp "backups/$stand/datenbank.dump" backups/manuell/2026-01-02_000000/
+backup backup wiederherstellen manuell/2026-01-02_000000 --ja > photos.log 2>&1 &&
+  fail "Ohne Ordner fotos darf das Zurückspielen nicht als gelungen gelten"
+cat photos.log
+grep -q "Fotos sind nur zum Teil zurückgespielt" photos.log || fail "Kein Hinweis zu den halben Fotos"
+grep -q "$(newest vor-wiederherstellung)" photos.log || fail "Der Hinweis nennt die Sicherung davor nicht"
+
 docker compose up -d
 wait_for_health
 echo "Zeilenzahlen gleich: $after"
