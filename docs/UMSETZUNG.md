@@ -198,11 +198,11 @@ Alle Pakete: nur `domain/` oder `shared/lib`, keine Abhängigkeit zu React, Next
 - **M3-03 · Ersteinrichtung: erster Admin und Haushalt** (M) — IDs: ERS-01 · Quelle: F ERS-01, T#sicherheit · Ordner: `auth/application/setup-first-admin.ts`, `src/app/(auth)/einrichten`
   - Fertig, wenn: Existiert kein Nutzer, zeigt die App die Einrichtung statt der Anmeldung. Nutzer, Haushalt und Einstellungen entstehen in einer Transaktion. Danach ist die Seite nicht mehr erreichbar, auch nicht bei zwei gleichzeitigen Aufrufen.
   - Tests: Integration: zweiter Aufruf scheitert. E2E: Einrichtung bis zur Übersicht · Braucht: M3-01, M3-04
-- **M3-04 · Design-Tokens und Grundbausteine** (M) — Quelle: PLAN §2, D „Bildsprache“, `Proto/app/d6/theme.css`, `Proto/components/d6/ui` · Ordner: `src/app/globals.css`, `src/shared/ui`
-  - Fertig, wenn: Tokens aus PLAN §2 als CSS-Variablen (hell, dunkel vorbereitet, aber nicht umschaltbar). Tailwind-Varianten für die Stufen mittel (≥ 640 px und ≥ 700 px hoch), breit (≥ 900), weit (≥ 1280). Bausteine: Glaskachel, Knopf, Chip, Ampel-Punkt mit Wort, Feld mit Label und Fehler, Blatt von unten. Touch-Ziele ≥ 44 px. Glasfläche bleibt ohne `backdrop-filter` lesbar.
+- **M3-04 · Design-Tokens und Grundbausteine** (M) — Quelle: `docs/konzept/DESIGN_SYSTEM.md` §2–5 (ersetzt d6/Glas) · Ordner: `src/app/globals.css`, `src/shared/ui`
+  - Fertig, wenn: Tokens aus DESIGN_SYSTEM §2–4 als CSS-Variablen (hell und dunkel nach `prefers-color-scheme`, kein Schalter). Tailwind-Varianten für die Stufen mittel (≥ 640 px und ≥ 700 px hoch), breit (≥ 900), weit (≥ 1280). Bausteine aus DESIGN_SYSTEM §5, Piktogramme als Inline-SVG. Touch-Ziele ≥ 44 px.
   - Tests: E2E: Musterseite (nur im Dev-Modus) besteht axe in allen Viewports · Braucht: M0-06 · **[USER]** U11 (Schrift, Piktogramme)
-- **M3-05 · App-Rahmen kompakt** (M) — IDs: EIN-01, PWA-03 · Quelle: D „iPhone“ Variante A mit Kamera-Knopf aus B, `Proto/components/d6/CockpitApp.tsx` · Ordner: `src/app/(app)/layout.tsx`, `src/shared/ui`
-  - Fertig, wenn: Kopf mit Zahnrad, Dock mit den Tabs Übersicht · Vorrat · Neu · Statistik · Nachkaufen, betonter Kamera-Knopf in der Mitte. Leere Seiten je Tab. Tastatur und Fokus sichtbar. Safe-Area-Ränder.
+- **M3-05 · App-Rahmen kompakt** (M) — IDs: EIN-01, PWA-03 · Quelle: `docs/konzept/DESIGN_SYSTEM.md` §6, UX_KONZEPT §6 · Ordner: `src/app/(app)/layout.tsx`, `src/shared/ui`
+  - Fertig, wenn: Zahnrad oben rechts auf der Übersicht, Tab-Leiste Übersicht · Vorrat · Erfassen · Nachkaufen · Statistik mit rundem Akzent-Knopf „Erfassen“ in der Mitte, ab „breit“ Seitenleiste. Leere Seiten je Ziel. Tastatur und Fokus sichtbar. Safe-Area-Ränder.
   - Tests: E2E: Tabwechsel per Tippen und Tastatur · Braucht: M3-02
 - **M3-06 · Einstellungen-Rahmen mit Sichtbarkeit nach Rolle** (S) — IDs: EIN-01 · Quelle: F EIN-01, D „Einstellungen im Detail“, `Proto/components/d6/settings/routes.ts` · Ordner: `settings/ui`, `src/app/(app)/einstellungen`
   - Fertig, wenn: Vier Gruppen. Mitglied sieht „Haushalt“ nur lesend und „Nutzerverwaltung“ sowie „Daten & System“ gar nicht, auch nicht per Direktaufruf.
@@ -529,7 +529,7 @@ W1 Zugriff immer über Tailscale · W3 nur Anthropic, Adapter bleibt austauschba
 - **Ernährungsform in den Quellwerten:** Die Verteilung kommt als versionierte Seed-Daten, nicht als fester Code. Die genaue Tabellenform legt M1-04 nach dem Prüfblatt fest.
 - **„Dringend höchstens einmal am Tag“:** über einen pg-boss-Schlüssel je Nutzer und Tag, ohne zusätzliche Tabelle.
 - **Erster Admin (L2):** Die Einrichtung ist nur erreichbar, solange kein Nutzer existiert. Die App hängt nie am offenen Internet.
-- **Login, Einladung, Ersteinrichtung ohne Gestaltung (L3):** werden aus den d6-Bausteinen gebaut, schlicht und einspaltig.
+- **Login, Einladung, Ersteinrichtung ohne Gestaltung (L3):** werden aus den Bausteinen in `src/shared/ui` (DESIGN_SYSTEM.md) gebaut, schlicht und einspaltig.
 - **CP §5 nennt noch GSAP, CP §10 eine Compose-Test-DB:** überholt, M0-08 korrigiert beides.
 
 **Nicht freigegeben, [USER] U11.** Die vorläufige Annahme ist jeweils so gebaut, dass eine andere Antwort nur eine Stelle ändert:
@@ -544,7 +544,7 @@ W1 Zugriff immer über Tailscale · W3 nur Anthropic, Adapter bleibt austauschba
 | KI aus: Fotos trotzdem als Produktbild? (ERF-16) | M9-05 | nein, nur Formular |
 | Fotos im JSON-Export? (SYS-01) | M9-06 | nein |
 | Rundung der Kennzahlen | M2-07 | abrunden auf eine Nachkommastelle |
-| Schrift und Piktogramme (W18, L26) | M3-04 | Inter und Geist Mono, Emoji wie im Prototyp |
+| Schrift und Piktogramme (W18, L26) | M3-04 | entschieden: Systemschrift und eigene Linien-Piktogramme (DESIGN_SYSTEM.md §2, §5) |
 | Vorrat-Filter: drei Reihen (A) oder eine Reihe plus „Filter“ (B) | M4-02 | drei Reihen |
 | Eigene Ampelstufe für das Verbrauchsdatum | M2-04 | nein, nur die Regel aus ROT-06 |
 | Tailscale-Zugang für weitere Haushaltsmitglieder (L4) | M13-05 | Anleitung beschreibt beide Wege |
