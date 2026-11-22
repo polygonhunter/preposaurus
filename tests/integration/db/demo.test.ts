@@ -26,14 +26,14 @@ describe('Demo-Daten', () => {
 
   it('legt auf leerer DB einen Beispielhaushalt mit Admin und Mitglied an', async () => {
     const people = await testDb.db
-      .select({ email: users.email, role: users.role })
+      .select({ username: users.username, role: users.role })
       .from(users)
-      .orderBy(users.email)
+      .orderBy(users.username)
 
     expect(created).toBe(true)
     expect(people).toEqual([
-      { email: 'alex@example.org', role: 'admin' },
-      { email: 'sam@example.org', role: 'mitglied' },
+      { username: 'alex', role: 'admin' },
+      { username: 'sam', role: 'mitglied' },
     ])
   })
 

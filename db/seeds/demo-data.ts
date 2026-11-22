@@ -23,8 +23,8 @@ export const DEMO_MEMBERS = [
 
 // Alex ist Admin, Sam Mitglied, Kim hat keinen Login (wie im Prototyp).
 export const DEMO_USERS = [
-  { name: 'Alex', email: 'alex@example.org', role: 'admin', member: 'Alex' },
-  { name: 'Sam', email: 'sam@example.org', role: 'mitglied', member: 'Sam' },
+  { name: 'Alex', username: 'alex', role: 'admin', member: 'Alex' },
+  { name: 'Sam', username: 'sam', role: 'mitglied', member: 'Sam' },
 ] as const
 
 const product = (
