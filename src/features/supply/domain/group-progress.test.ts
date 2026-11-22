@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
-import { formatQuantity } from '@/shared/lib/quantities'
+import { describe, expect, expectTypeOf, it } from 'vitest'
+import { formatQuantity, type ContentQuantity } from '@/shared/lib/quantities'
 import { toCalendarDay } from '@/shared/lib/dates'
-import { calculateGoalGap } from './goal-gap'
+import { calculateGoalGap, type GoalGap } from './goal-gap'
 import { calculateGroupProgress, findTightestGroup, type GroupUnit } from './group-progress'
 import type { HouseholdGroupTarget } from './group-targets'
 
@@ -129,6 +129,10 @@ describe('findTightestGroup', () => {
 })
 
 describe('calculateGoalGap', () => {
+  it('nennt Lücken nur in g oder ml, nie in Stück', () => {
+    expectTypeOf<GoalGap['missing']>().toEqualTypeOf<ContentQuantity>()
+  })
+
   it('nennt die fehlende Menge je Warengruppe in kg oder l', () => {
     const gaps = calculateGoalGap(progressFor([unit('getreide', 3600), unit('wasser', 26000)]))
 

@@ -69,7 +69,10 @@ function toQuantity(value: number, unitText: string): Result<Quantity, QuantityP
   return ok({ value: roundNoise(value * unit.factor), unit: unit.unit })
 }
 
-/** Liest Mengen wie `500 g`, `1,5 l`, `1 kg` oder `6 Stück` und rechnet in g, ml oder Stück. */
+/**
+ * Liest Mengen wie `500 g`, `1,5 l`, `1 kg` oder `6 Stück` und rechnet in g, ml oder Stück.
+ * Für den Inhalt einer Packung gilt `parseContentQuantity`, Stück nur beim Nachkaufen.
+ */
 export function parseQuantity(text: string): Result<Quantity, QuantityParseError> {
   const cleaned = text.trim().toLowerCase()
   if (cleaned === '') return err({ kind: 'empty' })
@@ -78,6 +81,23 @@ export function parseQuantity(text: string): Result<Quantity, QuantityParseError
   const value = parseGermanNumber(match[1] ?? '')
   if (value === null) return err({ kind: 'invalid-number' })
   return toQuantity(value, match[2] ?? '')
+}
+
+/** Packungsinhalt bei der Erfassung: Stück ist kein Inhalt, sondern die Anzahl der Packungen. */
+export type ContentParseError = QuantityParseError | { kind: 'piece-not-content' }
+
+const isContentQuantity = (quantity: Quantity): quantity is ContentQuantity =>
+  quantity.unit !== 'piece'
+
+/**
+ * Liest den Inhalt einer Packung wie `parseQuantity`, lehnt Stück aber ab. Die DB kennt als Inhalt
+ * nur g und ml (`produkt_inhalt_einheit_check`). „6 Stück“ meint bei der Erfassung sechs Packungen,
+ * die UI leitet deshalb auf die Anzahl um. Stück bleibt dem Nachkaufen vorbehalten.
+ */
+export function parseContentQuantity(text: string): Result<ContentQuantity, ContentParseError> {
+  const parsed = parseQuantity(text)
+  if (!parsed.ok) return parsed
+  return isContentQuantity(parsed.value) ? ok(parsed.value) : err({ kind: 'piece-not-content' })
 }
 
 /** Zahl im deutschen Format, z. B. 17.950 oder 1,5. */
