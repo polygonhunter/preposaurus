@@ -4,7 +4,8 @@
 #   pruefen <stand>                     Probe in eine Wegwerf-Datenbank, der Betrieb läuft weiter
 # Sicherheitsnetz: Zuerst entsteht ein Stand vor-wiederherstellung/… des aktuellen Zustands. Der
 # Stand wird in eine neue Datenbank eingespielt, erst danach ersetzt sie die alte. Scheitert das
-# Einspielen, bleibt alles, wie es war.
+# Einspielen, bleibt alles, wie es war. Alte Stände rotieren erst ganz am Ende, damit das
+# Sicherheitsnetz nicht den gewählten Stand löscht (z. B. den ältesten unter vor-wiederherstellung).
 
 resolve_stand() {
   for candidate in "$BACKUP_DIR/$1" $(for kind in $STAND_KINDS; do echo "$BACKUP_DIR/$kind/$1"; done); do
@@ -49,7 +50,8 @@ run_restore() {
   confirm_restore "$1" "${2:-}"
   ensure_no_connections
   log "Sichere zuerst den jetzigen Zustand"
-  run_backup vor-wiederherstellung
+  create_stand vor-wiederherstellung
+  finish_backup
   safety_stand=$LAST_STAND
   log "Spiele $1 in eine neue Datenbank ein"
   restore_into "${PGDATABASE}_neu" "$stand_dir/$DUMP_FILE" ||
@@ -58,6 +60,7 @@ run_restore() {
   dropdb --maintenance-db=postgres "$PGDATABASE"
   psql --dbname=postgres -c "alter database \"${PGDATABASE}_neu\" rename to \"$PGDATABASE\"" > /dev/null
   rsync -a --delete "$stand_dir/fotos/" "$PHOTO_DIR/"
+  apply_retention
   log "Wiederhergestellt. Der Zustand davor liegt unter $safety_stand."
   log "Jetzt die App starten (spielt auch neuere Migrationen ein): docker compose up -d"
 }
