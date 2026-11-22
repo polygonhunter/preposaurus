@@ -99,14 +99,15 @@ function expandUnits(entries: readonly UnitEntry[]): Result<PlannedUnit[], Stock
   return ok(planned)
 }
 
-const hasAnyValue = ({ kcal, protein, carbs, fat }: NutritionValues) =>
+/** Mindestens ein Wert ist da. Ohne einen einzigen gilt der Richtwert (E-5). */
+export const hasAnyNutritionValue = ({ kcal, protein, carbs, fat }: NutritionValues) =>
   [kcal, protein, carbs, fat].some((value) => value !== null)
 
 /** Bestätigt wird nur eine KI-Schätzung. Tabelle und eigene Eingabe brauchen das nicht. */
 export function planNutrition(draft: NutritionDraft | null, now: Date): PlannedNutrition | null {
   if (draft === null) return null
   const { source, isConfirmed, ...values } = draft
-  if (!hasAnyValue(values)) return null
+  if (!hasAnyNutritionValue(values)) return null
   const confirmedAt = source === 'ai-estimate' && isConfirmed ? now : null
   return { values, source, confirmedAt }
 }

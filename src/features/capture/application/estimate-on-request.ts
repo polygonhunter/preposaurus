@@ -18,6 +18,7 @@ import { err, ok, type Result } from '@/shared/lib/result'
 import { mapBestBeforeEstimateAnswer } from '../domain/map-best-before-estimate'
 import { mapNutritionEstimateAnswer } from '../domain/map-recognition'
 import type { Confidence } from '../domain/plausibility'
+import { hasAnyNutritionValue } from '../domain/stock-draft'
 
 /** Die KI hat geantwortet, aber nichts sinnvoll geschätzt. Es bleibt leer bzw. beim Richtwert. */
 type EstimateError = AiFailure | { kind: 'no-estimate' }
@@ -55,9 +56,6 @@ export async function estimateBestBefore(
   return ok({ bestBefore: estimate.bestBefore, confidence: estimate.confidence })
 }
 
-const hasAnyValue = ({ kcal, protein, carbs, fat }: NutritionValues) =>
-  [kcal, protein, carbs, fat].some((value) => value !== null)
-
 export async function estimateNutrition(
   request: EstimateRequest,
 ): Promise<Result<EstimatedNutrition, EstimateError>> {
@@ -70,6 +68,6 @@ export async function estimateNutrition(
   })
   if (!outcome.answer.ok) return outcome.answer
   const { values, confidence } = mapNutritionEstimateAnswer(outcome.answer.value)
-  if (!hasAnyValue(values)) return err({ kind: 'no-estimate' })
+  if (!hasAnyNutritionValue(values)) return err({ kind: 'no-estimate' })
   return ok({ values, source: 'ai-estimate', isConfirmed: false, confidence })
 }
