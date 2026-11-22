@@ -36,15 +36,18 @@ describe('createNodemailerMailSender', () => {
     expect(mails).toEqual([{ from: config.from, to: 'anna@example.org', ...content }])
   })
 
-  it.each([['ohne-at'], ['1b2c@nutzer.invalid'], ['']])(
-    'überspringt die Adresse „%s“ ohne Versand',
-    async (to) => {
-      const { mails, transport } = recordingTransport()
-      const result = await createNodemailerMailSender(config, transport).send({ ...content, to })
-      expect(result).toEqual({ ok: false, error: { kind: 'no-recipient' } })
-      expect(mails).toHaveLength(0)
-    },
-  )
+  it.each([
+    ['ohne-at'],
+    ['1b2c@nutzer.invalid'],
+    [''],
+    ['anna@example.org,ben@example.org'],
+    ['Anna <anna@example.org>'],
+  ])('überspringt die Adresse „%s“ ohne Versand', async (to) => {
+    const { mails, transport } = recordingTransport()
+    const result = await createNodemailerMailSender(config, transport).send({ ...content, to })
+    expect(result).toEqual({ ok: false, error: { kind: 'no-recipient' } })
+    expect(mails).toHaveLength(0)
+  })
 
   it('meldet einen Fehler des Mailservers als Rückgabewert', async () => {
     const transport: MailTransport = {
@@ -55,6 +58,26 @@ describe('createNodemailerMailSender', () => {
       to: 'anna@example.org',
     })
     expect(result).toEqual({ ok: false, error: { kind: 'failed', reason: 'Verbindung abgelehnt' } })
+  })
+
+  it('nimmt Adressen aus der Antwort des Mailservers heraus', async () => {
+    const transport: MailTransport = {
+      sendMail: () =>
+        Promise.reject(
+          new Error("Can't send mail: 550 5.1.1 <anna@example.org>: Recipient address rejected"),
+        ),
+    }
+    const result = await createNodemailerMailSender(config, transport).send({
+      ...content,
+      to: 'anna@example.org',
+    })
+    expect(result).toEqual({
+      ok: false,
+      error: {
+        kind: 'failed',
+        reason: "Can't send mail: 550 5.1.1 <<Adresse>>: Recipient address rejected",
+      },
+    })
   })
 
   it('meldet auch einen Fehler ohne Error-Objekt', async () => {

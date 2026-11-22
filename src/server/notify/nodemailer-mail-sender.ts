@@ -39,13 +39,19 @@ function createSmtpTransport(config: SmtpConfig): MailTransport {
     connectionTimeout: SMTP_TIMEOUT_MS,
     greetingTimeout: SMTP_TIMEOUT_MS,
     socketTimeout: SMTP_TIMEOUT_MS,
+    dnsTimeout: SMTP_TIMEOUT_MS,
     ...(config.auth === null
       ? {}
       : { auth: { user: config.auth.user, pass: config.auth.password } }),
   })
 }
 
-const reasonOf = (error: unknown) => (error instanceof Error ? error.message : String(error))
+// Antworten des Mailservers nennen oft den Empfänger („550 <anna@example.org> unknown“). Der Grund
+// soll ins Log dürfen, deshalb fallen Adressen heraus.
+const ADDRESS_IN_TEXT = /[^\s<>()[\]"',;:]+@[^\s<>()[\]"',;:]+/g
+
+const reasonOf = (error: unknown) =>
+  (error instanceof Error ? error.message : String(error)).replace(ADDRESS_IN_TEXT, '<Adresse>')
 
 export function createNodemailerMailSender(
   config: SmtpConfig,
