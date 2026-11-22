@@ -78,3 +78,8 @@ export interface RecognitionOutcome<R extends AiRole> {
 export interface VisionRecognizer {
   recognize: <R extends AiRole>(request: RecognitionRequest<R>) => Promise<RecognitionOutcome<R>>
 }
+
+/** „Verbindung testen“ (#108): ein kleiner Aufruf ohne Foto, Ergebnis nur Erfolg oder Fehlerart. */
+export interface ConnectionTester {
+  testConnection: (model: string) => Promise<Result<null, AiFailure>>
+}
