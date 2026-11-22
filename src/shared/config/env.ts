@@ -38,6 +38,8 @@ const envSchema = z.object({
   // der Empfehlung in ai-roles.ts (Entscheidung #59).
   ANTHROPIC_API_KEY: optionalSecret,
   PHOTO_STORAGE_DIR: z.string().min(1).default('./.data/fotos'),
+  // Musterseite /muster auch im Produktionsbuild zeigen (nur für die E2E-Tests in der CI).
+  SHOW_PATTERN_PAGE: z.stringbool().default(false),
 })
 
 export type Env = z.infer<typeof envSchema>
@@ -48,6 +50,11 @@ function parseEnv(source: EnvSource): Result<Env, string> {
   const parsed = envSchema.safeParse(source)
   if (parsed.success) return ok(parsed.data)
   return err(`Ungültige Umgebungsvariablen:\n${z.prettifyError(parsed.error)}`)
+}
+
+// Im Dev-Modus immer, sonst nur mit SHOW_PATTERN_PAGE=true.
+export function isPatternPageEnabled(env: Pick<Env, 'NODE_ENV' | 'SHOW_PATTERN_PAGE'>): boolean {
+  return env.NODE_ENV !== 'production' || env.SHOW_PATTERN_PAGE
 }
 
 // Wirft bei ungültigen Werten: ohne gültige Umgebung soll der Server gar nicht erst starten.
