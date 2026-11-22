@@ -18,7 +18,7 @@ Diese Anleitung führt Schritt für Schritt durch die Einrichtung von Preposauru
 10. [Backups](#10-backups)
 11. [Wiederherstellen](#11-wiederherstellen)
 12. [Updates und der Weg zurück](#12-updates-und-der-weg-zurück)
-13. [Notfall: Admin-Passwort vergessen](#13-notfall-admin-passwort-vergessen)
+13. [Notfall-Befehle: Passwort vergessen, kein Admin, alle abmelden](#13-notfall-befehle-passwort-vergessen-kein-admin-alle-abmelden)
 14. [Fehlersuche](#14-fehlersuche)
 15. [Hinweise je NAS-Typ](#15-hinweise-je-nas-typ)
 16. [Tailscale als Paket auf dem NAS (zweiter Weg)](#16-tailscale-als-paket-auf-dem-nas-zweiter-weg)
@@ -362,7 +362,11 @@ Erwartet: `Wiederhergestellt. Der Zustand davor liegt unter vor-wiederherstellun
 2. Den gesicherten Ordner `backups` vom zweiten Ort zurück in den neuen Preposaurus-Ordner kopieren.
 3. Wie oben wiederherstellen.
 
-Wer ein **altes oder fremdes** Backup einspielt, holt damit auch alte Sitzungen zurück. Dann alle Geräte abmelden. *Der Befehl dafür (`alle-abmelden`) kommt mit einer späteren Version (#145).* Bis dahin hilft ein neues `APP_SECRET`, das alle abmeldet (ein in der App hinterlegter KI-Schlüssel muss danach neu eingetragen werden).
+Wer ein **altes oder fremdes** Backup einspielt, holt damit auch alte Sitzungen zurück. Dann nach dem Start alle Geräte abmelden (mehr dazu in Abschnitt 13):
+
+```bash
+docker compose exec web node scripts/admin.mjs alle-abmelden
+```
 
 ## 12. Updates und der Weg zurück
 
@@ -387,7 +391,31 @@ Neue Versionen stehen auf der [Release-Seite](https://github.com/polygonhunter/p
 
 Was zwischen Update und Rückweg erfasst wurde, ist danach weg (es steckt aber noch im Stand `vor-wiederherstellung/…`). Alte Stände unter `vor-update` löschst du selbst, wenn du sie nicht mehr brauchst: `rm -r backups/vor-update/<name>`.
 
-## 13. Notfall: Admin-Passwort vergessen
+## 13. Notfall-Befehle: Passwort vergessen, kein Admin, alle abmelden
+
+Für Notfälle gibt es vier Befehle, die du auf dem NAS im Preposaurus-Ordner ausführst, während die App läuft. Jeder hinterlässt eine Zeile im Log von `web` (`docker compose logs web`), nie mit Passwort.
+
+| Befehl | Wofür |
+|---|---|
+| `nutzer-auflisten` | zeigt Benutzername, Anzeigename, Rolle, ob aktiv und die letzte Anmeldung |
+| `passwort-zuruecksetzen <benutzername>` | neues vorläufiges Passwort, siehe unten |
+| `admin-machen <benutzername>` | macht den Nutzer wieder aktiv und zum Admin |
+| `alle-abmelden` | meldet alle Geräte aller Nutzer ab |
+
+### Den richtigen Benutzernamen finden
+
+```bash
+docker compose exec web node scripts/admin.mjs nutzer-auflisten
+```
+
+Erwartet, z. B.:
+```
+Benutzername  Anzeigename  Rolle     Aktiv  Letzte Anmeldung
+alex          Alex         admin     ja     20.11.2026, 09:30
+sam           Sam          mitglied  nein   noch nie
+```
+
+### Admin-Passwort vergessen
 
 1. **Gibt es einen zweiten Admin,** setzt er das Passwort in der App zurück (Einstellungen → Nutzer).
 2. **Sonst** auf dem NAS im Preposaurus-Ordner:
@@ -405,7 +433,27 @@ Der Befehl erzeugt das Passwort selbst und zeigt es nur einmal. Er beendet alle 
 
 Das Passwort steht danach im Terminal. Teilst du gerade deinen Bildschirm oder zeichnest ihn auf, vorher beenden, und das Terminal danach schließen bzw. leeren (`clear`).
 
-Den Befehl gibt es bewusst nur im Container, nicht als Formular oder Einstellung: Wer `docker compose exec` ausführen darf, hat ohnehin Zugriff auf alle Daten.
+### Es gibt keinen aktiven Admin mehr
+
+Wurde der einzige Admin deaktiviert oder herabgestuft, oder ist die Person nicht mehr da:
+
+```bash
+docker compose exec web node scripts/admin.mjs admin-machen <benutzername>
+```
+
+Erwartet: `„sam“ ist jetzt ein aktiver Admin.` Der Nutzer behält sein Passwort. Kennt er das Passwort nicht, danach `passwort-zuruecksetzen` für ihn ausführen.
+
+### Alle Geräte abmelden
+
+Nach dem Einspielen eines alten oder fremden Backups (Abschnitt 11) oder wenn ein Gerät verloren ging, auf dem jemand angemeldet war:
+
+```bash
+docker compose exec web node scripts/admin.mjs alle-abmelden
+```
+
+Erwartet: `Alle Geräte sind abgemeldet (3 Sitzungen beendet).` Jeder meldet sich danach mit seinem Passwort neu an. Anders als ein neues `APP_SECRET` bleibt dabei ein in der App hinterlegter KI-Schlüssel erhalten.
+
+Die Befehle gibt es bewusst nur im Container, nicht als Formular oder Einstellung: Wer `docker compose exec` ausführen darf, hat ohnehin Zugriff auf alle Daten.
 
 ## 14. Fehlersuche
 
