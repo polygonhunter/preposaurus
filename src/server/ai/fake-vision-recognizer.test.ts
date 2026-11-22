@@ -15,6 +15,7 @@ const CONTEXTS: RoleContexts = {
   naehrwerte_schaetzen: { foodType: { key: 'spaghetti', name: 'Spaghetti' }, productName: null },
   mhd: {},
   mhd_zweitversuch: {},
+  mhd_schaetzen: { foodType: { key: 'spaghetti', name: 'Spaghetti' }, productName: null },
 }
 
 const MHD_READ = {

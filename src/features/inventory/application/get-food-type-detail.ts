@@ -17,6 +17,7 @@ import {
 } from './read-context'
 import type { StockReader } from './stock-reader'
 import { joinUnits, rowKeyOf, rowNameOf, type JoinedUnit } from './stock-model'
+import { groupByKey } from './stock-rows'
 
 interface DetailInput {
   householdId: string
@@ -34,6 +35,7 @@ function productsOf(
 ): FoodTypeDetail['products'] {
   const nodes = products.map(({ id }) => ({ level: 'product' as const, key: id }))
   const totals = totalsByNode(context, units, nodes)
+  const unitsByProduct = groupByKey(units, (entry) => entry.product.id)
   return products.map((product) => ({
     id: product.id,
     name: product.name,
@@ -43,7 +45,7 @@ function productsOf(
     nutrition: nutritionOf(product),
     totals: totalsOf(totals, { level: 'product', key: product.id }),
     bestBeforeGroups: bestBeforeGroupsOf(
-      units.filter((entry) => entry.product.id === product.id).map(({ unit }) => unit),
+      (unitsByProduct.get(product.id) ?? []).map(({ unit }) => unit),
       context,
     ),
   }))

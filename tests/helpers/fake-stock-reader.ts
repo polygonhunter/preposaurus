@@ -60,14 +60,19 @@ function matchesProduct(product: StockProduct, filter: ProductFilter): boolean {
     [filter.storageLocationId, product.storageLocation?.id],
   ]
   const fits = checks.every(([wanted, actual]) => wanted === undefined || wanted === actual)
-  return fits && matchesSearch(product, filter.search)
+  const isListed = filter.productIds?.includes(product.id) ?? true
+  return fits && isListed && matchesSearch(product, filter.search)
 }
 
-function matchesUnit(unit: StockProductUnit, query: UnitQuery): boolean {
-  if (query.productIds !== undefined && !query.productIds.includes(unit.productId)) return false
-  if (!query.statuses.includes(unit.status)) return false
-  if (query.dueUntil === undefined) return true
-  return unit.bestBefore !== null && unit.bestBefore.date <= query.dueUntil
+// Sets statt Listen, damit auch der große Haushalt im Laufzeit-Test (#141) schnell gefiltert ist
+function unitMatcher(query: UnitQuery): (unit: StockProductUnit) => boolean {
+  const productIds = query.productIds === undefined ? undefined : new Set(query.productIds)
+  return (unit) => {
+    if (productIds !== undefined && !productIds.has(unit.productId)) return false
+    if (!query.statuses.includes(unit.status)) return false
+    if (query.dueUntil === undefined) return true
+    return unit.bestBefore !== null && unit.bestBefore.date <= query.dueUntil
+  }
 }
 
 export function createFakeStockReader(data: FakeData) {
@@ -90,11 +95,12 @@ export function createFakeStockReader(data: FakeData) {
         ownProducts(householdId).filter((product) => matchesProduct(product, filter)),
       ),
     loadUnits: (householdId: string, query: UnitQuery) =>
-      Promise.resolve(ownUnits(householdId).filter((unit) => matchesUnit(unit, query))),
+      Promise.resolve(ownUnits(householdId).filter(unitMatcher(query))),
     countUnitsByStatus: (householdId: string, productIds: readonly string[]) => {
       const counts: Record<UnitStatus, number> = { stock: 0, consumed: 0, discarded: 0 }
+      const ids = new Set(productIds)
       for (const unit of ownUnits(householdId)) {
-        if (productIds.includes(unit.productId)) counts[unit.status] += 1
+        if (ids.has(unit.productId)) counts[unit.status] += 1
       }
       return Promise.resolve(counts)
     },

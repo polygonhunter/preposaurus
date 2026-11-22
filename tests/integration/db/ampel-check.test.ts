@@ -1,6 +1,7 @@
 // Ampel-Schwellen in der DB (E-21, #135): Orange mindestens 7 Tage und höchstens Gelb.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { THIS_WEEK_DAYS } from '../../../src/features/inventory/domain/unit-state'
+import { URGENT_WINDOW_DAYS } from '../../../src/features/reminders/domain/urgent'
 import { householdSettings, households } from '../../../src/server/db/schema/household'
 import { MIN_AMPEL_ORANGE_DAYS } from '../../../src/shared/config/constants'
 import { expectConstraintViolation } from '../../helpers/db-errors'
@@ -35,6 +36,10 @@ describe('Ampel-CHECK der Haushaltseinstellung', () => {
 
   it('nutzt dieselbe Untergrenze wie die Fachlogik', () => {
     expect(MIN_AMPEL_ORANGE_DAYS).toBe(THIS_WEEK_DAYS)
+  })
+
+  it('meldet „Dringend“ für dieselbe Gruppe „Diese Woche“', () => {
+    expect(URGENT_WINDOW_DAYS).toBe(THIS_WEEK_DAYS)
   })
 
   it('lehnt eine orange Schwelle unter 7 Tagen ab', async () => {

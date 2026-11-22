@@ -7,6 +7,7 @@ import type { StockProductUnit, UnitQuery } from '@/features/inventory/domain/st
 import type { UnitStatus } from '@/features/inventory/domain/unit'
 import type { Database } from '@/server/db/connection'
 import { products, units } from '@/server/db/schema/inventory'
+import { isAnyOf } from './id-list'
 import { DB_UNIT_STATUS, toBestBefore, toDateKind, toDayOrNull, toUnitStatus } from './db-values'
 
 const columns = {
@@ -21,7 +22,7 @@ const columns = {
 }
 
 function productCondition(productIds: readonly string[] | undefined): SQL | undefined {
-  return productIds === undefined ? undefined : inArray(units.productId, [...productIds])
+  return productIds === undefined ? undefined : isAnyOf(units.productId, productIds)
 }
 
 function dueCondition(query: UnitQuery): SQL | undefined {
@@ -75,7 +76,7 @@ export async function countUnitsByStatus(
     .select({ status: units.status, total: count() })
     .from(units)
     .innerJoin(products, eq(products.id, units.productId))
-    .where(and(eq(products.householdId, householdId), inArray(units.productId, [...productIds])))
+    .where(and(eq(products.householdId, householdId), isAnyOf(units.productId, productIds)))
     .groupBy(units.status)
   for (const row of rows) counts[toUnitStatus(row.status)] = row.total
   return counts

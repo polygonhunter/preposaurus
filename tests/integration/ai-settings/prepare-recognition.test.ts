@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createAiConnection } from '../../../src/features/ai-settings/application/create-ai-connection'
 import { prepareRecognition } from '../../../src/features/ai-settings/application/prepare-recognition'
 import { recognizeBestBefore } from '../../../src/features/capture/application/recognize-best-before'
-import { aiCalls } from '../../../src/server/db/schema/capture'
+import { aiCalls, photos } from '../../../src/server/db/schema/capture'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
 import { PLAINTEXT_KEY, assignRole, envWith, insertHousehold } from './ai-settings-fixtures'
 
@@ -137,6 +137,52 @@ describe('Erkennung vorbereiten und protokollieren (#59, #108)', () => {
     expect(await prepareRecognition({ db: testDb.db, env: fakeEnv }, input)).toEqual({
       ok: false,
       error: { kind: 'ai-disabled' },
+    })
+  })
+
+  describe('Mandantenbezug des Fotos (#133)', () => {
+    const insertPhoto = async (householdId: string) => {
+      const id = crypto.randomUUID()
+      const path = `test/${id}.jpg`
+      await testDb.db
+        .insert(photos)
+        .values({ id, householdId, role: 'mhd', path, mimeType: 'image/jpeg' })
+      return id
+    }
+
+    const prepareWith = (householdId: string, photoId: string) =>
+      prepareRecognition(
+        { db: testDb.db, env: fakeEnv },
+        { householdId, photoId, required: ['mhd'] },
+      )
+
+    it('nimmt ein Foto des eigenen Haushalts an', async () => {
+      const householdId = await insertHousehold(testDb.db)
+
+      const prepared = await prepareWith(householdId, await insertPhoto(householdId))
+
+      expect(prepared.ok).toBe(true)
+    })
+
+    it('lehnt ein Foto eines anderen Haushalts als not-found ab, bevor die KI läuft', async () => {
+      const householdId = await insertHousehold(testDb.db)
+      const foreignPhotoId = await insertPhoto(await insertHousehold(testDb.db))
+
+      expect(await prepareWith(householdId, foreignPhotoId)).toEqual({
+        ok: false,
+        error: { kind: 'photo-not-found' },
+      })
+      expect(await callsOf(householdId)).toEqual([])
+    })
+
+    it('lehnt eine unbekannte Foto-ID ab', async () => {
+      const householdId = await insertHousehold(testDb.db)
+
+      expect(await prepareWith(householdId, crypto.randomUUID())).toEqual({
+        ok: false,
+        error: { kind: 'photo-not-found' },
+      })
+      expect(await callsOf(householdId)).toEqual([])
     })
   })
 })

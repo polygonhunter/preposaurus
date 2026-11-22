@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # CI-Rauchtest für compose.yaml (UMSETZUNG M13-02): db → migrate → web bis /api/health,
-# Port nur an 127.0.0.1, web ohne root, Notfall-Befehl im Image.
+# Port nur an 127.0.0.1, web ohne root, Notfall-Befehle im Image.
 # Aufruf aus dem Repo-Ordner, das Image ghcr.io/polygonhunter/preposaurus:ci muss gebaut sein.
 set -euo pipefail
 repo_dir=$(pwd)
@@ -56,7 +56,29 @@ grep -q 'Neues vorläufiges Passwort' reset.log || fail "Kein neues Passwort aus
 [ "$(psql_value 'select count(*) from anmelde_sperre')" = "0" ] || fail "Sperren sind nicht aufgehoben"
 [ "$(psql_value "select count(*) from konto where provider_id = 'credential' and password is not null")" = "1" ] ||
   fail "Kein Passwort-Hash gespeichert"
+
+# Die übrigen Notfall-Befehle (#145): auflisten, zum Admin machen, alle abmelden.
+admin_cli() {
+  docker compose exec -T web node scripts/admin.mjs "$@"
+}
+admin_cli nutzer-auflisten | tee users.log
+grep -Eq '^admin +Admin +mitglied +ja ' users.log || fail "nutzer-auflisten zeigt den Admin nicht"
+password_hash=$(psql_value "select password from konto where provider_id = 'credential'")
+grep -qF "$password_hash" users.log && fail "nutzer-auflisten zeigt den Passwort-Hash"
+psql_value "update nutzer set rolle = 'mitglied', aktiv = false where benutzername = 'admin'" > /dev/null
+admin_cli admin-machen admin
+[ "$(psql_value "select rolle || ' ' || aktiv from nutzer where benutzername = 'admin'")" = "admin true" ] ||
+  fail "admin-machen hat Rolle oder Status nicht gesetzt"
+psql_value "insert into sitzung (id, token, expires_at, nutzer_id) values
+  (gen_random_uuid(), 'probe-1', now() + interval '1 day', '00000000-0000-4000-8000-000000000001'),
+  (gen_random_uuid(), 'probe-2', now() + interval '1 day', '00000000-0000-4000-8000-000000000001')" > /dev/null
+admin_cli alle-abmelden | tee sign-out.log
+grep -q '2 Sitzungen beendet' sign-out.log || fail "alle-abmelden nennt die beendeten Sitzungen nicht"
+[ "$(psql_value 'select count(*) from sitzung')" = "0" ] || fail "alle-abmelden hat Sitzungen übrig gelassen"
+
 docker compose logs web > web.log
 grep -q 'Passwort per Kommandozeile zurückgesetzt' web.log || fail "Die Spur fehlt im Log von web"
+grep -q 'Nutzer per Kommandozeile zum Admin gemacht' web.log || fail "Die Spur von admin-machen fehlt"
+grep -q 'Alle Sitzungen per Kommandozeile beendet' web.log || fail "Die Spur von alle-abmelden fehlt"
 
 echo "Compose-Test bestanden"

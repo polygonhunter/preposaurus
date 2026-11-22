@@ -14,7 +14,6 @@ export function accessMessage(error: CaptureAccessError): string {
     case 'unauthenticated':
       return 'Bitte melde dich an.'
     case 'forbidden':
-    case 'no-household':
       return 'Dafür gehört dein Konto zu keinem Haushalt.'
   }
 }

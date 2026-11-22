@@ -8,6 +8,7 @@ const RECOMMENDED: Record<AiRole, string> = {
   naehrwerte_schaetzen: 'haiku',
   mhd: 'haiku',
   mhd_zweitversuch: 'sonnet',
+  mhd_schaetzen: 'haiku',
 }
 
 const CONNECTION = { id: 'v1', isActive: true, hasKey: true }

@@ -1,6 +1,6 @@
 // Bausteine der Detailseite (UX-Konzept §8.4): Nährwerte mit Herkunft und Packungen nach Datum.
 import 'server-only'
-import { groupByBestBefore, type BestBeforeGroup } from '../domain/group-units'
+import { bestBeforeKeyOf, groupByBestBefore, groupKeyOf } from '../domain/group-units'
 import { nutritionGapOf } from '../domain/incomplete'
 import { isEstimateUnconfirmed } from '../domain/nutrition-source'
 import { hasEstimatedKcal } from '../domain/resolve-nutrition'
@@ -8,6 +8,7 @@ import { displayStateOf, type StateContext } from '../domain/stock-filter'
 import type { StockProduct, StockProductUnit } from '../domain/stock-entry'
 import type { BestBeforeGroupDto, NutritionDto } from '../schemas'
 import { perPackage, resolvedNutritionOf } from './stock-model'
+import { groupByKey } from './stock-rows'
 
 export function nutritionOf(product: StockProduct): NutritionDto {
   const per100 = resolvedNutritionOf(product)
@@ -28,17 +29,6 @@ export function nutritionOf(product: StockProduct): NutritionDto {
   }
 }
 
-function isInGroup(unit: StockProductUnit, group: BestBeforeGroup): boolean {
-  if (group.kind === 'no-date') return unit.bestBefore === null
-  const { bestBefore } = unit
-  return (
-    bestBefore !== null &&
-    bestBefore.date === group.date &&
-    bestBefore.precision === group.precision &&
-    bestBefore.isEstimated === group.isEstimated
-  )
-}
-
 const toDetailUnit = ({ id, kind, checkedAt }: StockProductUnit) => ({ id, kind, checkedAt })
 
 /**
@@ -49,8 +39,9 @@ export function bestBeforeGroupsOf(
   units: readonly StockProductUnit[],
   context: StateContext,
 ): BestBeforeGroupDto[] {
+  const unitsByGroup = groupByKey(units, (unit) => bestBeforeKeyOf(unit.bestBefore))
   return groupByBestBefore(units.map((unit) => unit.bestBefore)).map((group) => {
-    const members = units.filter((unit) => isInGroup(unit, group))
+    const members = unitsByGroup.get(groupKeyOf(group)) ?? []
     const detailUnits = members.map(toDetailUnit)
     if (group.kind === 'no-date') return { kind: 'no-date', units: detailUnits }
     const { date, precision, isEstimated } = group

@@ -57,6 +57,8 @@ jobs:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - run: npm run test
+      # Laufzeit-Grenzen der Lesepfade (#141) allein, ohne parallele Testdateien daneben
+      - run: npm run test:perf
 
   # Dieselbe Suite gegen PostgreSQL 18: tests/helpers/test-db.ts legt je Testdatei eine eigene
   # Datenbank auf diesem Dienst an, spielt alle Migrationen ein und löscht sie danach wieder.

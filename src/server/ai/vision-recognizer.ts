@@ -4,6 +4,7 @@
 import type { AiRole } from '@/shared/config/ai-roles'
 import type {
   BestBeforeAnswer,
+  BestBeforeEstimateAnswer,
   NutritionAnswer,
   NutritionEstimateAnswer,
   PackagingAnswer,
@@ -24,15 +25,23 @@ interface FoodTypeOption {
 
 type NoContext = Readonly<Record<string, never>>
 
+/** Lebensmittelart und Bezeichnung aus dem Schritt Verpackung, beides darf fehlen */
+interface EstimateContext {
+  foodType: FoodTypeOption | null
+  productName: string | null
+}
+
 /** Was jede Rolle außer dem Foto braucht. */
 export interface RoleContexts {
   /** Erlaubte Lebensmittelarten des Haushalts, bei jedem Aufruf frisch aus den Stammdaten */
   verpackung: { foodTypes: readonly FoodTypeOption[] }
   naehrwerte: NoContext
   /** Grundlage der Schätzung: Lebensmittelart und Bezeichnung aus dem Schritt Verpackung */
-  naehrwerte_schaetzen: { foodType: FoodTypeOption | null; productName: string | null }
+  naehrwerte_schaetzen: EstimateContext
   mhd: NoContext
   mhd_zweitversuch: NoContext
+  /** Grundlage der MHD-Schätzung: dieselben Angaben wie bei den Nährwerten (#124) */
+  mhd_schaetzen: EstimateContext
 }
 
 /** Geprüfte Antwort je Rolle, Typen aus den Zod-Schemas. */
@@ -42,6 +51,7 @@ export interface RoleAnswers {
   naehrwerte_schaetzen: NutritionEstimateAnswer
   mhd: BestBeforeAnswer
   mhd_zweitversuch: BestBeforeAnswer
+  mhd_schaetzen: BestBeforeEstimateAnswer
 }
 
 export interface RecognitionRequest<R extends AiRole> {

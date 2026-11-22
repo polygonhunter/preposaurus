@@ -18,9 +18,9 @@ const state = vi.hoisted(() => ({
   deps: null as CaptureDeps | null,
 }))
 
-vi.mock('@/server/auth/guards', () => ({
-  requireUser: () => Promise.resolve(state.session),
-}))
+vi.mock('@/server/auth/guards', async () =>
+  (await import('./photo-fixtures')).fakeGuards(() => state.session),
+)
 vi.mock('@/features/capture/application/capture-deps', () => ({
   loadCaptureDeps: () => Promise.resolve(state.deps),
 }))
@@ -112,21 +112,14 @@ describe('POST /api/recognize', () => {
     expect(attempts).toEqual([1, 2])
   })
 
-  it('liest die Nährwerttabelle oder schätzt auf ausdrückliche Wahl', async () => {
-    const table = await uploadPhoto('naehrwerte')
-    const packaging = await uploadPhoto('verpackung')
+  it('liest die Nährwerttabelle und lehnt eine Schätzung über diesen Weg ab', async () => {
+    const fotoId = await uploadPhoto('naehrwerte')
 
-    const read = await recognizeJson({ fotoId: table })
-    const estimate = await recognizeJson({
-      fotoId: packaging,
-      schaetzung: { lebensmittelart: null, bezeichnung: 'Linsen' },
-    })
+    const read = await recognizeJson({ fotoId })
+    const estimate = await recognizeJson({ fotoId, schaetzung: { bezeichnung: 'Linsen' } })
 
     expect(read.body).toMatchObject({ role: 'naehrwerte', nutrition: { source: 'label' } })
-    expect(estimate.body).toMatchObject({
-      role: 'naehrwerte_schaetzen',
-      nutrition: { source: 'ai-estimate' },
-    })
+    expect(estimate.status).toBe(400)
   })
 
   it('ruft bei ausgeschalteter KI keinen Adapter auf', async () => {
