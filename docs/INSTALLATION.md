@@ -351,6 +351,7 @@ Der Container fragt vor dem Ersetzen nach und erwartet die Eingabe `ja`. Läuft 
 
 So bleibt es sicher:
 - **Zuerst sichert er den jetzigen Zustand** nach `vor-wiederherstellung/…`. Hast du den falschen Stand gewählt, spielst du einfach diesen zurück.
+- Von `vor-wiederherstellung` bleiben die neuesten 5. Spielst du den ältesten davon zurück, räumt er ihn danach weg. Sein Inhalt ist jetzt der laufende Stand, und der neue Stand `vor-wiederherstellung/…` hält den Zustand davor.
 - Er spielt den Stand in eine **neue** Datenbank ein und ersetzt die alte erst, wenn das geklappt hat. Lässt sich der Stand nicht einspielen, bleibt alles, wie es war.
 - Die Fotos ersetzt er erst ganz am Ende. Bricht das ab (z. B. Platte voll), nennt die Meldung den Stand `vor-wiederherstellung/…` von eben. Schaffe Platz und spiele denselben Stand noch einmal zurück.
 
