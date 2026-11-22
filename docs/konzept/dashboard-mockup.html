@@ -1,0 +1,232 @@
+<title>Preposaurus Übersicht</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Handy = eine Spalte mit Dock unten; ab 900 px Seitenleiste + Raster aus Kacheln (Variante A / PC H) */
+:root{
+  --bg:#f4f3fa; --card:rgba(255,255,255,.78); --card-solid:#fff; --line:rgba(15,23,42,.09); --track:rgba(15,23,42,.07);
+  --text:#0f172a; --muted:#475569; --subtle:#64748b;
+  --accent:#5b5bd6; --accent-text:#4338ca; --accent-soft:rgba(99,102,241,.12);
+  --ok:#10b981; --ok-text:#047857; --soon:#f59e0b; --soon-text:#854d0e; --urgent:#f97316; --urgent-text:#c2410c; --bad:#f43f5e; --bad-text:#be123c;
+  --protein:#e11d74; --carbs:#5b5bd6; --fat:#d97706; --water:#0ea5e9;
+  --blob1:#ffd6e0; --blob2:#dbe4ff;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#070b10; --card:rgba(17,24,32,.82); --card-solid:#111820; --line:rgba(255,255,255,.08); --track:rgba(255,255,255,.08);
+  --text:#e8eef4; --muted:#a7b4c1; --subtle:#8b98a5;
+  --accent:#3ee6ff; --accent-text:#6eeaff; --accent-soft:rgba(62,230,255,.12);
+  --ok:#4ade80; --ok-text:#86efac; --soon:#facc15; --soon-text:#fde047; --urgent:#fb923c; --urgent-text:#fdba74; --bad:#f87171; --bad-text:#fca5a5;
+  --protein:#f472b6; --carbs:#3ee6ff; --fat:#fbbf24; --water:#38bdf8; --blob1:#0b3a48; --blob2:#1a1f3d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#070b10; --card:rgba(17,24,32,.82); --card-solid:#111820; --line:rgba(255,255,255,.08); --track:rgba(255,255,255,.08);
+  --text:#e8eef4; --muted:#a7b4c1; --subtle:#8b98a5;
+  --accent:#3ee6ff; --accent-text:#6eeaff; --accent-soft:rgba(62,230,255,.12);
+  --ok:#4ade80; --ok-text:#86efac; --soon:#facc15; --soon-text:#fde047; --urgent:#fb923c; --urgent-text:#fdba74; --bad:#f87171; --bad-text:#fca5a5;
+  --protein:#f472b6; --carbs:#3ee6ff; --fat:#fbbf24; --water:#38bdf8; --blob1:#0b3a48; --blob2:#1a1f3d; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font:15px/1.5 var(--sans);margin:0;min-height:100vh;
+  background-image:radial-gradient(40rem 30rem at 0% 0%,var(--blob1),transparent 70%),radial-gradient(40rem 30rem at 100% 10%,var(--blob2),transparent 70%);background-attachment:fixed}
+.shell{display:grid;grid-template-columns:1fr;max-width:1320px;margin:0 auto}
+.side{display:none}
+main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 110px;display:grid;gap:14px;min-width:0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:-.01em}
+.logo{width:34px;height:34px;border-radius:10px;background:var(--accent);display:grid;place-items:center;color:var(--card-solid);font:700 15px var(--mono)}
+.who{font-size:13px;color:var(--muted)}
+.demo{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent-text);background:var(--accent-soft);padding:4px 8px;border-radius:999px}
+.grid{display:grid;gap:14px;grid-template-columns:1fr}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);min-width:0}
+.card h2{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 10px;letter-spacing:.02em;text-transform:uppercase}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+/* Hero */
+.hero{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.gauge{width:132px;height:132px;flex:none}
+.big{font:600 44px/1 var(--sans);letter-spacing:-.03em}
+.big small{font-size:18px;font-weight:500;color:var(--muted);margin-left:4px}
+.goal{margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:500;border:1px solid var(--line);background:var(--card-solid)}
+.dot{width:8px;height:8px;border-radius:50%}
+.d-ok{background:var(--ok)}.d-soon{background:var(--soon)}.d-urgent{background:var(--urgent)}.d-bad{background:var(--bad)}
+.t-ok{color:var(--ok-text)}.t-soon{color:var(--soon-text)}.t-urgent{color:var(--urgent-text)}.t-bad{color:var(--bad-text)}
+.bar{height:8px;border-radius:999px;background:var(--track);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:inherit}
+/* Makros */
+.kcal{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.kcal b{font:600 28px/1 var(--sans);letter-spacing:-.02em}
+.macro{display:grid;grid-template-columns:96px 1fr auto;gap:10px;align-items:center;font-size:14px;margin-top:8px}
+.macro .lbl{display:flex;align-items:center;gap:6px}
+.macro .val{font-size:13px;color:var(--muted);text-align:right;min-width:116px}
+.note{font-size:12px;color:var(--subtle);margin:10px 0 0}
+/* Warengruppen */
+.wg{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;font-size:14px;padding:7px 0;border-bottom:1px solid var(--line)}
+.wg:last-child{border-bottom:0}
+.wg .bar{grid-column:1/-1}
+/* Baum */
+details{border-bottom:1px solid var(--line)}
+details:last-child{border-bottom:0}
+summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:18px 1fr auto;gap:8px;align-items:center;padding:9px 0;font-size:14px}
+summary::-webkit-details-marker{display:none}
+summary .car{color:var(--subtle);transition:transform .15s}
+details[open]>summary .car{transform:rotate(90deg)}
+summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.lvl{font:500 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--subtle);margin-left:6px}
+.sub{padding-left:22px}
+.leaf{display:grid;grid-template-columns:1fr auto;gap:8px;padding:6px 0 6px 26px;font-size:13px;color:var(--muted);border-top:1px dashed var(--line)}
+.leaf b{color:var(--text);font-weight:500}
+/* Fällig */
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.row:last-child{border-bottom:0}
+.row .meta{font-size:12px;color:var(--subtle)}
+.ico{width:34px;height:34px;border-radius:10px;background:var(--accent-soft);display:grid;place-items:center;font-size:16px}
+.nk{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:14px}
+.box{width:18px;height:18px;border-radius:6px;border:1.5px solid var(--subtle);flex:none}
+/* Dock */
+.dock{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:4px;align-items:center;background:var(--card-solid);border:1px solid var(--line);border-radius:22px;padding:6px;box-shadow:0 10px 30px rgba(15,23,42,.18);z-index:5}
+.dock a{display:grid;place-items:center;gap:2px;width:62px;padding:6px 0;border-radius:16px;color:var(--muted);text-decoration:none;font-size:11px}
+.dock a.on{color:var(--accent-text);background:var(--accent-soft)}
+.dock .cam{width:54px;height:54px;border-radius:18px;background:var(--accent);color:var(--card-solid);font-size:22px;margin:0 4px}
+.dock svg,.side svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+@media (min-width:640px){.grid{grid-template-columns:1fr 1fr}.span2{grid-column:1/-1}}
+@media (min-width:900px){
+  .shell{grid-template-columns:220px 1fr}
+  .side{display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh;padding:20px 12px;border-right:1px solid var(--line)}
+  .side .brand{margin:0 8px 18px}
+  .side a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;color:var(--muted);text-decoration:none;font-size:14px}
+  .side a.on{background:var(--accent-soft);color:var(--accent-text);font-weight:500}
+  .side .add{margin-top:10px;background:var(--accent);color:var(--card-solid)}
+  .top .brand{display:none}
+  .dock{display:none}
+  main{padding-bottom:32px}
+}
+@media (min-width:1280px){.grid{grid-template-columns:repeat(3,1fr)}.span2{grid-column:span 2}.span3{grid-column:1/-1}}
+@media (prefers-reduced-motion:reduce){summary .car{transition:none}}
+</style>
+
+<div class="shell">
+  <nav class="side" aria-label="Hauptnavigation">
+    <div class="brand"><span class="logo">P</span>Preposaurus</div>
+    <a class="on" href="#"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8M5 10v10h14V10"/></svg>Übersicht</a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Vorrat</a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M6 6h15l-2 9H8L6 3H3"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>Nachkaufen</a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Statistik</a>
+    <a href="#"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>Einstellungen</a>
+    <a class="add" href="#"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Erfassen</a>
+  </nav>
+
+  <main>
+    <header class="top">
+      <div class="brand"><span class="logo">P</span>Preposaurus</div>
+      <div class="who">Haushalt Alex · Sam · Kim · 3 Personen</div>
+      <span class="demo">Mockup · Beispieldaten</span>
+    </header>
+
+    <div class="grid">
+      <!-- Versorgt -->
+      <section class="card span2" aria-labelledby="h-vers">
+        <h2 id="h-vers">Heute versorgt</h2>
+        <div class="hero">
+          <svg class="gauge" viewBox="0 0 120 120" role="img" aria-label="9,4 von 10 Tagen">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="var(--track)" stroke-width="12"/>
+            <circle cx="60" cy="60" r="50" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" stroke-dasharray="295 314" transform="rotate(-90 60 60)"/>
+            <text x="60" y="58" text-anchor="middle" font-family="Geist Mono, monospace" font-size="13" fill="var(--muted)">von 10</text>
+            <text x="60" y="76" text-anchor="middle" font-family="Geist Mono, monospace" font-size="13" fill="var(--muted)">Tagen</text>
+          </svg>
+          <div>
+            <div class="big mono">9,4<small>Tage</small></div>
+            <div style="color:var(--muted);font-size:14px;margin-top:4px">für 3 Personen nach BBK-Empfehlung</div>
+            <div class="goal"><span class="chip"><span class="dot d-soon"></span>Ziel 01.03.2027</span><span>7 von 10 Tagen sind dann noch haltbar</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bald fällig -->
+      <section class="card" aria-labelledby="h-faellig">
+        <h2 id="h-faellig">Bald fällig</h2>
+        <div class="row"><span class="ico">🥛</span><div>Haferdrink 1 l<div class="meta">Pflanzendrinks · 4 Packungen</div></div><span class="chip t-urgent"><span class="dot d-urgent"></span>12 Tage</span></div>
+        <div class="row"><span class="ico">🍞</span><div>Knäckebrot<div class="meta">Brot &amp; Knäcke · 2 Packungen</div></div><span class="chip t-soon"><span class="dot d-soon"></span>6 Wochen</span></div>
+        <div class="row"><span class="ico">🥫</span><div>Mais 340 g<div class="meta">Gemüsekonserven · 1 Dose</div></div><span class="chip t-bad"><span class="dot d-bad"></span>abgelaufen</span></div>
+      </section>
+
+      <!-- Makros -->
+      <section class="card" aria-labelledby="h-makro">
+        <h2 id="h-makro">Makros im Vorrat</h2>
+        <div class="kcal"><b class="mono">52.600</b><span style="color:var(--muted)">kcal gelagert · Bedarf 5.600 kcal am Tag</span></div>
+        <div class="macro"><span class="lbl"><span class="dot" style="background:var(--carbs)"></span>Kohlenhydrate</span><div class="bar"><i style="width:88%;background:var(--carbs)"></i></div><span class="val mono">7.940 g · 9,9 T</span></div>
+        <div class="macro"><span class="lbl"><span class="dot" style="background:var(--protein)"></span>Eiweiß</span><div class="bar"><i style="width:71%;background:var(--protein)"></i></div><span class="val mono">1.420 g · 7,1 T</span></div>
+        <div class="macro"><span class="lbl"><span class="dot" style="background:var(--fat)"></span>Fett</span><div class="bar"><i style="width:64%;background:var(--fat)"></i></div><span class="val mono">1.150 g · 6,4 T</span></div>
+        <p class="note">Summe aus Nährwerttabelle × Menge × Anzahl aller Packungen. „T“ = Tage für den Haushalt.</p>
+      </section>
+
+      <!-- Warengruppen -->
+      <section class="card" aria-labelledby="h-wg">
+        <h2 id="h-wg">Warengruppen (BBK)</h2>
+        <div class="wg"><span>Wasser &amp; Getränke</span><span class="mono t-urgent">6 / 10 T</span><div class="bar"><i style="width:60%;background:var(--water)"></i></div></div>
+        <div class="wg"><span>Getreide, Kartoffeln</span><span class="mono t-ok">14 / 10 T</span><div class="bar"><i style="width:100%;background:var(--ok)"></i></div></div>
+        <div class="wg"><span>Gemüse, Hülsenfrüchte</span><span class="mono t-ok">11 / 10 T</span><div class="bar"><i style="width:100%;background:var(--ok)"></i></div></div>
+        <div class="wg"><span>Milch, Milchprodukte</span><span class="mono t-soon">8 / 10 T</span><div class="bar"><i style="width:80%;background:var(--soon)"></i></div></div>
+        <div class="wg"><span>Fisch, Fleisch, Eier</span><span class="mono t-soon">7 / 10 T</span><div class="bar"><i style="width:70%;background:var(--soon)"></i></div></div>
+      </section>
+
+      <!-- Baum -->
+      <section class="card span2" aria-labelledby="h-baum">
+        <h2 id="h-baum">Vorrat nach Lebensmitteln</h2>
+        <details open>
+          <summary><span class="car">›</span><span>Getreide, Kartoffeln<span class="lvl">Warengruppe</span></span><span class="mono">8,5 kg · 29.800 kcal</span></summary>
+          <div class="sub">
+            <details open>
+              <summary><span class="car">›</span><span>Nudeln<span class="lvl">Kategorie</span></span><span class="mono">4 kg</span></summary>
+              <div class="leaf"><span><b>Spaghetti</b> · 3 × 500 g · MHD 03/2028, 07/2028</span><span class="mono">5.385 kcal</span></div>
+              <div class="leaf"><span><b>Penne</b> · 5 × 500 g · MHD 11/2027</span><span class="mono">8.975 kcal</span></div>
+            </details>
+            <details>
+              <summary><span class="car">›</span><span>Reis<span class="lvl">Kategorie</span></span><span class="mono">3 kg</span></summary>
+              <div class="leaf"><span><b>Langkornreis</b> · 3 × 1 kg · MHD 09/2028</span><span class="mono">10.500 kcal</span></div>
+            </details>
+            <details>
+              <summary><span class="car">›</span><span>Brot &amp; Knäcke<span class="lvl">Kategorie</span></span><span class="mono">1,5 kg</span></summary>
+              <div class="leaf"><span><b>Knäckebrot</b> · 2 × 250 g · MHD 01/2027</span><span class="mono">1.800 kcal</span></div>
+            </details>
+          </div>
+        </details>
+        <details>
+          <summary><span class="car">›</span><span>Fisch, Fleisch, Eier<span class="lvl">Warengruppe</span></span><span class="mono">2,1 kg · 3.400 kcal</span></summary>
+          <div class="sub">
+            <details open>
+              <summary><span class="car">›</span><span>Fischkonserven<span class="lvl">Kategorie</span></span><span class="mono">1,2 kg</span></summary>
+              <div class="leaf"><span><b>Thunfisch</b> · 6 × 185 g · MHD 12/2030</span><span class="mono">974 kcal</span></div>
+              <div class="leaf"><span><b>Sardinen</b> · 4 × 120 g · MHD 06/2029</span><span class="mono">1.050 kcal</span></div>
+            </details>
+          </div>
+        </details>
+        <details>
+          <summary><span class="car">›</span><span>Milch, Milchprodukte<span class="lvl">Warengruppe</span></span><span class="mono">6 l · 2.900 kcal</span></summary>
+          <div class="sub">
+            <details open>
+              <summary><span class="car">›</span><span>Pflanzendrinks<span class="lvl">Kategorie</span></span><span class="mono">4 l</span></summary>
+              <div class="leaf"><span><b>Haferdrink</b> · 4 × 1 l · MHD 04/2027</span><span class="mono">1.840 kcal</span></div>
+            </details>
+          </div>
+        </details>
+      </section>
+
+      <!-- Nachkaufen -->
+      <section class="card" aria-labelledby="h-nk">
+        <h2 id="h-nk">Nachkaufen</h2>
+        <div class="nk"><span class="box" aria-hidden="true"></span><span>Stilles Wasser · <span class="mono">18 l</span> bis zum Ziel</span></div>
+        <div class="nk"><span class="box" aria-hidden="true"></span><span>Fisch oder Hülsenfrüchte · <span class="mono">≈ 600 g</span></span></div>
+        <div class="nk"><span class="box" aria-hidden="true"></span><span>Mais ersetzen (abgelaufen)</span></div>
+        <p class="note">Wird automatisch aus den Lücken zum Ziel berechnet.</p>
+      </section>
+    </div>
+  </main>
+</div>
+
+<nav class="dock" aria-label="Navigation">
+  <a class="on" href="#"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8M5 10v10h14V10"/></svg>Übersicht</a>
+  <a href="#"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Vorrat</a>
+  <a class="cam" href="#" aria-label="Erfassen mit Kamera"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></a>
+  <a href="#"><svg viewBox="0 0 24 24"><path d="M6 6h15l-2 9H8L6 3H3"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>Nachkaufen</a>
+  <a href="#"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Statistik</a>
+</nav>
