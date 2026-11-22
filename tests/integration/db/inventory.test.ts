@@ -128,12 +128,12 @@ describe('Schema Vorrat', () => {
     )
   })
 
-  it('lehnt eine unbekannte Nährwertquelle ab', async () => {
+  // richtwert ist keine gespeicherte Quelle: Richtwerte werden nur beim Lesen ergänzt (E-5).
+  it.each(['geraten', 'richtwert'])('lehnt die Nährwertquelle „%s“ ab', async (source) => {
     await expectConstraintViolation(
       testDb.db
         .insert(products)
-        // @ts-expect-error -- absichtlich ungültige Quelle, die nur die DB abfangen soll
-        .values(buildProduct({ householdId, categoryId, nutritionSource: 'geraten' })),
+        .values(buildProduct({ householdId, categoryId, nutritionSource: source as 'tabelle' })),
       'produkt_naehrwerte_quelle_check',
     )
   })
