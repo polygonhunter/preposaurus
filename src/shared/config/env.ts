@@ -40,6 +40,9 @@ const envSchema = z.object({
   PHOTO_STORAGE_DIR: z.string().min(1).default('./.data/fotos'),
   // Musterseite /muster auch im Produktionsbuild zeigen (nur für die E2E-Tests in der CI).
   SHOW_PATTERN_PAGE: z.stringbool().default(false),
+  // Sitzungs-Cookie im Produktionsbuild ohne Secure (nur für die E2E-Tests der CI über
+  // http://localhost: WebKit speichert dort keine Secure-Cookies). Im Betrieb nie setzen.
+  E2E_INSECURE_COOKIES: z.stringbool().default(false),
 })
 
 export type Env = z.infer<typeof envSchema>
@@ -55,6 +58,11 @@ function parseEnv(source: EnvSource): Result<Env, string> {
 // Im Dev-Modus immer, sonst nur mit SHOW_PATTERN_PAGE=true.
 export function isPatternPageEnabled(env: Pick<Env, 'NODE_ENV' | 'SHOW_PATTERN_PAGE'>): boolean {
   return env.NODE_ENV !== 'production' || env.SHOW_PATTERN_PAGE
+}
+
+// Secure-Cookies im Produktionsbuild, außer im E2E-Lauf der CI (E2E_INSECURE_COOKIES).
+export function isCookieSecure(env: Pick<Env, 'NODE_ENV' | 'E2E_INSECURE_COOKIES'>): boolean {
+  return env.NODE_ENV === 'production' && !env.E2E_INSECURE_COOKIES
 }
 
 // Wirft bei ungültigen Werten: ohne gültige Umgebung soll der Server gar nicht erst starten.

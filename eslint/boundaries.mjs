@@ -22,6 +22,8 @@ const files = [
   { pattern: '**/src/features/*/schemas.ts', category: 'schemas', capture: ['root', 'feature'] },
   // Einstieg von Next beim Serverstart (prüft env, startet Logger)
   { pattern: '**/src/instrumentation.ts', category: 'instrumentation' },
+  // Proxy von Next vor jeder Anfrage (optimistische Prüfung des Sitzungs-Cookies, #33)
+  { pattern: '**/src/proxy.ts', category: 'proxy' },
 ]
 
 const element = (type, captured) => ({ element: captured ? { type, captured } : { type } })
@@ -42,6 +44,10 @@ const policies = [
   },
   { from: schemas, allow: [to({ module: { origin: ['external', 'core'] } }), to(anyShared)] },
   { from: { file: { categories: 'instrumentation' } }, allow: [to(anyShared)] },
+  {
+    from: { file: { categories: 'proxy' } },
+    allow: [to({ module: { origin: ['external', 'core'] } }), to(anyShared)],
+  },
   {
     from: element('app'),
     allow: [

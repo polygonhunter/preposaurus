@@ -1,7 +1,7 @@
 // Eine Better-Auth-Instanz je Serverprozess, aus env.ts und getDb() gebaut.
 // Wie getDb() auf globalThis, damit der Hot Reload keine zweite Instanz anlegt.
 import 'server-only'
-import { loadEnv } from '@/shared/config/env'
+import { loadEnv, isCookieSecure } from '@/shared/config/env'
 import { createLogger } from '@/shared/lib/logger'
 import { getDb } from '../db/get-db'
 import { createAuth, type Auth } from './auth'
@@ -19,7 +19,7 @@ async function buildAuth(): Promise<Auth> {
     db: await getDb(),
     secret: env.APP_SECRET,
     clientIpHeader: env.CLIENT_IP_HEADER,
-    secureCookies: env.NODE_ENV === 'production',
+    secureCookies: isCookieSecure(env),
     log: (level, message) => {
       logger[level](`Better Auth: ${message}`)
     },
