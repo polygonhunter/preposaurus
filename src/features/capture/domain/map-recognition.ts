@@ -28,13 +28,10 @@ const positiveOrNull = (value: number | null) =>
 const nonNegativeOrNull = (value: number | null) =>
   value !== null && Number.isFinite(value) && value >= 0 ? value : null
 
-/** Behälter aus den Stammdaten. „sonstiges“ heißt: keiner davon, die Auswahl bleibt leer. */
-type Container = Exclude<AiPackagingAnswer['behaelter'], 'sonstiges'>
-
 export interface PackagingSuggestion {
   name: string | null
   foodTypeKey: string | null
-  container: Container | null
+  container: AiPackagingAnswer['behaelter']
   content: Quantity | null
   drainedWeightG: number | null
   confidence: Confidence
@@ -50,7 +47,7 @@ export function mapPackagingAnswer(answer: AiPackagingAnswer): PackagingSuggesti
   return {
     name: name === '' ? null : name,
     foodTypeKey: answer.lebensmittelart,
-    container: answer.behaelter === 'sonstiges' ? null : answer.behaelter,
+    container: answer.behaelter,
     content: mapContent(answer.inhalt),
     drainedWeightG: positiveOrNull(answer.abtropfgewicht_g),
     confidence: mapConfidence(answer.sicherheit),

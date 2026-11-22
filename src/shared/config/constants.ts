@@ -71,3 +71,9 @@ export const AI_CONNECTION_STATUSES = [
 // Woher die gespeicherten Nährwerte eines Produkts stammen. ki_schaetzung ist eine Schätzung,
 // die gesondert bestätigt werden müssen (naehrwerte_bestaetigt_am).
 export const NUTRITION_SOURCES = ['tabelle', 'manuell', 'ki_schaetzung'] as const
+
+// Behälter-Schlüssel (Merkmal, keine Kategorie). Einzige Liste für Seed, KI-Schema (Schema A)
+// und Antworttyp. Ein neuer Behälter braucht nur hier einen Eintrag und im Seed einen Namen.
+export const CONTAINER_KEYS = ['dose', 'glas', 'packung', 'flasche', 'tetrapak', 'beutel'] as const
+
+export type ContainerKey = (typeof CONTAINER_KEYS)[number]

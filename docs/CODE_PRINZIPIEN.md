@@ -44,7 +44,7 @@ db/migrations/ · db/seeds/ · tests/e2e/
 | `ui/` | ✓ | ✓ | – | ✓ (Typen, reine Helfer) | – | ✓ | – | ✓ |
 | `actions/` | – | – | ✓ | ✓ | – | ✓ | `auth` | ✓ |
 | `application/` | – | – | ✓ | ✓ | ✓ | ✓ | ✓ (Ports/Adapter) | ✓ |
-| `domain/` | – | – | – | ✓ | – | – | – | `shared/lib` |
+| `domain/` | – | – | – | ✓ | – | – | – | `shared/lib`, Typen aus `shared/config` |
 | `data/` | – | – | – | ✓ (Typen) | ✓ | – | `db` | ✓ |
 | `server/` | – | – | – | ✓ (Typen) | – | ✓ | ✓ | ✓ |
 | `shared/` | – | – | – | – | – | – | – | ✓ |

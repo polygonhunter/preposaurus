@@ -27,7 +27,7 @@ const NOTHING_RECOGNIZED: Readonly<Record<AiRole, unknown>> = {
     ...NOTHING_READ,
     bezeichnung: null,
     lebensmittelart: null,
-    behaelter: 'sonstiges',
+    behaelter: null,
     inhalt: { wert: null, einheit: null },
     abtropfgewicht_g: null,
   },

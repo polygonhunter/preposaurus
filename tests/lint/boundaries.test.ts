@@ -100,6 +100,7 @@ const cases: readonly ImportCase[] = [
   ['domain', 'shared/lib', 'value', true],
   ['domain', 'shared/ui', 'value', false],
   ['domain', 'shared/config', 'value', false],
+  ['domain', 'shared/config', 'type', true],
   ['domain', 'data', 'value', false],
   ['domain', 'schemas', 'value', false],
   ['domain', 'react', 'value', false],
