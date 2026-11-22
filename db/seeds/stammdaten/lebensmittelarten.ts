@@ -2,7 +2,14 @@
 // Behälter (die Dose ist ein Merkmal am Produkt), nur echte Unterschiede wie „getrocknet“.
 // VORLÄUFIG, wird vom Maintainer geprüft. Richtwerte (kcal_100, übliche Haltbarkeit) bleiben leer,
 // bis sie belegt sind (M1-08). Sie wären ohnehin nur Anzeige-Richtwerte, nie ein MHD.
-type SystemFoodType = Readonly<{ key: string; name: string; category: string }>
+type SystemFoodType = Readonly<{
+  key: string
+  name: string
+  category: string
+  // Anzeige-Richtwerte, sobald belegt (M1-08). Fehlt ein Wert, setzt der Seed die Spalte auf leer.
+  kcalPer100?: string
+  typicalShelfLifeMonths?: number
+}>
 
 const inCategory = (category: string, entries: readonly (readonly [string, string])[]) =>
   entries.map(([key, name]) => ({ key, name, category }))

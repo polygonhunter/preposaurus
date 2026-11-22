@@ -7,6 +7,9 @@ type SystemCategory = Readonly<{
   name: string
   pictogram: string
   productGroup: ProductGroupKey
+  // Richtwerte, sobald belegt (M1-08). Fehlt ein Wert, setzt der Seed die Spalte auf leer.
+  averageKcalPer100?: string
+  typicalShelfLifeMonths?: number
 }>
 
 export const SYSTEM_CATEGORIES: readonly SystemCategory[] = [
