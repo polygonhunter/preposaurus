@@ -214,6 +214,14 @@ Beim Datenmodell getroffen, Details in den Kopfkommentaren von `src/server/db/sc
 - **Ziel der Nachricht** ist abstrakt (`overview` bzw. `due`), die Adresse legt die Oberfläche fest. `formatBestBefore` ist als `formatDayWithPrecision` nach `shared/lib/dates.ts` gewandert, weil domain/ zwischen Features nur Typen teilt.
 - Die Merker `wochenuebersicht_gesendet_am` und `dringend_gesendet_am` (SCHNITTSTELLEN Nr. 27) fehlen noch im Schema und kommen mit M11-05.
 
+## Technische Festlegungen aus M11-04 (2026-11-22, Mail: Port, Adapter, Vorlagen, #87)
+- **Mail ist optional.** Port `MailSender` in `src/server/notify/mail-sender.ts`, Adapter mit Nodemailer 10.6.1 (MIT-0, steht schon in der Erlaubnisliste, `npm run licenses` grün, keine weiteren Abhängigkeiten, eigene Typen). Ohne `SMTP_HOST` liefert die Factory einen Versand, der immer „nicht eingerichtet“ meldet; alles andere läuft weiter.
+- **ENV:** `SMTP_HOST`, `SMTP_PORT` (Standard 587), `SMTP_SECURE` (leer: TLS von Anfang an nur bei Port 465), `SMTP_USER` und `SMTP_PASSWORD` (nur zusammen), `SMTP_FROM` (Pflicht, sobald `SMTP_HOST` gesetzt ist). Leere Zeilen aus der Vorlage gelten als nicht gesetzt. Zeitlimit je SMTP-Schritt 15 s. In `compose.yaml` und `docs/INSTALLATION.md` kommen die Variablen erst mit dem Job, der Mails verschickt (M11-05).
+- **Empfänger:** Zugestellt wird nur an echte Adressen. Leer, unplausibel oder die technische Adresse `<id>@nutzer.invalid` → `no-recipient`, `sendMailToAll` überspringt sie still und sendet je Empfänger einzeln. Fehlschläge kommen als Rückgabewert ohne Adresse zurück, damit sie ins Log dürfen.
+- **Vorlagen:** Wochenübersicht (Zeilen aus der Fachlogik der Erinnerungen) und Check-in-Mail, je als Text und schlichtes HTML (`lang="de"`, ohne Bilder, externe Inhalte oder Zählpixel, alles maskiert). Ein Link in die App nur mit `http(s)`, die Adresse der App gibt der Aufrufer mit (eine `APP_URL` gibt es noch nicht).
+- Fake für Tests: `tests/helpers/fake-mail-sender.ts`. Test-Helfer dürfen dafür `server/notify` importieren (Schichtgrenzen).
+- **Offen:** Woher die Mail-Adresse kommt. Nutzer haben nur die technische Adresse (Frage 4 in `docs/konzept/ABGLEICH.md`, B9: freiwilliges Feld „E-Mail für Erinnerungen“ bräuchte eine Migration).
+
 ## Offene Fragen an den Maintainer (endgültige Entscheidung steht noch aus)
 1. **Offline**: nur anzeigen oder auch eintragen (mit späterem Abgleich)?
 2. ~~**Lizenz**~~ entschieden 2026-11-22: AGPL-3.0-or-later (siehe oben). Der Prototyp mit GSAP ist ausgenommen, siehe `prototypes/README.md`
