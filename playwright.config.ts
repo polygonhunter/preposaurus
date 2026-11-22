@@ -55,6 +55,8 @@ export default defineConfig({
       // Nur für die E2E-Tests, kein Geheimnis (env.ts verlangt mindestens 32 Zeichen)
       APP_SECRET: 'e2e-nur-zum-testen-kein-geheimnis-000',
       LOG_LEVEL: 'warn',
+      // Musterseite auch im Standalone-Build der CI (muster.spec.ts)
+      SHOW_PATTERN_PAGE: 'true',
       PORT: String(PORT),
       // server.js bindet an HOSTNAME, und GitHub Actions setzt dort den Rechnernamen.
       ...(isCi ? { HOSTNAME: '0.0.0.0' } : {}),

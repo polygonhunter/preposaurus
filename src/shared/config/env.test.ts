@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { loadEnv } from './env'
+import { isPatternPageEnabled, loadEnv } from './env'
 
 const SECRET = 'x'.repeat(32)
 const minimal = { DATABASE_URL: 'pglite://./.data/dev', APP_SECRET: SECRET }
@@ -69,5 +69,21 @@ describe('loadEnv', () => {
     vi.stubEnv('APP_SECRET', SECRET)
 
     expect(loadEnv().DATABASE_URL).toBe('postgres://localhost/preposaurus')
+  })
+
+  it('liest SHOW_PATTERN_PAGE als Wahrheitswert, Standard aus', () => {
+    expect(loadEnv(minimal).SHOW_PATTERN_PAGE).toBe(false)
+    expect(loadEnv({ ...minimal, SHOW_PATTERN_PAGE: 'true' }).SHOW_PATTERN_PAGE).toBe(true)
+  })
+})
+
+describe('isPatternPageEnabled', () => {
+  it('zeigt die Musterseite im Dev-Modus immer', () => {
+    expect(isPatternPageEnabled({ NODE_ENV: 'development', SHOW_PATTERN_PAGE: false })).toBe(true)
+  })
+
+  it('zeigt sie im Produktionsbuild nur mit SHOW_PATTERN_PAGE', () => {
+    expect(isPatternPageEnabled({ NODE_ENV: 'production', SHOW_PATTERN_PAGE: false })).toBe(false)
+    expect(isPatternPageEnabled({ NODE_ENV: 'production', SHOW_PATTERN_PAGE: true })).toBe(true)
   })
 })
