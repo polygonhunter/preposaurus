@@ -49,6 +49,23 @@ describe('Schema Vorrat', () => {
     })
   })
 
+  it('speichert eine Einheit ohne MHD als „Datum fehlt“', async () => {
+    const product = await insertProduct()
+
+    const [unit] = await testDb.db.insert(units).values({ productId: product.id }).returning()
+
+    expect(unit).toMatchObject({ bestBefore: null, isBestBeforeEstimated: false })
+  })
+
+  it('lehnt ein geschätztes MHD ohne Datum ab', async () => {
+    const product = await insertProduct()
+
+    await expectConstraintViolation(
+      testDb.db.insert(units).values({ productId: product.id, isBestBeforeEstimated: true }),
+      'einheit_mhd_geschaetzt_check',
+    )
+  })
+
   it('lehnt einen unbekannten Status ab', async () => {
     const product = await insertProduct()
 
