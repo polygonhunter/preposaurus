@@ -20,7 +20,7 @@ export interface JoinedUnit {
 const PER_100 = 100
 // Schlüssel der Warengruppe Wasser (Seed warengruppen.ts). Nur ihre Packungen in ml zählen in die
 // Wasser-Tage, andere Getränke nicht (UX-Konzept A10).
-const WATER_GROUP_KEY = 'wasser'
+export const WATER_GROUP_KEY = 'wasser'
 
 /** Verknüpft Einheiten mit ihrem Produkt. Einheiten ohne geladenes Produkt fallen weg. */
 export function joinUnits(

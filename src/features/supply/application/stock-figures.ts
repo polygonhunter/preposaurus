@@ -17,6 +17,7 @@ import {
   type TreeNode,
 } from '../domain/node-totals'
 import type { SupplyBasis } from '../domain/supply-basis'
+import type { ReferenceDay } from '../domain/supply-rules'
 
 type Need = Pick<DailyNeed, 'kcalPerDay' | 'waterMlPerDay'>
 
@@ -78,6 +79,8 @@ interface CoverageInput {
   units: readonly GroupUnit[]
   today: CalendarDay
   stillGoodCounts: boolean
+  /** Stichtag, ohne Angabe heute. Die Ziel-Lücke (A13) rechnet am Zieldatum */
+  reference?: ReferenceDay
 }
 
 export interface GroupCoverage {
@@ -85,14 +88,20 @@ export interface GroupCoverage {
   tightestGroupKey: string | null
 }
 
-/** „X von Y Tagen“ je Warengruppe am heutigen Tag. Ohne Ziel oder Quelle bleibt sie leer. */
-export function coverageOf({ basis, units, today, stillGoodCounts }: CoverageInput): GroupCoverage {
+/** „X von Y Tagen“ je Warengruppe am Stichtag. Ohne Ziel oder Quelle bleibt sie leer. */
+export function coverageOf({
+  basis,
+  units,
+  today,
+  stillGoodCounts,
+  reference,
+}: CoverageInput): GroupCoverage {
   if (basis.goalDays === null) return { progress: [], tightestGroupKey: null }
   const progress = calculateGroupProgress({
     units,
     targets: calculateStoredDietTargets(basis, basis.goalDays),
     goalDays: basis.goalDays,
-    reference: { day: today, kind: 'today' },
+    reference: reference ?? { day: today, kind: 'today' },
     stillGoodCounts,
   })
   return { progress, tightestGroupKey: findTightestGroup(progress)?.groupKey ?? null }

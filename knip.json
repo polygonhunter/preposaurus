@@ -11,7 +11,8 @@
     "src/features/capture/actions/*.ts!",
     "src/server/auth/guards.ts!",
     "scripts/admin.ts!",
-    "tests/e2e/*.setup.ts"
+    "tests/e2e/*.setup.ts",
+    "tests/e2e/beispiel/*.setup.ts"
   ],
   "project": [
     "src/**/*.{ts,tsx,css}!",
@@ -21,7 +22,7 @@
     "!src/features/ai-settings/{application,data}/**!",
     "!src/features/capture/{application/{recognize-best-before,estimate-on-request}.ts,schemas.ts}!",
     "!src/features/inventory/{application/**,data/**,schemas.ts}!",
-    "!src/features/supply/application/**!",
+    "!src/features/supply/application/stock-figures.ts!",
     "db/**/*.ts!",
     "!db/seeds/{demo*,factories}.ts!",
     "tests/**/*.{ts,tsx}",
