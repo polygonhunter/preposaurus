@@ -1,4 +1,5 @@
-// System-Lebensmittelarten, je einer System-Kategorie zugeordnet.
+// System-Lebensmittelarten, je einer System-Kategorie zugeordnet. Namen und Schlüssel nennen keinen
+// Behälter (die Dose ist ein Merkmal am Produkt), nur echte Unterschiede wie „getrocknet“.
 // VORLÄUFIG, wird vom Maintainer geprüft. Richtwerte (kcal_100, übliche Haltbarkeit) bleiben leer,
 // bis sie belegt sind (M1-08). Sie wären ohnehin nur Anzeige-Richtwerte, nie ein MHD.
 type SystemFoodType = Readonly<{ key: string; name: string; category: string }>
@@ -24,11 +25,13 @@ export const SYSTEM_FOOD_TYPES: readonly SystemFoodType[] = [
     ['muesli', 'Müsli'],
   ]),
   ...inCategory('gemuese_huelsenfruechte', [
+    ['linsen', 'Linsen'],
     ['linsen_getrocknet', 'Linsen getrocknet'],
-    ['kichererbsen_dose', 'Kichererbsen Dose'],
-    ['weisse_bohnen_dose', 'Weiße Bohnen Dose'],
-    ['kidneybohnen_dose', 'Kidneybohnen Dose'],
-    ['mais_dose', 'Mais'],
+    ['kichererbsen', 'Kichererbsen'],
+    ['kichererbsen_getrocknet', 'Kichererbsen getrocknet'],
+    ['weisse_bohnen', 'Weiße Bohnen'],
+    ['kidneybohnen', 'Kidneybohnen'],
+    ['mais', 'Mais'],
     ['erbsen_moehren', 'Erbsen & Möhren'],
     ['tomaten_gehackt', 'Tomaten gehackt'],
     ['passierte_tomaten', 'Passierte Tomaten'],
@@ -39,16 +42,18 @@ export const SYSTEM_FOOD_TYPES: readonly SystemFoodType[] = [
   ]),
   ...inCategory('obst_nuesse', [
     ['apfelmus', 'Apfelmus'],
-    ['pfirsiche_dose', 'Pfirsiche Dose'],
-    ['ananas_dose', 'Ananas Dose'],
-    ['mandarinen_dose', 'Mandarinen Dose'],
+    ['pfirsiche', 'Pfirsiche'],
+    ['ananas', 'Ananas'],
+    ['mandarinen', 'Mandarinen'],
     ['rosinen', 'Rosinen'],
     ['trockenobst', 'Trockenobst'],
     ['walnuesse', 'Walnüsse'],
     ['haselnuesse', 'Haselnüsse'],
     ['mandeln', 'Mandeln'],
-    ['erdnuesse', 'Erdnüsse'],
+    ['erdnuesse', 'Erdnüsse und Erdnussbutter'],
   ]),
+  // Pflanzendrinks stehen bei Milch, weil sie im Vorrat dieselbe Rolle spielen: Sie werden wie
+  // Milch verwendet und gelagert. Wer vegan lebt, findet sie so an der erwarteten Stelle.
   ...inCategory('milch', [
     ['h_milch', 'H-Milch'],
     ['haferdrink', 'Haferdrink'],
@@ -63,7 +68,7 @@ export const SYSTEM_FOOD_TYPES: readonly SystemFoodType[] = [
     ['makrele', 'Makrele'],
     ['hering', 'Hering'],
     ['fleischkonserve', 'Fleischkonserve'],
-    ['wuerstchen_glas', 'Würstchen im Glas'],
+    ['wuerstchen', 'Würstchen'],
     ['eipulver', 'Eipulver'],
   ]),
   ...inCategory('fette_oele', [
@@ -71,21 +76,16 @@ export const SYSTEM_FOOD_TYPES: readonly SystemFoodType[] = [
     ['olivenoel', 'Olivenöl'],
     ['sonnenblumenoel', 'Sonnenblumenöl'],
     ['butterschmalz', 'Butterschmalz'],
-    ['erdnussbutter', 'Erdnussbutter'],
   ]),
   ...inCategory('wasser', [
     ['stilles_wasser', 'Stilles Wasser'],
     ['sprudelwasser', 'Sprudelwasser'],
   ]),
-  ...inCategory('getraenke', [
-    ['fruchtsaft', 'Fruchtsaft'],
-    ['tee', 'Tee'],
-    ['kaffee', 'Kaffee'],
-  ]),
+  ...inCategory('getraenke', [['fruchtsaft', 'Fruchtsaft']]),
   ...inCategory('fertiggerichte', [
     ['ravioli', 'Ravioli'],
     ['eintopf', 'Eintopf'],
-    ['suppe_dose', 'Suppe Dose'],
+    ['suppe', 'Suppe'],
     ['instantnudeln', 'Instantnudeln'],
   ]),
   ...inCategory('sonstiges', [
@@ -95,5 +95,8 @@ export const SYSTEM_FOOD_TYPES: readonly SystemFoodType[] = [
     ['marmelade', 'Marmelade'],
     ['schokolade', 'Schokolade'],
     ['kakaopulver', 'Kakaopulver'],
+    // Tee und Kaffee liefern kaum Energie und zählen nicht als Getränk für den Wasserbedarf.
+    ['tee', 'Tee'],
+    ['kaffee', 'Kaffee'],
   ]),
 ]
