@@ -1,4 +1,4 @@
-import { dayParts, type CalendarDay } from '@/shared/lib/dates'
+import { formatDayWithPrecision, type CalendarDay } from '@/shared/lib/dates'
 import type { BestBefore, BestBeforePrecision } from './unit'
 
 /** Einheiten mit gleichem Datum, gleicher Genauigkeit und gleichem Schätz-Kennzeichen. */
@@ -21,16 +21,6 @@ export type BestBeforeGroup = DatedGroup | NoDateGroup
 const NO_DATE_LABEL = 'Datum fehlt'
 
 const PRECISION_ORDER: Record<BestBeforePrecision, number> = { day: 0, month: 1, year: 2 }
-
-const pad2 = (value: number) => String(value).padStart(2, '0')
-
-/** MHD so, wie es aufgedruckt war: „30.09.2027“, „09/2027“ oder „2027“. */
-export function formatBestBefore({ date, precision }: Omit<BestBefore, 'isEstimated'>): string {
-  const { year, month, day } = dayParts(date)
-  if (precision === 'year') return String(year)
-  if (precision === 'month') return `${pad2(month)}/${String(year)}`
-  return `${pad2(day)}.${pad2(month)}.${String(year)}`
-}
 
 const groupKey = (entry: BestBefore) =>
   `${entry.date}|${entry.precision}|${String(entry.isEstimated)}`
@@ -70,5 +60,5 @@ export function formatBestBeforeGroup(group: BestBeforeGroup): string {
   const count = `${String(group.count)}×`
   if (group.kind === 'no-date') return `${NO_DATE_LABEL} (${count})`
   const estimated = group.isEstimated ? ', geschätzt' : ''
-  return `${formatBestBefore(group)} (${count}${estimated})`
+  return `${formatDayWithPrecision(group)} (${count}${estimated})`
 }

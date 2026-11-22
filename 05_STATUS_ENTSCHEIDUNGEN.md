@@ -168,6 +168,15 @@ Beim Datenmodell getroffen, Details in den Kopfkommentaren von `src/server/db/sc
 - **CI** (`.github/workflows/docker.yml`): baut beide Images auf beiden Architekturen ohne Push, prüft sharp, startet `compose.yaml` in einem eigenen Installationsordner bis `/api/health` (Port nur an 127.0.0.1, web nicht root, Notfall-Befehl samt Log-Spur) und sichert, ändert, spielt zurück und vergleicht die Zeilenzahlen aller Tabellen. Die Tailscale-Überlagerung wird nur per `docker compose config` geprüft.
 - **Anleitung** heißt `docs/INSTALLATION.md` (nicht `docs/EINRICHTUNG.md` wie im Plan, Vorgabe des Maintainers für #101). Sie ist am Gerät noch nicht geprüft (M13-06).
 
+## Fachliche Festlegungen aus M11-02 (2026-11-22, Erinnerungen, #85, vorläufig)
+- **Reine Fachlogik** in `src/features/reminders/domain`: `planReminder` entscheidet je Haushalt, ob jetzt eine Nachricht hinausgeht, und liefert sie mit den Merkern, die danach gesetzt werden. Zeitpläne in Europe/Berlin, „einmal am Tag“ heißt Berliner Kalendertag.
+- **Wochenübersicht:** ab der gewählten Uhrzeit am gewählten Wochentag, am selben Tag nachholbar. Zeilen für Abgelaufen, Diese Woche (mit bis zu drei Namen), Diesen Monat, Nachkaufen, Ziel und höchstens eine Zeile „Datum fehlt“. „In 3 Monaten“ fehlt. Kein Anlass (nichts fällig, nichts offen, Ziel erreicht oder keins) → keine Nachricht.
+- **Dringend:** nur Gruppe „Diese Woche“, alle neuen Einträge gebündelt in einer Nachricht. Neu heißt: beim letzten Versand noch nicht in „Diese Woche“ oder seither eine Packung dazu (braucht je Eintrag das Erfassungsdatum der neuesten Packung).
+- **Ruhezeit** (neu): „Dringend“ geht nicht zwischen 21:00 und 8:00 Uhr hinaus. Die Wochenübersicht hat eine selbst gewählte Uhrzeit und ist ausgenommen.
+- **Bündelung:** Am Tag der Wochenübersicht wartet „Dringend“ auf sie, sie setzt beide Merker. So kommt höchstens eine Nachricht am Tag.
+- **Ziel der Nachricht** ist abstrakt (`overview` bzw. `due`), die Adresse legt die Oberfläche fest. `formatBestBefore` ist als `formatDayWithPrecision` nach `shared/lib/dates.ts` gewandert, weil domain/ zwischen Features nur Typen teilt.
+- Die Merker `wochenuebersicht_gesendet_am` und `dringend_gesendet_am` (SCHNITTSTELLEN Nr. 27) fehlen noch im Schema und kommen mit M11-05.
+
 ## Offene Fragen an den Maintainer (endgültige Entscheidung steht noch aus)
 1. **Offline**: nur anzeigen oder auch eintragen (mit späterem Abgleich)?
 2. ~~**Lizenz**~~ entschieden 2026-11-22: AGPL-3.0-or-later (siehe oben). Der Prototyp mit GSAP ist ausgenommen, siehe `prototypes/README.md`
