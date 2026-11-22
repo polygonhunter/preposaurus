@@ -23,6 +23,13 @@ export function daysFrom(today: Date, days: number): string {
 // Tage bis zum MHD je Ampelstufe bei den Standard-Schwellen 90 (gelb) und 28 (orange) Tage.
 export const AMPEL_OFFSETS = { gruen: 400, gelb: 60, orange: 10, rot: -3 } as const
 
+// Stufe einer Demo-Einheit: eine Ampelstufe oder „Datum fehlt“ (MHD leer, später nachtragbar).
+export type DemoUnitStage = keyof typeof AMPEL_OFFSETS | 'datum_fehlt'
+
+export function bestBeforeFor(stage: DemoUnitStage, today: Date): string | null {
+  return stage === 'datum_fehlt' ? null : daysFrom(today, AMPEL_OFFSETS[stage])
+}
+
 export function buildHousehold(
   overrides: Partial<Insert<typeof households>> = {},
 ): WithId<Insert<typeof households>> {
@@ -80,7 +87,7 @@ export function buildProduct(
 }
 
 export function buildUnit(
-  overrides: Partial<Insert<typeof units>> & { productId: string; bestBefore: string },
+  overrides: Partial<Insert<typeof units>> & { productId: string },
 ): WithId<Insert<typeof units>> {
   return { status: 'vorrat', ...overrides, id: overrides.id ?? randomUUID() }
 }

@@ -50,6 +50,13 @@
       "when": 1795352732950,
       "tag": "0006_lebensmittelart",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795353941334,
+      "tag": "0007_mhd_optional",
+      "breakpoints": true
     }
   ]
 }

@@ -9,7 +9,7 @@ import { products, units } from '../../src/server/db/schema/inventory'
 import { goals } from '../../src/server/db/schema/recommendation'
 import { restockItems } from '../../src/server/db/schema/restock'
 import {
-  AMPEL_OFFSETS,
+  bestBeforeFor,
   buildGoal,
   buildHousehold,
   buildHouseholdSettings,
@@ -91,7 +91,7 @@ async function insertStock({ db, householdId, today }: DemoContext, lookups: Loo
   await db.insert(products).values(built.map(({ product }) => product))
   const unitRows = built.flatMap(({ product, stages }) =>
     stages.map((stage) =>
-      buildUnit({ productId: product.id, bestBefore: daysFrom(today, AMPEL_OFFSETS[stage]) }),
+      buildUnit({ productId: product.id, bestBefore: bestBeforeFor(stage, today) }),
     ),
   )
   await db.insert(units).values(unitRows)

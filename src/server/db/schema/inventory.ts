@@ -81,8 +81,9 @@ export const units = pgTable(
     productId: uuid('produkt_id')
       .notNull()
       .references(() => products.id, { onDelete: 'cascade' }),
-    // Pflicht: Die App erfindet nie ein Datum. „Ohne Datum“ speichert eine Schätzung mit mhd_geschaetzt.
-    bestBefore: date('mhd').notNull(),
+    // Leer heißt „Datum fehlt“ und lässt sich später von Hand nachtragen. Die App erfindet nie ein
+    // Datum: Eine KI-Schätzung gibt es nur auf ausdrückliche Wahl, dann mit mhd_geschaetzt markiert.
+    bestBefore: date('mhd'),
     bestBeforePrecision: text('mhd_genauigkeit', { enum: BEST_BEFORE_PRECISIONS })
       .notNull()
       .default('tag'),
@@ -102,6 +103,11 @@ export const units = pgTable(
       isOneOf(table.bestBeforePrecision, BEST_BEFORE_PRECISIONS),
     ),
     check('einheit_mhd_art_check', isOneOf(table.bestBeforeKind, BEST_BEFORE_KINDS)),
+    // Geschätzt kann nur ein Datum sein, das es gibt.
+    check(
+      'einheit_mhd_geschaetzt_check',
+      sql`not ${table.isBestBeforeEstimated} or ${table.bestBefore} is not null`,
+    ),
     // Verbraucht oder entsorgt heißt immer: mit Zeitpunkt. Im Vorrat gibt es keinen.
     check('einheit_entnahme_check', sql`(${table.status} = 'vorrat') = (${table.takenAt} is null)`),
   ],

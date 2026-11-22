@@ -37,7 +37,7 @@ describe('Demo-Daten', () => {
     ])
   })
 
-  it('enthält Einheiten in allen Ampelstufen', async () => {
+  it('enthält Einheiten in allen Ampelstufen und eine mit fehlendem Datum', async () => {
     const stock = await testDb.db
       .select({ bestBefore: units.bestBefore })
       .from(units)
@@ -47,6 +47,7 @@ describe('Demo-Daten', () => {
     for (const offset of Object.values(AMPEL_OFFSETS)) {
       expect(dates).toContain(daysFrom(TODAY, offset))
     }
+    expect(dates).toContain(null)
   })
 
   it('enthält Historie mit einer verbrauchten und einer entsorgten Einheit', async () => {

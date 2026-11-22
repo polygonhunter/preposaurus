@@ -1,8 +1,6 @@
 // Inhalt des Beispielhaushalts (nach prototypes/lib/mock-data.ts). Erfundene Personen, erfundene
 // Produkte. Die MHDs stehen als Ampelstufe da und werden relativ zum Tag des Seeds berechnet.
-import type { AMPEL_OFFSETS } from './factories'
-
-type AmpelStage = keyof typeof AMPEL_OFFSETS
+import type { DemoUnitStage } from './factories'
 
 export type DemoProduct = Readonly<{
   name: string
@@ -14,7 +12,7 @@ export type DemoProduct = Readonly<{
   contentAmount: string
   contentUnit: 'g' | 'ml'
   kcalPer100: string
-  units: readonly AmpelStage[]
+  units: readonly DemoUnitStage[]
 }>
 
 export const DEMO_MEMBERS = [
@@ -51,7 +49,7 @@ export const DEMO_PRODUCTS: readonly DemoProduct[] = [
     location: 'Küche',
     contentAmount: '500',
     kcalPer100: '372',
-    units: ['orange'],
+    units: ['orange', 'datum_fehlt'],
   }),
   product('Linsen', {
     category: 'gemuese_huelsenfruechte',
