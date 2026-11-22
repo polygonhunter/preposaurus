@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
-import {
-  formatBestBefore,
-  formatBestBeforeGroup,
-  groupByBestBefore,
-  type BestBeforeGroup,
-} from './group-units'
+import { formatBestBeforeGroup, groupByBestBefore, type BestBeforeGroup } from './group-units'
 import type { BestBefore, BestBeforePrecision } from './unit'
 
 function bestBefore(date: string, precision: BestBeforePrecision = 'month', isEstimated = false) {
@@ -90,21 +85,5 @@ describe('groupByBestBefore mit „Datum fehlt“', () => {
         count: 1,
       },
     ])
-  })
-})
-
-describe('formatBestBefore', () => {
-  it.each([
-    ['day', '30.09.2027'],
-    ['month', '09/2027'],
-    ['year', '2027'],
-  ] as const)('zeigt Genauigkeit %s als %s', (precision, text) => {
-    expect(formatBestBefore({ date: toCalendarDay('2027-09-30'), precision })).toBe(text)
-  })
-
-  it('zeigt einstellige Tage und Monate zweistellig', () => {
-    expect(formatBestBefore({ date: toCalendarDay('2027-03-05'), precision: 'day' })).toBe(
-      '05.03.2027',
-    )
   })
 })
