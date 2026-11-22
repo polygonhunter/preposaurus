@@ -1,10 +1,11 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["src/server/db/migrate.ts!", "src/server/db/schema/*.ts!"],
+  "entry": ["src/server/db/migrate.ts!", "src/server/db/schema/*.ts!", "db/seeds/index.ts!"],
   "project": [
     "src/**/*.{ts,tsx,css}!",
     "!src/features/*/domain/**!",
     "!src/shared/lib/{dates,quantities}.ts!",
+    "db/**/*.ts!",
     "tests/**/*.{ts,tsx}",
     "eslint/**/*.mjs",
     "scripts/**/*.ts"
