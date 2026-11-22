@@ -8,6 +8,7 @@ import { manualCaptureSchema } from '../schemas'
 import {
   captureErrorsOf,
   clearErrorsFor,
+  draftForSaving,
   emptyDraft,
   firstInvalidField,
   type CaptureErrors,
@@ -37,7 +38,7 @@ function useSaveCapture(onInvalid: InvalidHandler) {
   const [result, dispatch, isSaving] = useActionState(save, null)
 
   function submit(draft: ManualCaptureDraft) {
-    const parsed = manualCaptureSchema.safeParse(draft)
+    const parsed = manualCaptureSchema.safeParse(draftForSaving(draft))
     if (parsed.success) {
       setErrors({})
       startTransition(() => {

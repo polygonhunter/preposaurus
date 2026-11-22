@@ -32,6 +32,16 @@ export function emptyDraft(storageLocationId: string | null): ManualCaptureDraft
   }
 }
 
+/**
+ * Was gespeichert wird: Beim Nachschub sind Lagerort und Nährwerte ausgeblendet und gehören zum
+ * vorhandenen Produkt. Vorher Eingetipptes darf dann weder speichern noch eine unsichtbare Meldung
+ * auslösen. Es bleibt im Entwurf, falls doch „Neu anlegen“ gewählt wird.
+ */
+export function draftForSaving(draft: ManualCaptureDraft): ManualCaptureDraft {
+  if (draft.existingProductId === null) return draft
+  return { ...draft, storageLocationId: null, nutrition: emptyDraft(null).nutrition }
+}
+
 /** Felder mit eigener Meldung, in der Reihenfolge des Formulars. `form` steht am Knopf. */
 const CAPTURE_FIELDS = ['foodTypeId', 'content', 'units', ...NUTRITION_FIELDS] as const
 export type CaptureField = (typeof CAPTURE_FIELDS)[number] | 'form'

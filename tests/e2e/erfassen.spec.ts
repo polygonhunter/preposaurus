@@ -50,6 +50,15 @@ test('Fehler stehen am Feld, der Fokus springt zum ersten', async ({ page }) => 
   await expect(bestBefore(page)).toHaveAccessibleDescription(/Bitte gib ein MHD ein oder wähle/)
   await expectAccessibleLayout(page)
 
+  // Eingetippt, aber nicht hinzugefügt: Die Meldung sagt, was fehlt.
+  await bestBefore(page).fill('2027')
+  await page.getByRole('button', { name: 'Speichern' }).click()
+  await expect(bestBefore(page)).toHaveAccessibleDescription(/Bitte übernimm das Datum mit Enter/)
+  // Fällt eine Zeile weg, bleibt der Fokus im Datumsfeld.
+  await bestBefore(page).press('Enter')
+  await page.getByRole('button', { name: '2027 entfernen' }).click()
+  await expect(bestBefore(page)).toBeFocused()
+
   await content(page).fill('6 Stück')
   await addDate(page, '09/27')
   await page.getByRole('button', { name: 'Speichern' }).click()

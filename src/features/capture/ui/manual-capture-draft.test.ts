@@ -6,6 +6,7 @@ import { manualCaptureSchema } from '../schemas'
 import {
   captureErrorsOf,
   clearErrorsFor,
+  draftForSaving,
   emptyDraft,
   firstInvalidField,
   type ManualCaptureDraft,
@@ -74,6 +75,21 @@ describe('manualCaptureSchema', () => {
     const value = manualCaptureSchema.parse(draft({ existingProductId: PRODUCT }))
 
     expect(value.product).toEqual({ kind: 'existing', productId: PRODUCT })
+  })
+
+  it('übergeht beim Nachschub vorher eingetippte Nährwerte, die dann ausgeblendet sind', () => {
+    const restock = draft({
+      existingProductId: PRODUCT,
+      nutrition: { kcal: 'viel', protein: '', carbs: '', fat: '' },
+    })
+
+    expect(manualCaptureSchema.safeParse(restock).success).toBe(false)
+    expect(manualCaptureSchema.parse(draftForSaving(restock)).product).toEqual({
+      kind: 'existing',
+      productId: PRODUCT,
+    })
+    const newProduct = draft()
+    expect(draftForSaving(newProduct)).toBe(newProduct)
   })
 
   it('meldet fehlende Pflichtangaben am jeweiligen Feld', () => {

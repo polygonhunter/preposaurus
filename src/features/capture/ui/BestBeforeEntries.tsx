@@ -1,5 +1,5 @@
 'use client'
-import { useId, useState, type KeyboardEvent } from 'react'
+import { useId, useRef, useState, type KeyboardEvent } from 'react'
 import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
@@ -23,12 +23,18 @@ const PARSE_MESSAGES: Record<BestBeforeParseError['kind'], string> = {
   'year-out-of-range': 'Bitte ein Jahr zwischen 2000 und 2099 eingeben.',
 }
 
+/** Beim Speichern steht noch ein Datum im Feld, das nicht hinzugefügt wurde. */
+const PENDING_MESSAGE = 'Bitte übernimm das Datum mit Enter oder „Datum hinzufügen“.'
+
 // MHD manuell (#53): je Datum ein Eintrag mit Anzahl, „Datum fehlt“ als eigene Wahl (#116).
 // Die Genauigkeit folgt der Eingabe (Tag, Monat oder Jahr). Es wird nie ein Datum vorgeschlagen.
 export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntriesProps) {
   const headerId = useId()
   const [text, setText] = useState('')
   const [parseError, setParseError] = useState<string>()
+  const inputRef = useRef<HTMLInputElement>(null)
+  const isPending = error !== undefined && entries.length === 0 && text.trim() !== ''
+  const fieldError = parseError ?? (isPending ? PENDING_MESSAGE : error)
 
   function addTyped() {
     const parsed = parseBestBefore(text, todayInBerlin(new Date()))
@@ -64,7 +70,8 @@ export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntrie
             setText(event.target.value)
           }}
           onKeyDown={addOnEnter}
-          error={parseError ?? error}
+          ref={inputRef}
+          error={fieldError}
         />
         <div className="flex flex-wrap gap-2">
           <Button variant="tinted" onClick={addTyped}>
@@ -85,7 +92,10 @@ export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntrie
         entries={entries}
         labelledBy={headerId}
         onCountChange={(key, delta) => {
-          onChange(changeDateCount(entries, { key, delta }))
+          const next = changeDateCount(entries, { key, delta })
+          // Verschwindet die Zeile samt Knopf, bleibt der Fokus nicht im Nichts, sondern im Feld.
+          if (next.length < entries.length) inputRef.current?.focus()
+          onChange(next)
         }}
       />
     </section>
