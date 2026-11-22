@@ -14,6 +14,8 @@
     "!src/shared/lib/{dates,quantities,slug,stock-unit}.ts!",
     "!src/server/{ai,storage}/**!",
     "!src/features/capture/{application/**,schemas.ts}!",
+    "!src/features/inventory/{application/**,data/**,schemas.ts}!",
+    "!src/features/supply/application/**!",
     "db/**/*.ts!",
     "!db/seeds/{demo*,factories}.ts!",
     "tests/**/*.{ts,tsx}",
