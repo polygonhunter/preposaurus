@@ -1,15 +1,9 @@
 import type { BestBefore } from '@/features/inventory/domain/unit'
 import type { CalendarDay } from '@/shared/lib/dates'
 import type { Quantity, QuantityUnit } from '@/shared/lib/quantities'
-import { ok, type Result } from '@/shared/lib/result'
 import { estimatedKcalShare, isApproximate } from './approximation'
-import {
-  calculateSupplyDays,
-  type SupplyError,
-  type SupplyInput,
-  type SupplyUnit,
-} from './supply-days'
-import { isCountedOn, isFreshOn } from './supply-rules'
+import type { SupplyInput, SupplyUnit } from './supply-days'
+import { daysOrNull, isCountedOn, isFreshOn } from './supply-rules'
 
 // Summen je Knoten des Baums Warengruppe → Kategorie → Lebensmittelart → Produkt (UX-Konzept A8).
 // Der Baum kommt als Daten herein: Jede Einheit trägt ihren Pfad, ein Knoten ist Ebene + Schlüssel.
@@ -47,9 +41,9 @@ export interface NodeTotals {
   amounts: Record<QuantityUnit, number>
   kcal: number
   macros: Macros
-  /** Beitrag in Tagen, gerechnet wie „versorgt“ (M2-07) */
-  energyDays: number
-  waterDays: number
+  /** Beitrag in Tagen, gerechnet wie „versorgt“ (M2-07). Ohne Bedarf null, der Rest zählt weiter */
+  energyDays: number | null
+  waterDays: number | null
   /** Frühestes MHD der gezählten Packungen, null wenn keine ein Datum hat */
   nextBestBefore: BestBefore | null
   /** Packungen im Vorrat mit „Datum fehlt“, gesondert gezählt */
@@ -97,25 +91,30 @@ function earliestBestBefore(units: readonly NodeUnit[], day: CalendarDay): BestB
   return earliest
 }
 
+const sumOf = (units: readonly NodeUnit[], pick: (unit: NodeUnit) => number) =>
+  units.reduce((total, unit) => total + pick(unit), 0)
+
 /** Summen eines Knotens am Stichtag. Ein Knoten ohne Packungen ergibt überall 0. */
-export function calculateNodeTotals(input: NodeTotalsInput): Result<NodeTotals, SupplyError> {
+export function calculateNodeTotals(input: NodeTotalsInput): NodeTotals {
   const inNode = input.units.filter((unit) => isInNode(unit, input.node))
-  const supply = calculateSupplyDays({ ...input, units: inNode })
-  if (!supply.ok) return supply
   const counted = inNode.filter((unit) => isCountedOn(unit, input.reference, input.stillGoodCounts))
   const inStock = inNode.filter((unit) => unit.status === 'stock')
   const share = estimatedKcalShare(counted)
-  return ok({
+  const kcal = sumOf(counted, (unit) => unit.kcal)
+  return {
     packages: counted.length,
     uncountedPackages: inStock.length - counted.length,
     amounts: sumContent(counted),
-    kcal: supply.value.kcal,
+    kcal,
     macros: sumMacros(counted),
-    energyDays: supply.value.energyDays,
-    waterDays: supply.value.waterDays,
+    energyDays: daysOrNull(kcal, input.need.kcalPerDay),
+    waterDays: daysOrNull(
+      sumOf(counted, (unit) => unit.waterMl),
+      input.need.waterMlPerDay,
+    ),
     nextBestBefore: earliestBestBefore(counted, input.reference.day),
     withoutDate: inStock.filter((unit) => unit.bestBefore === null).length,
     estimatedKcalShare: share,
     isApproximate: isApproximate(share),
-  })
+  }
 }

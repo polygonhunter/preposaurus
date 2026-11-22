@@ -57,11 +57,8 @@ function unit({
   return { ...base, path, content, macros: { protein: 65, carbs: 355, fat: 7.5 } }
 }
 
-const totalsOf = (units: NodeUnit[], node: TreeNode, reference = today) => {
-  const result = calculateNodeTotals({ stillGoodCounts: false, units, node, need, reference })
-  if (!result.ok) throw new Error('Rechnung fehlgeschlagen')
-  return result.value
-}
+const totalsOf = (units: NodeUnit[], node: TreeNode, reference = today) =>
+  calculateNodeTotals({ stillGoodCounts: false, units, node, need, reference })
 
 const day = (text: string): CalendarDay => toCalendarDay(text)
 
@@ -143,15 +140,34 @@ describe('calculateNodeTotals', () => {
     expect(totals.nextBestBefore?.date).toBe(day('2028-03-31'))
   })
 
-  it('meldet einen Fehler, wenn kein Bedarf da ist', () => {
-    const result = calculateNodeTotals({
+  it('rechnet ohne Bedarf (nur Babys) Menge, kcal und Makros, aber keine Tage', () => {
+    const totals = calculateNodeTotals({
       stillGoodCounts: false,
       units: [unit()],
       node: { level: 'group', key: 'getreide' },
       need: { kcalPerDay: 0, waterMlPerDay: 0 },
       reference: today,
     })
-    expect(result).toEqual({ ok: false, error: { kind: 'no-need' } })
+    expect(totals).toMatchObject({
+      packages: 1,
+      amounts: { g: 500, ml: 0, piece: 0 },
+      kcal: 1795,
+      macros: { protein: 65, carbs: 355, fat: 7.5 },
+      energyDays: null,
+      waterDays: null,
+    })
+  })
+
+  it('lässt nur die Tage weg, für die der Bedarf fehlt', () => {
+    const totals = calculateNodeTotals({
+      stillGoodCounts: false,
+      units: [unit({ path: wasser, kcal: 0, waterMl: 3000 })],
+      node: { level: 'group', key: 'wasser' },
+      need: { kcalPerDay: 0, waterMlPerDay: 2000 },
+      reference: today,
+    })
+    expect(totals.energyDays).toBeNull()
+    expect(totals.waterDays).toBe(1.5)
   })
 })
 
@@ -161,11 +177,8 @@ describe('calculateNodeTotals mit „Noch gut zählt mit“', () => {
     unit({ bestBefore: '2026-01-01', checkedAt: '2026-11-20' }),
     unit({ bestBefore: '2027-09-30' }),
   ]
-  const totalsWithSwitch = (reference: ReferenceDay) => {
-    const result = calculateNodeTotals({ units, node, need, reference, stillGoodCounts: true })
-    if (!result.ok) throw new Error('Rechnung fehlgeschlagen')
-    return result.value
-  }
+  const totalsWithSwitch = (reference: ReferenceDay) =>
+    calculateNodeTotals({ units, node, need, reference, stillGoodCounts: true })
 
   it('zählt die geprüfte Packung heute mit, macht ihr Datum aber nicht zum nächsten MHD', () => {
     const totals = totalsWithSwitch(today)
@@ -182,8 +195,8 @@ describe('calculateNodeTotals mit „Noch gut zählt mit“', () => {
       reference: today,
       stillGoodCounts: true,
     })
-    expect(result.ok && result.value.packages).toBe(1)
-    expect(result.ok && result.value.nextBestBefore).toBeNull()
+    expect(result.packages).toBe(1)
+    expect(result.nextBestBefore).toBeNull()
   })
 
   it('zählt sie am Zieldatum nie', () => {
