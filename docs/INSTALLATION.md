@@ -352,7 +352,7 @@ Der Container fragt vor dem Ersetzen nach und erwartet die Eingabe `ja`. Läuft 
 So bleibt es sicher:
 - **Zuerst sichert er den jetzigen Zustand** nach `vor-wiederherstellung/…`. Hast du den falschen Stand gewählt, spielst du einfach diesen zurück.
 - Er spielt den Stand in eine **neue** Datenbank ein und ersetzt die alte erst, wenn das geklappt hat. Lässt sich der Stand nicht einspielen, bleibt alles, wie es war.
-- Die Fotos ersetzt er erst ganz am Ende.
+- Die Fotos ersetzt er erst ganz am Ende. Bricht das ab (z. B. Platte voll), nennt die Meldung den Stand `vor-wiederherstellung/…` von eben. Schaffe Platz und spiele denselben Stand noch einmal zurück.
 
 Erwartet: `Wiederhergestellt. Der Zustand davor liegt unter vor-wiederherstellung/…` und `Jetzt die App starten …: docker compose up -d`. Nimm `up -d` und nicht nur `start web`: So läuft auch `migrate` und bringt einen älteren Stand auf das Schema der aktuellen Version.
 
