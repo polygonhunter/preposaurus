@@ -46,6 +46,11 @@ export function isCountedOn(
   return countsAsStillGood(unit, reference, stillGoodCounts)
 }
 
+/** Beitrag in Tagen. Ohne Bedarf (etwa nur Babys im Haushalt) gibt es keine Zahl: null. */
+export function daysOrNull(amount: number, perDay: number): number | null {
+  return perDay > 0 ? roundDownDays(amount / perDay) : null
+}
+
 /** Rundet Tage auf eine Nachkommastelle ab, damit die App nie mehr verspricht als da ist. */
 export function roundDownDays(days: number): number {
   return Math.floor(days * SUPPLY_DAYS_FACTOR + ROUNDING_EPSILON) / SUPPLY_DAYS_FACTOR
