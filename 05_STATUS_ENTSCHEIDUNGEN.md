@@ -123,5 +123,5 @@ Beim Datenmodell getroffen, Details in den Kopfkommentaren von `src/server/db/sc
 ## Nächste Schritte
 1. Pakete aus `docs/UMSETZUNG.md` als GitHub-Issues abarbeiten, mit Tests (M0 liegt als PR vor, dann M1 und M2)
 2. PoC Foto-Erkennung: ca. 15 Verpackungs-, 10 Nährwert-, 30 MHD-Fotos vom Maintainer; Sonnet 5.5 vs. Haiku 5.5 messen (Kennzahl Nr. 1: erfundene MHDs)
-3. Offizielle Werte (BBK/BLE, DGE) an Primärquellen prüfen, bevor sie als Seed-Daten übernommen werden
+3. Offizielle Werte (BBK/BLE, DGE) an Primärquellen prüfen, bevor sie als Seed-Daten übernommen werden. **Prüfblatt liegt vor:** `docs/quellen/EMPFEHLUNGSWERTE.md` (#19). Es wartet auf die Freigabe durch den Maintainer (U3), danach folgt der Seed (M1-09)
 4. Danach Programmierung

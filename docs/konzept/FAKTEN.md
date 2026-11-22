@@ -135,6 +135,7 @@ Abweichungen von den Annahmen im Plan sind mit **⚠ Abweichung** markiert.
 
 ## F16 · BLE/BBK-Mengen und DGE-Werte
 - Laut Plan kein Auftrag für AP0. In den Seiten nicht als Tatsache nennen. – **nicht geprüft (außerhalb des Umfangs)**
+- **Nachtrag 2026-11-22:** an den Primärquellen geprüft im Prüfblatt `docs/quellen/EMPFEHLUNGSWERTE.md` (#19). Die Freigabe durch den Maintainer steht aus.
 
 ## F17 · GitHub-Issue #1
 - **Aussage:** Issue #1 heißt „Einrichtungsanleitung: Preposaurus auf dem NAS mit Tailscale“ und enthält 11 Listenpunkte. – https://github.com/polygonhunter/preposaurus/issues/1 (gelesen über `gh`) – **geprüft**
