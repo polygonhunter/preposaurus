@@ -16,9 +16,9 @@ export type NeedsByMemberType = Partial<Record<MemberType, PersonNeed>>
  * Vorläufige Annahme L20 (UMSETZUNG §7.3): Ein Baby lässt sich anlegen, zählt aber nicht im
  * Bedarf, solange der Sonderbedarf (HH-05) fehlt. Gilt auch, wenn die Quelle einen Wert hätte.
  */
-export const MEMBER_TYPES_WITHOUT_NEED: readonly MemberType[] = ['baby']
+const MEMBER_TYPES_WITHOUT_NEED: readonly MemberType[] = ['baby']
 
-export interface UncountedMembers {
+interface UncountedMembers {
   type: MemberType
   count: number
 }

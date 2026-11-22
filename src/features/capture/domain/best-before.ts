@@ -124,7 +124,7 @@ export function bestBeforeFromMonth(year: number, month: number): ParseResult {
   return buildMonth(year, month)
 }
 
-export const QUICK_PICK_MONTHS = {
+const QUICK_PICK_MONTHS = {
   'plus-6-months': 6,
   'plus-1-year': 12,
   'plus-2-years': 24,

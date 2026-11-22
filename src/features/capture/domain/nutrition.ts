@@ -2,10 +2,10 @@ import type { Quantity } from '@/shared/lib/quantities'
 import { err, ok, type Result } from '@/shared/lib/result'
 
 /** Umrechnung laut Lebensmittelinformationsverordnung: 1 kcal = 4,184 kJ. */
-export const KJ_PER_KCAL = 4.184
+const KJ_PER_KCAL = 4.184
 
 /** Worauf sich die Werte der Nährwerttabelle beziehen (Schema B der KI). */
-export type NutritionBasis = '100g' | '100ml' | 'portion'
+type NutritionBasis = '100g' | '100ml' | 'portion'
 
 const PER_100 = 100
 
