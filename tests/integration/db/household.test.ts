@@ -29,7 +29,7 @@ describe('Schema Haushalt', () => {
     await testDb.close()
   })
 
-  it('setzt die Standardwerte der Einstellungen (Ampel 90 und 28 Tage, KI aus)', async () => {
+  it('setzt die Standardwerte der Einstellungen (Ampel 90/28, KI aus, Noch gut zählt nicht)', async () => {
     const [settings] = await testDb.db.insert(householdSettings).values({ householdId }).returning()
 
     expect(settings).toMatchObject({
@@ -37,7 +37,22 @@ describe('Schema Haushalt', () => {
       ampelYellowDays: 90,
       ampelOrangeDays: 28,
       isAiEnabled: false,
+      stillGoodCountsAsSupplied: false,
+      weeklySummaryEnabled: true,
+      weeklySummaryWeekday: 6,
+      weeklySummaryTime: '10:00:00',
+      urgentEnabled: true,
+      setupCompletedAt: null,
     })
+  })
+
+  it('lehnt einen Wochentag außerhalb von 1 bis 7 ab', async () => {
+    const otherId = await insertHousehold('Wochentag-Haushalt')
+
+    await expectConstraintViolation(
+      testDb.db.insert(householdSettings).values({ householdId: otherId, weeklySummaryWeekday: 0 }),
+      'haushalt_einstellung_wochentag_check',
+    )
   })
 
   it('lehnt eine orange Schwelle über der gelben ab', async () => {

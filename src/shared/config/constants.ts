@@ -21,6 +21,10 @@ export const MEMBER_CONDITIONS = ['schwanger', 'stillend'] as const
 export const DEFAULT_AMPEL_YELLOW_DAYS = 90
 export const DEFAULT_AMPEL_ORANGE_DAYS = 28
 
+// Wochenübersicht standardmäßig samstags (ISO-Wochentag 6) um 10:00 Uhr
+export const DEFAULT_WEEKLY_SUMMARY_WEEKDAY = 6
+export const DEFAULT_WEEKLY_SUMMARY_TIME = '10:00'
+
 // Maßeinheit für Inhalt und Empfehlungsmengen. Wasser und Getränke in ml, sonst g.
 export const QUANTITY_UNITS = ['g', 'ml'] as const
 
