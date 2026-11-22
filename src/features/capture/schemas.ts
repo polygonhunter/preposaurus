@@ -2,8 +2,10 @@
 // für die Prüfung der Antwort. Bewusst schlank: alle Felder Pflicht und nullable, keine Zahlen-
 // oder Längengrenzen, weil Anthropic sie nicht unterstützt. Die Grenzen prüft danach das Mapping
 // in capture/domain (map-recognition.ts, map-best-before-recognition.ts).
+// Dazu am Ende die Eingabe des Speicherns (#51), gleich für Foto und manuell.
 import { z } from 'zod'
 import { AI_CONFIDENCE_LEVELS, CONTAINER_KEYS } from '@/shared/config/constants'
+import { parseCalendarDay } from '@/shared/lib/dates'
 
 const confidence = z.enum(AI_CONFIDENCE_LEVELS).describe('Wie sicher die Werte lesbar waren')
 
@@ -86,3 +88,83 @@ export type PackagingAnswer = z.infer<ReturnType<typeof packagingAnswerSchema>>
 export type NutritionAnswer = z.infer<typeof nutritionAnswerSchema>
 export type NutritionEstimateAnswer = z.infer<typeof nutritionEstimateAnswerSchema>
 export type BestBeforeAnswer = z.infer<typeof bestBeforeAnswerSchema>
+
+// ---------- Speichern einer Erfassung (#51) ----------
+// Eingabe von createStockAction. Die Grenzen folgen den Spalten: Mengen numeric(9,2),
+// Nährwerte je 100 numeric(6,2).
+
+const MAX_CONTENT = 9_999_999
+const MAX_PER_100 = 9_999
+const MAX_NAME_LENGTH = 120
+/** Schnellzahlen gehen bis 12, hochzählen darf weiter. Mehr in einem Chip ist ein Tippfehler. */
+const MAX_COUNT_PER_DATE = 99
+const MAX_DATES_PER_CAPTURE = 30
+
+const calendarDay = z.string().transform((text, context) => {
+  const day = parseCalendarDay(text)
+  if (day !== null) return day
+  context.addIssue({ code: 'custom', message: 'Kein gültiges Datum' })
+  return z.NEVER
+})
+
+const unitEntrySchema = z.object({
+  /** null heißt „Datum fehlt“ (#116) */
+  bestBefore: z
+    .object({
+      date: calendarDay,
+      precision: z.enum(['day', 'month', 'year']),
+      isEstimated: z.boolean().default(false),
+    })
+    .nullable(),
+  kind: z.enum(['best-before', 'use-by']).default('best-before'),
+  count: z.int().min(1).max(MAX_COUNT_PER_DATE),
+})
+
+const per100 = z.number().min(0).max(MAX_PER_100).nullable()
+const optionalId = z.uuid().nullable().default(null)
+
+const contentSchema = z.object({
+  value: z.number().positive().max(MAX_CONTENT),
+  unit: z.enum(['g', 'ml']),
+})
+
+const newProductSchema = z.object({
+  kind: z.literal('new'),
+  foodTypeId: z.uuid(),
+  name: z.string().trim().max(MAX_NAME_LENGTH).nullable().default(null),
+  content: contentSchema,
+  drainedWeightG: z.number().positive().max(MAX_CONTENT).nullable().default(null),
+  containerId: optionalId,
+  storageLocationId: optionalId,
+  nutrition: z
+    .object({
+      kcal: per100,
+      protein: per100,
+      carbs: per100,
+      fat: per100,
+      source: z.enum(['label', 'manual', 'ai-estimate']),
+      isConfirmed: z.boolean().default(false),
+    })
+    .nullable()
+    .default(null),
+})
+
+export const createStockSchema = z.object({
+  /** Idempotenz-Schlüssel: einmal je Erfassung auf dem Gerät erzeugt */
+  captureId: z.uuid(),
+  method: z.enum(['photo', 'manual']),
+  product: z.discriminatedUnion('kind', [
+    z.object({ kind: z.literal('existing'), productId: z.uuid() }),
+    newProductSchema,
+  ]),
+  units: z.array(unitEntrySchema).min(1).max(MAX_DATES_PER_CAPTURE),
+})
+
+/** Suche nach einem passenden Produkt für „Zu Spaghetti 500 g hinzufügen?“ */
+export const productMatchQuerySchema = z.object({
+  foodTypeId: z.uuid(),
+  content: contentSchema,
+  containerId: optionalId,
+})
+
+export type ProductMatchQuery = z.infer<typeof productMatchQuerySchema>
