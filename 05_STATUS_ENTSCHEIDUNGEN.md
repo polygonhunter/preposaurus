@@ -3,7 +3,7 @@
 > Zentrale Übersicht für jede neue Session (lokal oder Cloud). Details stehen in den Konzeptdateien 00–04.
 
 ## Phase
-Konzept ✅ · Recherche ✅ · UI-Prototyp ✅ · Konzept-Dokumente ✅ (`docs/konzept/`) · **Freigabe ✅ (2026-11-22)** · Umsetzungsplan ✅ (`docs/UMSETZUNG.md`) · Programmierung 🔄 (M0 Projektgerüst als PR) · PoC Foto-Erkennung ⬜
+Konzept ✅ · Recherche ✅ · UI-Prototyp ✅ · Konzept-Dokumente ✅ (`docs/konzept/`) · **Freigabe ✅ (2026-11-22)** · Umsetzungsplan ✅ (`docs/UMSETZUNG.md`) · Programmierung 🔄 (M0 und M2 gemergt, M1 Datenmodell als PR) · PoC Foto-Erkennung ⬜
 
 Der Maintainer hat am 2026-11-22 auf Rückfrage ausdrücklich bestätigt: Die drei Konzept-Dokumente sind samt aller Vorschläge freigegeben, das Programmieren des MVP ebenso. Gearbeitet wird nach `docs/UMSETZUNG.md` und `docs/CODE_PRINZIPIEN.md`.
 
@@ -74,6 +74,19 @@ Beim Umsetzen der Fachlogik getroffen, jeweils als benannte Konstante, damit ein
 - **Geschätztes MHD** („Ohne Datum“) = heute + übliche Haltbarkeit der Kategorie, Genauigkeit Tag, immer mit Kennzeichen. Ohne üblichen Wert gibt es keine Schätzung.
 - **Ernährungsform:** Die Verschiebung zwischen Warengruppen ist mengengleich je Einheit (g bzw. ml). Verteilungsdaten werden vor dem Rechnen geprüft: unbekannte Gruppe, Anteile ≠ 1 oder ein Wechsel zwischen g und ml ergeben einen Fehlerwert. Ob dabei auch die kcal-Summe gleich bleibt, hängt an den geprüften Ersatzregeln (U3).
 - **FIFO und knappste Warengruppe:** Bei Gleichstand gewinnt die zuerst genannte Einheit bzw. Gruppe.
+
+## Technische Festlegungen aus M1 (2026-11-22)
+Beim Datenmodell getroffen, Details in den Kopfkommentaren von `src/server/db/schema/*.ts`:
+- **Versionen:** drizzle-orm 0.45.4, drizzle-kit 0.31.11 (stabile Linie, nicht 1.0-rc), PGlite 0.5.17, pg 8.23.1, tsx 4.23.15 für die Skripte `db:migrate`, `db:seed`, `db:seed:demo`.
+- **Migrationen** spielt `npm run db:migrate` mit dem Migrator von drizzle-orm ein (derselbe Code wie in den Tests), nicht `drizzle-kit migrate`. So braucht der spätere `migrate`-Container kein drizzle-kit.
+- **Namen:** Tabellen und eigene Spalten deutsch, jeder Spaltenname steht ausdrücklich im Schema, `casing` bleibt aus. Spalten, die nur Better Auth nutzt (`email_verified`, `token`, `expires_at` …), behalten die englischen Namen der Bibliothek, Fremdschlüssel heißen trotzdem `nutzer_id`.
+- **Wertelisten** als `text` mit CHECK statt PostgreSQL-Enum, die Listen stehen in `src/shared/config/constants.ts`.
+- **System-Stammdaten** (Kategorien, Lebensmittelarten, Behälter) liegen ohne `haushalt_id` und mit festem `schluessel`, eigene Einträge mit `haushalt_id`. Ein CHECK hält beides auseinander. Der Seed überschreibt Name, Zuordnung und Sortierung, nie `ausgeblendet`.
+- **`haushalt_id`** steht an jeder Tabelle mit direktem Haushaltsbezug. Kindtabellen (`einheit`, `mitglied_allergie`, `sitzung`, `konto`) erreichen den Haushalt über ihre Elterntabelle, damit nichts doppelt gespeichert ist.
+- **`nutzer.haushalt_id`** ist vorerst nullable, damit Better Auth einen Nutzer anlegen kann, bevor die Einrichtung ihn zuordnet (M3 prüft das).
+- **`einheit.mhd`** ist Pflicht. „Ohne Datum“ speichert eine Schätzung mit `mhd_geschaetzt = true`. Ein CHECK verlangt bei `verbraucht`/`entsorgt` immer `entnommen_am`.
+- **Lebensmittelart** (Maintainer-Entscheidung 2026-11-22): Baum Warengruppe → Kategorie → Lebensmittelart → Produkt → Einheit. `produkt.kategorie_id` bleibt Pflicht, `produkt.lebensmittelart_id` ist optional. Ein zusammengesetzter Fremdschlüssel `(lebensmittelart_id, kategorie_id)` sichert ohne Trigger, dass die Kategorie des Produkts die der Art ist, und zieht sie per `ON UPDATE CASCADE` mit. Die Startliste (69 Arten) ist vorläufig und wartet auf Prüfung durch den Maintainer, Richtwerte bleiben bis M1-08 leer.
+- **`ki_einstellung`** (Issue #108) ist als Schema angelegt: Anbieter, Schlüssel als Chiffrat + IV + Tag (Base64-Text), Modell je Foto-Rolle, letzter Teststatus mit Zeitpunkt. Das ersetzt für die Modelle Grundentscheidung 11.
 
 ## Offene Fragen an den Maintainer (endgültige Entscheidung steht noch aus)
 1. **Offline**: nur anzeigen oder auch eintragen (mit späterem Abgleich)?
