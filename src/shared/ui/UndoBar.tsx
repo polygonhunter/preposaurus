@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useEffectEvent } from 'react'
 
 // Laut UX_KONZEPT §7: Erfolg zeigt fünf Sekunden lang „Rückgängig“.
 const UNDO_WINDOW_MS = 5000
@@ -17,12 +17,16 @@ type UndoBarProps = Readonly<{
 }>
 
 export function UndoBar({ message, onUndo, onDismiss, secondary }: UndoBarProps) {
+  // Eine neu erzeugte onDismiss-Funktion je Render startet die fünf Sekunden nicht neu, eine neue Meldung schon.
+  const dismiss = useEffectEvent(onDismiss)
   useEffect(() => {
-    const timer = setTimeout(onDismiss, UNDO_WINDOW_MS)
+    const timer = setTimeout(() => {
+      dismiss()
+    }, UNDO_WINDOW_MS)
     return () => {
       clearTimeout(timer)
     }
-  }, [onDismiss])
+  }, [message])
 
   return (
     <div

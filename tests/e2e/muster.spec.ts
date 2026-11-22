@@ -39,3 +39,21 @@ test('Blatt öffnet sich als Dialog und schließt mit Escape', async ({ page }, 
   await page.keyboard.press('Escape')
   await expect(sheet).toBeHidden()
 })
+
+test('Blatt schließt mit Tippen auf den Hintergrund, nicht auf den Inhalt', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'einmal reicht')
+  await page.goto('/muster')
+  await page
+    .getByRole('region', { name: 'Hell' })
+    .getByRole('button', { name: 'Blatt öffnen' })
+    .click()
+  const sheet = page.getByRole('dialog', { name: 'Haferflocken' })
+
+  await sheet.getByRole('heading', { name: 'Haferflocken' }).click()
+  await expect(sheet).toBeVisible()
+
+  await page.mouse.click(5, 5)
+  await expect(sheet).toBeHidden()
+})
