@@ -57,6 +57,7 @@ export const BEST_BEFORE_PRECISIONS = ['tag', 'monat', 'jahr'] as const
 export const BEST_BEFORE_KINDS = ['mhd', 'verbrauchen_bis'] as const
 
 export const PHOTO_ROLES = ['verpackung', 'naehrwerte', 'mhd'] as const
+export type PhotoRole = (typeof PHOTO_ROLES)[number]
 
 // Weg einer bestätigten Erfassung (DATENKATALOG §2.9): Vorbelegung beim nächsten Erfassen.
 export const CAPTURE_METHODS = ['foto', 'manuell'] as const
