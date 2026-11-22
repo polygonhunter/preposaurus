@@ -9,13 +9,7 @@ import {
   type GroupProgress,
   type GroupUnit,
 } from '../domain/group-progress'
-import {
-  calculateHouseholdTargets,
-  resolveDiet,
-  type Diet,
-  type DietShifts,
-  type HouseholdGroupTarget,
-} from '../domain/group-targets'
+import { calculateStoredDietTargets } from '../domain/stored-diet-targets'
 import {
   calculateNodeTotals,
   type NodeTotals,
@@ -53,37 +47,6 @@ export function dailyNeedOf(basis: SupplyBasis): Need {
   return { kcalPerDay, waterMlPerDay }
 }
 
-// quelle_wert speichert die Menge je Ernährungsform schon verteilt. Deshalb ohne Verschiebung.
-const NO_SHIFTS: DietShifts = { omnivore: [], vegetarian: [], vegan: [] }
-const DIETS: readonly Diet[] = ['omnivore', 'vegetarian', 'vegan']
-
-function targetsForDiet(basis: SupplyBasis, diet: Diet, days: number): HouseholdGroupTarget[] {
-  const members = basis.members.filter(
-    (member) => resolveDiet(member, basis.householdDiet) === diet,
-  )
-  // Fehlen Werte für eine Form, gilt vorläufig „alles“, damit niemand ohne Ziel bleibt
-  const targets = basis.targetsByDiet[diet] ?? basis.targetsByDiet.omnivore ?? []
-  if (members.length === 0) return []
-  const result = calculateHouseholdTargets({
-    members,
-    householdDiet: basis.householdDiet,
-    targets,
-    dietShifts: NO_SHIFTS,
-    days,
-  })
-  return result.ok ? result.value : []
-}
-
-function householdTargets(basis: SupplyBasis, days: number): HouseholdGroupTarget[] {
-  const totals = new Map<string, HouseholdGroupTarget>()
-  for (const target of DIETS.flatMap((diet) => targetsForDiet(basis, diet, days))) {
-    const existing = totals.get(target.groupKey)
-    if (existing) existing.amount += target.amount
-    else totals.set(target.groupKey, { ...target })
-  }
-  return [...totals.values()]
-}
-
 interface CoverageInput {
   basis: SupplyBasis
   units: readonly GroupUnit[]
@@ -101,7 +64,7 @@ export function coverageOf({ basis, units, today, stillGoodCounts }: CoverageInp
   if (basis.goalDays === null) return { progress: [], tightestGroupKey: null }
   const progress = calculateGroupProgress({
     units,
-    targets: householdTargets(basis, basis.goalDays),
+    targets: calculateStoredDietTargets(basis, basis.goalDays),
     goalDays: basis.goalDays,
     reference: { day: today, kind: 'today' },
     stillGoodCounts,
