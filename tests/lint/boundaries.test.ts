@@ -171,3 +171,21 @@ describe('Umwege über Dateien außerhalb der Schichten', () => {
     },
   )
 })
+
+describe('Tests neben dem Code', () => {
+  const vitestImport = "import { expect } from 'vitest'\nexport const probe = expect\n"
+
+  it('erlaubt vitest in einer Testdatei der Fachlogik', async () => {
+    const asFile = 'boundaries/src/features/alpha/domain/domain-module.test.ts'
+    const messages = await lintTextAs({ code: vitestImport, asFile })
+
+    expect(messages.filter((message) => message.fatal)).toEqual([])
+    expect(messages.map((message) => message.ruleId)).not.toContain('boundaries/dependencies')
+  })
+
+  it('verbietet vitest im Code der Fachlogik', async () => {
+    const messages = await lintTextAs({ code: vitestImport, asFile: fileOf('domain') })
+
+    expect(messages.map((message) => message.ruleId)).toContain('boundaries/dependencies')
+  })
+})
