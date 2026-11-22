@@ -20,6 +20,25 @@ describe('estimatedKcalShare', () => {
   })
 })
 
+describe('isApproximate mit echten Anteilen', () => {
+  it('setzt „ca.“ bei genau 10 %, auch wenn die Division 0,0999… ergibt', () => {
+    const share = estimatedKcalShare([
+      { kcal: 6.3, isKcalEstimated: false },
+      { kcal: 0.7, isKcalEstimated: true },
+    ])
+    expect(share).toBeLessThan(0.1)
+    expect(isApproximate(share)).toBe(true)
+  })
+
+  it('setzt kein „ca.“ knapp unter 10 %', () => {
+    const share = estimatedKcalShare([
+      { kcal: 901, isKcalEstimated: false },
+      { kcal: 99, isKcalEstimated: true },
+    ])
+    expect(isApproximate(share)).toBe(false)
+  })
+})
+
 describe('isApproximate', () => {
   it.each([
     [0, false],

@@ -27,8 +27,8 @@ describe('calculateSupplyDays', () => {
       waterDays: 4,
       days: 4,
       bottleneck: 'water',
-      containsEstimates: false,
       estimatedKcalShare: 0,
+      isApproximate: false,
       kcal: 35200,
       waterMl: 16000,
     })
@@ -81,16 +81,18 @@ describe('calculateSupplyDays', () => {
     expect(valueOf(counting).days).toBe(1)
   })
 
-  it('kennzeichnet geschätzte kcal und geschätzte MHDs', () => {
+  it('setzt „ca.“ nach dem Anteil geschätzter kcal, ein geschätztes MHD zählt nicht', () => {
     const estimatedKcal = [supplyUnit('a', '2028-01-31', { kcal: 100, isKcalEstimated: true })]
-    const estimatedDate = [supplyUnit('b', '2028-01-31', { isBestBeforeEstimated: true })]
+    const estimatedDate = [
+      supplyUnit('b', '2028-01-31', { kcal: 100, isBestBeforeEstimated: true }),
+    ]
     const exact = [supplyUnit('c', '2028-01-31', { kcal: 100 })]
     const run = (units: typeof exact) =>
       valueOf(calculateSupplyDays({ units, need, reference: { day: today, kind: 'today' } }))
-        .containsEstimates
+        .isApproximate
 
     expect(run(estimatedKcal)).toBe(true)
-    expect(run(estimatedDate)).toBe(true)
+    expect(run(estimatedDate)).toBe(false)
     expect(run(exact)).toBe(false)
   })
 
@@ -104,15 +106,17 @@ describe('calculateSupplyDays', () => {
       calculateSupplyDays({ units, need, reference: { day: today, kind: 'today' } }),
     )
     expect(result.estimatedKcalShare).toBe(0.25)
+    expect(result.isApproximate).toBe(true)
   })
 
   it('übersieht Schätzwerte, die am Stichtag nicht mehr zählen', () => {
     const units = [supplyUnit('a', '2026-01-31', { kcal: 100, isKcalEstimated: true })]
 
-    expect(
-      valueOf(calculateSupplyDays({ units, need, reference: { day: today, kind: 'today' } }))
-        .containsEstimates,
-    ).toBe(false)
+    const result = valueOf(
+      calculateSupplyDays({ units, need, reference: { day: today, kind: 'today' } }),
+    )
+    expect(result.estimatedKcalShare).toBe(0)
+    expect(result.isApproximate).toBe(false)
   })
 
   it('zählt Einheiten ohne Datum heute mit, am Zieldatum nicht', () => {
@@ -132,7 +136,7 @@ describe('calculateSupplyDays', () => {
     const result = valueOf(
       calculateSupplyDays({ units, need, reference: { day: today, kind: 'today' } }),
     )
-    expect(result.containsEstimates).toBe(false)
+    expect(result.isApproximate).toBe(false)
   })
 
   it('rundet auf eine Nachkommastelle ab', () => {
