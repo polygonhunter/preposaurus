@@ -8,7 +8,8 @@
     "src/server/ai/anthropic-adapter.ts!",
     "src/features/ai-settings/application/*.ts!",
     "src/features/auth/actions/*.ts!",
-    "src/server/auth/guards.ts!"
+    "src/server/auth/guards.ts!",
+    "scripts/admin.ts!"
   ],
   "project": [
     "src/**/*.{ts,tsx,css}!",

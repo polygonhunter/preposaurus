@@ -1,0 +1,20 @@
+# Nur, was der Build braucht. Geheimnisse und lokale Daten kommen nie ins Image.
+.env*
+.data/
+.git/
+.github/
+.claude/
+node_modules/
+.next/
+dist/
+coverage/
+playwright-report/
+test-results/
+poc/
+prototypes/
+research/
+docs/
+compose*.yaml
+fotos/
+backups/
+*.md

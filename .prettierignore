@@ -3,6 +3,7 @@ prototypes/
 .next/
 out/
 build/
+dist/
 coverage/
 playwright-report/
 test-results/

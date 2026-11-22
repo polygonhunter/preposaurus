@@ -44,7 +44,8 @@ export const GLOBAL_RULE: BrakeRule = {
 
 export const GLOBAL_LOCK_KEY = 'global'
 export const nameLockKey = (username: string) => `name:${username}`
-export const ipLockKey = (ip: string | null) => `ip:${ip ?? UNKNOWN_IP}`
+export const IP_LOCK_PREFIX = 'ip:'
+export const ipLockKey = (ip: string | null) => `${IP_LOCK_PREFIX}${ip ?? UNKNOWN_IP}`
 
 /** Ganze Minuten bis zum Ende einer Sperre, mindestens 1. */
 export function minutesUntil(lockedUntil: Date, now: Date): number {
