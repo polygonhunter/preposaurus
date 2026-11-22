@@ -33,7 +33,7 @@ interface TargetInPast {
   targetDay: CalendarDay
 }
 
-export type TargetOutlook<T extends SupplyUnit> = TargetReachable<T> | TargetInPast
+type TargetOutlook<T extends SupplyUnit> = TargetReachable<T> | TargetInPast
 
 /** Die beiden Kennzahlen der Übersicht: „Heute versorgt“ und der Stand am Zieldatum. */
 export interface GoalProgress<T extends SupplyUnit> {
