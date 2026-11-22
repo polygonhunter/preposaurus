@@ -93,7 +93,11 @@ backup backup wiederherstellen manuell/2026-01-01_000000 --ja && fail "Ein kaput
 [ "$(psql_value "$ROW_COUNTS")" = "$changed" ] || fail "Ein gescheitertes Einspielen hat Daten verändert"
 [ -f fotos/haushalt/zwei.jpg ] || fail "Ein gescheitertes Einspielen hat Fotos verändert"
 
+# Rest eines abgebrochenen Laufs: Eine alte Kopie unter preposaurus_alt räumt der nächste Lauf weg.
+psql_value 'create database preposaurus_alt' > /dev/null
 backup backup wiederherstellen "$stand" --ja | tee restore.log
+[ "$(psql_value "select count(*) from pg_database where datname like 'preposaurus\_%'")" = "0" ] ||
+  fail "Nach dem Zurückspielen sind preposaurus_alt oder preposaurus_neu übrig"
 after=$(psql_value "$ROW_COUNTS")
 [ "$after" = "$before" ] || fail "Zeilenzahlen weichen ab: vorher $before, nachher $after"
 [ "$(cat fotos/haushalt/eins.jpg)" = "foto-1" ] || fail "Das gesicherte Foto ist nicht zurück"
