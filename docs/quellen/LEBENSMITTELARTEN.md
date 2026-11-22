@@ -4,7 +4,7 @@ Recherche und Begründung für die zweite Startliste der Lebensmittelarten. Umge
 `db/seeds/stammdaten/kategorien.ts` und `db/seeds/stammdaten/arten/*.ts`, Prüfseite:
 `docs/konzept/lebensmittelarten.html`. **Abrufdatum aller Quellen: 2026-11-22.** Issues: #128, #126, #110, #142.
 
-**Kurz:** 40 Kategorien, 323 Lebensmittelarten, quer durch das Lebensmittelsortiment eines deutschen
+**Kurz:** 41 Kategorien, 325 Lebensmittelarten, quer durch das Lebensmittelsortiment eines deutschen
 Supermarkts. Die Arten sind gröber als in v1 („Nudeln“ statt Spaghetti, Penne, Fusilli), aber die
 Liste ist viel breiter (frisch, Kühlregal, Tiefkühl, Getränke, Süßes, Babynahrung). Die 9
 Warengruppen bleiben unverändert, sie sind an die BLE gebunden.
@@ -67,7 +67,7 @@ Warengruppen bleiben unverändert, sie sind an die BLE gebunden.
   Konserve, tiefgekühlt). Dort ist sie das, wonach ein Haushalt den Vorrat sortiert (Vorratsregal,
   Kühlschrank, Gefrierschrank), und sonst würde eine Kategorie mit 60 Arten entstehen. In allen
   anderen Bereichen ist die Lagerung nur ein Merkmal der Art (Vorschlag §6).
-- Kategorien haben etwa 2 bis 32 Arten (Mittel 8). Große Abteilungen wie „Gemüse, Salat und Kräuter
+- Kategorien haben etwa 2 bis 34 Arten (Mittel 8). Große Abteilungen wie „Gemüse, Salat und Kräuter
   (frisch)“ sind bewusst nicht weiter zerteilt, weil Nutzer dort nach Namen suchen.
 - Die bisherigen Schlüssel `getreide`, `milch`, `wasser` und `fertiggerichte` bleiben erhalten.
 
@@ -98,22 +98,22 @@ Diese Angaben gehören in die Produktbezeichnung („Zusatz“, UX-Konzept Frage
 | Schlüssel | Kategorie | Warengruppe | Arten |
 |---|---|---|---|
 | `getreide` | 🍝 Nudeln, Reis und Getreide | Getreide, Getreideprodukte, Brot und Kartoffeln | 12 |
-| `mehl_griess` | 🌾 Mehl, Grieß und Stärke | Getreide, Getreideprodukte, Brot und Kartoffeln | 5 |
+| `mehl_griess` | 🌾 Mehl, Grieß und Stärke | Getreide, Getreideprodukte, Brot und Kartoffeln | 4 |
 | `cerealien` | 🥣 Müsli, Flocken und Cerealien | Getreide, Getreideprodukte, Brot und Kartoffeln | 4 |
 | `brot` | 🍞 Brot, Brötchen und Dauerbackwaren | Getreide, Getreideprodukte, Brot und Kartoffeln | 12 |
 | `kartoffeln` | 🥔 Kartoffeln und Kartoffelprodukte | Getreide, Getreideprodukte, Brot und Kartoffeln | 7 |
-| `gemuese_frisch` | 🥕 Gemüse, Salat und Kräuter (frisch) | Gemüse und Hülsenfrüchte | 32 |
+| `gemuese_frisch` | 🥕 Gemüse, Salat und Kräuter (frisch) | Gemüse und Hülsenfrüchte | 34 |
 | `gemuese_konserve` | 🌽 Gemüse (Konserve, eingelegt, getrocknet) | Gemüse und Hülsenfrüchte | 19 |
-| `gemuese_tk` | 🥦 Gemüse (tiefgekühlt) | Gemüse und Hülsenfrüchte | 7 |
+| `gemuese_tk` | 🥦 Gemüse (tiefgekühlt) | Gemüse und Hülsenfrüchte | 8 |
 | `huelsenfruechte` | 🫘 Hülsenfrüchte | Gemüse und Hülsenfrüchte | 8 |
 | `obst_frisch` | 🍎 Obst (frisch) | Obst und Nüsse | 13 |
 | `obst_haltbar` | 🍑 Obst (Konserve, Mus und tiefgekühlt) | Obst und Nüsse | 4 |
 | `trockenobst` | 🍇 Trockenobst | Obst und Nüsse | 7 |
-| `nuesse_saaten` | 🥜 Nüsse, Kerne und Saaten | Obst und Nüsse | 13 |
-| `milch` | 🥛 Milch und Sahne | Milch und Milchprodukte | 8 |
+| `nuesse_saaten` | 🥜 Nüsse, Kerne und Saaten | Obst und Nüsse | 14 |
+| `milch` | 🥛 Milch und Sahne | Milch und Milchprodukte | 9 |
 | `joghurt_quark` | 🥄 Joghurt, Quark und Milchdesserts | Milch und Milchprodukte | 6 |
 | `kaese` | 🧀 Käse | Milch und Milchprodukte | 8 |
-| `milchalternativen` | 🌱 Pflanzendrinks und Milchalternativen | Milch und Milchprodukte | 7 |
+| `milchalternativen` | 🌱 Pflanzendrinks und Milchalternativen | Milch und Milchprodukte | 5 |
 | `fleisch` | 🥩 Fleisch und Geflügel (frisch) | Fisch, Fleisch und Eier | 6 |
 | `wurst` | 🥓 Wurst und Schinken | Fisch, Fleisch und Eier | 8 |
 | `fisch` | 🐟 Fisch und Meeresfrüchte (frisch) | Fisch, Fleisch und Eier | 4 |
@@ -124,23 +124,24 @@ Diese Angaben gehören in die Produktbezeichnung („Zusatz“, UX-Konzept Frage
 | `oele` | 🫒 Speiseöle | Fette und Öle | 3 |
 | `streichfette` | 🧈 Butter, Margarine und Speisefette | Fette und Öle | 4 |
 | `wasser` | 💧 Wasser | Wasser | 3 |
-| `saefte` | 🧃 Säfte und Nektare | Getränke | 6 |
+| `saefte` | 🧃 Säfte und Nektare | Getränke | 5 |
 | `erfrischungsgetraenke` | 🥤 Limonaden, Schorlen und Eistee | Getränke | 7 |
 | `alkohol` | 🍷 Bier, Wein und Spirituosen | Getränke | 5 |
 | `fertiggerichte` | 🍲 Fertiggerichte, Suppen und Feinkost | Sonstiges | 10 |
 | `tk_gerichte` | 🍕 Pizza und Fertiggerichte (tiefgekühlt) | Sonstiges | 4 |
 | `suesswaren` | 🍫 Süßwaren, Gebäck und Knabbereien | Sonstiges | 12 |
-| `aufstriche` | 🍯 Brotaufstriche | Sonstiges | 5 |
+| `aufstriche` | 🍯 Brotaufstriche | Sonstiges | 4 |
 | `backzutaten` | 🧁 Backzutaten und Zucker | Sonstiges | 13 |
 | `gewuerze` | 🧂 Salz, Gewürze und Würzmittel | Sonstiges | 10 |
-| `saucen` | 🍅 Saucen und Dressings | Sonstiges | 10 |
+| `saucen` | 🍅 Saucen und Dressings | Sonstiges | 9 |
 | `kaffee_tee` | ☕ Kaffee, Tee und Kakao | Sonstiges | 7 |
 | `babynahrung` | 🍼 Babynahrung | Sonstiges | 6 |
+| `sonstige_lebensmittel` | 📦 Sonstige Lebensmittel | Sonstiges | 3 |
 | `spezialnahrung` | 🎒 Notrationen und Spezialnahrung | Sonstiges | 5 |
 
 ## 6. Vollständige Liste
 
-323 Arten. **Lagerung** = typische Lagerung ungeöffnet (Vorschlag §9). **Richtwert** = im Seed
+325 Arten. **Lagerung** = typische Lagerung ungeöffnet (Vorschlag §9). **Richtwert** = im Seed
 hinterlegter USDA-Richtwert (kcal je 100 g bzw. ml, übliche Haltbarkeit in Monaten), Details in
 EMPFEHLUNGSWERTE.md §4.2. **Herkunft** = bleibt (Schlüssel aus v1), aus … (zusammengelegt), neu.
 
@@ -162,7 +163,6 @@ EMPFEHLUNGSWERTE.md §4.2. **Herkunft** = bleibt (Schlüssel aus v1), aus … (z
 | Getreide, Getreideprodukte, Brot und Kartoffeln | 🌾 Mehl, Grieß und Stärke | `griess` | Grieß | trocken | 344 kcal | bleibt |
 | Getreide, Getreideprodukte, Brot und Kartoffeln | 🌾 Mehl, Grieß und Stärke | `speisestaerke` | Speisestärke | trocken |  | neu |
 | Getreide, Getreideprodukte, Brot und Kartoffeln | 🌾 Mehl, Grieß und Stärke | `paniermehl` | Paniermehl | trocken |  | neu |
-| Getreide, Getreideprodukte, Brot und Kartoffeln | 🌾 Mehl, Grieß und Stärke | `brotbackmischung` | Brotbackmischung | trocken |  | neu |
 | Getreide, Getreideprodukte, Brot und Kartoffeln | 🥣 Müsli, Flocken und Cerealien | `haferflocken` | Haferflocken | trocken | 362 kcal, 12 Mon. | bleibt |
 | Getreide, Getreideprodukte, Brot und Kartoffeln | 🥣 Müsli, Flocken und Cerealien | `getreideflocken` | Getreideflocken (Dinkel, Hirse u. a.) | trocken |  | neu |
 | Getreide, Getreideprodukte, Brot und Kartoffeln | 🥣 Müsli, Flocken und Cerealien | `muesli` | Müsli | trocken |  | bleibt |
@@ -196,6 +196,8 @@ EMPFEHLUNGSWERTE.md §4.2. **Herkunft** = bleibt (Schlüssel aus v1), aus … (z
 | Gemüse und Hülsenfrüchte | 🥕 Gemüse, Salat und Kräuter (frisch) | `zucchini` | Zucchini | Kühlschrank |  | neu |
 | Gemüse und Hülsenfrüchte | 🥕 Gemüse, Salat und Kräuter (frisch) | `auberginen` | Auberginen | Kühlschrank |  | neu |
 | Gemüse und Hülsenfrüchte | 🥕 Gemüse, Salat und Kräuter (frisch) | `kohl` | Kohl (Weiß-, Rot-, Spitzkohl, Wirsing) | Kühlschrank |  | neu |
+| Gemüse und Hülsenfrüchte | 🥕 Gemüse, Salat und Kräuter (frisch) | `gruenkohl` | Grünkohl | Kühlschrank |  | neu |
+| Gemüse und Hülsenfrüchte | 🥕 Gemüse, Salat und Kräuter (frisch) | `rosenkohl` | Rosenkohl | Kühlschrank |  | neu |
 | Gemüse und Hülsenfrüchte | 🥕 Gemüse, Salat und Kräuter (frisch) | `brokkoli` | Brokkoli | Kühlschrank |  | neu |
 | Gemüse und Hülsenfrüchte | 🥕 Gemüse, Salat und Kräuter (frisch) | `blumenkohl` | Blumenkohl | Kühlschrank |  | neu |
 | Gemüse und Hülsenfrüchte | 🥕 Gemüse, Salat und Kräuter (frisch) | `kohlrabi` | Kohlrabi | Kühlschrank |  | neu |
@@ -241,6 +243,7 @@ EMPFEHLUNGSWERTE.md §4.2. **Herkunft** = bleibt (Schlüssel aus v1), aus … (z
 | Gemüse und Hülsenfrüchte | 🥦 Gemüse (tiefgekühlt) | `erbsen_tk` | Erbsen (tiefgekühlt) | Tiefkühl |  | neu |
 | Gemüse und Hülsenfrüchte | 🥦 Gemüse (tiefgekühlt) | `gruene_bohnen_tk` | Grüne Bohnen (tiefgekühlt) | Tiefkühl |  | neu |
 | Gemüse und Hülsenfrüchte | 🥦 Gemüse (tiefgekühlt) | `brokkoli_tk` | Brokkoli und Blumenkohl (tiefgekühlt) | Tiefkühl |  | neu |
+| Gemüse und Hülsenfrüchte | 🥦 Gemüse (tiefgekühlt) | `kohl_tk` | Kohl (tiefgekühlt: Grünkohl, Rosenkohl, Rotkohl) | Tiefkühl |  | neu |
 | Gemüse und Hülsenfrüchte | 🥦 Gemüse (tiefgekühlt) | `gemuesemischung_tk` | Gemüsemischung (tiefgekühlt) | Tiefkühl |  | neu |
 | Gemüse und Hülsenfrüchte | 🥦 Gemüse (tiefgekühlt) | `suppengemuese_tk` | Suppengemüse (tiefgekühlt) | Tiefkühl |  | neu |
 | Gemüse und Hülsenfrüchte | 🥦 Gemüse (tiefgekühlt) | `kraeuter_tk` | Kräuter (tiefgekühlt) | Tiefkühl |  | neu |
@@ -280,6 +283,7 @@ EMPFEHLUNGSWERTE.md §4.2. **Herkunft** = bleibt (Schlüssel aus v1), aus … (z
 | Obst und Nüsse | 🥜 Nüsse, Kerne und Saaten | `haselnuesse` | Haselnüsse | trocken | 654 kcal | bleibt |
 | Obst und Nüsse | 🥜 Nüsse, Kerne und Saaten | `mandeln` | Mandeln | trocken | 595 kcal | bleibt |
 | Obst und Nüsse | 🥜 Nüsse, Kerne und Saaten | `erdnuesse` | Erdnüsse | trocken | 613 kcal | bleibt |
+| Obst und Nüsse | 🥜 Nüsse, Kerne und Saaten | `erdnussbutter` | Erdnussbutter und Nussmus | trocken |  | neu |
 | Obst und Nüsse | 🥜 Nüsse, Kerne und Saaten | `cashewkerne` | Cashewkerne | trocken |  | neu |
 | Obst und Nüsse | 🥜 Nüsse, Kerne und Saaten | `pistazien` | Pistazien | trocken |  | neu |
 | Obst und Nüsse | 🥜 Nüsse, Kerne und Saaten | `nuesse_sonstige` | Nüsse (sonstige: Paranüsse, Macadamia, Pekan) | trocken |  | neu |
@@ -292,7 +296,8 @@ EMPFEHLUNGSWERTE.md §4.2. **Herkunft** = bleibt (Schlüssel aus v1), aus … (z
 | Milch und Milchprodukte | 🥛 Milch und Sahne | `h_milch` | H-Milch | trocken | 61 kcal | bleibt |
 | Milch und Milchprodukte | 🥛 Milch und Sahne | `frischmilch` | Frischmilch | Kühlschrank |  | neu |
 | Milch und Milchprodukte | 🥛 Milch und Sahne | `milchpulver` | Milchpulver | trocken | 499 kcal | bleibt |
-| Milch und Milchprodukte | 🥛 Milch und Sahne | `kondensmilch` | Kondensmilch und Kaffeesahne | trocken | 135 kcal | bleibt |
+| Milch und Milchprodukte | 🥛 Milch und Sahne | `kondensmilch` | Kondensmilch | trocken | 135 kcal | bleibt |
+| Milch und Milchprodukte | 🥛 Milch und Sahne | `kaffeesahne` | Kaffeesahne | trocken |  | neu |
 | Milch und Milchprodukte | 🥛 Milch und Sahne | `sahne` | Sahne (Schlagsahne, Kochsahne) | Kühlschrank |  | neu |
 | Milch und Milchprodukte | 🥛 Milch und Sahne | `saure_sahne` | Saure Sahne, Schmand und Crème fraîche | Kühlschrank |  | neu |
 | Milch und Milchprodukte | 🥛 Milch und Sahne | `buttermilch` | Buttermilch und Kefir | Kühlschrank |  | neu |
@@ -316,8 +321,6 @@ EMPFEHLUNGSWERTE.md §4.2. **Herkunft** = bleibt (Schlüssel aus v1), aus … (z
 | Milch und Milchprodukte | 🌱 Pflanzendrinks und Milchalternativen | `pflanzendrink` | Pflanzendrink (Mandel, Reis, Kokos u. a.) | trocken |  | neu |
 | Milch und Milchprodukte | 🌱 Pflanzendrinks und Milchalternativen | `joghurtalternative` | Joghurtalternative (pflanzlich) | Kühlschrank |  | neu |
 | Milch und Milchprodukte | 🌱 Pflanzendrinks und Milchalternativen | `sahnealternative` | Sahnealternative (pflanzlich) | trocken |  | neu |
-| Milch und Milchprodukte | 🌱 Pflanzendrinks und Milchalternativen | `kaesealternative` | Käsealternative (pflanzlich) | Kühlschrank |  | neu |
-| Milch und Milchprodukte | 🌱 Pflanzendrinks und Milchalternativen | `kokosmilch` | Kokosmilch | trocken |  | neu |
 | Fisch, Fleisch und Eier | 🥩 Fleisch und Geflügel (frisch) | `hackfleisch` | Hackfleisch | Kühlschrank |  | neu |
 | Fisch, Fleisch und Eier | 🥩 Fleisch und Geflügel (frisch) | `rindfleisch` | Rindfleisch | Kühlschrank |  | neu |
 | Fisch, Fleisch und Eier | 🥩 Fleisch und Geflügel (frisch) | `schweinefleisch` | Schweinefleisch | Kühlschrank |  | neu |
@@ -372,9 +375,8 @@ EMPFEHLUNGSWERTE.md §4.2. **Herkunft** = bleibt (Schlüssel aus v1), aus … (z
 | Getränke | 🧃 Säfte und Nektare | `fruchtsaft` | Fruchtsaft | trocken | 46 kcal, 18 Mon. | bleibt |
 | Getränke | 🧃 Säfte und Nektare | `fruchtnektar` | Fruchtnektar | trocken |  | neu |
 | Getränke | 🧃 Säfte und Nektare | `gemuesesaft` | Gemüsesaft | trocken |  | neu |
-| Getränke | 🧃 Säfte und Nektare | `smoothie` | Smoothies und Direktsaft (gekühlt) | Kühlschrank |  | neu |
+| Getränke | 🧃 Säfte und Nektare | `smoothie` | Smoothies (gekühlt) | Kühlschrank |  | neu |
 | Getränke | 🧃 Säfte und Nektare | `zitronensaft` | Zitronensaft | trocken |  | neu |
-| Getränke | 🧃 Säfte und Nektare | `sirup` | Sirup zum Verdünnen | trocken |  | neu |
 | Getränke | 🥤 Limonaden, Schorlen und Eistee | `limonade` | Limonade und Cola | trocken |  | neu |
 | Getränke | 🥤 Limonaden, Schorlen und Eistee | `limonade_zuckerfrei` | Limonade und Cola (zuckerfrei) | trocken |  | neu |
 | Getränke | 🥤 Limonaden, Schorlen und Eistee | `saftschorle` | Saftschorle | trocken |  | neu |
@@ -416,17 +418,16 @@ EMPFEHLUNGSWERTE.md §4.2. **Herkunft** = bleibt (Schlüssel aus v1), aus … (z
 | Sonstiges | 🍯 Brotaufstriche | `honig` | Honig | trocken | 330 kcal, 24 Mon. | bleibt |
 | Sonstiges | 🍯 Brotaufstriche | `marmelade` | Marmelade und Konfitüre | trocken | 275 kcal, 18 Mon. | bleibt |
 | Sonstiges | 🍯 Brotaufstriche | `nuss_nougat_creme` | Nuss-Nougat-Creme | trocken |  | neu |
-| Sonstiges | 🍯 Brotaufstriche | `erdnussbutter` | Erdnussbutter und Nussmus | trocken |  | neu |
 | Sonstiges | 🍯 Brotaufstriche | `aufstrich_herzhaft` | Brotaufstrich (herzhaft, vegetarisch) | trocken |  | neu |
 | Sonstiges | 🧁 Backzutaten und Zucker | `zucker` | Zucker | trocken | 400 kcal | bleibt |
 | Sonstiges | 🧁 Backzutaten und Zucker | `suessungsmittel` | Süßstoff und Zuckerersatz | trocken |  | neu |
-| Sonstiges | 🧁 Backzutaten und Zucker | `dicksaft` | Dicksaft und Sirup (Ahorn, Agave, Zuckerrübe) | trocken |  | neu |
+| Sonstiges | 🧁 Backzutaten und Zucker | `sirup` | Sirup und Dicksaft (Frucht-, Ahorn-, Agavensirup) | trocken |  | neu |
 | Sonstiges | 🧁 Backzutaten und Zucker | `backpulver` | Backpulver und Natron | trocken |  | neu |
 | Sonstiges | 🧁 Backzutaten und Zucker | `hefe` | Hefe | trocken |  | neu |
 | Sonstiges | 🧁 Backzutaten und Zucker | `vanillezucker` | Vanillezucker und Backaromen | trocken |  | neu |
 | Sonstiges | 🧁 Backzutaten und Zucker | `puddingpulver` | Puddingpulver und Dessertpulver | trocken |  | neu |
 | Sonstiges | 🧁 Backzutaten und Zucker | `gelatine` | Gelatine und Agar-Agar | trocken |  | neu |
-| Sonstiges | 🧁 Backzutaten und Zucker | `backmischung` | Backmischung (Kuchen, Muffins) | trocken |  | neu |
+| Sonstiges | 🧁 Backzutaten und Zucker | `backmischung` | Backmischung (Brot, Kuchen, Muffins) | trocken |  | neu |
 | Sonstiges | 🧁 Backzutaten und Zucker | `kuvertuere` | Kuvertüre, Schokotropfen und Glasur | trocken |  | neu |
 | Sonstiges | 🧁 Backzutaten und Zucker | `marzipan` | Marzipan und Persipan (Rohmasse) | trocken |  | neu |
 | Sonstiges | 🧁 Backzutaten und Zucker | `backdekor` | Streusel und Backdekor | trocken |  | neu |
@@ -445,12 +446,11 @@ EMPFEHLUNGSWERTE.md §4.2. **Herkunft** = bleibt (Schlüssel aus v1), aus … (z
 | Sonstiges | 🍅 Saucen und Dressings | `mayonnaise` | Mayonnaise und Remoulade | trocken |  | neu |
 | Sonstiges | 🍅 Saucen und Dressings | `tomatensauce` | Tomatensauce und Pastasauce | trocken |  | neu |
 | Sonstiges | 🍅 Saucen und Dressings | `pesto` | Pesto | trocken |  | neu |
-| Sonstiges | 🍅 Saucen und Dressings | `grillsauce` | Grill- und Würzsaucen (BBQ, Curry, Chili) | trocken |  | neu |
+| Sonstiges | 🍅 Saucen und Dressings | `grillsauce` | Grill- und Würzsaucen (BBQ, Curry, Chili, Salsa) | trocken |  | neu |
 | Sonstiges | 🍅 Saucen und Dressings | `sauce_fertig` | Fertige Saucen (Hollandaise, Bratensauce) | trocken |  | neu |
 | Sonstiges | 🍅 Saucen und Dressings | `saucenpulver` | Fix-Produkte und Saucenpulver | trocken |  | neu |
 | Sonstiges | 🍅 Saucen und Dressings | `wuerzpaste` | Würzpasten (Curry-, Chilipaste) | trocken |  | neu |
 | Sonstiges | 🍅 Saucen und Dressings | `dressing` | Salatdressing | trocken |  | neu |
-| Sonstiges | 🍅 Saucen und Dressings | `salsa` | Salsa und Dips (haltbar) | trocken |  | neu |
 | Sonstiges | ☕ Kaffee, Tee und Kakao | `kaffee` | Kaffee | trocken |  | bleibt |
 | Sonstiges | ☕ Kaffee, Tee und Kakao | `instantkaffee` | Instantkaffee und Kaffeespezialitäten (Pulver) | trocken |  | neu |
 | Sonstiges | ☕ Kaffee, Tee und Kakao | `kaffeeersatz` | Getreidekaffee und Kaffeeersatz | trocken |  | neu |
@@ -464,6 +464,9 @@ EMPFEHLUNGSWERTE.md §4.2. **Herkunft** = bleibt (Schlüssel aus v1), aus … (z
 | Sonstiges | 🍼 Babynahrung | `getreidebrei` | Getreide- und Milchbrei (Pulver) | trocken |  | neu |
 | Sonstiges | 🍼 Babynahrung | `babysnacks` | Baby- und Kleinkindsnacks | trocken |  | neu |
 | Sonstiges | 🍼 Babynahrung | `babytee` | Baby- und Kindertee | trocken |  | neu |
+| Sonstiges | 📦 Sonstige Lebensmittel | `kokosmilch` | Kokosmilch | trocken |  | neu |
+| Sonstiges | 📦 Sonstige Lebensmittel | `kaesealternative` | Käsealternative (pflanzlich) | Kühlschrank |  | neu |
+| Sonstiges | 📦 Sonstige Lebensmittel | `sonstiges_lebensmittel` | Sonstiges Lebensmittel | trocken |  | neu |
 | Sonstiges | 🎒 Notrationen und Spezialnahrung | `notration` | Notration und Kompaktnahrung | trocken |  | neu |
 | Sonstiges | 🎒 Notrationen und Spezialnahrung | `trekkingmahlzeit` | Trekkingmahlzeit (gefriergetrocknet) | trocken |  | neu |
 | Sonstiges | 🎒 Notrationen und Spezialnahrung | `trinknahrung` | Trinknahrung und Trinkmahlzeit | trocken |  | neu |
@@ -488,17 +491,18 @@ neuer Kategorie), 25 gehen in 16 neue oder umbenannte Arten auf. Es entfällt ke
 | `rapsoel`, `sonnenblumenoel` | `speiseoel` | gleiche Nährwerte und Verwendung. Olivenöl bleibt eigene Art |
 
 **Umbenannt bei gleichem Schlüssel** (Auswahl): `erdnuesse` heißt nur noch „Erdnüsse“ (Erdnussbutter ist
-die neue Art `erdnussbutter` bei den Brotaufstrichen), `hartkaese` nennt Beispiele, `kondensmilch`
-schließt Kaffeesahne ein, `marmelade` heißt „Marmelade und Konfitüre“, `linsen_getrocknet` heißt
+die neue Art `erdnussbutter` bei den Brotaufstrichen), `hartkaese` nennt Beispiele, `kaffeesahne` ist eine
+eigene Art ohne Richtwert (die Kondensmilch-Werte gelten nicht eindeutig), `marmelade` heißt „Marmelade und Konfitüre“, `linsen_getrocknet` heißt
 „Linsen (getrocknet)“.
 
 **Kategorien:** Bleiben: `getreide` (jetzt „Nudeln, Reis und Getreide“), `milch` („Milch und Sahne“),
 `wasser`, `fertiggerichte` („Fertiggerichte, Suppen und Feinkost“). Entfallen und aufgeteilt:
 `gemuese_huelsenfruechte`, `obst_nuesse`, `fleisch_fisch_eier`, `fette_oele`, `getraenke`, `sonstiges`.
-Eine Auffang-Kategorie „Sonstiges“ gibt es nicht mehr, jede Art hat eine sprechende Kategorie. Die
-Warengruppe „Sonstiges“ bleibt.
+Neu ist die Auffang-Kategorie `sonstige_lebensmittel` („Sonstige Lebensmittel“, Warengruppe Sonstiges)
+mit der Auffang-Art „Sonstiges Lebensmittel“ und Arten, die bewusst nicht zum Milch-Ziel zählen
+(Kokosmilch, Käsealternative).
 
-**Neu:** 262 Arten, unter anderem Frischware (Obst, Gemüse, Brot, Fleisch, Wurst, Fisch, Käse,
+**Neu:** 264 Arten, unter anderem Frischware (Obst, Gemüse, Brot, Fleisch, Wurst, Fisch, Käse,
 Joghurt), Tiefkühlkost, vegetarische und vegane Alternativen (Tofu, Fleischersatz, Pflanzendrinks,
 Käse- und Joghurtalternativen, wie in EMPFEHLUNGSWERTE.md §7 gewünscht), Getränke ohne Wasser
 (Säfte, Limonaden, Alkohol), Süßes und Knabbereien, Backzutaten, Gewürze, Saucen, Babynahrung,
@@ -539,6 +543,35 @@ Begründung: Umhängen erhält die Absicht der Zusammenlegung (Spaghetti sind Nu
 Daten, die der Seed nicht deuten kann. Migrationen sind nicht betroffen. Grenze: Kommt ein entfallener
 Schlüssel später wieder in den Seed, bleibt er ausgeblendet, bis ihn jemand einblendet.
 
+**Pflicht für die Oberfläche und die KI:** Ausgeblendete Arten und Kategorien (`ausgeblendet = true`,
+durch den Seed oder durch den Haushalt) müssen überall herausgefiltert werden, wo etwas **neu
+ausgewählt** wird: Auswahl und Suche in der Erfassung, „+ Neue Lebensmittelart“, Verwaltung der Arten
+(dort sichtbar, aber als ausgeblendet markiert) und vor allem das **KI-Enum** der Rolle `verpackung`
+samt Prompt-Liste. Sonst schlägt die KI z. B. eine entfallene Art vor. Bestehende Produkte auf einer
+ausgeblendeten Art bleiben sichtbar und zählen weiter. Betrifft #126 (Verwaltung) und #142
+(KI-Vorschlag, Dublettenprüfung nur gegen sichtbare Arten).
+
+### 7.3 Nachbesserungen aus dem Review
+
+- **Erdnussbutter und Nussmus** stehen bei `nuesse_saaten` und zählen damit zu Obst und Nüssen.
+- **Kokosmilch** und **Käsealternative** stehen in der neuen Auffang-Kategorie „Sonstige Lebensmittel“
+  (Warengruppe Sonstiges): Kokosmilch ist eine fettreiche Kochzutat, Käsealternativen sind meist
+  Stärke und Kokosfett mit kaum Eiweiß. Beide sollen nicht zum Milch-Ziel zählen (Kommentar im Seed).
+- **Keine Überschneidungen mehr:** Dips nur noch als `hummus_dips`, haltbare Salsa gehört zu den
+  Würzsaucen (`grillsauce`). Sirup zum Verdünnen und Dicksaft sind eine Art `sirup` bei den
+  Backzutaten. „Smoothies und Direktsaft (gekühlt)“ heißt jetzt „Smoothies (gekühlt)“, Direktsaft ist
+  Fruchtsaft.
+- **Kohl:** neu `gruenkohl`, `rosenkohl` (frisch) und `kohl_tk` (tiefgekühlt).
+- **Backmischungen und Teige** stehen einheitlich bei den Backzutaten (Sonstiges): `backmischung`
+  umfasst jetzt auch Brot (die Art `brotbackmischung` ist vor dem Merge entfallen), `teig_gekuehlt`
+  steht daneben. Sie zählen nur über kcal, weil die Zusammensetzung stark schwankt.
+- **Kaffeesahne** ist eine eigene Art ohne Richtwert. Der Kondensmilch-Wert (7,5 % Fett) passt nicht
+  eindeutig zu Kaffeesahne (meist 10 bis 12 %).
+- **Alkohol** ist im Seed als „nie im Getränke- oder Wasser-Ziel“ kommentiert. Geprüft: Als Trinkmenge
+  zählt nur die Warengruppe Wasser (`stock-model.ts`, `WATER_GROUP_KEY`). Die Warengruppe Getränke
+  hat kein Ziel. Ihre kcal zählen aber wie alle anderen zur Energie, also auch die von Bier und Wein
+  (Frage unten).
+
 ## 8. Auswirkung auf die KI (Rolle `verpackung`)
 
 Heute steht die Liste **doppelt** im Aufruf: als Enum `lebensmittelart` im Schema (Structured Outputs)
@@ -547,10 +580,10 @@ und als Liste „Schlüssel: Name“ im Prompt (`src/server/ai/prompts.ts`).
 **Größe** (gemessen an der Seed-Liste, Tokens geschätzt, nicht mit `count_tokens` gezählt, weil kein
 API-Schlüssel zur Verfügung stand):
 
-| | v1 (70 Arten) | v2 (323 Arten) |
+| | v1 (70 Arten) | v2 (325 Arten) |
 |---|---|---|
-| Prompt-Liste | ca. 1.700 Zeichen, ca. 600 Tokens | 12.303 Zeichen, ca. 4.000 bis 4.500 Tokens |
-| Enum im Schema | ca. 1.000 Zeichen, ca. 350 Tokens | 4.709 Zeichen, ca. 1.500 bis 2.000 Tokens |
+| Prompt-Liste | ca. 1.700 Zeichen, ca. 600 Tokens | 12.367 Zeichen, ca. 4.000 bis 4.500 Tokens |
+| Enum im Schema | ca. 1.000 Zeichen, ca. 350 Tokens | 4.744 Zeichen, ca. 1.500 bis 2.000 Tokens |
 | Zusammen | ca. 950 Tokens | ca. 5.500 bis 6.500 Tokens |
 
 Annahme: deutsche Namen mit Umlauten und Slugs mit Unterstrichen ergeben etwa 2,5 bis 3 Zeichen je
@@ -568,7 +601,7 @@ Liste. Teuer ist das nicht, aber die Liste ist jetzt der größte Posten der Ein
 optionale Parameter (24) und Parameter mit Union-Typen (16, `nullable` zählt dazu, `lebensmittelart`
 belegt einen). Darüber hinaus begrenzt die API intern die Größe der kompilierten Grammatik (Fehler
 „Schema is too complex for compilation“, Zeitlimit 180 s). Grammatiken werden 24 Stunden gecacht,
-jede Änderung am Schema kompiliert neu. Ein Enum mit 323 kurzen Strings ist nach dieser Beschreibung
+jede Änderung am Schema kompiliert neu. Ein Enum mit 325 kurzen Strings ist nach dieser Beschreibung
 unkritisch. Es bleibt deshalb **im Schema**, weil nur es garantiert, dass ein gültiger Schlüssel
 zurückkommt. Hinweise: Groß- und Kleinschreibung von Enum-Werten ist nicht garantiert (Schlüssel sind
 klein, also unkritisch). Legt ein Haushalt eine eigene Art an, ändert sich das Enum, und der nächste
@@ -585,14 +618,14 @@ Quelle: https://platform.claude.com/docs/en/build-with-claude/structured-outputs
    beim typischen Einräumen eines Einkaufs.
 3. **Nur die Arten einer Kategorie schicken,** wenn die Kategorie schon feststeht (Erfassung aus einer
    Kategorie heraus gestartet, Zweitversuch nach Korrektur). Dann schrumpft die Liste auf höchstens
-   32 Arten. Ohne bekannte Kategorie wäre ein vorgeschalteter Aufruf nötig, der mehr kostet als er
-   spart. Dafür bekommt das Schema optional zusätzlich ein Enum `kategorie` (40 Werte), was auch
+   34 Arten. Ohne bekannte Kategorie wäre ein vorgeschalteter Aufruf nötig, der mehr kostet als er
+   spart. Dafür bekommt das Schema optional zusätzlich ein Enum `kategorie` (41 Werte), was auch
    `neue_lebensmittelart_vorschlag` aus #142 braucht.
 
 ## 9. Vorschlag: Merkmal „typische Lagerung“ (Schemaänderung, nicht umgesetzt)
 
 Die Tabelle in §6 nennt je Art die typische Lagerung **ungeöffnet**: `trocken` (Vorratsschrank,
-Raumtemperatur), `kuehl` (Kühlschrank) oder `tiefkuehl`. Verteilung: 217 trocken, 85 Kühlschrank, 21
+Raumtemperatur), `kuehl` (Kühlschrank) oder `tiefkuehl`. Verteilung: 216 trocken, 87 Kühlschrank, 22
 Tiefkühl. Für die Datenbank wäre eine Migration nötig:
 
 - `lebensmittelart.typische_lagerung text` mit CHECK auf `STORAGE_KINDS = ['trocken', 'kuehl',
@@ -611,8 +644,8 @@ Tiefkühl. Für die Datenbank wäre eine Migration nötig:
    wieder leeren?
 2. **Kaffee, Tee und Kakao** stehen wie bisher in der Warengruppe Sonstiges. Die BLE zählt Kaffee und
    Tee zu „Getränke“. Umziehen?
-3. **Pflanzendrinks und Kokosmilch** zählen zur Warengruppe Milch und damit zum Milch-Ziel. Für Kokosmilch
-   (Kochzutat, viel Fett) eher Sonstiges?
+3. **Pflanzendrinks** zählen zur Warengruppe Milch und damit zum Milch-Ziel (Kokosmilch und
+   Käsealternative nicht mehr, §7.3). Recht so?
 4. **Babynahrung** zählt zu Sonstiges (nur kcal). Säuglingsmilch eher zur Warengruppe Milch?
 5. **Obstkonserven und Bohnenkerne** sind zusammengelegt. Lieber je Frucht bzw. Bohnensorte, damit die
    belegten Richtwerte erhalten bleiben?
@@ -628,3 +661,9 @@ Tiefkühl. Für die Datenbank wäre eine Migration nötig:
 11. **Ausgeblendet bleibt ausgeblendet:** Taucht ein entfallener Schlüssel später wieder im Seed auf,
     blendet der Seed ihn nicht von selbst ein. Recht so?
 12. **KI-Liste** (§8): Prompt kürzen und cachen, Kategorie-Filter erst mit #142?
+13. **Granularitätsbrüche:** Nüsse stehen nach Sorte (Walnüsse, Haselnüsse, Mandeln …), frisches
+    Fleisch nach Tierart, andere Bereiche gröber (Obstkonserven, Bohnenkerne). Nüsse zu
+    „Nüsse“ zusammenlegen und Fleisch nur nach frisch/TK trennen, oder so lassen?
+14. **kcal aus Alkohol:** Bier, Wein und Spirituosen zählen heute zur Energie wie jedes Lebensmittel.
+    Sollen alkoholische Getränke bei der Energie ausgenommen werden (würde eine Regel in der
+    Rechnung brauchen)?
