@@ -14,9 +14,6 @@ describe('loadEnv', () => {
       CLIENT_IP_HEADER: 'x-forwarded-for',
       AI_PROVIDER: 'fake',
       LOG_LEVEL: 'info',
-      AI_MODEL_PACKAGING: 'claude-haiku-5-5',
-      AI_MODEL_NUTRITION: 'claude-haiku-5-5',
-      AI_MODEL_BEST_BEFORE: 'claude-haiku-5-5',
       PHOTO_STORAGE_DIR: './.data/fotos',
     })
   })
@@ -47,16 +44,18 @@ describe('loadEnv', () => {
     )
   })
 
-  it('verlangt einen API-Schlüssel, wenn Anthropic gewählt ist', () => {
-    expect(() => loadEnv({ ...minimal, AI_PROVIDER: 'anthropic' })).toThrow(
-      'ANTHROPIC_API_KEY fehlt',
-    )
+  it('nimmt Anthropic ohne Schlüssel in der Umgebung an, weil er in der App liegen kann', () => {
+    expect(loadEnv({ ...minimal, AI_PROVIDER: 'anthropic' }).ANTHROPIC_API_KEY).toBeUndefined()
   })
 
   it('behandelt einen leeren Schlüssel aus der Vorlage als nicht gesetzt', () => {
     const source = { ...minimal, AI_PROVIDER: 'anthropic', ANTHROPIC_API_KEY: ' ' }
 
-    expect(() => loadEnv(source)).toThrow('ANTHROPIC_API_KEY fehlt')
+    expect(loadEnv(source).ANTHROPIC_API_KEY).toBeUndefined()
+  })
+
+  it('kennt keine Modelle je Rolle mehr, die kommen aus der Zuweisung in der App', () => {
+    expect(Object.keys(loadEnv(minimal)).filter((key) => key.startsWith('AI_MODEL'))).toEqual([])
   })
 
   it('nimmt Anthropic mit Schlüssel an', () => {

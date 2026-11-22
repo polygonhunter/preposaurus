@@ -47,7 +47,7 @@ Summe: **102 Pakete.** M14 kann jederzeit nach M6-05 starten, sobald der Maintai
 8. **Alle Schemaänderungen in M1**, nacheinander. Zwei offene PRs mit Migrationen erzeugen Konflikte im drizzle-Journal. Regel: Es ist immer nur eine PR offen, die `db/migrations/` anfasst.
 9. **Mobil zuerst.** M3 bis M11 bauen jede Oberfläche in der Stufe „kompakt“. Die Stufen-Varianten stehen ab M3-04 als Tailwind-Varianten bereit, M12 ordnet nur um.
 10. **Animation nur mit CSS** (Übergänge, View Transitions). Keine Animationsbibliothek im MVP, kein GSAP. `prefers-reduced-motion` wird immer beachtet.
-11. **KI-Modell nur über `.env`** (`AI_MODEL_PACKAGING`, `AI_MODEL_NUTRITION`, `AI_MODEL_BEST_BEFORE`, Standard `claude-sonnet-5-5`), weil EIN-07 später kommt.
+11. ~~**KI-Modell nur über `.env`**~~ überholt durch #108/#59: Modelle je Rolle kommen aus der Zuweisung in der App bzw. der Empfehlung in `ai-roles.ts`, `AI_MODEL_*` gibt es nicht mehr (siehe 05). Ursprünglich: (`AI_MODEL_PACKAGING`, `AI_MODEL_NUTRITION`, `AI_MODEL_BEST_BEFORE`, Standard `claude-sonnet-5-5`), weil EIN-07 später kommt.
 12. **Externe Dienste in Tests immer als Fake:** `AI_PROVIDER=fake`, Mail- und Push-Fake, Speicher im Temp-Ordner. Echte Anthropic-Aufrufe gibt es nur im PoC (M14).
 13. **Compose in zwei Dateien:** `compose.yaml` (ohne Tailscale, Port an 127.0.0.1, in der CI startbar) und `compose.tailscale.yaml` (Sidecar mit Serve als Überlagerung).
 
