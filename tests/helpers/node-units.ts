@@ -1,3 +1,4 @@
+import type { PackageMacros } from '@/features/supply/domain/node-macros'
 import type { NodeUnit, TreePath } from '@/features/supply/domain/node-totals'
 import type { ReferenceDay } from '@/features/supply/domain/supply-rules'
 import { toCalendarDay } from '@/shared/lib/dates'
@@ -42,6 +43,7 @@ interface UnitOptions {
   status?: NodeUnit['status']
   waterMl?: number
   checkedAt?: string
+  macros?: PackageMacros
 }
 
 let counter = 0
@@ -52,6 +54,7 @@ export function nodeUnit({
   content = { value: 500, unit: 'g' },
   estimated = false,
   kcal = 1795,
+  macros = { protein: 65, carbs: 355, fat: 7.5 },
   ...rest
 }: UnitOptions = {}): NodeUnit {
   counter += 1
@@ -60,5 +63,5 @@ export function nodeUnit({
     kcal,
     isKcalEstimated: estimated,
   })
-  return { ...base, path, content, macros: { protein: 65, carbs: 355, fat: 7.5 } }
+  return { ...base, path, content, macros }
 }

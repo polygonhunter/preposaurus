@@ -3,6 +3,7 @@ import type { CalendarDay } from '@/shared/lib/dates'
 import type { ContentQuantity, ContentUnit } from '@/shared/lib/quantities'
 import { isInStockWithoutDate } from '@/shared/lib/stock-unit'
 import { estimatedKcalShare, isApproximate } from './approximation'
+import { sumMacros, type Macros, type PackageMacros } from './node-macros'
 import type { SupplyInput, SupplyUnit } from './supply-days'
 import { daysOrNull, isCountedOn, isFreshOn } from './supply-rules'
 
@@ -19,18 +20,11 @@ export interface TreeNode {
   key: string
 }
 
-/** Makros in Gramm. */
-interface Macros {
-  protein: number
-  carbs: number
-  fat: number
-}
-
-/** Eine Packung mit Pfad, Inhalt und Makros je Packung (fehlende Makros zählen als 0). */
+/** Eine Packung mit Pfad, Inhalt und Makros je Packung (aufgelöst, fehlende sind null). */
 export interface NodeUnit extends SupplyUnit {
   path: TreePath
   content: ContentQuantity
-  macros: Macros
+  macros: PackageMacros
 }
 
 /** Kennwerte eines Knotens, auf jeder Ebene gleich (UX-Konzept §2). */
@@ -41,7 +35,10 @@ export interface NodeTotals {
   uncountedPackages: number
   amounts: Record<ContentUnit, number>
   kcal: number
+  /** Summe der bekannten Makros der gezählten Packungen */
   macros: Macros
+  /** Gezählte Produkte mit fehlendem Makro: Hinweis „ohne N Produkte“ statt stiller Null */
+  productsWithoutMacros: number
   /** Beitrag in Tagen, gerechnet wie „versorgt“ (M2-07). Ohne Bedarf null, der Rest zählt weiter */
   energyDays: number | null
   waterDays: number | null
@@ -65,16 +62,6 @@ function sumContent(units: readonly NodeUnit[]): Record<ContentUnit, number> {
   const amounts = { g: 0, ml: 0 }
   for (const { content } of units) amounts[content.unit] += content.value
   return amounts
-}
-
-function sumMacros(units: readonly NodeUnit[]): Macros {
-  const total = { protein: 0, carbs: 0, fat: 0 }
-  for (const { macros } of units) {
-    total.protein += macros.protein
-    total.carbs += macros.carbs
-    total.fat += macros.fat
-  }
-  return total
 }
 
 /**
@@ -102,12 +89,14 @@ export function calculateNodeTotals(input: NodeTotalsInput): NodeTotals {
   const inStock = inNode.filter((unit) => unit.status === 'stock')
   const share = estimatedKcalShare(counted)
   const kcal = sumOf(counted, (unit) => unit.kcal)
+  const { productsWithoutMacros, ...macros } = sumMacros(counted)
   return {
     packages: counted.length,
     uncountedPackages: inStock.length - counted.length,
     amounts: sumContent(counted),
     kcal,
-    macros: sumMacros(counted),
+    macros,
+    productsWithoutMacros,
     energyDays: daysOrNull(kcal, input.need.kcalPerDay),
     waterDays: daysOrNull(
       sumOf(counted, (unit) => unit.waterMl),
