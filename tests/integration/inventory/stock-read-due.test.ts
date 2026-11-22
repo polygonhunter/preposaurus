@@ -59,7 +59,7 @@ describe('Bald fällig und „Noch gut“ gegen die Datenbank', () => {
   })
 
   it('liefert einem fremden Haushalt nur seine eigenen fälligen Packungen', async () => {
-    expect(await namesIn('this-week', foreignId)).toEqual([['Spaghetti', 1]])
+    expect(await namesIn('this-week', foreignId)).toEqual([['Nudeln', 1]])
     expect(await namesIn('expired', foreignId)).toEqual([])
   })
 

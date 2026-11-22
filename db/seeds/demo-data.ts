@@ -36,7 +36,7 @@ const product = (
 
 export const DEMO_PRODUCTS: readonly DemoProduct[] = [
   product('Nudeln', {
-    foodType: 'spaghetti',
+    foodType: 'nudeln',
     category: 'getreide',
     container: 'packung',
     contentAmount: '500',
@@ -45,7 +45,7 @@ export const DEMO_PRODUCTS: readonly DemoProduct[] = [
   }),
   product('Haferflocken', {
     foodType: 'haferflocken',
-    category: 'getreide',
+    category: 'cerealien',
     container: 'packung',
     location: 'Küche',
     contentAmount: '500',
@@ -53,14 +53,14 @@ export const DEMO_PRODUCTS: readonly DemoProduct[] = [
     units: ['orange', 'datum_fehlt'],
   }),
   product('Linsen', {
-    category: 'gemuese_huelsenfruechte',
+    category: 'huelsenfruechte',
     container: 'dose',
     contentAmount: '400',
     kcalPer100: '90',
     units: ['gruen', 'gruen', 'gruen'],
   }),
   product('Walnüsse', {
-    category: 'obst_nuesse',
+    category: 'nuesse_saaten',
     container: 'beutel',
     location: 'Küche',
     contentAmount: '200',
@@ -76,8 +76,8 @@ export const DEMO_PRODUCTS: readonly DemoProduct[] = [
     units: ['orange', 'gelb', 'gruen'],
   }),
   product('Thunfisch in Öl', {
-    foodType: 'thunfisch',
-    category: 'fleisch_fisch_eier',
+    foodType: 'thunfisch_konserve',
+    category: 'konserven_fleisch_fisch',
     container: 'dose',
     contentAmount: '150',
     kcalPer100: '190',

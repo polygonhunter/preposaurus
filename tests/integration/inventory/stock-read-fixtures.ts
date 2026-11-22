@@ -29,7 +29,7 @@ async function idOf(db: Database, table: typeof categories | typeof foodTypes, k
   return row.id
 }
 
-async function insertForeignHousehold(db: Database, spaghettiId: string) {
+async function insertForeignHousehold(db: Database, noodlesId: string) {
   const household = buildHousehold({ name: 'Fremder Haushalt' })
   await db.insert(households).values(household)
   const user = buildUser({ householdId: household.id })
@@ -37,7 +37,7 @@ async function insertForeignHousehold(db: Database, spaghettiId: string) {
   const product = buildProduct({
     householdId: household.id,
     categoryId: await idOf(db, categories, 'getreide'),
-    foodTypeId: spaghettiId,
+    foodTypeId: noodlesId,
     name: 'Fremde Spaghetti',
   })
   await db.insert(products).values(product)
@@ -57,12 +57,12 @@ export async function setupStockRead(db: Database) {
   await seedDemo(db, SEED_DAY)
   const [demo] = await db.select({ id: households.id }).from(households)
   if (demo === undefined) throw new Error('Demo-Haushalt fehlt')
-  const spaghettiId = await idOf(db, foodTypes, 'spaghetti')
-  const foreignId = await insertForeignHousehold(db, spaghettiId)
+  const noodlesId = await idOf(db, foodTypes, 'nudeln')
+  const foreignId = await insertForeignHousehold(db, noodlesId)
   return {
     reader: createStockReadRepository(db),
     householdId: demo.id,
     foreignId,
-    spaghettiId,
+    noodlesId,
   }
 }

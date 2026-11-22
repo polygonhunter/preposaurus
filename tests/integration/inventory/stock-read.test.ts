@@ -19,11 +19,11 @@ describe('Vorrat lesen gegen die Datenbank (Demo-Daten)', () => {
   let reader: StockReader
   let householdId: string
   let foreignId: string
-  let spaghettiId: string
+  let noodlesId: string
 
   beforeAll(async () => {
     testDb = await createTestDb()
-    ;({ reader, householdId, foreignId, spaghettiId } = await setupStockRead(testDb.db))
+    ;({ reader, householdId, foreignId, noodlesId } = await setupStockRead(testDb.db))
   })
 
   afterAll(async () => {
@@ -77,8 +77,8 @@ describe('Vorrat lesen gegen die Datenbank (Demo-Daten)', () => {
     ])
   })
 
-  it('liefert das Detail der Spaghetti mit Herkunft der Nährwerte', async () => {
-    const target = { kind: 'food-type', id: spaghettiId } as const
+  it('liefert das Detail der Nudeln mit Herkunft der Nährwerte', async () => {
+    const target = { kind: 'food-type', id: noodlesId } as const
     const result = await getFoodTypeDetail(reader, { householdId, today, target })
     const detail = foodTypeDetailSchema.parse(result.ok ? result.value : null)
 
@@ -101,8 +101,8 @@ describe('Vorrat lesen gegen die Datenbank (Demo-Daten)', () => {
   })
 
   it('zeigt einem fremden Haushalt nichts vom Demo-Haushalt und umgekehrt', async () => {
-    const target = { kind: 'food-type', id: spaghettiId } as const
-    const filter = stockFilterSchema.parse({ search: 'spaghetti' })
+    const target = { kind: 'food-type', id: noodlesId } as const
+    const filter = stockFilterSchema.parse({ search: 'nudeln' })
     const own = await searchStock(reader, { householdId, today, filter })
     const foreign = await searchStock(reader, { householdId: foreignId, today, filter })
     const foreignDetail = await getFoodTypeDetail(reader, { householdId: foreignId, today, target })
@@ -117,7 +117,7 @@ describe('Vorrat lesen gegen die Datenbank (Demo-Daten)', () => {
   it('liefert für einen unbekannten Haushalt überall leere Ergebnisse', async () => {
     const unknown = '00000000-0000-4000-8000-000000000000'
     const overview = await getStockOverview(reader, { householdId: unknown, today })
-    const target = { kind: 'food-type', id: spaghettiId } as const
+    const target = { kind: 'food-type', id: noodlesId } as const
     const detail = await getFoodTypeDetail(reader, { householdId: unknown, today, target })
 
     expect(overview.groups.every((group) => group.totals.packages === 0)).toBe(true)
