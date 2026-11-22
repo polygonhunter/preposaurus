@@ -1,6 +1,6 @@
 // Foto-Rollen der KI und ihre empfohlenen Standardmodelle (Issue #108). Einzige Stelle dafür:
-// Das DB-Schema (CHECK in ki_rollen_zuweisung), env.ts, der spätere Seed und die Oberfläche lesen
-// von hier. Liegt in shared/config statt in einer domain/, weil das Schema die Werte braucht und
+// Das DB-Schema (CHECK in ki_rollen_zuweisung), der Konfigurations-Service (ohne Zuweisung gilt die
+// Empfehlung), der spätere Seed und die Oberfläche lesen von hier. Liegt in shared/config statt in einer domain/, weil das Schema die Werte braucht und
 // server/ aus domain/ nur Typen importieren darf (CODE_PRINZIPIEN §2).
 export const AI_ROLES = [
   'verpackung',

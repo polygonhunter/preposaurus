@@ -1,7 +1,8 @@
 // KI-Verbindungen und ihre Zuweisung je Foto-Rolle (Issue #108). Ein Haushalt kann mehrere
 // Verbindungen anlegen (z. B. zwei Anthropic-Schlüssel, später ein lokales Modell) und jeder Rolle
 // eine Verbindung mit Modell zuweisen. Der haushaltsweite Schalter bleibt haushalt_einstellung.ki_aktiv.
-// Nur das Schema: Verschlüsselung (AES-256-GCM mit APP_SECRET) und Oberfläche kommen mit M9.
+// Verschlüsselung (AES-256-GCM, Schlüssel per HKDF aus APP_SECRET) in server/crypto/secret-box.ts,
+// Auswahl je Rolle in features/ai-settings (#59). Die Oberfläche kommt mit M9.
 // Der Schlüssel steht nie im Klartext in der DB, sondern als Chiffrat, IV und Auth-Tag (Base64).
 import { sql } from 'drizzle-orm'
 import {

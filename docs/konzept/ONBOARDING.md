@@ -234,7 +234,7 @@ Die volle Anleitung ist **Issue #1** (wird nach dem MVP als `docs/EINRICHTUNG.md
 | Docker bzw. Container Manager auf dem NAS (amd64 oder arm64) | Betrieb | startet nichts |
 | Tailscale auf dem NAS (Sidecar-Container), MagicDNS und HTTPS an, `tailscale serve` | einzige Zugangsweg, HTTPS für Kamera, Push, Home-Bildschirm | App nicht oder nur unverschlüsselt erreichbar |
 | `.env` aus `.env.example`: `DATABASE_URL` bzw. DB-Passwort, **`APP_SECRET`** (Geheimnis für die Sitzungen, z. B. `openssl rand -base64 32`) | Daten, sichere Anmeldung | Server startet nicht |
-| optional `AI_PROVIDER=anthropic` und `ANTHROPIC_API_KEY` | Foto-Erkennung | Erkennung nicht verfügbar, alles geht von Hand |
+| optional `AI_PROVIDER=anthropic`, dazu `ANTHROPIC_API_KEY` oder ein Schlüssel in der App | Foto-Erkennung | Erkennung nicht verfügbar, alles geht von Hand |
 | optional VAPID-Schlüssel | Push | keine Push-Frage, keine Push-Einstellung |
 | optional SMTP | Check-in-Mails | Mails aus |
 | Tailscale auf jedem Gerät, das die App nutzt | Zugang | Browser erreicht die Adresse nicht |
