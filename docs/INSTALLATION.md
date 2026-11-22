@@ -393,7 +393,7 @@ Was zwischen Update und Rückweg erfasst wurde, ist danach weg (es steckt aber n
 
 ## 13. Notfall-Befehle: Passwort vergessen, kein Admin, alle abmelden
 
-Für Notfälle gibt es vier Befehle, die du auf dem NAS im Preposaurus-Ordner ausführst, während die App läuft. Jeder hinterlässt eine Zeile im Log von `web` (`docker compose logs web`), nie mit Passwort.
+Für Notfälle gibt es vier Befehle, die du auf dem NAS im Preposaurus-Ordner ausführst, während die App läuft. Jeder Befehl, der etwas ändert, hinterlässt eine Zeile im Log von `web` (`docker compose logs web`), nie mit Passwort.
 
 | Befehl | Wofür |
 |---|---|
