@@ -80,9 +80,18 @@ const buildDay = (year: number, month: number, day: number) => build({ year, mon
 const buildMonth = (year: number, month: number) => build({ year, month, day: 1 }, 'month')
 const buildYear = (year: number) => build({ year, month: 1, day: 1 }, 'year')
 
+/** Nur Monat oder Jahr bekannt: Es gilt das Monats- bzw. Jahresende. */
+export function normalizeToPrecision(
+  date: CalendarDay,
+  precision: BestBeforePrecision,
+): CalendarDay {
+  if (precision === 'month') return endOfMonth(date)
+  if (precision === 'year') return endOfYear(date)
+  return date
+}
+
 function withPrecision(date: CalendarDay, precision: BestBeforePrecision): BestBefore {
-  const byPrecision = { day: date, month: endOfMonth(date), year: endOfYear(date) }
-  return { date: byPrecision[precision], precision, isEstimated: false }
+  return { date: normalizeToPrecision(date, precision), precision, isEstimated: false }
 }
 
 const n = (groups: string[], index: number) => Number(groups[index])

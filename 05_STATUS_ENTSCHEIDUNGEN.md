@@ -99,6 +99,16 @@ Server und Anwendungslogik ohne UI, Details in den Kopfkommentaren von `src/feat
 - **Abdeckung je Warengruppe:** Zielmengen aus `quelle_wert` der aktiven Quellfassung je Ernährungsform der Mitglieder (ohne Verschiebung, weil die Werte je Form gespeichert sind; `calculateStoredDietTargets` in `supply/domain`). Fehlen Werte für eine Form, gilt vorläufig „alles“. Ohne aktive Quelle oder ohne Ziel gibt es keine Abdeckung und keine Tage, die Summen schon. Der Seed der Werte (M1-09) steht noch aus.
 - **knip:** `inventory/{application,data,schemas.ts}` und `supply/application` sind wie die Fachlogik vorläufig aus dem `--production`-Lauf ausgenommen, bis die Seiten sie aufrufen (#113).
 
+## Festlegungen aus M5-01 „Speichern“ (#51, 2026-11-22, vorläufig)
+Server-Teil ohne UI, Details in den Kopfkommentaren von `src/features/capture/{domain/stock-draft.ts,application/create-stock.ts}`:
+- **Ein Use-Case für beide Wege:** `createStock` (Action `createStockAction(input)`, Schema `createStockSchema`). Eingabe: `captureId` (Idempotenz-Schlüssel, auf dem Gerät einmal je Erfassung erzeugt), `method` (`photo`/`manual`), Produkt als `{ kind: 'new', … }` oder `{ kind: 'existing', productId }` und Chips „Datum × Anzahl“ (`units`, je Packung entsteht eine Einheit). Alles in einer Transaktion. Ein zweiter Aufruf mit demselben Schlüssel legt nichts an und liefert das erste Ergebnis mit `isReplay: true` (auch gleichzeitig: `INSERT … ON CONFLICT DO NOTHING` auf `erfassung.id`). Gehört der Schlüssel einem anderen Haushalt, ergibt das `conflict`.
+- **Lebensmittelart ist beim Speichern Pflicht** (UX §1), die Kategorie wird daraus abgeleitet (#110), nie aus der Eingabe. Ohne Bezeichnung gilt der Name der Art. Eine neue Art legt ein eigener Ablauf an (#126).
+- **„Datum fehlt“** ist erlaubt (#116). Monat bzw. Jahr werden zum Monats- bzw. Jahresende. Ein MHD mit Kennzeichen „geschätzt“ muss Genauigkeit Monat oder Jahr haben, sonst `invalid` (eine taggenaue Schätzung täuschte ein gelesenes Datum vor). Die Regel aus UMSETZUNG M5-01 „jede Einheit braucht ein Datum“ ist damit überholt.
+- **Nährwerte:** Ohne einen einzigen Wert gilt „keine eigenen Werte“ (Quelle leer, Richtwert beim Lesen). `naehrwerte_bestaetigt_am` wird nur bei einer KI-Schätzung mit `isConfirmed` gesetzt.
+- **Mandantenfilter:** Lebensmittelart nur System oder eigene, Lagerort und bestehendes Produkt nur eigene, Behälter sind System-Stammdaten. Sonst `not-found` mit dem betroffenen Bezug. Ausgeblendete Arten werden beim Speichern nicht abgelehnt (die Auswahl filtert sie, #126).
+- **Wiedererkennen:** `findMatchingProducts` (Action `findMatchingProductsAction`) liefert eigene Produkte mit gleicher Art, Menge (Toleranz 0,005) und Behälter, auch mehrere (gleiches Produkt an zwei Lagerorten). Es bleibt ein Vorschlag, nichts wird zusammengelegt.
+- **Guard** `requireHouseholdUser` in `server/auth/guards.ts`: angemeldet und einem Haushalt zugeordnet, sonst `forbidden`.
+
 ## Technische Festlegungen aus M1 (2026-11-22)
 Beim Datenmodell getroffen, Details in den Kopfkommentaren von `src/server/db/schema/*.ts`:
 - **Versionen:** drizzle-orm 0.45.4, drizzle-kit 0.31.11 (stabile Linie, nicht 1.0-rc), PGlite 0.5.17, pg 8.23.1, tsx 4.23.15 für die Skripte `db:migrate`, `db:seed`, `db:seed:demo`.
