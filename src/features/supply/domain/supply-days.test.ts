@@ -18,7 +18,9 @@ describe('calculateSupplyDays', () => {
       supplyUnit('reis', '2028-01-31', { kcal: 35200 }),
       supplyUnit('wasser', '2028-01-31', { waterMl: 16000 }),
     ]
-    const result = valueOf(calculateSupplyDays({ units, need, referenceDay: today }))
+    const result = valueOf(
+      calculateSupplyDays({ units, need, reference: { day: today, kind: 'today' } }),
+    )
 
     expect(result).toEqual({
       energyDays: 8,
@@ -36,7 +38,9 @@ describe('calculateSupplyDays', () => {
       supplyUnit('reis', '2028-01-31', { kcal: 8800 }),
       supplyUnit('wasser', '2028-01-31', { waterMl: 40000 }),
     ]
-    const result = valueOf(calculateSupplyDays({ units, need, referenceDay: today }))
+    const result = valueOf(
+      calculateSupplyDays({ units, need, reference: { day: today, kind: 'today' } }),
+    )
 
     expect(result.days).toBe(2)
     expect(result.bottleneck).toBe('energy')
@@ -49,7 +53,9 @@ describe('calculateSupplyDays', () => {
       supplyUnit('verbraucht', '2028-01-31', { kcal: 44000, status: 'consumed' }),
       supplyUnit('entsorgt', '2028-01-31', { waterMl: 40000, status: 'discarded' }),
     ]
-    const result = valueOf(calculateSupplyDays({ units, need, referenceDay: today }))
+    const result = valueOf(
+      calculateSupplyDays({ units, need, reference: { day: today, kind: 'today' } }),
+    )
 
     expect(result.days).toBe(1)
   })
@@ -62,11 +68,13 @@ describe('calculateSupplyDays', () => {
     })
     const units = [checked]
 
-    expect(valueOf(calculateSupplyDays({ units, need, referenceDay: today })).days).toBe(0)
+    expect(
+      valueOf(calculateSupplyDays({ units, need, reference: { day: today, kind: 'today' } })).days,
+    ).toBe(0)
     const counting = calculateSupplyDays({
       units,
       need,
-      referenceDay: today,
+      reference: { day: today, kind: 'today' },
       stillGoodCounts: true,
     })
     expect(valueOf(counting).days).toBe(1)
@@ -77,7 +85,8 @@ describe('calculateSupplyDays', () => {
     const estimatedDate = [supplyUnit('b', '2028-01-31', { isBestBeforeEstimated: true })]
     const exact = [supplyUnit('c', '2028-01-31', { kcal: 100 })]
     const run = (units: typeof exact) =>
-      valueOf(calculateSupplyDays({ units, need, referenceDay: today })).containsEstimates
+      valueOf(calculateSupplyDays({ units, need, reference: { day: today, kind: 'today' } }))
+        .containsEstimates
 
     expect(run(estimatedKcal)).toBe(true)
     expect(run(estimatedDate)).toBe(true)
@@ -88,7 +97,8 @@ describe('calculateSupplyDays', () => {
     const units = [supplyUnit('a', '2026-01-31', { kcal: 100, isKcalEstimated: true })]
 
     expect(
-      valueOf(calculateSupplyDays({ units, need, referenceDay: today })).containsEstimates,
+      valueOf(calculateSupplyDays({ units, need, reference: { day: today, kind: 'today' } }))
+        .containsEstimates,
     ).toBe(false)
   })
 
@@ -97,7 +107,9 @@ describe('calculateSupplyDays', () => {
       supplyUnit('reis', '2028-01-31', { kcal: 4400 * 2.99 }),
       supplyUnit('wasser', '2028-01-31', { waterMl: 4000 * 0.7 }),
     ]
-    const result = valueOf(calculateSupplyDays({ units, need, referenceDay: today }))
+    const result = valueOf(
+      calculateSupplyDays({ units, need, reference: { day: today, kind: 'today' } }),
+    )
 
     expect(result.energyDays).toBe(2.9)
     expect(result.waterDays).toBe(0.7)
@@ -105,12 +117,17 @@ describe('calculateSupplyDays', () => {
   })
 
   it('liefert 0 Tage bei leerem Vorrat', () => {
-    expect(valueOf(calculateSupplyDays({ units: [], need, referenceDay: today })).days).toBe(0)
+    expect(
+      valueOf(calculateSupplyDays({ units: [], need, reference: { day: today, kind: 'today' } }))
+        .days,
+    ).toBe(0)
   })
 
   it('meldet einen Fehler, wenn kein Bedarf da ist', () => {
     const noNeed = { kcalPerDay: 0, waterMlPerDay: 0 }
-    expect(calculateSupplyDays({ units: [], need: noNeed, referenceDay: today })).toEqual({
+    expect(
+      calculateSupplyDays({ units: [], need: noNeed, reference: { day: today, kind: 'today' } }),
+    ).toEqual({
       ok: false,
       error: { kind: 'no-need' },
     })
@@ -122,7 +139,7 @@ describe('calculateSupplyDays', () => {
       calculateSupplyDays({
         units,
         need: { kcalPerDay: 2200, waterMlPerDay: 2000 },
-        referenceDay: today,
+        reference: { day: today, kind: 'today' },
       }),
     )
 
