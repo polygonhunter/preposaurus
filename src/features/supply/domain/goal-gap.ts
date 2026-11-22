@@ -1,10 +1,10 @@
-import type { Quantity } from '@/shared/lib/quantities'
+import type { ContentQuantity } from '@/shared/lib/quantities'
 import type { GroupProgress } from './group-progress'
 
 /** Fehlende Menge einer Warengruppe bis zum Ziel, Quelle „ziel“ der Nachkaufen-Liste. */
 export interface GoalGap {
   groupKey: string
-  missing: Quantity
+  missing: ContentQuantity
 }
 
 // Zielmengen aus Anteilen erzeugen Rauschen wie 839,9999999. Mini-Lücken gehören nicht auf die Liste.

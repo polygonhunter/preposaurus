@@ -5,7 +5,7 @@ import type {
   NutritionValues,
   StoredNutritionSource,
 } from '@/features/inventory/domain/nutrition-source'
-import type { Quantity } from '@/shared/lib/quantities'
+import type { ContentQuantity } from '@/shared/lib/quantities'
 import type {
   AiConfidence,
   AiNutritionAnswer,
@@ -35,12 +35,12 @@ export interface PackagingSuggestion {
   name: string | null
   foodTypeKey: string | null
   container: AiPackagingAnswer['behaelter']
-  content: Quantity | null
+  content: ContentQuantity | null
   drainedWeightG: number | null
   confidence: Confidence
 }
 
-function mapContent({ wert, einheit }: AiPackagingAnswer['inhalt']): Quantity | null {
+function mapContent({ wert, einheit }: AiPackagingAnswer['inhalt']): ContentQuantity | null {
   const value = positiveOrNull(wert)
   return value === null || einheit === null ? null : { value, unit: einheit }
 }

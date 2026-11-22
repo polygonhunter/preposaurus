@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, expectTypeOf, it } from 'vitest'
+import type { ContentQuantity } from '@/shared/lib/quantities'
 import { amountPerUnit, kjToKcal, nutritionBase, resolveKcal, toPer100 } from './nutrition'
 
 describe('kjToKcal und resolveKcal', () => {
@@ -65,10 +66,6 @@ describe('nutritionBase', () => {
     expect(nutritionBase({ value: 400, unit: 'g' }, null)).toBe(400)
     expect(nutritionBase({ value: 400, unit: 'g' }, 0)).toBe(400)
   })
-
-  it('kennt bei Stückware ohne Gewicht keine Bezugsmenge', () => {
-    expect(nutritionBase({ value: 6, unit: 'piece' }, null)).toBeNull()
-  })
 })
 
 describe('amountPerUnit', () => {
@@ -88,8 +85,8 @@ describe('amountPerUnit', () => {
     expect(amountPerUnit({ content, drainedWeightG: null, per100: 42 })).toBe(630)
   })
 
-  it('liefert null bei Stückware ohne Gewicht', () => {
-    const content = { value: 6, unit: 'piece' as const }
-    expect(amountPerUnit({ content, drainedWeightG: null, per100: 100 })).toBeNull()
+  it('nimmt Stück nicht als Inhalt an, Stück ist nur die Anzahl der Packungen', () => {
+    expectTypeOf<Parameters<typeof amountPerUnit>[0]['content']>().toEqualTypeOf<ContentQuantity>()
+    expectTypeOf<Parameters<typeof nutritionBase>[0]>().toEqualTypeOf<ContentQuantity>()
   })
 })

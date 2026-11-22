@@ -1,4 +1,4 @@
-import type { Quantity } from '@/shared/lib/quantities'
+import type { ContentQuantity } from '@/shared/lib/quantities'
 import { err, ok, type Result } from '@/shared/lib/result'
 
 /** Umrechnung laut Lebensmittelinformationsverordnung: 1 kcal = 4,184 kJ. */
@@ -41,19 +41,18 @@ export function toPer100({
 }
 
 /** Menge, auf die sich die Nährwerte beziehen: Das Abtropfgewicht hat Vorrang vor dem Inhalt. */
-export function nutritionBase(content: Quantity, drainedWeightG: number | null): number | null {
+export function nutritionBase(content: ContentQuantity, drainedWeightG: number | null): number {
   if (drainedWeightG !== null && drainedWeightG > 0) return drainedWeightG
-  return content.unit === 'piece' ? null : content.value
+  return content.value
 }
 
 interface UnitNutrition {
-  content: Quantity
+  content: ContentQuantity
   drainedWeightG: number | null
   per100: number
 }
 
 /** Wert je Packung = Inhalt × Wert je 100 ÷ 100, z. B. 500 g × 359 kcal ÷ 100 = 1.795 kcal. */
-export function amountPerUnit({ content, drainedWeightG, per100 }: UnitNutrition): number | null {
-  const base = nutritionBase(content, drainedWeightG)
-  return base === null ? null : (base * per100) / PER_100
+export function amountPerUnit({ content, drainedWeightG, per100 }: UnitNutrition): number {
+  return (nutritionBase(content, drainedWeightG) * per100) / PER_100
 }

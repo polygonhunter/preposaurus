@@ -1,4 +1,4 @@
-import type { Quantity } from '@/shared/lib/quantities'
+import type { ContentQuantity } from '@/shared/lib/quantities'
 
 // Eine Packung über 25 kg bzw. 25 l oder unter 1 g bzw. 1 ml ist fast immer ein Lesefehler,
 // etwa englisch formatiertes „1.500 l“, das deutsch gelesen 1.500.000 ml ergibt.
@@ -11,9 +11,8 @@ const MIN_PACKAGE_AMOUNT = 1
 export type QuantityAssessment =
   { status: 'ok' } | { status: 'review'; reason: 'too-large' | 'too-small' }
 
-/** Inhalt einer Packung prüfen. Stückzahlen haben keine Grenze. */
-export function assessPackageQuantity(quantity: Quantity): QuantityAssessment {
-  if (quantity.unit === 'piece') return { status: 'ok' }
+/** Inhalt einer Packung in g bzw. ml prüfen. Stück ist kein Inhalt (`parseContentQuantity`). */
+export function assessPackageQuantity(quantity: ContentQuantity): QuantityAssessment {
   if (quantity.value > MAX_PACKAGE_AMOUNT) return { status: 'review', reason: 'too-large' }
   if (quantity.value < MIN_PACKAGE_AMOUNT) return { status: 'review', reason: 'too-small' }
   return { status: 'ok' }

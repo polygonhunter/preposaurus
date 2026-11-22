@@ -2,9 +2,11 @@ import { describe, expect, expectTypeOf, it } from 'vitest'
 import {
   formatGermanNumber,
   formatQuantity,
+  parseContentQuantity,
   parseGermanNumber,
   parseQuantity,
   type ContentQuantity,
+  type ContentParseError,
   type ContentUnit,
   type Quantity,
   type QuantityParseError,
@@ -59,6 +61,25 @@ describe('parseQuantity – Fehler', () => {
     ['500 g Nudeln', 'invalid-number'],
   ])('%j ergibt den Fehler %s', (text, kind) => {
     expect(parseQuantity(text)).toEqual({ ok: false, error: { kind } })
+  })
+})
+
+describe('parseContentQuantity – Inhalt einer Packung', () => {
+  it.each([
+    ['500 g', 500, 'g'],
+    ['1,5 l', 1500, 'ml'],
+  ])('%s ergibt %d %s', (text, value, unit) => {
+    expect(parseContentQuantity(text)).toEqual({ ok: true, value: { value, unit } })
+  })
+
+  it.each<[string, ContentParseError['kind']]>([
+    ['6 Stück', 'piece-not-content'],
+    ['1 St.', 'piece-not-content'],
+    ['1,5 Stück', 'fractional-pieces'],
+    ['500', 'unknown-unit'],
+    ['', 'empty'],
+  ])('%j ergibt den Fehler %s', (text, kind) => {
+    expect(parseContentQuantity(text)).toEqual({ ok: false, error: { kind } })
   })
 })
 
