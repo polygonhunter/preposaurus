@@ -46,6 +46,8 @@ npm run dev            # http://localhost:3000
 npm run check          # Format, Lint, Budget, Typecheck, knip und Tests
 ```
 
+**Lokale Dev-DB nach dem Schema-Nachtrag (#120) neu aufsetzen:** Die Migrationen sind zu einem Basisstand `0000_basis.sql` zusammengefasst. Wer schon eine lokale Datenbank aus der Zeit davor hat, löscht den Ordner `.data/` einmal und spielt danach `npm run db:migrate`, `npm run db:seed` und bei Bedarf `npm run db:seed:demo` neu ein.
+
 | Befehl | Zweck |
 |---|---|
 | `npm run build` / `npm start` | Produktions-Build bauen bzw. starten |
