@@ -17,6 +17,11 @@ grep -q 'network_mode: service:tailscale' tailscale.yaml || fail "web hängt nic
 grep -q 'HOSTNAME: 127.0.0.1' tailscale.yaml || fail "web lauscht hinter dem Sidecar nicht nur auf 127.0.0.1"
 grep -q 'published:' tailscale.yaml && fail "Mit Sidecar darf kein Port auf dem NAS offen sein"
 
+docker compose config > merged.yaml
+[ "$(grep -c 'no-new-privileges:true' merged.yaml)" -ge 4 ] || fail "no-new-privileges fehlt bei Diensten"
+[ "$(docker compose config --format json | jq -r '.services.web.cap_drop[0]')" = "ALL" ] ||
+  fail "web behält Capabilities"
+
 docker compose up -d
 wait_for_health
 echo "/api/health: $(curl -fsS http://127.0.0.1:3000/api/health)"

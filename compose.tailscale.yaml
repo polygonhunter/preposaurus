@@ -7,6 +7,7 @@
 services:
   tailscale:
     image: tailscale/tailscale:v1.104.7
+    security_opt: ['no-new-privileges:true']
     hostname: ${TS_HOSTNAME:?TS_HOSTNAME fehlt in .env}
     environment:
       # Nur für die erste Anmeldung nötig, danach steht der Zustand im Ordner tailscale.
