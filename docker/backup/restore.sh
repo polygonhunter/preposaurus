@@ -3,7 +3,8 @@
 #   wiederherstellen <stand> [--ja]     Stand z. B. manuell/2026-11-22_010000
 #   pruefen <stand>                     Probe in eine Wegwerf-Datenbank, der Betrieb läuft weiter
 # Sicherheitsnetz: Zuerst entsteht ein Stand vor-wiederherstellung/… des aktuellen Zustands. Der
-# Stand wird in eine neue Datenbank eingespielt, erst danach ersetzt sie die alte (über <db>_alt).
+# Stand wird in eine neue Datenbank eingespielt, erst danach ersetzt sie die alte (über <db>_alt,
+# gelöscht erst nach den Fotos).
 # Scheitert das Einspielen, bleibt alles, wie es war. Alte Stände rotieren erst ganz am Ende, damit
 # das Sicherheitsnetz nicht den gewählten Stand löscht (z. B. den ältesten unter vor-wiederherstellung).
 
@@ -51,7 +52,13 @@ swap_in_new_database() {
   psql --dbname=postgres -v ON_ERROR_STOP=1 --single-transaction \
     -c "alter database \"$PGDATABASE\" rename to \"${PGDATABASE}_alt\"" \
     -c "alter database \"${PGDATABASE}_neu\" rename to \"$PGDATABASE\"" > /dev/null
-  dropdb --maintenance-db=postgres "${PGDATABASE}_alt"
+}
+
+# Nur Aufräumen nach den Fotos: Scheitert es, ist der Stand trotzdem zurück, und der nächste Lauf
+# räumt <db>_alt weg. Deshalb kein Abbruch über set -e.
+drop_old_database() {
+  dropdb --maintenance-db=postgres "${PGDATABASE}_alt" ||
+    log "Hinweis: Die alte Datenbank ${PGDATABASE}_alt ist noch da, der nächste Lauf räumt sie weg."
 }
 
 # Die Datenbank ist hier schon getauscht. Scheitert der Abgleich (Platte voll, Strg+C), nennt die
@@ -80,6 +87,7 @@ run_restore() {
   ensure_no_connections
   swap_in_new_database
   restore_photos "$1" "$stand_dir" "$safety_stand"
+  drop_old_database
   apply_retention
   log "Wiederhergestellt. Der Zustand davor liegt unter $safety_stand."
   log "Jetzt die App starten (spielt auch neuere Migrationen ein): docker compose up -d"
