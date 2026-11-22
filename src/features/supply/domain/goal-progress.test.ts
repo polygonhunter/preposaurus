@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
 import { calculateGoalProgress, unitsExpiringBefore } from './goal-progress'
-import { supplyUnit, supplyUnits } from './supply-test-units'
+import { supplyUnit, supplyUnits } from '../../../../tests/helpers/supply-units'
 
 const today = toCalendarDay('2026-11-22')
 const targetDay = toCalendarDay('2027-03-31')
