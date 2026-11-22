@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
+  GLOBAL_LOCK_KEY,
+  GLOBAL_RULE,
   IP_RULE,
   NAME_RULE,
   ipLockKey,
@@ -43,6 +45,14 @@ describe('Bremse je Adresse', () => {
   })
 })
 
+describe('Globale Obergrenze', () => {
+  it('pausiert alle für 1 Minute ab dem hundertsten Versuch im 10-Minuten-Fenster', () => {
+    expect(GLOBAL_RULE.windowMs).toBe(10 * MINUTE)
+    expect(GLOBAL_RULE.lockMsAfter(99)).toBe(0)
+    expect(GLOBAL_RULE.lockMsAfter(100)).toBe(MINUTE)
+  })
+})
+
 describe('minutesUntil', () => {
   it('rundet auf ganze Minuten auf und nennt mindestens 1', () => {
     expect(minutesUntil(later(4 * MINUTE + 1), now)).toBe(5)
@@ -55,5 +65,10 @@ describe('Schlüssel', () => {
   it('trennt Namen und Adressen', () => {
     expect(nameLockKey('alex')).toBe('name:alex')
     expect(ipLockKey('100.64.0.1')).toBe('ip:100.64.0.1')
+    expect(GLOBAL_LOCK_KEY).toBe('global')
+  })
+
+  it('fasst Anfragen ohne erkennbare Adresse unter einem Schlüssel zusammen', () => {
+    expect(ipLockKey(null)).toBe('ip:unbekannt')
   })
 })

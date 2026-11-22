@@ -213,7 +213,9 @@ Auch im Heimnetz sinnvoll: Ein befallenes Gerät im WLAN oder ein neugieriges Ki
 | Schicht | Festlegung |
 |---|---|
 | Bremse je Benutzername | Ab 5 Fehlversuchen in Folge wartet dieser Name 1 Minute, danach verdoppelt sich die Wartezeit je Fehlversuch bis höchstens 15 Minuten. Erfolg setzt zurück. **Keine Dauersperre**, sonst könnte jemand den Admin aussperren |
-| Bremse je Adresse | Höchstens 20 Fehlversuche je IP in 10 Minuten, über alle Namen. Bremst das Durchprobieren vieler Namen. Hinter Tailscale Serve kommt die IP aus `X-Forwarded-For` (geprüft in M3-01, §4.5) |
+| Bremse je Adresse | Höchstens 20 Fehlversuche je IP in 10 Minuten, über alle Namen. Bremst das Durchprobieren vieler Namen. Hinter Tailscale Serve kommt die IP aus `X-Forwarded-For` (geprüft in M3-01, §4.5) Ohne verwertbare Adresse (Header fehlt oder enthält eine Liste) teilen sich alle Geräte den Zähler `ip:unbekannt` |
+| Obergrenze für alle | Höchstens 100 Versuche in 10 Minuten über alle Namen und Adressen, danach 1 Minute Pause für alle (Schlüssel `global`). Hält auch einen Angreifer auf, der die Adresse je Anfrage fälscht (Sicherheits-Review #138) |
+| Zählen vor dem Prüfen | Jeder Versuch wird atomar gezählt, **bevor** das Passwort geprüft wird. Erreicht der Stand eine Grenze, gilt die Sperre sofort, auch für parallele Anfragen. Ein Erfolg nimmt die Zählung zurück (Review #138) |
 | Gleiches Verhalten für unbekannte Namen | Gezählt wird der eingegebene Name, ob es ihn gibt oder nicht. Auch dann wird ein Hash gerechnet. Antwort und Dauer verraten nichts |
 | Meldungen | Falsch: „Benutzername oder Passwort stimmt nicht.“ Gebremst: „Zu viele Versuche. Bitte in 5 Minuten noch einmal.“ Deaktiviert: dieselbe Meldung wie falsch |
 | Ausweg | Ein Admin setzt das Passwort zurück, das hebt die Bremse auf. Für den Admin: §3.4 |
