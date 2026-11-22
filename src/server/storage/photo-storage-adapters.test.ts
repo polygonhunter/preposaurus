@@ -5,7 +5,7 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createPhotoStorage } from './create-photo-storage'
 import { createLocalFileStorage } from './local-file-storage'
-import { createMemoryPhotoStorage } from './memory-photo-storage'
+import { createMemoryPhotoStorage } from '../../../tests/helpers/memory-photo-storage'
 import { parsePhotoKey, type PhotoKey } from './photo-key'
 import type { PhotoStorage } from './photo-storage'
 
