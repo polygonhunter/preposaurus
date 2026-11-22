@@ -77,6 +77,8 @@ Dazu kommt `tailscale` mit dem Zustand des Tailscale-Containers. Er enthält den
 
 Alles in diesem Abschnitt passiert im Browser im Tailscale-Admin-Bereich: [login.tailscale.com/admin](https://login.tailscale.com/admin).
 
+> *Noch nicht am Gerät geprüft:* der Tailscale-Container mit Serve und HTTPS-Zertifikat (Abschnitte 3, 6 und 7). Die CI prüft die Tailscale-Datei nur auf ihren Aufbau, nicht im echten Tailnet. Die Bezeichnungen im Admin-Bereich können sich geändert haben.
+
 ### 3.1 MagicDNS und HTTPS einschalten
 
 1. Seite **DNS** öffnen.
@@ -197,7 +199,7 @@ docker run --rm alpine:3.22 sh -c "apk add -q openssl && openssl rand -base64 32
 | `APP_SECRET` | ja | Geheimnis für die Sitzungen und für den verschlüsselt gespeicherten KI-Schlüssel, mindestens 32 Zeichen (`openssl rand -base64 32`). Ein neuer Wert meldet alle Geräte ab, ein in der App hinterlegter KI-Schlüssel muss dann neu eingetragen werden. **Getrennt von der Datenbank sichern** |
 | `PREPOSAURUS_UID`, `PREPOSAURUS_GID` | ja | Nutzer- und Gruppen-ID, der die Ordner `fotos` und `backups` gehören (aus Abschnitt 4.3). Standard 1000 |
 | `TS_HOSTNAME` | mit Tailscale-Container | Gerätename im Tailnet. Neutral wählen (Abschnitt 3.2). Ergibt die Adresse `https://<TS_HOSTNAME>.<tailnet>.ts.net` |
-| `TS_AUTHKEY` | nur beim ersten Start | Auth-Schlüssel aus Abschnitt 3.3. Nach dem ersten erfolgreichen Start darf die Zeile wieder leer sein |
+| `TS_AUTHKEY` | nur beim ersten Start | Auth-Schlüssel aus Abschnitt 3.3. Nach dem ersten erfolgreichen Start leeren und `docker compose up -d` ausführen (Abschnitt 6) |
 | `BACKUP_TIME` | nein | Uhrzeit der täglichen Sicherung, Standard `03:00` |
 | `TZ` | nein | Zeitzone für die Sicherung, Standard `Europe/Berlin` |
 | `LOG_LEVEL` | nein | Wie viel die App ins Log schreibt: `debug`, `info` (Standard), `warn` oder `error` |
@@ -238,12 +240,14 @@ Im Log von `migrate` stehen `Migrationen eingespielt` und `Stammdaten eingespiel
 docker compose logs migrate
 ```
 
-Läuft der Tailscale-Container, erscheint das Gerät mit deinem `TS_HOSTNAME` im Admin-Bereich unter **Machines**. Dort beim Gerät über das Menü **Disable key expiry** wählen, sonst muss es sich nach einigen Monaten neu anmelden.
+Läuft der Tailscale-Container, erscheint das Gerät mit deinem `TS_HOSTNAME` im Admin-Bereich unter **Machines** (*noch nicht am Gerät geprüft*). Dort beim Gerät über das Menü **Disable key expiry** wählen, sonst muss es sich nach einigen Monaten neu anmelden.
+
+Danach den Auth-Schlüssel wieder aus der `.env` nehmen (Zeile `TS_AUTHKEY=` leeren) und `docker compose up -d` ausführen. Der Zustand liegt jetzt im Ordner `tailscale`, und der Schlüssel steht nicht mehr in der Container-Konfiguration (`docker inspect`).
 
 ## 7. Erster Aufruf und Ersteinrichtung
 
 1. Auf einem Gerät mit verbundener Tailscale-App im Browser öffnen: `https://<TS_HOSTNAME>.<tailnet>.ts.net`, z. B. `https://haushalt.dein-tailnet.ts.net`.
-2. Der erste Aufruf kann einige Sekunden dauern, weil Tailscale das Zertifikat holt.
+2. Der erste Aufruf kann einige Sekunden dauern, weil Tailscale das Zertifikat holt (*noch nicht am Gerät geprüft*).
 3. Kurztest ohne Anmeldung: `https://<adresse>/api/health` zeigt `{"status":"ok"}`.
 
 **Wer die App zuerst öffnet, wird Admin.** Richte sie deshalb direkt nach dem Start ein. Die Ersteinrichtung in der App fragt nach Anzeigename, Benutzername und Passwort (keine E-Mail), danach nach der Zahl der Personen im Haushalt und dem Ziel in Tagen. Das dauert etwa zwei Minuten.
@@ -307,7 +311,7 @@ backups/
 
 Im Log steht jede Sicherung (`docker compose logs backup`), z. B. `Sicherung fertig: taeglich/2026-11-22_030000 (14M)`.
 
-**Fehlgeschlagene Sicherungen fallen auf:** Scheitert eine Sicherung oder ist die letzte älter als 26 Stunden, zeigt `docker compose ps` den Dienst `backup` als `unhealthy`. Schau deshalb ab und zu in `docker compose ps` oder in die Container-Übersicht des NAS. Ein Hinweis in der App kommt später.
+**Fehlgeschlagene Sicherungen fallen auf:** Scheitert eine Sicherung oder ist die letzte älter als 26 Stunden, zeigt `docker compose ps` den Dienst `backup` als `unhealthy`. Schau deshalb ab und zu in `docker compose ps` oder in die Container-Übersicht des NAS. Ein Hinweis in der App kommt später (#147).
 
 ### 10.2 Von Hand sichern und Stände ansehen
 
@@ -357,7 +361,7 @@ Erwartet: `Wiederhergestellt. Der Zustand davor liegt unter vor-wiederherstellun
 2. Den gesicherten Ordner `backups` vom zweiten Ort zurück in den neuen Preposaurus-Ordner kopieren.
 3. Wie oben wiederherstellen.
 
-Wer ein **altes oder fremdes** Backup einspielt, holt damit auch alte Sitzungen zurück. Dann alle Geräte abmelden. *Der Befehl dafür (`alle-abmelden`) kommt mit einer späteren Version.* Bis dahin hilft ein neues `APP_SECRET`, das alle abmeldet (ein in der App hinterlegter KI-Schlüssel muss danach neu eingetragen werden).
+Wer ein **altes oder fremdes** Backup einspielt, holt damit auch alte Sitzungen zurück. Dann alle Geräte abmelden. *Der Befehl dafür (`alle-abmelden`) kommt mit einer späteren Version (#145).* Bis dahin hilft ein neues `APP_SECRET`, das alle abmeldet (ein in der App hinterlegter KI-Schlüssel muss danach neu eingetragen werden).
 
 ## 12. Updates und der Weg zurück
 
@@ -365,7 +369,7 @@ Neue Versionen stehen auf der [Release-Seite](https://github.com/polygonhunter/p
 
 1. **Sichern:** `docker compose run --rm backup jetzt vor-update` und den Namen aus der Ausgabe merken (z. B. `vor-update/2026-11-22_100512`). Diesen Stand löscht der Container nie von selbst, auch nicht die nächtliche Sicherung.
 2. **Version eintragen:** in der `.env` die Zeile `PREPOSAURUS_VERSION=` auf die neue Nummer setzen.
-3. **Neue Dateien prüfen:** Falls das Release geänderte Compose-Dateien enthält, das neue Archiv wie in Abschnitt 4.2 entpacken (ohne `cp env.beispiel .env`, deine `.env` bleibt).
+3. **Neue Dateien prüfen:** Falls das Release geänderte Compose-Dateien enthält, das neue Archiv wie in Abschnitt 4.2 entpacken (ohne `cp env.beispiel .env`, deine `.env` bleibt). Achtung: Das Entpacken ersetzt `compose.yaml` und `compose.tailscale.yaml` ohne Rückfrage. Hast du sie selbst angepasst, vorher eine Kopie anlegen und die Änderung danach neu eintragen.
 4. **Ziehen und neu starten:**
    ```bash
    docker compose pull
@@ -398,6 +402,8 @@ Es wird nur jetzt angezeigt. Alle Sitzungen und Anmeldesperren sind aufgehoben.
 
 Der Befehl erzeugt das Passwort selbst und zeigt es nur einmal. Er beendet alle Sitzungen dieses Nutzers und hebt die Anmeldesperren auf (für den Namen, die Pause für alle und die Sperren je Adresse). Melde dich damit an und setze danach ein eigenes Passwort. Im Log von `web` steht eine Zeile `Passwort per Kommandozeile zurückgesetzt` ohne das Passwort.
 
+Das Passwort steht danach im Terminal. Teilst du gerade deinen Bildschirm oder zeichnest ihn auf, vorher beenden, und das Terminal danach schließen bzw. leeren (`clear`).
+
 Den Befehl gibt es bewusst nur im Container, nicht als Formular oder Einstellung: Wer `docker compose exec` ausführen darf, hat ohnehin Zugriff auf alle Daten.
 
 ## 14. Fehlersuche
@@ -425,6 +431,10 @@ docker compose logs tailscale        # Tailscale
 | Kamera geht nicht | Nur über die `https://…ts.net`-Adresse. Im Browser die Kamera für die Seite erlauben |
 | „Zu viele Versuche“ bei der Anmeldung | Kurz warten (höchstens 15 Minuten) oder ein Admin setzt das Passwort zurück. Für den einzigen Admin: Abschnitt 13 |
 | Tailscale-Gerät nach Monaten offline | Schlüssel abgelaufen. In **Machines** neu anmelden und **Disable key expiry** wählen |
+| App nach einem Neustart des Tailscale-Containers nicht mehr erreichbar | `web` hängt noch am Netz des alten Tailscale-Containers. `docker compose up -d --force-recreate web` (*noch nicht am Gerät geprüft*) |
+| Tailscale meldet einen ungültigen oder verbrauchten Auth-Schlüssel | Der Schlüssel war einmalig und ist verbraucht, der Ordner `tailscale` aber leer (z. B. neu angelegt). Neuen Schlüssel erzeugen (Abschnitt 3.3), eintragen, `docker compose up -d`, danach wieder leeren |
+| `backup` steht in `docker compose ps` auf `unhealthy` | Die letzte Sicherung ist gescheitert oder älter als 26 Stunden. `docker compose logs backup` lesen, dann `docker compose run --rm backup jetzt` |
+| Backup meldet „Es läuft schon eine Sicherung …“ | Gerade läuft eine Sicherung, Probe oder Wiederherstellung. Kurz warten |
 | `pull` meldet `denied` oder `unauthorized` | Das Image ist (noch) nicht öffentlich. Mit einem GitHub-Token mit Leserecht für Pakete anmelden: `docker login ghcr.io` |
 | `!reset` wird nicht verstanden | Docker Compose ist älter als 2.24. Docker bzw. Container Manager aktualisieren |
 
