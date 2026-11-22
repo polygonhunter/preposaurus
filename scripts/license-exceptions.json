@@ -13,5 +13,10 @@
     "package": "lightningcss*",
     "license": "MPL-2.0",
     "reason": "CSS-Werkzeug von vite. Fällt nur über vitest, eine optionale Peer-Abhängigkeit von better-auth (#32), in den Produktionsbaum. Läuft nie zur Laufzeit und landet nicht im Standalone-Image. MPL-2.0 gilt je Datei, unverändert genutzt, mit AGPL vereinbar. Freigabe durch den Maintainer offen."
+  },
+  {
+    "package": "fast-sha256",
+    "license": "Unlicense",
+    "reason": "Kommt über standardwebhooks, eine Abhängigkeit von @anthropic-ai/sdk (Anthropic-Adapter M6-05, #59). Die App nutzt die Webhook-Helfer des SDK nicht. Unlicense gibt den Code in die Gemeinfreiheit und ist laut FSF mit GPL und AGPL vereinbar. Freigabe durch den Maintainer offen."
   }
 ]
