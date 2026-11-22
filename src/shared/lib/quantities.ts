@@ -3,7 +3,7 @@ import { err, ok, type Result } from './result'
 // Mengen werden intern in Gramm, Milliliter oder Stück geführt. Eingaben kommen deutsch
 // („1,5 l“, „1.000 g“), Ausgaben ebenso.
 
-type QuantityUnit = 'g' | 'ml' | 'piece'
+export type QuantityUnit = 'g' | 'ml' | 'piece'
 
 export interface Quantity {
   value: number
