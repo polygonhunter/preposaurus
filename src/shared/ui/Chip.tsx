@@ -13,7 +13,10 @@ type ChipProps = Readonly<{
 function chipClasses(isActive: boolean): string {
   return cx(
     'touch-target inline-flex shrink-0 items-center rounded-full px-3.5 py-1.5 text-callout whitespace-nowrap transition-colors duration-150 ease-out',
-    isActive ? 'bg-fg text-bg' : 'bg-surface text-fg',
+    // Ab „breit“ liegt der Inhalt selbst auf surface, dort braucht der Chip einen Rand
+    isActive
+      ? 'bg-fg text-bg'
+      : 'bg-surface text-fg breit:shadow-[inset_0_0_0_1px_var(--color-line)]',
   )
 }
 
