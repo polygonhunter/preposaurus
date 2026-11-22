@@ -2,6 +2,8 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "project": [
     "src/**/*.{ts,tsx,css}!",
+    "!src/features/*/domain/**!",
+    "!src/shared/lib/{dates,quantities}.ts!",
     "tests/**/*.{ts,tsx}",
     "eslint/**/*.mjs",
     "scripts/**/*.ts"
