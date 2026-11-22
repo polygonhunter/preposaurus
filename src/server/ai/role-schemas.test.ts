@@ -56,6 +56,13 @@ describe('KI-Schemas', () => {
     })
   })
 
+  it('nimmt Behälter nur aus den Stammdaten-Schlüsseln, sonst null (kein „sonstiges“)', () => {
+    const request = { role: 'verpackung', context: CONTEXTS.verpackung } as const
+
+    expect(parseAnswer(request, { ...packaging, behaelter: null }).ok).toBe(true)
+    expect(parseAnswer(request, { ...packaging, behaelter: 'sonstiges' }).ok).toBe(false)
+  })
+
   it('erlaubt ohne Lebensmittelarten im Haushalt nur null', () => {
     const request = { role: 'verpackung', context: { foodTypes: [] } } as const
 

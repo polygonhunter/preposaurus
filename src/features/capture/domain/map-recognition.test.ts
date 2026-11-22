@@ -70,8 +70,8 @@ describe('mapPackagingAnswer', () => {
     })
   })
 
-  it('macht „sonstiges“ zu keinem Behälter und eine leere Bezeichnung zu null', () => {
-    const suggestion = mapPackagingAnswer(packaging({ behaelter: 'sonstiges', bezeichnung: '  ' }))
+  it('lässt einen fehlenden Behälter leer und macht eine leere Bezeichnung zu null', () => {
+    const suggestion = mapPackagingAnswer(packaging({ behaelter: null, bezeichnung: '  ' }))
 
     expect(suggestion.container).toBeNull()
     expect(suggestion.name).toBeNull()

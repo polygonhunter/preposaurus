@@ -84,7 +84,12 @@ const policies = [
   },
   {
     from: element('domain'),
-    allow: [...domainSameOrTypes, to(element('shared', { module: 'lib' }))],
+    allow: [
+      ...domainSameOrTypes,
+      to(element('shared', { module: 'lib' })),
+      // Wertelisten (z. B. Behälter-Schlüssel) nur als Typ, damit es eine Liste gibt
+      typesOnly(element('shared', { module: 'config' })),
+    ],
   },
   {
     from: element('data'),

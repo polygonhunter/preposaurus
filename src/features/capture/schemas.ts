@@ -3,22 +3,13 @@
 // oder Längengrenzen, weil Anthropic sie nicht unterstützt. Die Grenzen prüft danach das Mapping
 // in capture/domain (map-recognition.ts, map-best-before-recognition.ts).
 import { z } from 'zod'
+import { CONTAINER_KEYS } from '@/shared/config/constants'
 
 const confidence = z
   .enum(['hoch', 'mittel', 'niedrig'])
   .describe('Wie sicher die Werte lesbar waren')
 
 const nullableNumber = (description: string) => z.number().nullable().describe(description)
-
-const CONTAINERS = [
-  'dose',
-  'glas',
-  'packung',
-  'flasche',
-  'tetrapak',
-  'beutel',
-  'sonstiges',
-] as const
 
 /**
  * Lebensmittelart nur aus der erlaubten Liste des Haushalts, sonst null (#110). Die Liste
@@ -42,7 +33,10 @@ export function packagingAnswerSchema(allowedFoodTypeKeys: readonly string[]) {
       .nullable()
       .describe('Generische deutsche Bezeichnung ohne Marke, z. B. „Spaghetti“'),
     lebensmittelart: foodTypeField(allowedFoodTypeKeys),
-    behaelter: z.enum(CONTAINERS).describe('Art der Verpackung'),
+    behaelter: z
+      .enum(CONTAINER_KEYS)
+      .nullable()
+      .describe('Art der Verpackung, null wenn keine davon passt'),
     inhalt: z.strictObject({
       wert: nullableNumber('Füllmenge laut Aufdruck'),
       einheit: z.enum(['g', 'ml']).nullable().describe('Einheit der Füllmenge'),
