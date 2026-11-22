@@ -2,6 +2,7 @@ import type { BestBefore, BestBeforePrecision, DateKind } from '@/features/inven
 import {
   addMonths,
   calendarDayFrom,
+  dayParts,
   endOfMonth,
   endOfYear,
   type CalendarDay,
@@ -22,10 +23,16 @@ export type BestBeforeParseError =
 
 type ParseResult = Result<BestBefore, BestBeforeParseError>
 
-/** Zweistellige Jahre auf Packungen meinen dieses Jahrhundert, frühere Jahre sind kein MHD. */
+/** Vierstellige Jahre außerhalb dieses Bereichs sind kein MHD. */
 const MIN_YEAR = 2000
 const MAX_YEAR = 2099
 const CENTURY = 2000
+/**
+ * Ein zweistelliges Jahr (`30.09.27`) gilt nur in einem engen Fenster um heute als 20JJ:
+ * höchstens so viele Jahre zurück bzw. voraus. Außerhalb ist die Eingabe mehrdeutig.
+ */
+const TWO_DIGIT_YEAR_YEARS_BACK = 2
+const TWO_DIGIT_YEAR_YEARS_AHEAD = 15
 
 const LABEL =
   /^(mindestens haltbar bis( ende)?|zu verbrauchen bis|verbrauchen bis|mhd|best before( end)?|bbe|use by|exp\.?)\s*:?\s*/
@@ -35,12 +42,25 @@ const BEST_BEFORE_LABEL = /mindestens haltbar|mhd|best before|bbe/i
 
 interface Matcher {
   pattern: RegExp
-  toResult: (groups: string[]) => ParseResult
+  toResult: (groups: string[], today: CalendarDay) => ParseResult
 }
 
-function normalizeYear(text: string): number {
+/** Jahr aus dem Aufdruck. Ein zweistelliges Jahr außerhalb des Fensters ergibt null. */
+function normalizeYear(text: string, today: CalendarDay): number | null {
   const year = Number(text)
-  return text.length === 2 ? CENTURY + year : year
+  if (text.length !== 2) return year
+  const currentYear = dayParts(today).year
+  const candidate = CENTURY + year
+  const isInWindow =
+    candidate >= currentYear - TWO_DIGIT_YEAR_YEARS_BACK &&
+    candidate <= currentYear + TWO_DIGIT_YEAR_YEARS_AHEAD
+  return isInWindow ? candidate : null
+}
+
+function buildDayWithShortYear(groups: string[], today: CalendarDay): ParseResult {
+  const year = normalizeYear(groups[4] ?? '', today)
+  if (year === null) return err({ kind: 'ambiguous' })
+  return buildDay(year, n(groups, 3), n(groups, 1))
 }
 
 interface DateNumbers {
@@ -72,10 +92,7 @@ const MATCHERS: Matcher[] = [
     pattern: /^(\d{4})-(\d{2})-(\d{2})$/,
     toResult: (g) => buildDay(n(g, 1), n(g, 2), n(g, 3)),
   },
-  {
-    pattern: /^(\d{1,2})[./-](\d{1,2})[./-](\d{4}|\d{2})$/,
-    toResult: (g) => buildDay(normalizeYear(g[3] ?? ''), n(g, 2), n(g, 1)),
-  },
+  { pattern: /^(\d{1,2})([./-])(\d{1,2})\2(\d{4}|\d{2})$/, toResult: buildDayWithShortYear },
   { pattern: /^(\d{4})-(\d{2})$/, toResult: (g) => buildMonth(n(g, 1), n(g, 2)) },
   { pattern: /^(\d{1,2})[./-](\d{4})$/, toResult: (g) => buildMonth(n(g, 2), n(g, 1)) },
   {
@@ -102,12 +119,12 @@ function stripDecoration(text: string): string {
 }
 
 /** Liest ein MHD wie `30.09.2027`, `09/2027` oder `2027` samt Genauigkeit. */
-export function parseBestBefore(text: string): ParseResult {
+export function parseBestBefore(text: string, today: CalendarDay): ParseResult {
   const cleaned = stripDecoration(text)
   if (cleaned === '') return err({ kind: 'empty' })
   for (const { pattern, toResult } of MATCHERS) {
     const match = pattern.exec(cleaned)
-    if (match) return toResult([...match])
+    if (match) return toResult([...match], today)
   }
   return err({ kind: 'no-date' })
 }

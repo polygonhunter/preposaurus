@@ -61,6 +61,23 @@ describe('assessBestBefore', () => {
     expect(result.status).toBe('ok')
   })
 
+  it('markiert ein MHD mehr als 15 Jahre in der Zukunft, auch ohne Kategoriewert', () => {
+    const assessUnknown = (date: string) =>
+      assessBestBefore({
+        bestBefore: { date: toCalendarDay(date), precision: 'day', isEstimated: false },
+        confidence: 'high',
+        today,
+        typicalShelfLifeDays: null,
+      })
+
+    expect(assessUnknown('2041-11-22').status).toBe('ok')
+    expect(assessUnknown('2041-11-23')).toMatchObject({
+      status: 'review',
+      reasons: ['too-far-ahead'],
+    })
+    expect(assessUnknown('2099-09-30')).toMatchObject({ reasons: ['too-far-ahead'] })
+  })
+
   it('markiert einen Vorschlag mit niedriger Sicherheit', () => {
     expect(assess(inDays(200), 'low')).toMatchObject({
       status: 'review',
@@ -80,7 +97,7 @@ describe('Kein Pfad liefert ein Datum ohne Kennzeichen', () => {
   it.each(['', 'L 2027 0915', '14:32', '30.09', '09/27', '31.02.2027'])(
     'eine unlesbare Eingabe %j führt zu keinem Datum',
     (text) => {
-      const parsed = parseBestBefore(text)
+      const parsed = parseBestBefore(text, today)
       const suggestion = assess(parsed.ok ? parsed.value : null)
 
       expect(suggestion).toEqual({ status: 'unreadable' })
@@ -88,7 +105,7 @@ describe('Kein Pfad liefert ein Datum ohne Kennzeichen', () => {
   )
 
   it('ein gelesenes Datum ist nie als geschätzt markiert und trägt einen Status', () => {
-    const parsed = parseBestBefore('09/2027')
+    const parsed = parseBestBefore('09/2027', today)
     const suggestion = assess(parsed.ok ? parsed.value : null)
 
     expect(suggestion.status).toBe('ok')
