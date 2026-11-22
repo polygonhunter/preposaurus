@@ -11,12 +11,14 @@ const isCi = Boolean(process.env['CI'])
 const touch = { isMobile: true, hasTouch: true }
 
 // Alle Projekte starten mit der Sitzung, die das Projekt „einrichtung“ anlegt (tests/helpers/e2e-auth.ts).
+// Danach legt „beispielvorrat“ den Beispielvorrat in den neuen Haushalt (tests/e2e/beispielvorrat.setup.ts).
 const signedIn = { storageState: ADMIN_STORAGE_STATE }
-const afterSetup = ['einrichtung']
+const afterSetup = ['beispielvorrat']
 
-// Jeder Lauf beginnt mit einer leeren, migrierten Datenbank, damit die Ersteinrichtung testbar ist.
+// Jeder Lauf beginnt mit einer leeren, migrierten Datenbank mit Stammdaten (wie im Container), damit
+// die Ersteinrichtung testbar ist.
 const E2E_DATA_DIR = '.data/e2e'
-const freshDatabase = `rm -rf ${E2E_DATA_DIR} && npm run db:migrate`
+const freshDatabase = `rm -rf ${E2E_DATA_DIR} && npm run db:migrate && npm run db:seed`
 const startServer = isCi ? 'npm run start:standalone' : `npm run dev -- -p ${String(PORT)}`
 
 export default defineConfig({
@@ -32,6 +34,12 @@ export default defineConfig({
   },
   projects: [
     { name: 'einrichtung', testMatch: /einrichtung\.setup\.ts$/ },
+    {
+      name: 'beispielvorrat',
+      testMatch: /beispielvorrat\.setup\.ts$/,
+      use: signedIn,
+      dependencies: ['einrichtung'],
+    },
     {
       name: 'iphone',
       use: {
@@ -95,6 +103,8 @@ export default defineConfig({
       SHOW_PATTERN_PAGE: 'true',
       // Standalone-Server über http://localhost: WebKit verwirft dort Secure-Cookies
       E2E_INSECURE_COOKIES: 'true',
+      // Route für den Beispielvorrat nach der Einrichtung (tests/e2e/beispielvorrat.setup.ts)
+      E2E_DEMO_STOCK: 'true',
       PORT: String(PORT),
       // server.js bindet an HOSTNAME, und GitHub Actions setzt dort den Rechnernamen.
       ...(isCi ? { HOSTNAME: '0.0.0.0' } : {}),

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
-// Vorrat lesen mit dem Beispielhaushalt (npm run e2e:db, db/seeds/demo-data.ts). Diese Tests
+// Vorrat lesen mit dem Beispielvorrat (beispielvorrat.setup.ts, db/seeds/demo-data.ts). Diese Tests
 // ändern nichts, Entnehmen steht in vorrat-entnehmen.spec.ts.
 
 const GRAIN = 'Getreide, Getreideprodukte, Brot und Kartoffeln'

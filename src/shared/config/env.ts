@@ -87,7 +87,10 @@ const baseSchema = z.object({
   // Sitzungs-Cookie im Produktionsbuild ohne Secure (nur für die E2E-Tests der CI über
   // http://localhost: WebKit speichert dort keine Secure-Cookies). Im Betrieb nie setzen.
   E2E_INSECURE_COOKIES: z.stringbool().default(false),
-  // Setzt GitHub Actions (CI=true). Bindet E2E_INSECURE_COOKIES an die CI.
+  // Nur E2E: POST /api/e2e/beispielvorrat legt den Beispielvorrat in den Haushalt des angemeldeten
+  // Admins (tests/e2e/beispielvorrat.setup.ts). Im Betrieb nie setzen.
+  E2E_DEMO_STOCK: z.stringbool().default(false),
+  // Setzt GitHub Actions (CI=true). Bindet E2E_INSECURE_COOKIES und E2E_DEMO_STOCK an die CI.
   CI: optionalText.transform((value) => value !== undefined && !/^(0|false)$/i.test(value.trim())),
 })
 
@@ -95,21 +98,24 @@ type BaseValues = z.infer<typeof baseSchema>
 
 // Ein versehentlich gesetztes E2E_INSECURE_COOKIES im Betrieb stoppt den Start, statt die
 // Sitzungs-Cookies still ohne Secure auszuliefern.
-function checkInsecureCookies(values: BaseValues, context: z.RefinementCtx): void {
-  if (values.E2E_INSECURE_COOKIES && values.NODE_ENV === 'production' && !values.CI) {
-    context.addIssue({
-      code: 'custom',
-      path: ['E2E_INSECURE_COOKIES'],
-      message:
-        'E2E_INSECURE_COOKIES gilt nur für die E2E-Tests der CI. Im Betrieb bitte entfernen.',
-    })
+// Dasselbe gilt für E2E_DEMO_STOCK: Im Betrieb legt niemand per Aufruf Beispieldaten an.
+function checkE2eFlags(values: BaseValues, context: z.RefinementCtx): void {
+  const isOperation = values.NODE_ENV === 'production' && !values.CI
+  for (const key of ['E2E_INSECURE_COOKIES', 'E2E_DEMO_STOCK'] as const) {
+    if (values[key] && isOperation) {
+      context.addIssue({
+        code: 'custom',
+        path: [key],
+        message: `${key} gilt nur für die E2E-Tests der CI. Im Betrieb bitte entfernen.`,
+      })
+    }
   }
 }
 
 const envSchema = baseSchema
   .extend(smtpSchema.shape)
   .superRefine(checkSmtp)
-  .superRefine(checkInsecureCookies)
+  .superRefine(checkE2eFlags)
 
 export type Env = z.infer<typeof envSchema>
 
