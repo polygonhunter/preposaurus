@@ -27,12 +27,30 @@ function packagingInstruction({ foodTypes }: RoleContexts['verpackung']): string
   return `Lies die Verpackung: generische Bezeichnung ohne Marke, Behälter, Füllmenge und Abtropfgewicht. ${choice}`
 }
 
-function estimateInstruction(context: RoleContexts['naehrwerte_schaetzen']): string {
+type EstimateContext = RoleContexts['naehrwerte_schaetzen']
+
+function estimateBasis(context: EstimateContext): string {
   const basis = [context.foodType?.name, context.productName].filter(Boolean).join(', ')
+  return basis === '' ? '' : ` (${basis})`
+}
+
+function estimateInstruction(context: EstimateContext): string {
   return (
     'Es gibt keine Nährwerttabelle. Schätze typische Nährwerte je 100 g bzw. 100 ml ' +
-    `für dieses Lebensmittel${basis === '' ? '' : ` (${basis})`}. Das Ergebnis ist ausdrücklich ` +
+    `für dieses Lebensmittel${estimateBasis(context)}. Das Ergebnis ist ausdrücklich ` +
     'eine Schätzung. Wenn du nicht sinnvoll schätzen kannst, setze null.'
+  )
+}
+
+// Die KI liefert eine Haltbarkeit in Monaten, kein Datum. So kann ein gelesenes Datum nie mit
+// einer Schätzung verwechselt werden. Das Datum rechnet die App.
+function bestBeforeEstimateInstruction(context: EstimateContext): string {
+  return (
+    'Auf der Packung ist kein Mindesthaltbarkeitsdatum lesbar. Schätze, wie viele Monate ' +
+    `dieses Lebensmittel${estimateBasis(context)} ab heute typischerweise noch haltbar ist, ` +
+    'ungeöffnet und richtig gelagert. Das Ergebnis ist ausdrücklich eine Schätzung, kein ' +
+    'gelesenes Datum: Lies kein Datum von der Packung ab. Wähle genauigkeit „jahr“, wenn du ' +
+    'nur grob schätzen kannst. Wenn du nicht sinnvoll schätzen kannst, setze null.'
   )
 }
 
@@ -51,11 +69,12 @@ const INSTRUCTIONS: InstructionBuilders = {
   naehrwerte_schaetzen: estimateInstruction,
   mhd: () => BEST_BEFORE_INSTRUCTION,
   mhd_zweitversuch: () => BEST_BEFORE_INSTRUCTION,
+  mhd_schaetzen: bestBeforeEstimateInstruction,
 }
 
 function systemFor(role: AiRole): string {
-  // Die Schätzung ist die eine Rolle, die bewusst schätzt (nur auf ausdrückliche Wahl, #124).
-  if (role === 'naehrwerte_schaetzen') return BASE
+  // Die Schätz-Rollen schätzen bewusst (nur auf ausdrückliche Wahl, #124).
+  if (role === 'naehrwerte_schaetzen' || role === 'mhd_schaetzen') return BASE
   if (role === 'mhd' || role === 'mhd_zweitversuch') {
     return `${BASE} ${NEVER_INVENT} ${NEVER_INVENT_DATE}`
   }

@@ -2,8 +2,9 @@
 // dem Feld `datum`. `roh_text` ist reine Anzeige und wird nie zu einem Datum geparst, auch wenn
 // darin eines stünde: Hat die KI kein Datum geliefert, war sie sich nicht sicher.
 import type { BestBefore, BestBeforePrecision, DateKind } from '@/features/inventory/domain/unit'
-import { endOfMonth, endOfYear, parseCalendarDay, type CalendarDay } from '@/shared/lib/dates'
+import { parseCalendarDay } from '@/shared/lib/dates'
 import type { AiBestBeforeAnswer } from './ai-answers'
+import { normalizeToPrecision } from './best-before'
 import { mapConfidence } from './map-recognition'
 import type { Confidence } from './plausibility'
 
@@ -30,13 +31,6 @@ const KIND: Readonly<Record<AiBestBeforeAnswer['art'], DateKind | null>> = {
   unbekannt: null,
 }
 
-/** Nur Monat oder Jahr aufgedruckt: Es gilt das Monats- bzw. Jahresende. */
-function normalize(date: CalendarDay, precision: BestBeforePrecision): CalendarDay {
-  if (precision === 'month') return endOfMonth(date)
-  if (precision === 'year') return endOfYear(date)
-  return date
-}
-
 /**
  * Ein Datum mit unbekannter Genauigkeit bleibt ein Tagesdatum, wird aber zu „bitte prüfen“
  * (Sicherheit niedrig). Ergänzt wird nichts.
@@ -49,7 +43,7 @@ export function mapBestBeforeAnswer(answer: AiBestBeforeAnswer): BestBeforeReadi
   const base = { kind: KIND[answer.art], rawText: rawText === '' ? null : rawText }
   if (date === null) return { ...base, bestBefore: null, confidence }
   const bestBefore: BestBefore = {
-    date: normalize(date, precision ?? 'day'),
+    date: normalizeToPrecision(date, precision ?? 'day'),
     precision: precision ?? 'day',
     isEstimated: false,
   }

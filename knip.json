@@ -8,7 +8,7 @@
     "src/server/ai/anthropic-adapter.ts!",
     "src/features/ai-settings/application/*.ts!",
     "src/features/auth/actions/*.ts!",
-    "src/features/capture/actions/*-action.ts!",
+    "src/features/capture/actions/*.ts!",
     "src/server/auth/guards.ts!",
     "scripts/admin.ts!"
   ],
@@ -18,14 +18,16 @@
     "!src/shared/lib/{dates,quantities,slug,stock-unit}.ts!",
     "!src/server/{ai,crypto,storage}/**!",
     "!src/features/ai-settings/{application,data}/**!",
-    "!src/features/capture/{application/{recognize-best-before,find-open-draft}.ts,schemas.ts}!",
+    "!src/features/capture/{application/{recognize-best-before,estimate-on-request,find-open-draft}.ts,schemas.ts}!",
     "!src/features/inventory/{application/**,data/**,schemas.ts}!",
     "!src/features/supply/application/**!",
     "db/**/*.ts!",
     "!db/seeds/{demo*,factories}.ts!",
     "tests/**/*.{ts,tsx}",
     "eslint/**/*.mjs",
-    "scripts/**/*.ts"
+    "scripts/*.ts",
+    "scripts/admin/*.test.ts",
+    "scripts/admin/*.ts!"
   ],
   "ignore": ["tests/lint/fixtures/**"]
 }

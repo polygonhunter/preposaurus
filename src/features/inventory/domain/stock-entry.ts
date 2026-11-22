@@ -53,6 +53,8 @@ export interface ProductFilter {
   categoryId?: string | undefined
   foodTypeId?: string | undefined
   productId?: string | undefined
+  /** Nur diese Produkte, z. B. die mit fälligen Packungen (#141) */
+  productIds?: readonly string[] | undefined
   containerId?: string | undefined
   storageLocationId?: string | undefined
   /** Teilwort in Bezeichnung oder Lebensmittelart, ohne Groß- und Kleinschreibung */

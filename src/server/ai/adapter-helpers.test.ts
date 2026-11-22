@@ -15,6 +15,7 @@ const CONTEXTS: RoleContexts = {
   },
   mhd: {},
   mhd_zweitversuch: {},
+  mhd_schaetzen: { foodType: { key: 'linsen', name: 'Linsen' }, productName: 'Tellerlinsen' },
 }
 
 const requestFor = <R extends AiRole>(role: R) => ({ role, context: CONTEXTS[role] })
@@ -47,6 +48,15 @@ describe('promptForRole', () => {
 
     expect(prompt.system).not.toContain('erfinde nichts')
     expect(prompt.instruction).toContain('ausdrücklich eine Schätzung')
+    expect(prompt.instruction).toContain('Linsen, Tellerlinsen')
+  })
+
+  it('nennt die MHD-Schätzung Schätzung und verlangt kein gelesenes Datum', () => {
+    const prompt = promptForRole(requestFor('mhd_schaetzen'))
+
+    expect(prompt.system).not.toContain('erfinde nichts')
+    expect(prompt.instruction).toContain('ausdrücklich eine Schätzung, kein gelesenes Datum')
+    expect(prompt.instruction).toContain('Lies kein Datum von der Packung ab')
     expect(prompt.instruction).toContain('Linsen, Tellerlinsen')
   })
 

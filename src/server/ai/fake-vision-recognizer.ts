@@ -35,6 +35,7 @@ const NOTHING_RECOGNIZED: Readonly<Record<AiRole, unknown>> = {
   naehrwerte_schaetzen: { ...NOTHING_READ, ...NO_MACROS },
   mhd: { ...NOTHING_READ, ...NO_DATE },
   mhd_zweitversuch: { ...NOTHING_READ, ...NO_DATE },
+  mhd_schaetzen: { ...NOTHING_READ, haltbar_monate: null, genauigkeit: 'monat' },
 }
 
 export interface FakeVisionRecognizer extends VisionRecognizer {

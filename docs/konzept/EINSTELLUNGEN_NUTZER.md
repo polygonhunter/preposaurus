@@ -186,7 +186,7 @@ docker compose exec web node scripts/admin.mjs passwort-zuruecksetzen <benutzern
 | Wirkung | Neuer Hash, `passwort_vorlaeufig = true`, alle Sitzungen des Nutzers beendet, Anmeldesperre aufgehoben: in `anmelde_sperre` die Zeile `name:<benutzername>`, dazu `global` und alle `ip:`-Zeilen | Wie das Zurücksetzen in der App. `global` und `ip:` mit, weil der Admin sonst trotz neuem Passwort in einer laufenden Pause oder Adress-Sperre hängen kann (Review #138) |
 | Spur | Eine Zeile im Server-Log **ohne** Passwort. Am Konto steht „zuletzt geändert … per Kommandozeile“ | Ein Zurücksetzen bleibt nicht unbemerkt |
 | Weitere Befehle | `nutzer-auflisten` · `admin-machen <benutzername>` (reaktiviert und setzt die Rolle) · `alle-abmelden` | Deckt „einziger Admin ist weg“ und „Backup eingespielt“ ab |
-| Technik | Nutzt dieselben Use-Cases wie die Oberfläche. Muss im Standalone-Image enthalten sein (eigener Build-Schritt). **Umgesetzt in M13-01:** `passwort-zuruecksetzen` (Use-Case `resetPasswordFromCli`, gebündelt per `npm run build:cli`), die übrigen Befehle fehlen noch | Keine zweite Logik, die Regeln gelten auch hier |
+| Technik | Nutzt dieselben Use-Cases wie die Oberfläche. Muss im Standalone-Image enthalten sein (eigener Build-Schritt). **Umgesetzt in M13-01:** `passwort-zuruecksetzen` (Use-Case `resetPasswordFromCli`, gebündelt per `npm run build:cli`). **#145:** `nutzer-auflisten`, `admin-machen`, `alle-abmelden` (Use-Cases `listUsersFromCli`, `makeAdminFromCli`, `signOutEveryoneFromCli`) | Keine zweite Logik, die Regeln gelten auch hier |
 | Verworfen | `ADMIN_PASSWORD` in `.env`, Reset-Datei im Volume, Sicherheitsfrage | Bleiben liegen, landen in Backups oder sind erratbar |
 
 ## 4. Anmeldung (ERS-02)

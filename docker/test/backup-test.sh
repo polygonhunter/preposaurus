@@ -131,6 +131,10 @@ backup backup wiederherstellen manuell/2026-01-02_000000 --ja > photos.log 2>&1 
 cat photos.log
 grep -q "Fotos sind nur zum Teil zurückgespielt" photos.log || fail "Kein Hinweis zu den halben Fotos"
 grep -q "$(newest vor-wiederherstellung)" photos.log || fail "Der Hinweis nennt die Sicherung davor nicht"
+# Die alte Datenbank löscht erst das Aufräumen nach den Fotos (#153), die nächste Wiederherstellung
+# räumt sie weg.
+[ "$(psql_value "select count(*) from pg_database where datname = 'preposaurus_alt'")" = "1" ] ||
+  fail "preposaurus_alt wurde schon vor dem Foto-Abgleich gelöscht"
 
 docker compose up -d
 wait_for_health

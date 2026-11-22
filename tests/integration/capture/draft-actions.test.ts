@@ -18,9 +18,9 @@ const state = vi.hoisted(() => ({
   deps: null as CaptureDeps | null,
 }))
 
-vi.mock('@/server/auth/guards', () => ({
-  requireUser: () => Promise.resolve(state.session),
-}))
+vi.mock('@/server/auth/guards', async () =>
+  (await import('./photo-fixtures')).fakeGuards(() => state.session),
+)
 vi.mock('@/features/capture/application/capture-deps', () => ({
   loadCaptureDeps: () => Promise.resolve(state.deps),
 }))
