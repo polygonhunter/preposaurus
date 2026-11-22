@@ -1,19 +1,14 @@
 // Anmelden mit Benutzername und Passwort (EINSTELLUNGEN_NUTZER §4.3). Die Bremse läuft hier vor
-// Better Auth, weil dessen Rate-Limit Aufrufe über auth.api nicht begrenzt. Gezählt wird jeder
-// eingegebene Name, ob es ihn gibt oder nicht. Falsches Passwort, unbekannter Name und
-// deaktivierter Nutzer ergeben dieselbe Antwort.
+// Better Auth, weil dessen Rate-Limit Aufrufe über auth.api nicht begrenzt. Jeder Versuch wird
+// atomar gezählt, bevor das Passwort geprüft wird, sonst kämen parallele Anfragen an der Bremse
+// vorbei. Gezählt wird jeder eingegebene Name, ob es ihn gibt oder nicht. Falsches Passwort,
+// unbekannter Name und deaktivierter Nutzer ergeben dieselbe Antwort.
 import 'server-only'
 import { APIError } from 'better-auth/api'
 import type { Auth } from '@/server/auth/auth'
 import { err, ok, type Result } from '@/shared/lib/result'
-import type { SignInLockRepository } from '../data/sign-in-lock-repository'
-import {
-  ipLockKey,
-  nameLockKey,
-  registerIpFailure,
-  registerNameFailure,
-  remainingLockMinutes,
-} from '../domain/sign-in-brake'
+import type { BrakeRequest, SignInLockRepository } from '../data/sign-in-lock-repository'
+import { IP_RULE, NAME_RULE, ipLockKey, minutesUntil, nameLockKey } from '../domain/sign-in-brake'
 import type { SignInInput } from '../schemas'
 
 export type SignInError = { kind: 'invalid-credentials' } | { kind: 'throttled'; minutes: number }
@@ -40,41 +35,35 @@ async function tryBetterAuth(deps: SignInDeps, input: SignInInput): Promise<stri
   }
 }
 
-async function recordFailure(deps: SignInDeps, nameKey: string, ipKey: string | null) {
-  const now = deps.now()
-  const states = await deps.locks.findByKeys(ipKey === null ? [nameKey] : [nameKey, ipKey])
-  await deps.locks.save(nameKey, registerNameFailure(states.get(nameKey) ?? null, now))
-  if (ipKey !== null)
-    await deps.locks.save(ipKey, registerIpFailure(states.get(ipKey) ?? null, now))
+function brakeRequests(deps: SignInDeps, input: SignInInput): BrakeRequest[] {
+  const name = { key: nameLockKey(input.username), rule: NAME_RULE }
+  return deps.clientIp === null ? [name] : [name, { key: ipLockKey(deps.clientIp), rule: IP_RULE }]
 }
 
-async function lockedMinutes(deps: SignInDeps, keys: readonly string[]): Promise<number> {
-  const states = await deps.locks.findByKeys(keys)
-  return remainingLockMinutes(
-    keys.map((key) => states.get(key) ?? null),
-    deps.now(),
-  )
+// Ein Erfolg setzt die Bremse des Namens zurück. Die übrigen Zähler bleiben, nur dieser eine
+// reservierte Versuch zählt nicht als Fehlversuch.
+async function releaseAfterSuccess(deps: SignInDeps, requests: readonly BrakeRequest[]) {
+  const [name, ...shared] = requests.map((request) => request.key)
+  await deps.locks.release(name === undefined ? [] : [name], shared)
 }
 
 export async function signIn(
   deps: SignInDeps,
   input: SignInInput,
 ): Promise<Result<{ userId: string }, SignInError>> {
-  const nameKey = nameLockKey(input.username)
-  const ipKey = deps.clientIp === null ? null : ipLockKey(deps.clientIp)
+  const requests = brakeRequests(deps, input)
   const logContext = { username: input.username, ip: deps.clientIp }
-  const minutes = await lockedMinutes(deps, ipKey === null ? [nameKey] : [nameKey, ipKey])
-  if (minutes > 0) {
+  const now = deps.now()
+  const lockedUntil = await deps.locks.reserve(requests, now)
+  if (lockedUntil !== null) {
     deps.logWarning('Anmeldung gebremst', logContext)
-    return err({ kind: 'throttled', minutes })
+    return err({ kind: 'throttled', minutes: minutesUntil(lockedUntil, now) })
   }
   const userId = await tryBetterAuth(deps, input)
   if (userId === null) {
-    await recordFailure(deps, nameKey, ipKey)
     deps.logWarning('Anmeldung fehlgeschlagen', logContext)
     return err({ kind: 'invalid-credentials' })
   }
-  // Erfolg setzt nur die Bremse des Namens zurück. Die Adresse bleibt gezählt.
-  await deps.locks.remove(nameKey)
+  await releaseAfterSuccess(deps, requests)
   return ok({ userId })
 }
