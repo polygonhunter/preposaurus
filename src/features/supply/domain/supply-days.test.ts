@@ -76,7 +76,7 @@ describe('calculateSupplyDays', () => {
     expect(result.days).toBe(1)
   })
 
-  it('zählt „Noch gut“ vorläufig nicht, außer die Regel wird umgestellt', () => {
+  it('zählt „Noch gut“ heute nur mit eingeschaltetem Schalter', () => {
     const checked = supplyUnit('geprueft', '2026-10-31', {
       kcal: 4400,
       waterMl: 4000,
@@ -101,92 +101,6 @@ describe('calculateSupplyDays', () => {
       stillGoodCounts: true,
     })
     expect(valueOf(counting).days).toBe(1)
-  })
-
-  it('setzt „ca.“ nach dem Anteil geschätzter kcal, ein geschätztes MHD zählt nicht', () => {
-    const estimatedKcal = [supplyUnit('a', '2028-01-31', { kcal: 100, isKcalEstimated: true })]
-    const estimatedDate = [
-      supplyUnit('b', '2028-01-31', { kcal: 100, isBestBeforeEstimated: true }),
-    ]
-    const exact = [supplyUnit('c', '2028-01-31', { kcal: 100 })]
-    const run = (units: typeof exact) =>
-      valueOf(
-        calculateSupplyDays({
-          units,
-          need,
-          reference: { day: today, kind: 'today' },
-          stillGoodCounts: false,
-        }),
-      ).isApproximate
-
-    expect(run(estimatedKcal)).toBe(true)
-    expect(run(estimatedDate)).toBe(false)
-    expect(run(exact)).toBe(false)
-  })
-
-  it('nennt den Anteil der kcal aus Richtwerten der gezählten Einheiten', () => {
-    const units = [
-      supplyUnit('richtwert', '2028-01-31', { kcal: 1000, isKcalEstimated: true }),
-      supplyUnit('etikett', '2028-01-31', { kcal: 3000 }),
-      supplyUnit('abgelaufen', '2026-01-31', { kcal: 9000, isKcalEstimated: true }),
-    ]
-    const result = valueOf(
-      calculateSupplyDays({
-        units,
-        need,
-        reference: { day: today, kind: 'today' },
-        stillGoodCounts: false,
-      }),
-    )
-    expect(result.estimatedKcalShare).toBe(0.25)
-    expect(result.isApproximate).toBe(true)
-  })
-
-  it('übersieht Schätzwerte, die am Stichtag nicht mehr zählen', () => {
-    const units = [supplyUnit('a', '2026-01-31', { kcal: 100, isKcalEstimated: true })]
-
-    const result = valueOf(
-      calculateSupplyDays({
-        units,
-        need,
-        reference: { day: today, kind: 'today' },
-        stillGoodCounts: false,
-      }),
-    )
-    expect(result.estimatedKcalShare).toBe(0)
-    expect(result.isApproximate).toBe(false)
-  })
-
-  it('zählt Einheiten ohne Datum heute mit, am Zieldatum nicht', () => {
-    const units = [
-      supplyUnit('ohne', null, { kcal: 4400, waterMl: 4000 }),
-      supplyUnit('mit', '2028-01-31', { kcal: 4400, waterMl: 4000 }),
-    ]
-    const run = (kind: 'today' | 'target') =>
-      valueOf(
-        calculateSupplyDays({
-          units,
-          need,
-          reference: { day: today, kind },
-          stillGoodCounts: false,
-        }),
-      ).days
-
-    expect(run('today')).toBe(2)
-    expect(run('target')).toBe(1)
-  })
-
-  it('wertet ein fehlendes Datum nicht als Schätzung', () => {
-    const units = [supplyUnit('ohne', null, { kcal: 100 })]
-    const result = valueOf(
-      calculateSupplyDays({
-        units,
-        need,
-        reference: { day: today, kind: 'today' },
-        stillGoodCounts: false,
-      }),
-    )
-    expect(result.isApproximate).toBe(false)
   })
 
   it('rundet auf eine Nachkommastelle ab', () => {

@@ -11,7 +11,7 @@ import type {
 type NutritionField = keyof NutritionValues
 
 /** Ein Wert mit seiner Herkunft. Fehlt er auch im Richtwert, sind beide null. */
-export interface ResolvedValue {
+interface ResolvedValue {
   value: number | null
   origin: ValueOrigin | null
 }
