@@ -178,9 +178,11 @@ describe('Erkennung vorbereiten und protokollieren (#59, #108)', () => {
     it('lehnt eine unbekannte Foto-ID ab', async () => {
       const householdId = await insertHousehold(testDb.db)
 
-      const prepared = await prepareWith(householdId, crypto.randomUUID())
-
-      expect(prepared.ok || prepared.error).toEqual({ kind: 'photo-not-found' })
+      expect(await prepareWith(householdId, crypto.randomUUID())).toEqual({
+        ok: false,
+        error: { kind: 'photo-not-found' },
+      })
+      expect(await callsOf(householdId)).toEqual([])
     })
   })
 })
