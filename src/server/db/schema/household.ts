@@ -9,8 +9,10 @@ import {
   index,
   integer,
   numeric,
+  smallint,
   pgTable,
   text,
+  time,
   unique,
   uuid,
   type AnyPgColumn,
@@ -20,12 +22,14 @@ import {
   CALCULATION_MODES,
   DEFAULT_AMPEL_ORANGE_DAYS,
   DEFAULT_AMPEL_YELLOW_DAYS,
+  DEFAULT_WEEKLY_SUMMARY_TIME,
+  DEFAULT_WEEKLY_SUMMARY_WEEKDAY,
   DIETS,
   MEMBER_CONDITIONS,
   MEMBER_TYPES,
   SEXES,
 } from '../../../shared/config/constants'
-import { id, isOneOf, timestamps } from './columns'
+import { id, isOneOf, timestamps, timestampTz } from './columns'
 import { sources } from './recommendation'
 
 export const households = pgTable(
@@ -60,6 +64,18 @@ export const householdSettings = pgTable(
     ampelOrangeDays: integer('ampel_orange_tage').notNull().default(DEFAULT_AMPEL_ORANGE_DAYS),
     // Aus, bis der Admin die Foto-Erkennung bewusst einschaltet: Fotos gehen dann an den Anbieter.
     isAiEnabled: boolean('ki_aktiv').notNull().default(false),
+    // „Noch gut“ geprüfte, abgelaufene Einheiten zählen standardmäßig nicht zu „Heute versorgt“.
+    stillGoodCountsAsSupplied: boolean('noch_gut_zaehlt_mit').notNull().default(false),
+    // Erinnerungen je Haushalt (EINSTELLUNGEN_NUTZER §6.2). Wochentag nach ISO: 1 Montag … 7 Sonntag.
+    weeklySummaryEnabled: boolean('wochenuebersicht_aktiv').notNull().default(true),
+    weeklySummaryWeekday: smallint('wochenuebersicht_wochentag')
+      .notNull()
+      .default(DEFAULT_WEEKLY_SUMMARY_WEEKDAY),
+    weeklySummaryTime: time('wochenuebersicht_uhrzeit')
+      .notNull()
+      .default(DEFAULT_WEEKLY_SUMMARY_TIME),
+    urgentEnabled: boolean('dringend_aktiv').notNull().default(true),
+    setupCompletedAt: timestampTz('einrichtung_abgeschlossen_am'),
     ...timestamps(),
   },
   (table) => [
@@ -67,6 +83,10 @@ export const householdSettings = pgTable(
     check(
       'haushalt_einstellung_ampel_check',
       sql`${table.ampelOrangeDays} > 0 and ${table.ampelOrangeDays} <= ${table.ampelYellowDays}`,
+    ),
+    check(
+      'haushalt_einstellung_wochentag_check',
+      sql`${table.weeklySummaryWeekday} between 1 and 7`,
     ),
   ],
 )
