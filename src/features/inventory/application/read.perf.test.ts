@@ -1,10 +1,11 @@
 // Laufzeit der Lesepfade ohne Datenbank (#141): 5000 Produkte in 2000 Lebensmittelarten, 30.000
 // Packungen. Vorher lief jede Zeile und jede Kategorie über alle Packungen (Zeilen × Packungen),
-// das kostete mehrere Sekunden. Vorgruppiert bleibt es weit unter der Grenze, auch mit Coverage
-// und parallelen Testdateien. Gemessen wird der schnellste von drei Läufen.
+// das kostete rund 0,7 bis 1,5 s. Vorgruppiert sind es etwa 20 bis 90 ms. Nur mit
+// `npm run test:perf` (tests/helpers/perf.ts).
 import { describe, expect, it } from 'vitest'
 import { addDays, toCalendarDay } from '@/shared/lib/dates'
 import { createFakeStockReader, product, unit } from '../../../../tests/helpers/fake-stock-reader'
+import { fastestRun, isPerfRun } from '../../../../tests/helpers/perf'
 import { getDueUnits } from './get-due-units'
 import { getFoodTypeDetail } from './get-food-type-detail'
 import { getFoodTypeLevel } from './get-food-type-level'
@@ -18,7 +19,6 @@ const FOOD_TYPES = 2000
 const CATEGORIES = 100
 const UNITS_PER_PRODUCT = 6
 const LIMIT_MS = 500
-const RUNS = 3
 
 function largeProduct(index: number) {
   const type = index % FOOD_TYPES
@@ -51,20 +51,9 @@ const reader = createFakeStockReader({
   ),
 })
 
-async function fastestRun(run: () => Promise<unknown>): Promise<number> {
-  await run() // Aufwärmen: JIT
-  let fastest = Number.POSITIVE_INFINITY
-  for (let attempt = 0; attempt < RUNS; attempt += 1) {
-    const start = performance.now()
-    await run()
-    fastest = Math.min(fastest, performance.now() - start)
-  }
-  return fastest
-}
-
 const detailTarget = { kind: 'food-type', id: 'art-1' } as const
 
-describe('Lesepfade mit großem Haushalt (ohne Datenbank)', () => {
+describe.runIf(isPerfRun)('Lesepfade mit großem Haushalt (ohne Datenbank)', () => {
   it.each([
     ['Ebene 1', () => getStockOverview(reader, { householdId, today })],
     ['Ebene 2', () => getFoodTypeLevel(reader, { householdId, today, groupKey: 'getreide' })],

@@ -19,6 +19,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run --coverage",
+    "test:perf": "PERF=1 vitest run --no-file-parallelism perf.test",
     "knip": "knip && knip --production",
     "e2e": "playwright test",
     "licenses": "node scripts/check-licenses.ts",
