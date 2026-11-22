@@ -1,5 +1,5 @@
 import { toCalendarDay } from '@/shared/lib/dates'
-import type { SupplyUnit } from './supply-days'
+import type { SupplyUnit } from '@/features/supply/domain/supply-days'
 
 interface TestUnitOptions {
   kcal?: number

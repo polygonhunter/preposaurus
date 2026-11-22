@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
 import { calculateSupplyDays } from './supply-days'
-import { supplyUnit, supplyUnits } from './supply-test-units'
+import { supplyUnit, supplyUnits } from '../../../../tests/helpers/supply-units'
 
 const today = toCalendarDay('2026-11-22')
 // TESTDATEN: 2 Erwachsene mit den ungeprüften Konzeptwerten aus technik.html #rechnung

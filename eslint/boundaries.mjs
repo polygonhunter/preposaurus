@@ -13,6 +13,8 @@ const elements = [
   { type: 'server', pattern: 'src/server/*', capture: ['module'] },
   { type: 'shared', pattern: 'src/shared/*', capture: ['module'] },
   { type: 'worker', pattern: 'src/worker' },
+  // Test-Helfer (Fabriken, Fakes) liegen außerhalb von src/ und werden nicht ausgeliefert
+  { type: 'test-helpers', pattern: 'tests/helpers' },
 ]
 
 // schemas.ts ist eine Datei, kein Ordner. Darum ein Datei-Deskriptor statt eines Elements.
@@ -102,11 +104,19 @@ const policies = [
     from: element('worker'),
     allow: [to(element('application')), to(element('server')), to(anyShared)],
   },
+  {
+    from: element('test-helpers'),
+    allow: [
+      to({ module: { origin: ['external', 'core'] } }),
+      to(element(['test-helpers', 'domain'])),
+      to(anyShared),
+    ],
+  },
 ]
 
 const testRunnerPolicy = {
   from: element(['ui', 'actions', 'application', 'domain', 'data', 'server', 'shared', 'worker']),
-  allow: to({ module: { origin: 'external', source: 'vitest' } }),
+  allow: [to({ module: { origin: 'external', source: 'vitest' } }), to(element('test-helpers'))],
 }
 
 export const boundariesConfig = [
