@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createMemoryPhotoStorage } from './memory-photo-storage'
+import { createMemoryPhotoStorage } from '../../../tests/helpers/memory-photo-storage'
 import { deleteOrphanedPhotos, ORPHAN_MIN_AGE_MS, selectOrphanedFiles } from './orphaned-photos'
 import { parsePhotoKey, type PhotoKey } from './photo-key'
 

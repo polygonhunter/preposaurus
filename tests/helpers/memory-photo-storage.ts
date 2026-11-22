@@ -1,7 +1,7 @@
-// Fake-Adapter für Tests: hält Fotos im Speicher. Die Uhr ist einstellbar, damit Tests das
+// Fake-Adapter für Tests (nie produktiv, deshalb unter tests/helpers): hält Fotos im Speicher. Die Uhr ist einstellbar, damit Tests das
 // Alter von Dateien steuern können (Aufräumen erst ab 24 Stunden).
-import type { PhotoKey } from './photo-key'
-import { describeStoredPhoto, type PhotoStorage } from './photo-storage'
+import type { PhotoKey } from '@/server/storage/photo-key'
+import { describeStoredPhoto, type PhotoStorage } from '@/server/storage/photo-storage'
 
 interface MemoryEntry {
   data: Uint8Array

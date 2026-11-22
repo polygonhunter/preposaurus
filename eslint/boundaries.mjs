@@ -116,6 +116,8 @@ const policies = [
       to(element(['test-helpers', 'domain'])),
       // Test-DB, Schema und Fixtures für die Integrationstests (M1)
       to(serverModule('db')),
+      // Fake-Adapter brauchen den Port, den sie nachbilden
+      to(serverModule('storage')),
       to(anyShared),
     ],
   },
