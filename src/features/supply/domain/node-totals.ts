@@ -1,6 +1,7 @@
 import type { BestBefore } from '@/features/inventory/domain/unit'
 import type { CalendarDay } from '@/shared/lib/dates'
 import type { Quantity, QuantityUnit } from '@/shared/lib/quantities'
+import { isInStockWithoutDate } from '@/shared/lib/stock-unit'
 import { estimatedKcalShare, isApproximate } from './approximation'
 import type { SupplyInput, SupplyUnit } from './supply-days'
 import { daysOrNull, isCountedOn, isFreshOn } from './supply-rules'
@@ -113,7 +114,7 @@ export function calculateNodeTotals(input: NodeTotalsInput): NodeTotals {
       input.need.waterMlPerDay,
     ),
     nextBestBefore: earliestBestBefore(counted, input.reference.day),
-    withoutDate: inStock.filter((unit) => unit.bestBefore === null).length,
+    withoutDate: inNode.filter(isInStockWithoutDate).length,
     estimatedKcalShare: share,
     isApproximate: isApproximate(share),
   }
