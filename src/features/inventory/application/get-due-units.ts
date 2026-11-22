@@ -86,10 +86,10 @@ export async function getDueUnits(
 ): Promise<DueUnits> {
   const context = await loadReadContext(reader, householdId, today)
   const dueUntil = addDays(today, context.thresholds.soonDays)
-  const [products, stock] = await Promise.all([
-    reader.loadProducts(householdId, {}),
-    reader.loadUnits(householdId, { statuses: ['stock'], dueUntil }),
-  ])
+  // Erst die fälligen Packungen, dann nur deren Produkte (#141), nicht den ganzen Vorrat
+  const stock = await reader.loadUnits(householdId, { statuses: ['stock'], dueUntil })
+  const productIds = [...new Set(stock.map((unit) => unit.productId))]
+  const products = await reader.loadProducts(householdId, { productIds })
   const units = joinUnits(stock, products).map((joined) => ({
     ...joined.unit,
     bundleKey: rowKeyOf(joined.product),
