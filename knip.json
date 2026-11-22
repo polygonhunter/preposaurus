@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["src/server/db/migrate.ts!"],
+  "entry": ["src/server/db/migrate.ts!", "src/server/db/schema/*.ts!"],
   "project": [
     "src/**/*.{ts,tsx,css}!",
     "!src/features/*/domain/**!",
