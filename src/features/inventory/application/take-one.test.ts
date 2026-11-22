@@ -40,7 +40,7 @@ describe('takeOne („−1“ in der Vorratszeile)', () => {
 
   it('nimmt Packungen ohne Datum erst, wenn keine mit Datum mehr da ist', async () => {
     const { units, reader, writer } = setup()
-    const input = { householdId, userId: null, target: spaghetti, now }
+    const input = { householdId, userId: 'nutzer-1', target: spaghetti, now }
 
     await takeOne({ reader, writer }, input)
     await takeOne({ reader, writer }, input)
@@ -51,7 +51,7 @@ describe('takeOne („−1“ in der Vorratszeile)', () => {
 
   it('meldet „leer“, wenn nichts mehr im Vorrat ist', async () => {
     const { reader, writer } = setup()
-    const input = { householdId, userId: null, target: spaghetti, now }
+    const input = { householdId, userId: 'nutzer-1', target: spaghetti, now }
     for (let i = 0; i < 3; i += 1) await takeOne({ reader, writer }, input)
 
     expect(await takeOne({ reader, writer }, input)).toEqual({
@@ -65,11 +65,11 @@ describe('takeOne („−1“ in der Vorratszeile)', () => {
 
     const foreign = await takeOne(
       { reader, writer },
-      { householdId: 'haushalt-b', userId: null, target: spaghetti, now },
+      { householdId: 'haushalt-b', userId: 'nutzer-1', target: spaghetti, now },
     )
     const unknown = await takeOne(
       { reader, writer },
-      { householdId, userId: null, target: { kind: 'product', id: 'gibt-es-nicht' }, now },
+      { householdId, userId: 'nutzer-1', target: { kind: 'product', id: 'gibt-es-nicht' }, now },
     )
 
     expect(foreign).toEqual({ ok: false, error: { kind: 'not-found' } })
@@ -95,7 +95,7 @@ describe('takeOne („−1“ in der Vorratszeile)', () => {
 
     const result = await takeOne(
       { reader, writer: racingWriter },
-      { householdId, userId: null, target: spaghetti, now },
+      { householdId, userId: 'nutzer-1', target: spaghetti, now },
     )
 
     expect(result.ok && result.value.unitId).toBe(units[1]?.id)
@@ -110,7 +110,7 @@ describe('takeOne („−1“ in der Vorratszeile)', () => {
 
     const result = await takeOne(
       { reader, writer: alwaysLosing },
-      { householdId, userId: null, target: spaghetti, now },
+      { householdId, userId: 'nutzer-1', target: spaghetti, now },
     )
 
     expect(result).toEqual({ ok: false, error: { kind: 'empty' } })

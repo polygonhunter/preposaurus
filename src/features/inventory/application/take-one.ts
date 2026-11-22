@@ -24,7 +24,7 @@ export interface TakenUnit {
 
 interface TakeOneInput {
   householdId: string
-  userId: string | null
+  userId: string
   target: StockTarget
   now: Date
 }

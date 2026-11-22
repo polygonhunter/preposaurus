@@ -28,7 +28,7 @@ describe('consumeUnit („Verbraucht“ für eine Packung)', () => {
 
   it('ändert eine doppelt entnommene Packung nur einmal', async () => {
     const { units, writer } = setup()
-    const input = { householdId, userId: null, unitId: units[0]?.id ?? '', now }
+    const input = { householdId, userId: 'nutzer-1', unitId: units[0]?.id ?? '', now }
 
     await consumeUnit(writer, input)
     const second = await consumeUnit(writer, input)
@@ -41,7 +41,7 @@ describe('consumeUnit („Verbraucht“ für eine Packung)', () => {
 
     const result = await consumeUnit(writer, {
       householdId: 'haushalt-b',
-      userId: null,
+      userId: 'nutzer-1',
       unitId: units[0]?.id ?? '',
       now,
     })
@@ -52,12 +52,14 @@ describe('consumeUnit („Verbraucht“ für eine Packung)', () => {
 })
 
 describe('returnToStock (Rückgängig)', () => {
-  it('holt eine verbrauchte Packung zurück in den Vorrat', async () => {
+  const userId = 'nutzer-1'
+
+  it('holt die eigene verbrauchte Packung zurück in den Vorrat', async () => {
     const { units, writer } = setup()
     const unitId = units[0]?.id ?? ''
-    await consumeUnit(writer, { householdId, userId: null, unitId, now })
+    await consumeUnit(writer, { householdId, userId, unitId, now })
 
-    expect(await returnToStock(writer, { householdId, unitId })).toEqual({
+    expect(await returnToStock(writer, { householdId, userId, unitId })).toEqual({
       ok: true,
       value: { unitId },
     })
@@ -68,10 +70,21 @@ describe('returnToStock (Rückgängig)', () => {
     const { units, writer } = setup()
     const unitId = units[0]?.id ?? ''
 
-    expect(await returnToStock(writer, { householdId, unitId })).toEqual({
+    expect(await returnToStock(writer, { householdId, userId, unitId })).toEqual({
       ok: true,
       value: { unitId },
     })
+  })
+
+  it('holt keine Packung zurück, die jemand anderes entnommen hat', async () => {
+    const { units, writer } = setup()
+    const unitId = units[0]?.id ?? ''
+    await consumeUnit(writer, { householdId, userId: 'nutzer-2', unitId, now })
+
+    const result = await returnToStock(writer, { householdId, userId, unitId })
+
+    expect(result).toEqual({ ok: false, error: { kind: 'not-found' } })
+    expect(units[0]?.status).toBe('consumed')
   })
 
   it('kennt fremde Packungen nicht', async () => {
@@ -79,6 +92,7 @@ describe('returnToStock (Rückgängig)', () => {
 
     const result = await returnToStock(writer, {
       householdId: 'haushalt-b',
+      userId,
       unitId: units[0]?.id ?? '',
     })
 

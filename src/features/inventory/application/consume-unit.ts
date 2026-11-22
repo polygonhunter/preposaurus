@@ -9,7 +9,7 @@ export type ConsumeError = NotFound | { kind: 'not-in-stock' }
 
 interface ConsumeInput {
   householdId: string
-  userId: string | null
+  userId: string
   unitId: string
   now: Date
 }

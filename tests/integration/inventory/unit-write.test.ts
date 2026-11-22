@@ -21,16 +21,20 @@ describe('Entnehmen und Rückgängig gegen die Datenbank (#46)', () => {
   let foreignId: string
   let noodlesId: string
   let userId: string
+  let otherUserId: string
 
   beforeAll(async () => {
     testDb = await createTestDb()
     ;({ reader, householdId, foreignId, noodlesId } = await setupStockRead(testDb.db))
     writer = createUnitWriteRepository(testDb.db)
-    const [admin] = await testDb.db
+    // Demo: Alex ist Admin, Sam Mitglied (db/seeds/demo-data.ts)
+    const people = await testDb.db
       .select({ id: users.id })
       .from(users)
       .where(eq(users.householdId, householdId))
-    userId = admin?.id ?? ''
+      .orderBy(users.username)
+    userId = people[0]?.id ?? ''
+    otherUserId = people[1]?.id ?? ''
   })
 
   afterAll(async () => {
@@ -67,7 +71,7 @@ describe('Entnehmen und Rückgängig gegen die Datenbank (#46)', () => {
 
   it('ändert eine doppelt entnommene Packung nur einmal', async () => {
     const unitId = await stockUnitOf(householdId)
-    await returnToStock(writer, { householdId, unitId })
+    await returnToStock(writer, { householdId, userId, unitId })
 
     const [first, second] = await Promise.all([
       consumeUnit(writer, { householdId, userId, unitId, now }),
@@ -85,15 +89,26 @@ describe('Entnehmen und Rückgängig gegen die Datenbank (#46)', () => {
     const unitId = await stockUnitOf(householdId)
     await consumeUnit(writer, { householdId, userId, unitId, now })
 
-    expect((await returnToStock(writer, { householdId, unitId })).ok).toBe(true)
+    expect((await returnToStock(writer, { householdId, userId, unitId })).ok).toBe(true)
     expect(await unitOf(unitId)).toMatchObject({ status: 'vorrat', takenAt: null, takenBy: null })
+  })
+
+  it('holt mit Rückgängig keine Entnahme eines anderen Nutzers zurück', async () => {
+    const unitId = await stockUnitOf(householdId)
+    await consumeUnit(writer, { householdId, userId, unitId, now })
+
+    const result = await returnToStock(writer, { householdId, userId: otherUserId, unitId })
+
+    expect(result).toEqual({ ok: false, error: { kind: 'not-found' } })
+    expect(await unitOf(unitId)).toMatchObject({ status: 'verbraucht', takenBy: userId })
+    await returnToStock(writer, { householdId, userId, unitId })
   })
 
   it('fasst eine Packung eines fremden Haushalts nicht an', async () => {
     const foreignUnit = await stockUnitOf(foreignId)
 
     const consumed = await consumeUnit(writer, { householdId, userId, unitId: foreignUnit, now })
-    const returned = await returnToStock(writer, { householdId, unitId: foreignUnit })
+    const returned = await returnToStock(writer, { householdId, userId, unitId: foreignUnit })
 
     expect(consumed).toEqual({ ok: false, error: { kind: 'not-found' } })
     expect(returned).toEqual({ ok: false, error: { kind: 'not-found' } })

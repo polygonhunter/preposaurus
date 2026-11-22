@@ -1,5 +1,5 @@
 'use server'
-// „Rückgängig“ in der UndoBar nach Verbraucht (#46, UX-Konzept §7, P7).
+// „Rückgängig“ in der UndoBar nach Verbraucht (#46, UX-Konzept §7, P7). Nur die eigene Entnahme.
 import { refresh } from 'next/cache'
 import { requireHouseholdUser } from '@/server/auth/guards'
 import { returnToStock } from '../application/return-to-stock'
@@ -19,6 +19,7 @@ export async function undoConsumeAction(unitId: unknown): Promise<UndoActionResu
   const { writer } = await stockServices()
   const result = await returnToStock(writer, {
     householdId: user.value.householdId,
+    userId: user.value.id,
     unitId: parsed.data,
   })
   refresh()

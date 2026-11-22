@@ -7,8 +7,7 @@ import 'server-only'
 interface TakeOut {
   unitId: string
   status: 'consumed' | 'discarded'
-  /** null nur ohne angemeldeten Nutzer (Übergang bis zur Anmeldung, #33) */
-  userId: string | null
+  userId: string
   at: Date
 }
 
@@ -18,9 +17,12 @@ export interface UnitWriter {
     householdId: string,
     change: TakeOut,
   ) => Promise<'updated' | 'not-in-stock' | 'not-found'>
-  /** Rückgängig: holt eine verbrauchte oder entsorgte Packung zurück in den Vorrat. */
+  /**
+   * Rückgängig: holt eine Packung zurück in den Vorrat, aber nur, wenn genau dieser Nutzer sie
+   * verbraucht hat. Eine fremde Entnahme oder eine entsorgte Packung gilt als „nicht gefunden“.
+   */
   returnToStock: (
     householdId: string,
-    unitId: string,
+    taken: Readonly<{ unitId: string; userId: string }>,
   ) => Promise<'updated' | 'already-in-stock' | 'not-found'>
 }
