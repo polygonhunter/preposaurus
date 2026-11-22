@@ -7,6 +7,8 @@ type AmpelStage = keyof typeof AMPEL_OFFSETS
 export type DemoProduct = Readonly<{
   name: string
   category: string
+  // Leer wie nach einer KI-Erkennung ohne Treffer: Dann zählt nur die Kategorie.
+  foodType?: string
   container: string
   location: 'Keller' | 'Küche'
   contentAmount: string
@@ -35,6 +37,7 @@ const product = (
 
 export const DEMO_PRODUCTS: readonly DemoProduct[] = [
   product('Nudeln', {
+    foodType: 'spaghetti',
     category: 'getreide',
     container: 'packung',
     contentAmount: '500',
@@ -42,6 +45,7 @@ export const DEMO_PRODUCTS: readonly DemoProduct[] = [
     units: ['gruen', 'gruen', 'gelb'],
   }),
   product('Haferflocken', {
+    foodType: 'haferflocken',
     category: 'getreide',
     container: 'packung',
     location: 'Küche',
@@ -65,6 +69,7 @@ export const DEMO_PRODUCTS: readonly DemoProduct[] = [
     units: ['rot'],
   }),
   product('H-Milch', {
+    foodType: 'h_milch',
     category: 'milch',
     container: 'tetrapak',
     contentAmount: '1000',
@@ -73,6 +78,7 @@ export const DEMO_PRODUCTS: readonly DemoProduct[] = [
     units: ['orange', 'gelb', 'gruen'],
   }),
   product('Thunfisch in Öl', {
+    foodType: 'thunfisch',
     category: 'fleisch_fisch_eier',
     container: 'dose',
     contentAmount: '150',
@@ -80,6 +86,7 @@ export const DEMO_PRODUCTS: readonly DemoProduct[] = [
     units: ['rot', 'gruen'],
   }),
   product('Mineralwasser', {
+    foodType: 'sprudelwasser',
     category: 'wasser',
     container: 'flasche',
     contentAmount: '1500',
@@ -88,6 +95,7 @@ export const DEMO_PRODUCTS: readonly DemoProduct[] = [
     units: ['gruen', 'gruen', 'gruen', 'gruen', 'gruen', 'gruen'],
   }),
   product('Ravioli', {
+    foodType: 'ravioli',
     category: 'fertiggerichte',
     container: 'dose',
     contentAmount: '800',

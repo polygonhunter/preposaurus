@@ -1,7 +1,22 @@
 // Vorrat: Produkt mit Einheiten, je Packung ein MHD (UMSETZUNG M1-05, technik.html „Vorrat“).
 // Lagerort steht am Produkt (Freigabe L10). Wer dasselbe Produkt an zwei Orten lagert, legt es zweimal an.
+// Kategorie und Lebensmittelart: kategorie_id ist Pflicht, lebensmittelart_id optional (die KI kann
+// null liefern, dann wählt man von Hand). Ist eine Art gesetzt, muss kategorie_id deren Kategorie sein.
+// Das sichert ein zusammengesetzter Fremdschlüssel (lebensmittelart_id, kategorie_id) ab, ohne Trigger.
+// Er greift nur, wenn die Art gesetzt ist (MATCH SIMPLE), und zieht die Kategorie mit (ON UPDATE
+// CASCADE), wenn eine Art in eine andere Kategorie wandert.
 import { sql } from 'drizzle-orm'
-import { boolean, check, date, index, numeric, pgTable, text, uuid } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  check,
+  date,
+  foreignKey,
+  index,
+  numeric,
+  pgTable,
+  text,
+  uuid,
+} from 'drizzle-orm/pg-core'
 import {
   BEST_BEFORE_KINDS,
   BEST_BEFORE_PRECISIONS,
@@ -11,6 +26,7 @@ import {
 import { users } from './account'
 import { categories, containers, storageLocations } from './catalog'
 import { id, isOneOf, timestamps, timestampTz } from './columns'
+import { foodTypes } from './food-types'
 import { households } from './household'
 
 const per100 = (name: string) => numeric(name, { precision: 6, scale: 2 })
@@ -25,6 +41,7 @@ export const products = pgTable(
     categoryId: uuid('kategorie_id')
       .notNull()
       .references(() => categories.id, { onDelete: 'restrict' }),
+    foodTypeId: uuid('lebensmittelart_id'),
     containerId: uuid('behaelter_id').references(() => containers.id, { onDelete: 'set null' }),
     storageLocationId: uuid('lagerort_id').references(() => storageLocations.id, {
       onDelete: 'set null',
@@ -44,6 +61,14 @@ export const products = pgTable(
   },
   (table) => [
     index('produkt_haushalt_id_idx').on(table.householdId),
+    index('produkt_lebensmittelart_id_idx').on(table.foodTypeId),
+    foreignKey({
+      name: 'produkt_lebensmittelart_kategorie_fk',
+      columns: [table.foodTypeId, table.categoryId],
+      foreignColumns: [foodTypes.id, foodTypes.categoryId],
+    })
+      .onDelete('restrict')
+      .onUpdate('cascade'),
     check('produkt_inhalt_einheit_check', isOneOf(table.contentUnit, QUANTITY_UNITS)),
     check('produkt_inhalt_check', sql`${table.contentAmount} > 0`),
   ],
