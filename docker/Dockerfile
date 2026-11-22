@@ -3,9 +3,8 @@
 # Bauen aus dem Repo-Ordner: docker build -f docker/Dockerfile -t preposaurus .
 # Jede Architektur (amd64, arm64) wird nativ gebaut, damit sharp die passenden Binärdateien bekommt.
 
-ARG NODE_IMAGE=node:24.22.3-trixie-slim
-
-FROM ${NODE_IMAGE} AS build
+# Das Basis-Image steht direkt in FROM (zweimal), sonst findet Dependabot es nicht.
+FROM node:24.22.3-trixie-slim AS build
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json ./
@@ -15,7 +14,7 @@ COPY . .
 # next build für den Webserver, build:cli für migrate, seed und admin (siehe scripts/build-cli.ts)
 RUN npm run build && npm run build:cli
 
-FROM ${NODE_IMAGE} AS runtime
+FROM node:24.22.3-trixie-slim AS runtime
 LABEL org.opencontainers.image.title="Preposaurus" \
       org.opencontainers.image.description="Notvorrat nach offiziellen Empfehlungen, selbst gehostet" \
       org.opencontainers.image.source="https://github.com/polygonhunter/preposaurus" \

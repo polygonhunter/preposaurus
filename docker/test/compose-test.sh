@@ -9,6 +9,11 @@ repo_dir=$(pwd)
 prepare_install_dir "$repo_dir"
 trap 'docker compose down --volumes > /dev/null 2>&1 || true' EXIT
 
+# Dependabot löst keine ARG-Variablen in FROM auf. Beide Stufen nutzen dasselbe Basis-Image.
+grep -q '^FROM \$' "$repo_dir/docker/Dockerfile" && fail "Basis-Image im Dockerfile über eine Variable"
+[ "$(grep -Eo '^FROM node:[^ ]+' "$repo_dir/docker/Dockerfile" | sort -u | wc -l)" = "1" ] ||
+  fail "Die Stufen im Dockerfile nutzen verschiedene Node-Images"
+
 docker compose config --quiet
 docker compose -f compose.yaml -f compose.tailscale.yaml config --quiet 2> /dev/null &&
   fail "Die Tailscale-Überlagerung muss ohne TS_HOSTNAME abbrechen"
