@@ -7,22 +7,28 @@ export interface NutritionValues {
 }
 
 /**
- * Herkunft der Nährwerte am Produkt (#115, Spalte `naehrwerte_quelle`): vom Etikett gelesen,
- * von Hand eingegeben, Richtwert der Lebensmittelart oder KI-Schätzung auf ausdrückliche Wahl.
+ * Gespeicherte Herkunft der Nährwerte am Produkt (Spalte `naehrwerte_quelle`, #115, E-5):
+ * `label` = `tabelle` bzw. `etikett` (Nährwerttabelle gelesen), `manual` = `manuell`,
+ * `ai-estimate` = `ki_schaetzung`. Einen Richtwert gibt es hier bewusst nicht: Er wird beim Lesen
+ * aus der Lebensmittelart ergänzt und nie ins Produkt kopiert. Leer (null) = keine eigenen Werte.
  */
-export type NutritionSource = 'label' | 'manual' | 'reference' | 'ai-estimate'
+export type StoredNutritionSource = 'label' | 'manual' | 'ai-estimate'
 
+/** Herkunft eines einzelnen Werts nach dem Auflösen, nur im Lesepfad. */
+export type ValueOrigin = StoredNutritionSource | 'reference'
+
+/** Nährwerte, so wie sie am Produkt gespeichert sind. */
 export interface ProductNutrition {
   values: NutritionValues
-  source: NutritionSource
-  /** Wann der Nutzer Richtwert bzw. Schätzung bestätigt hat (`naehrwerte_bestaetigt_am`) */
+  source: StoredNutritionSource | null
+  /** Wann der Nutzer eine KI-Schätzung bestätigt hat (`naehrwerte_bestaetigt_am`) */
   confirmedAt: Date | null
 }
 
-/** Diese Herkünfte gelten bis zur gesonderten Bestätigung als unbestätigt (#115). */
-const SOURCES_NEEDING_CONFIRMATION: readonly NutritionSource[] = ['reference', 'ai-estimate']
-
-/** Stammen die Werte aus Richtwert oder Schätzung und hat sie noch niemand bestätigt? */
-export function isNutritionUnconfirmed(nutrition: Omit<ProductNutrition, 'values'>): boolean {
-  return SOURCES_NEEDING_CONFIRMATION.includes(nutrition.source) && nutrition.confirmedAt === null
+/**
+ * Eine KI-Schätzung, die noch niemand bestätigt hat. Die Bestätigung zählt nur für den Filter
+ * „Unvollständig“, nicht für „ca.“: Eine bestätigte Schätzung bleibt eine Schätzung (E-5).
+ */
+export function isEstimateUnconfirmed(nutrition: Omit<ProductNutrition, 'values'>): boolean {
+  return nutrition.source === 'ai-estimate' && nutrition.confirmedAt === null
 }
