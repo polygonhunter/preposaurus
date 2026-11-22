@@ -18,6 +18,8 @@
   --color-fg: light-dark(#000000, #ffffff);
   --color-fg2: light-dark(#6c6c70, #a1a1a6);
   --color-line: light-dark(#c6c6c8, #38383a);
+  /* Ränder interaktiver Elemente (Feld, ausgeschalteter Schalter): ≥ 3 : 1 auf surface und bg (WCAG 1.4.11). */
+  --color-line-strong: light-dark(#85858a, #6e6e73);
   --color-bar: light-dark(#3a3a3c, #e5e5ea);
   --color-accent: light-dark(#0060cc, #4da3ff);
   --color-on-accent: light-dark(#ffffff, #000000);
