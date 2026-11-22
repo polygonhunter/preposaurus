@@ -94,3 +94,38 @@ describe('isPatternPageEnabled', () => {
     expect(isPatternPageEnabled({ NODE_ENV: 'production', SHOW_PATTERN_PAGE: true })).toBe(true)
   })
 })
+
+describe('loadEnv: SMTP', () => {
+  const smtp = { ...minimal, SMTP_HOST: 'smtp.example.org', SMTP_FROM: 'vorrat@example.org' }
+
+  it('lässt Mail ohne SMTP_HOST aus, auch mit leeren Zeilen aus der Vorlage', () => {
+    const env = loadEnv({
+      ...minimal,
+      SMTP_HOST: '',
+      SMTP_PORT: '',
+      SMTP_SECURE: '',
+      SMTP_FROM: '',
+    })
+    expect(env).toMatchObject({ SMTP_HOST: undefined, SMTP_PORT: 587, SMTP_SECURE: undefined })
+  })
+
+  it('liest Port und TLS-Schalter', () => {
+    const env = loadEnv({ ...smtp, SMTP_PORT: '465', SMTP_SECURE: 'false' })
+    expect(env).toMatchObject({ SMTP_PORT: 465, SMTP_SECURE: false })
+  })
+
+  it('verlangt mit SMTP_HOST einen Absender', () => {
+    expect(() => loadEnv({ ...minimal, SMTP_HOST: 'smtp.example.org' })).toThrow('SMTP_FROM fehlt')
+  })
+
+  it('verlangt Nutzer und Passwort nur zusammen', () => {
+    expect(() => loadEnv({ ...smtp, SMTP_USER: 'vorrat' })).toThrow('gehören zusammen')
+    expect(loadEnv({ ...smtp, SMTP_USER: 'vorrat', SMTP_PASSWORD: 'geheim' }).SMTP_USER).toBe(
+      'vorrat',
+    )
+  })
+
+  it('lehnt einen ungültigen Port ab', () => {
+    expect(() => loadEnv({ ...smtp, SMTP_PORT: '70000' })).toThrow('SMTP_PORT')
+  })
+})

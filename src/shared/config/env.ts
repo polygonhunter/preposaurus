@@ -12,12 +12,56 @@ const required = (name: string) =>
     .min(1, `${name} ist leer.`)
 
 // Eine leere Zeile aus .env.example („KEY=“) gilt als nicht gesetzt.
-const optionalSecret = z
+const optionalText = z
   .string()
   .optional()
   .transform((value) => (value?.trim() ? value : undefined))
 
-const envSchema = z.object({
+const emptyAsUnset = (value: unknown) => (value === '' ? undefined : value)
+
+const DEFAULT_SMTP_PORT = 587
+
+// Mail ist optional (#87): Ohne SMTP_HOST sind Mails aus. Mit SMTP_HOST braucht es einen Absender,
+// und Nutzer und Passwort kommen nur zusammen.
+const smtpSchema = z.object({
+  SMTP_HOST: optionalText,
+  SMTP_PORT: z.preprocess(
+    emptyAsUnset,
+    z.coerce.number().int().min(1).max(65_535).default(DEFAULT_SMTP_PORT),
+  ),
+  // Leer: TLS von Anfang an nur auf Port 465, sonst STARTTLS
+  SMTP_SECURE: z.preprocess(
+    emptyAsUnset,
+    z
+      .enum(['true', 'false'])
+      .optional()
+      .transform((value) => (value === undefined ? undefined : value === 'true')),
+  ),
+  SMTP_USER: optionalText,
+  SMTP_PASSWORD: optionalText,
+  SMTP_FROM: optionalText,
+})
+
+type SmtpValues = z.infer<typeof smtpSchema>
+
+function checkSmtp(values: SmtpValues, context: z.RefinementCtx): void {
+  if (values.SMTP_HOST !== undefined && values.SMTP_FROM === undefined) {
+    context.addIssue({
+      code: 'custom',
+      path: ['SMTP_FROM'],
+      message: 'SMTP_FROM fehlt (Absender der Mails).',
+    })
+  }
+  if ((values.SMTP_USER === undefined) !== (values.SMTP_PASSWORD === undefined)) {
+    context.addIssue({
+      code: 'custom',
+      path: ['SMTP_PASSWORD'],
+      message: 'SMTP_USER und SMTP_PASSWORD gehören zusammen: beide setzen oder beide leer lassen.',
+    })
+  }
+}
+
+const baseSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   LOG_LEVEL: z.enum(LOG_LEVELS).default('info'),
   DATABASE_URL: required('DATABASE_URL').regex(
@@ -36,7 +80,7 @@ const envSchema = z.object({
   // Feste Verbindung „aus Umgebungsvariable“ mit Vorrang vor den Verbindungen in der App (#108).
   // Modelle je Rolle kommen nicht aus der Umgebung, sondern aus der Zuweisung in der App bzw.
   // der Empfehlung in ai-roles.ts (Entscheidung #59).
-  ANTHROPIC_API_KEY: optionalSecret,
+  ANTHROPIC_API_KEY: optionalText,
   PHOTO_STORAGE_DIR: z.string().min(1).default('./.data/fotos'),
   // Musterseite /muster auch im Produktionsbuild zeigen (nur für die E2E-Tests in der CI).
   SHOW_PATTERN_PAGE: z.stringbool().default(false),
@@ -44,6 +88,8 @@ const envSchema = z.object({
   // http://localhost: WebKit speichert dort keine Secure-Cookies). Im Betrieb nie setzen.
   E2E_INSECURE_COOKIES: z.stringbool().default(false),
 })
+
+const envSchema = baseSchema.extend(smtpSchema.shape).superRefine(checkSmtp)
 
 export type Env = z.infer<typeof envSchema>
 
