@@ -1,5 +1,6 @@
 // Beispielhaushalt für Entwicklung und E2E (UMSETZUNG M1-10). Läuft nur von Hand
 // (npm run db:seed:demo), nie automatisch im Container. Braucht die Stammdaten.
+import { eq } from 'drizzle-orm'
 import type { Database } from '../../src/server/db/connection'
 import { users } from '../../src/server/db/schema/account'
 import { categories, containers, storageLocations } from '../../src/server/db/schema/catalog'
@@ -44,9 +45,12 @@ function requireId(ids: Map<string, string>, key: string): string {
 async function loadMasterDataIds(db: Database) {
   const categoryRows = await db.select({ id: categories.id, key: categories.key }).from(categories)
   const containerRows = await db.select({ id: containers.id, key: containers.key }).from(containers)
-  const foodTypeRows = await db.select({ id: foodTypes.id, key: foodTypes.key }).from(foodTypes)
+  const foodTypeRows = await db
+    .select({ id: foodTypes.id, key: foodTypes.key })
+    .from(foodTypes)
+    .where(eq(foodTypes.isSystem, true))
   return {
-    foodTypeIds: new Map(foodTypeRows.map((row) => [row.key ?? '', row.id])),
+    foodTypeIds: new Map(foodTypeRows.map((row) => [row.key, row.id])),
     categoryIds: new Map(categoryRows.map((row) => [row.key ?? '', row.id])),
     containerIds: new Map(containerRows.map((row) => [row.key, row.id])),
   }

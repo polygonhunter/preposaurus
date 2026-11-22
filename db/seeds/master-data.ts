@@ -76,6 +76,8 @@ async function seedSystemFoodTypes(db: Database, categoryIds: Map<string, string
     )
     .onConflictDoUpdate({
       target: foodTypes.key,
+      // Passend zum Teilindex lebensmittelart_schluessel_system_eindeutig
+      targetWhere: sql`${foodTypes.householdId} is null`,
       set: {
         name: fromExcluded('name'),
         categoryId: fromExcluded('kategorie_id'),

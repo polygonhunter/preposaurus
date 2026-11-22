@@ -9,6 +9,7 @@ import { expectConstraintViolation } from '../../helpers/db-errors'
 import { insertBasics, type Basics } from '../../helpers/db-fixtures'
 import { buildHousehold, buildProduct } from '../../../db/seeds/factories'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
+import { toOwnKey } from '../../../src/shared/lib/slug'
 
 describe('Schema Lebensmittelart', () => {
   let testDb: TestDb
@@ -22,6 +23,12 @@ describe('Schema Lebensmittelart', () => {
     if (row === undefined) throw new Error(`Lebensmittelart ${key} fehlt`)
     return row
   }
+
+  const ownFoodType = (name: string) => ({
+    name,
+    key: toOwnKey(name) ?? '',
+    categoryId: basics.categoryId,
+  })
 
   beforeAll(async () => {
     testDb = await createTestDb()
@@ -42,18 +49,42 @@ describe('Schema Lebensmittelart', () => {
   it('erlaubt eine eigene Art je Haushalt, auch mit gleichem Namen in einem anderen Haushalt', async () => {
     const other = buildHousehold({ name: 'Zweiter Haushalt' })
     await testDb.db.insert(households).values(other)
-    const ownType = { name: 'Dinkelnudeln', categoryId: basics.categoryId }
+    const ownType = ownFoodType('Dinkelnudeln')
 
     await testDb.db.insert(foodTypes).values({ ...ownType, householdId: basics.householdId })
     await testDb.db.insert(foodTypes).values({ ...ownType, householdId: other.id })
 
     await expectConstraintViolation(
-      testDb.db.insert(foodTypes).values({ ...ownType, householdId: basics.householdId }),
+      testDb.db
+        .insert(foodTypes)
+        .values({ ...ownType, key: 'eigen_anders', householdId: basics.householdId }),
       'lebensmittelart_name_eindeutig',
     )
   })
 
-  it('lehnt einen doppelten Schlüssel ab', async () => {
+  it('lehnt einen doppelten Schlüssel einer eigenen Art im selben Haushalt ab', async () => {
+    const ownType = { ...ownFoodType('Roggenbrot'), householdId: basics.householdId }
+    await testDb.db.insert(foodTypes).values(ownType)
+
+    await expectConstraintViolation(
+      testDb.db.insert(foodTypes).values({ ...ownType, name: 'Roggenbrot hell' }),
+      'lebensmittelart_schluessel_eigen_eindeutig',
+    )
+  })
+
+  it('lehnt eine eigene Art mit dem Schlüssel einer System-Art ab', async () => {
+    await expectConstraintViolation(
+      testDb.db.insert(foodTypes).values({
+        key: 'spaghetti',
+        name: 'Meine Spaghetti',
+        categoryId: basics.categoryId,
+        householdId: basics.householdId,
+      }),
+      'lebensmittelart_herkunft_check',
+    )
+  })
+
+  it('lehnt einen doppelten System-Schlüssel ab', async () => {
     await expectConstraintViolation(
       testDb.db.insert(foodTypes).values({
         isSystem: true,
@@ -61,13 +92,13 @@ describe('Schema Lebensmittelart', () => {
         name: 'Spaghetti doppelt',
         categoryId: basics.categoryId,
       }),
-      'lebensmittelart_schluessel_unique',
+      'lebensmittelart_schluessel_system_eindeutig',
     )
   })
 
   it('lehnt eine eigene Art ohne Haushalt ab', async () => {
     await expectConstraintViolation(
-      testDb.db.insert(foodTypes).values({ name: 'Ohne Haushalt', categoryId: basics.categoryId }),
+      testDb.db.insert(foodTypes).values(ownFoodType('Ohne Haushalt')),
       'lebensmittelart_herkunft_check',
     )
   })
