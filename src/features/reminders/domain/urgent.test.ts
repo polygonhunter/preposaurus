@@ -12,26 +12,38 @@ describe('selectNewUrgentItems', () => {
       dueItem('Reis', '2026-11-20', { group: 'expired' }),
       dueItem('Mehl', '2026-12-10', { group: 'this-month' }),
     ]
-    const selected = selectNewUrgentItems(items, { lastSentDay: null })
+    const selected = selectNewUrgentItems(items, { lastSentAt: null })
     expect(selected.map((item) => item.label)).toEqual(['Thunfisch'])
   })
 
   it('meldet nur, was seit dem letzten Versand in „Diese Woche“ gerutscht ist', () => {
-    const lastSentDay = toCalendarDay('2026-11-21')
+    const lastSentAt = new Date('2026-11-21T07:00:00Z')
     const items = [
       // lag am 21.11. schon in „Diese Woche“ (bis 28.11.)
       dueItem('Reis', '2026-11-28'),
       // kam heute neu in die Gruppe
       dueItem('Thunfisch', '2026-11-29'),
     ]
-    const selected = selectNewUrgentItems(items, { lastSentDay })
+    const selected = selectNewUrgentItems(items, { lastSentAt })
     expect(selected.map((item) => item.label)).toEqual(['Thunfisch'])
   })
 
   it('meldet einen Eintrag erneut, wenn seither eine Packung dazukam', () => {
-    const lastSentDay = toCalendarDay('2026-11-21')
-    const items = [dueItem('Reis', '2026-11-25', { latestAddedOn: '2026-11-22' })]
-    expect(selectNewUrgentItems(items, { lastSentDay })).toHaveLength(1)
+    const lastSentAt = new Date('2026-11-21T07:00:00Z')
+    const items = [dueItem('Reis', '2026-11-25', { latestAddedAt: '2026-11-22T10:00:00Z' })]
+    expect(selectNewUrgentItems(items, { lastSentAt })).toHaveLength(1)
+  })
+
+  it('meldet eine Packung, die am Tag des Versands erst danach erfasst wurde', () => {
+    const lastSentAt = new Date('2026-11-21T07:00:00Z')
+    const items = [dueItem('Reis', '2026-11-25', { latestAddedAt: '2026-11-21T15:00:00Z' })]
+    expect(selectNewUrgentItems(items, { lastSentAt })).toHaveLength(1)
+  })
+
+  it('meldet keine Packung erneut, die vor dem Versand am selben Tag erfasst wurde', () => {
+    const lastSentAt = new Date('2026-11-21T07:00:00Z')
+    const items = [dueItem('Reis', '2026-11-25', { latestAddedAt: '2026-11-21T06:00:00Z' })]
+    expect(selectNewUrgentItems(items, { lastSentAt })).toHaveLength(0)
   })
 })
 

@@ -28,8 +28,8 @@ export interface DueItem {
   group: DueGroup
   bestBefore: BestBefore
   unitCount: number
-  /** Tag, an dem die zuletzt erfasste Packung des Eintrags dazukam */
-  latestAddedOn: CalendarDay
+  /** Zeitpunkt, an dem die zuletzt erfasste Packung des Eintrags dazukam */
+  latestAddedAt: Date
 }
 
 const MAX_NAMED_ITEMS = 3
