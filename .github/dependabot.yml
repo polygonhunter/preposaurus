@@ -1,0 +1,33 @@
+# Updates für Abhängigkeiten, Basis-Images und Actions (Review #143). Jede Änderung kommt als PR
+# und läuft durch CI und Docker, gemergt wird wie immer von Hand.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      entwicklung:
+        dependency-type: development
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
+
+  # Basis-Images der beiden Dockerfiles
+  - package-ecosystem: docker
+    directories: [/docker, /docker/backup]
+    schedule:
+      interval: weekly
+
+  # Feste Image-Versionen in compose.yaml und compose.tailscale.yaml
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
