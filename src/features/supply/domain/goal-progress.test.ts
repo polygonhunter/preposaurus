@@ -127,7 +127,51 @@ describe('calculateGoalProgress', () => {
   })
 })
 
+describe('Gemischter Bestand mit „Datum fehlt“', () => {
+  const need = { kcalPerDay: 2000, waterMlPerDay: 2000 }
+  const units = [
+    supplyUnit('mit-datum', '2028-01-31', { kcal: 6000, waterMl: 6000 }),
+    supplyUnit('ohne-1', null, { kcal: 4000, waterMl: 4000 }),
+    supplyUnit('ohne-2', null, { kcal: 2000, waterMl: 2000 }),
+    supplyUnit('ohne-verbraucht', null, { kcal: 9000, status: 'consumed' }),
+    supplyUnit('laeuft-ab', '2027-01-31', { kcal: 2000, waterMl: 2000 }),
+  ]
+  const result = calculateGoalProgress({ units, need, today, goal: { days: 5, targetDay } })
+  if (!result.ok) throw new Error('Rechnung fehlgeschlagen')
+  const progress = result.value
+
+  it('heute versorgt zählt Einheiten ohne Datum mit', () => {
+    expect(progress.today.days).toBe(7)
+  })
+
+  it('am Zieldatum zählen nur Einheiten mit Datum', () => {
+    expect(progress.atTarget.days).toBe(3)
+    expect(progress.isGoalReached).toBe(false)
+  })
+
+  it('nennt Einheiten ohne Datum gesondert, nicht als „läuft vor Zieldatum ab“', () => {
+    expect(progress.expiringBeforeTarget.map((unit) => unit.id)).toEqual(['laeuft-ab'])
+    expect(progress.withoutDate.map((unit) => unit.id)).toEqual(['ohne-1', 'ohne-2'])
+  })
+
+  it('erreicht das Ziel nicht allein durch Einheiten ohne Datum', () => {
+    const onlyUndated = [supplyUnit('ohne', null, { kcal: 100000, waterMl: 100000 })]
+    const run = calculateGoalProgress({
+      units: onlyUndated,
+      need,
+      today,
+      goal: { days: 5, targetDay },
+    })
+    expect(run.ok && run.value.today.days).toBe(50)
+    expect(run.ok && run.value.isGoalReached).toBe(false)
+  })
+})
+
 describe('unitsExpiringBefore', () => {
+  it('übergeht Einheiten ohne Datum', () => {
+    expect(unitsExpiringBefore([supplyUnit('ohne', null)], { today, targetDay })).toEqual([])
+  })
+
   it('nennt nur Einheiten, die heute zählen und am Zieldatum nicht mehr', () => {
     const units = [
       supplyUnit('schon-abgelaufen', '2026-11-01'),

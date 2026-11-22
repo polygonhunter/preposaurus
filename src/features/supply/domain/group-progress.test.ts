@@ -15,12 +15,19 @@ const targets: HouseholdGroupTarget[] = [
   { groupKey: 'wasser', unit: 'ml', amount: 40000 },
 ]
 
-function unit(groupKey: string | null, amount: number, bestBefore = '2028-01-31'): GroupUnit {
+function unit(
+  groupKey: string | null,
+  amount: number,
+  bestBefore: string | null = '2028-01-31',
+): GroupUnit {
   return {
     groupKey,
     amount,
     status: 'stock',
-    bestBefore: { date: toCalendarDay(bestBefore), precision: 'month', isEstimated: false },
+    bestBefore:
+      bestBefore === null
+        ? null
+        : { date: toCalendarDay(bestBefore), precision: 'month', isEstimated: false },
     checkedAt: null,
   }
 }
@@ -71,6 +78,36 @@ describe('calculateGroupProgress', () => {
 
   it('findet die knappste Warengruppe', () => {
     expect(findTightestGroup(progress)?.groupKey).toBe('gemuese')
+  })
+})
+
+describe('Warengruppen mit „Datum fehlt“', () => {
+  const targetDay = toCalendarDay('2027-03-31')
+  const units = [unit('getreide', 1500), unit('getreide', 1500, null), unit('wasser', 40000, null)]
+  const at = (reference: { day: typeof today; kind: 'today' | 'target' }) =>
+    calculateGroupProgress({ units, targets, goalDays: 10, reference })
+
+  it('zählen heute im Fortschritt mit', () => {
+    const progress = at({ day: today, kind: 'today' })
+    expect(progress.map((group) => [group.groupKey, group.stock])).toEqual([
+      ['getreide', 3000],
+      ['gemuese', 0],
+      ['wasser', 40000],
+    ])
+  })
+
+  it('zählen am Zieldatum nicht und erscheinen dort als Lücke', () => {
+    const progress = at({ day: targetDay, kind: 'target' })
+    expect(progress.map((group) => [group.groupKey, group.stock])).toEqual([
+      ['getreide', 1500],
+      ['gemuese', 0],
+      ['wasser', 0],
+    ])
+    expect(calculateGoalGap(progress).map((gap) => formatQuantity(gap.missing))).toEqual([
+      '1,5 kg',
+      '6 kg',
+      '40 l',
+    ])
   })
 })
 

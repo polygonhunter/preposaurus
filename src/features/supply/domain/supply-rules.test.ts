@@ -41,6 +41,24 @@ describe('isCountedOn', () => {
   })
 })
 
+describe('isCountedOn ohne Datum', () => {
+  const withoutDate = supplyUnit('ohne', null)
+
+  it('zählt heute mit', () => {
+    expect(isCountedOn(withoutDate, today)).toBe(true)
+  })
+
+  it('zählt am Zieldatum nicht, auch wenn das Zieldatum heute ist', () => {
+    expect(isCountedOn(withoutDate, target)).toBe(false)
+    expect(isCountedOn(withoutDate, { day: today.day, kind: 'target' })).toBe(false)
+  })
+
+  it('zählt verbraucht oder entsorgt auch heute nicht', () => {
+    expect(isCountedOn(supplyUnit('a', null, { status: 'consumed' }), today)).toBe(false)
+    expect(isCountedOn(supplyUnit('b', null, { status: 'discarded' }), today)).toBe(false)
+  })
+})
+
 describe('roundDownDays', () => {
   it('rundet auf eine Nachkommastelle ab und verträgt Gleitkomma-Rauschen', () => {
     expect(roundDownDays(2.99)).toBe(2.9)

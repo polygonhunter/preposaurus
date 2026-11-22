@@ -38,7 +38,8 @@ export interface SupplyInput {
   stillGoodCounts?: boolean
 }
 
-const isEstimate = (unit: SupplyUnit) => unit.isKcalEstimated || unit.bestBefore.isEstimated
+const isEstimate = (unit: SupplyUnit) =>
+  unit.isKcalEstimated || unit.bestBefore?.isEstimated === true
 
 /** „Versorgt“ am Stichtag (heute oder Zieldatum). Abgelaufene Einheiten zählen nicht. */
 export function calculateSupplyDays(input: SupplyInput): Result<SupplyDays, SupplyError> {

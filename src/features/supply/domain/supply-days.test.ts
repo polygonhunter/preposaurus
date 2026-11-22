@@ -102,6 +102,26 @@ describe('calculateSupplyDays', () => {
     ).toBe(false)
   })
 
+  it('zählt Einheiten ohne Datum heute mit, am Zieldatum nicht', () => {
+    const units = [
+      supplyUnit('ohne', null, { kcal: 4400, waterMl: 4000 }),
+      supplyUnit('mit', '2028-01-31', { kcal: 4400, waterMl: 4000 }),
+    ]
+    const run = (kind: 'today' | 'target') =>
+      valueOf(calculateSupplyDays({ units, need, reference: { day: today, kind } })).days
+
+    expect(run('today')).toBe(2)
+    expect(run('target')).toBe(1)
+  })
+
+  it('wertet ein fehlendes Datum nicht als Schätzung', () => {
+    const units = [supplyUnit('ohne', null, { kcal: 100 })]
+    const result = valueOf(
+      calculateSupplyDays({ units, need, reference: { day: today, kind: 'today' } }),
+    )
+    expect(result.containsEstimates).toBe(false)
+  })
+
   it('rundet auf eine Nachkommastelle ab', () => {
     const units = [
       supplyUnit('reis', '2028-01-31', { kcal: 4400 * 2.99 }),

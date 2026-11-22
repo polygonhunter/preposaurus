@@ -9,7 +9,10 @@ export type BestBeforePrecision = 'day' | 'month' | 'year'
 /** MHD oder Verbrauchsdatum („zu verbrauchen bis“). */
 export type DateKind = 'best-before' | 'use-by'
 
-/** Ein MHD mit Genauigkeit. Ein geschätztes Datum trägt immer das Kennzeichen. */
+/**
+ * Ein MHD mit Genauigkeit. Geschätzt wird nur auf ausdrückliche Wahl durch die KI (#116), dann
+ * trägt das Datum immer das Kennzeichen. Ein Richtwert wird nie zum MHD (#110).
+ */
 export interface BestBefore {
   date: CalendarDay
   precision: BestBeforePrecision
@@ -20,7 +23,8 @@ export interface BestBefore {
 export interface StockUnit {
   id: string
   status: UnitStatus
-  bestBefore: BestBefore
+  /** null heißt „Datum fehlt“ (#116): zählt heute mit, fürs Zieldatum nicht. Nie geschätzt. */
+  bestBefore: BestBefore | null
   kind: DateKind
   /** „Noch gut“ geprüft am, sonst null */
   checkedAt: CalendarDay | null
