@@ -9,7 +9,7 @@ import {
   resolveNutrition,
   type ResolvedNutrition,
 } from '../domain/resolve-nutrition'
-import type { StockProduct, StockProductUnit } from '../domain/stock-entry'
+import type { ProductFilter, StockProduct, StockProductUnit } from '../domain/stock-entry'
 import type { StockTarget } from '../schemas'
 
 export interface JoinedUnit {
@@ -43,6 +43,10 @@ export function rowTargetOf(product: StockProduct): StockTarget {
     ? { kind: 'product', id: product.id }
     : { kind: 'food-type', id: product.foodType.id }
 }
+
+/** Produkte einer Zeile: alle einer Lebensmittelart oder das eine Produkt ohne Art. */
+export const productFilterFor = (target: StockTarget): ProductFilter =>
+  target.kind === 'food-type' ? { foodTypeId: target.id } : { productId: target.id }
 
 export function rowKeyOf(product: StockProduct): string {
   const { kind, id } = rowTargetOf(product)

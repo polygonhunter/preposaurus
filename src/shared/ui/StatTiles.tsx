@@ -13,7 +13,7 @@ export function StatTiles({ tiles }: StatTilesProps) {
         >
           {/* Umbrechen statt abschneiden: Vier Kacheln auf 375 px („diese Woche“, #70) */}
           <dt className="text-footnote hyphens-auto text-fg2">{tile.label}</dt>
-          <dd className="text-title2">{tile.value}</dd>
+          <dd className="text-title2 whitespace-nowrap">{tile.value}</dd>
         </div>
       ))}
     </dl>

@@ -4,10 +4,13 @@ import 'server-only'
 import { getDb } from '@/server/db/get-db'
 import { todayInBerlin, type CalendarDay } from '@/shared/lib/dates'
 import { createStockReadRepository } from '../data/stock-read-repository'
+import { createUnitWriteRepository } from '../data/unit-write-repository'
 import type { StockReader } from './stock-reader'
+import type { UnitWriter } from './unit-writer'
 
 export interface StockServices {
   reader: StockReader
+  writer: UnitWriter
   today: CalendarDay
   now: Date
 }
@@ -17,6 +20,7 @@ export async function stockServices(): Promise<StockServices> {
   const now = new Date()
   return {
     reader: createStockReadRepository(db),
+    writer: createUnitWriteRepository(db),
     today: todayInBerlin(now),
     now,
   }

@@ -56,8 +56,8 @@ export default defineConfig([
     rules: { 'import/no-default-export': 'off' },
   },
   {
-    // Die Playwright-Konfigurationen gehören zum Werkzeug, nicht zur App: Sie lesen nur CI und E2E_PORT.
-    files: ['src/shared/config/env.ts', 'playwright.config.ts', 'playwright.beispiel.config.ts'],
+    // playwright.config.ts gehört zum Werkzeug, nicht zur App: Es liest nur CI.
+    files: ['src/shared/config/env.ts', 'playwright.config.ts'],
     rules: { 'no-restricted-properties': 'off' },
   },
   comments.recommended,

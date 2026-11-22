@@ -58,10 +58,13 @@ async function loadMasterDataIds(db: Database) {
   }
 }
 
-async function insertPeople(db: Database, householdId: string): Promise<string> {
+async function insertMembers(db: Database, householdId: string): Promise<Map<string, string>> {
   const memberRows = DEMO_MEMBERS.map((member) => buildMember({ householdId, ...member }))
   await db.insert(members).values(memberRows)
-  const memberIds = new Map(memberRows.map((row) => [row.name, row.id]))
+  return new Map(memberRows.map((row) => [row.name, row.id]))
+}
+
+async function insertUsers(db: Database, householdId: string, memberIds: Map<string, string>) {
   const userRows = DEMO_USERS.map(({ member, ...user }) =>
     buildUser({ householdId, ...user, memberId: requireId(memberIds, member) }),
   )
@@ -142,19 +145,42 @@ async function insertHousehold(db: Database, today: Date): Promise<string> {
   return household.id
 }
 
+type HouseholdTarget = Readonly<{ householdId: string; userId: string; today: Date }>
+
+// Personen, Lagerorte, Vorrat und Historie in einen bestehenden Haushalt. Für seedDemo und für die
+// E2E-Tests, die den Haushalt vorher über die Ersteinrichtung anlegen (tests/e2e/beispielvorrat.setup.ts).
+async function insertHouseholdData(tx: Database, target: HouseholdTarget) {
+  const masterData = await loadMasterDataIds(tx)
+  const locationIds = await insertLocations(tx, target.householdId)
+  const context = { db: tx, ...target }
+  const productId = await insertStock(context, { ...masterData, locationIds })
+  await insertHistory(context, productId)
+  await tx.insert(restockItems).values(buildRestockItem({ householdId: target.householdId }))
+}
+
 // Gibt false zurück, wenn schon ein Haushalt existiert: Die Demo überschreibt nie echte Daten.
 export async function seedDemo(db: Database, today: Date): Promise<boolean> {
   const existing = await db.select({ id: households.id }).from(households).limit(1)
   if (existing.length > 0) return false
   await db.transaction(async (tx) => {
-    const masterData = await loadMasterDataIds(tx)
     const householdId = await insertHousehold(tx, today)
-    const adminId = await insertPeople(tx, householdId)
-    const locationIds = await insertLocations(tx, householdId)
-    const context = { db: tx, householdId, today, userId: adminId }
-    const productId = await insertStock(context, { ...masterData, locationIds })
-    await insertHistory(context, productId)
-    await tx.insert(restockItems).values(buildRestockItem({ householdId }))
+    const adminId = await insertUsers(tx, householdId, await insertMembers(tx, householdId))
+    await insertHouseholdData(tx, { householdId, userId: adminId, today })
   })
   return true
+}
+
+// Gibt false zurück, wenn der Haushalt schon Produkte hat: Die Demo überschreibt nie echte Daten.
+export async function seedDemoIntoHousehold(db: Database, target: HouseholdTarget) {
+  return db.transaction(async (tx) => {
+    const existing = await tx
+      .select({ id: products.id })
+      .from(products)
+      .where(eq(products.householdId, target.householdId))
+      .limit(1)
+    if (existing.length > 0) return false
+    await insertMembers(tx, target.householdId)
+    await insertHouseholdData(tx, target)
+    return true
+  })
 }

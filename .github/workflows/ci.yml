@@ -108,9 +108,7 @@ jobs:
         if: failure()
         with:
           name: playwright-report
-          path: |
-            playwright-report/
-            playwright-report-beispiel/
+          path: playwright-report/
           retention-days: 7
 
   licenses:
