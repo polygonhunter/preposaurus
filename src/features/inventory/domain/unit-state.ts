@@ -7,7 +7,7 @@ import type { DateKind } from './unit'
  * „Datum fehlt“ ist ein eigener Zustand ohne Ampelfarbe: Ohne Datum lässt sich weder ein Ablauf
  * behaupten noch Entwarnung geben (#116). Die Einheit landet im Filter „Unvollständig“.
  */
-export type UnitState = 'good' | 'soon' | 'urgent' | 'expired' | 'date-missing'
+export type UnitState = 'good' | 'soon' | 'urgent' | 'expired' | 'no-date'
 
 /** Resttage, ab denen eine Einheit gelb (bald fällig) bzw. orange (dringend) wird. */
 export interface AmpelThresholds {
@@ -28,7 +28,7 @@ interface UnitStateInput {
 }
 
 export function unitStateFor({ bestBefore, today, thresholds }: UnitStateInput): UnitState {
-  if (bestBefore === null) return 'date-missing'
+  if (bestBefore === null) return 'no-date'
   const daysLeft = daysBetween(today, bestBefore)
   if (daysLeft < 0) return 'expired'
   if (daysLeft <= thresholds.urgentDays) return 'urgent'
