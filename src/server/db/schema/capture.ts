@@ -13,8 +13,10 @@ import {
   text,
   uuid,
 } from 'drizzle-orm/pg-core'
+import { AI_ROLES } from '../../../shared/config/ai-roles'
 import { PHOTO_ROLES, PHOTO_STATUSES } from '../../../shared/config/constants'
 import { users } from './account'
+import { aiConnections } from './ai-connections'
 import { id, isOneOf, timestamps } from './columns'
 import { households } from './household'
 import { products, units } from './inventory'
@@ -75,6 +77,11 @@ export const aiCalls = pgTable(
       .notNull()
       .references(() => households.id, { onDelete: 'cascade' }),
     photoId: uuid('foto_id').references(() => photos.id, { onDelete: 'set null' }),
+    // Rolle und Verbindung, damit Kosten und Fehlerquote je Rolle auswertbar sind (PoC, #108).
+    role: text('rolle', { enum: AI_ROLES }),
+    connectionId: uuid('verbindung_id').references(() => aiConnections.id, {
+      onDelete: 'set null',
+    }),
     model: text('modell').notNull(),
     inputTokens: integer('tokens_ein'),
     outputTokens: integer('tokens_aus'),
@@ -84,5 +91,8 @@ export const aiCalls = pgTable(
     errorKind: text('fehlerart'),
     ...timestamps(),
   },
-  (table) => [index('ki_aufruf_haushalt_erstellt_idx').on(table.householdId, table.createdAt)],
+  (table) => [
+    index('ki_aufruf_haushalt_erstellt_idx').on(table.householdId, table.createdAt),
+    check('ki_aufruf_rolle_check', isOneOf(table.role, AI_ROLES)),
+  ],
 )

@@ -12,9 +12,9 @@ describe('loadEnv', () => {
     expect(loadEnv(minimal)).toMatchObject({
       AI_PROVIDER: 'fake',
       LOG_LEVEL: 'info',
-      AI_MODEL_PACKAGING: 'claude-sonnet-5-5',
-      AI_MODEL_NUTRITION: 'claude-sonnet-5-5',
-      AI_MODEL_BEST_BEFORE: 'claude-sonnet-5-5',
+      AI_MODEL_PACKAGING: 'claude-haiku-5-5',
+      AI_MODEL_NUTRITION: 'claude-haiku-5-5',
+      AI_MODEL_BEST_BEFORE: 'claude-haiku-5-5',
     })
   })
 
