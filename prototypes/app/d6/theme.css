@@ -1,0 +1,83 @@
+/*
+ * Design 6 „Glas-Cockpit“ – alle Farb-Tokens an EINER Stelle.
+ * Jedes Token ist light-dark(<hell>, <dunkel>): Hell = Pastell-Glas (Design 3),
+ * Dunkel = Anthrazit mit Cyan-Glow (Design 2). Standard ist hell,
+ * `data-theme` (gesetzt per Inline-Script / Umschalter) schaltet auf dunkel.
+ */
+.d6-root {
+  color-scheme: light;
+
+  /* Flächen & Text */
+  --d6-bg: light-dark(#f4f3fa, #05080c);
+  --d6-text: light-dark(#0f172a, #e8eef4);
+  --d6-muted: light-dark(#475569, #a7b4c1);
+  --d6-subtle: light-dark(#5b6678, #82909d);
+  --d6-glass: light-dark(rgb(255 255 255 / 0.58), rgb(15 21 28 / 0.64));
+  --d6-glass-strong: light-dark(rgb(255 255 255 / 0.85), rgb(26 34 43 / 0.8));
+  --d6-glass-border: light-dark(rgb(255 255 255 / 0.85), rgb(255 255 255 / 0.08));
+  --d6-highlight: light-dark(rgb(255 255 255 / 0.9), rgb(255 255 255 / 0.06));
+  --d6-shadow: light-dark(rgb(70 60 140 / 0.3), rgb(0 0 0 / 0.7));
+  --d6-line: light-dark(rgb(15 23 42 / 0.09), rgb(255 255 255 / 0.08));
+  --d6-track: light-dark(rgb(15 23 42 / 0.07), rgb(255 255 255 / 0.07));
+  --d6-field: light-dark(rgb(255 255 255 / 0.75), rgb(0 0 0 / 0.35));
+
+  /* Akzent & Instrumente */
+  --d6-accent: light-dark(#5b5bd6, #3ee6ff);
+  --d6-accent-2: light-dark(#a78bfa, #22b8d4);
+  --d6-accent-text: light-dark(#4338ca, #6eeaff);
+  --d6-accent-soft: light-dark(rgb(99 102 241 / 0.12), rgb(62 230 255 / 0.12));
+  --d6-glow: light-dark(rgb(99 102 241 / 0.35), rgb(62 230 255 / 0.6));
+  --d6-ink: light-dark(#0f172a, #3ee6ff);
+  --d6-on-ink: light-dark(#ffffff, #03141a);
+  --d6-scan: light-dark(#a5b4fc, #3ee6ff);
+  --d6-grid: light-dark(rgb(79 70 229 / 0.05), rgb(148 197 214 / 0.06));
+
+  /* Füllstände */
+  --d6-surplus: light-dark(#10b981, #b4f34a);
+  --d6-surplus-text: light-dark(#047857, #c6f56f);
+  --d6-low: light-dark(#f59e0b, #fb923c);
+  --d6-low-text: light-dark(#b45309, #fdba74);
+
+  /* MHD-Ampel: Punkt + lesbare Textfarbe */
+  --d6-ok: light-dark(#10b981, #4ade80);
+  --d6-ok-text: light-dark(#047857, #86efac);
+  --d6-soon: light-dark(#f59e0b, #facc15);
+  --d6-soon-text: light-dark(#854d0e, #fde047);
+  --d6-urgent: light-dark(#f97316, #fb923c);
+  --d6-urgent-text: light-dark(#c2410c, #fdba74);
+  --d6-expired: light-dark(#f43f5e, #f87171);
+  --d6-expired-text: light-dark(#be123c, #fca5a5);
+  --d6-review: light-dark(rgb(253 224 71 / 0.55), rgb(253 224 71 / 0.12));
+
+  /* Makronährstoffe (Eiweiß · Kohlenhydrate · Fett) */
+  --d6-protein: light-dark(#e11d74, #f472b6);
+  --d6-carbs: light-dark(#5b5bd6, #3ee6ff);
+  --d6-fat: light-dark(#d97706, #fbbf24);
+
+  /* Wasser & Mesh-Hintergrund */
+  --d6-water: light-dark(rgb(56 189 248 / 0.38), rgb(34 211 238 / 0.22));
+  --d6-water-deep: light-dark(rgb(14 165 233 / 0.5), rgb(8 145 178 / 0.4));
+  --d6-blob-1: light-dark(#ffd6e0, #0b3a48);
+  --d6-blob-2: light-dark(#d7d4ff, #17195a);
+  --d6-blob-3: light-dark(#c9f2e3, #05343a);
+  --d6-blob-4: light-dark(#cfe8ff, #0d2449);
+
+  background: var(--d6-bg);
+  color: var(--d6-text);
+}
+
+.d6-root[data-theme="light"] {
+  color-scheme: light;
+}
+
+.d6-root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* Weicher Theme-Wechsel: nur während des Umschaltens aktiv. */
+.d6-root.d6-theming,
+.d6-root.d6-theming * {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow !important;
+  transition-duration: 600ms !important;
+  transition-timing-function: ease !important;
+}

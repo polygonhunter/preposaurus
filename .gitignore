@@ -1,0 +1,24 @@
+# Abhängigkeiten & Build
+node_modules/
+.next/
+out/
+build/
+*.tsbuildinfo
+
+# Geheimnisse
+.env*
+!.env.example
+*.pem
+
+# Lokale Claude-Einstellungen
+.claude/settings.local.json
+
+# System
+.DS_Store
+
+# Agenten-Arbeitskopien
+.claude/worktrees/
+
+# PoC-Fotos (können EXIF/GPS enthalten)
+poc/fotos/
+poc/

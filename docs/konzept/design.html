@@ -1,0 +1,1737 @@
+<title>Preposaurus Design</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+:root{
+--bg:#f4f3fa;--fg:#0f172a;--muted:#475569;--subtle:#5b6678;
+--line:rgb(15 23 42 / 0.12);--surface:rgb(255 255 255 / 0.58);--surface-strong:rgb(255 255 255 / 0.85);--surface-border:rgb(255 255 255 / 0.85);
+--shadow:rgb(70 60 140 / 0.3);--track:rgb(15 23 42 / 0.07);
+--accent:#5b5bd6;--accent-2:#a78bfa;--accent-text:#4338ca;--accent-soft:rgb(99 102 241 / 0.12);
+--ink:#0f172a;--on-ink:#ffffff;
+--ok:#10b981;--ok-text:#047857;--warn:#f59e0b;--warn-text:#854d0e;--urgent:#f97316;--urgent-text:#c2410c;--bad:#f43f5e;--bad-text:#be123c;
+--review:rgb(253 224 71 / 0.55);--water:rgb(56 189 248 / 0.38);
+--protein:#e11d74;--carbs:#5b5bd6;--fat:#d97706;
+--blob-1:#ffd6e0;--blob-2:#d7d4ff;--blob-3:#c9f2e3;--blob-4:#cfe8ff;
+--frame:#1e293b;--on-frame:#f8fafc;
+color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+--bg:#05080c;--fg:#e8eef4;--muted:#a7b4c1;--subtle:#82909d;
+--line:rgb(255 255 255 / 0.12);--surface:rgb(15 21 28 / 0.64);--surface-strong:rgb(26 34 43 / 0.8);--surface-border:rgb(255 255 255 / 0.08);
+--shadow:rgb(0 0 0 / 0.7);--track:rgb(255 255 255 / 0.07);
+--accent:#3ee6ff;--accent-2:#22b8d4;--accent-text:#6eeaff;--accent-soft:rgb(62 230 255 / 0.12);
+--ink:#3ee6ff;--on-ink:#03141a;
+--ok:#4ade80;--ok-text:#86efac;--warn:#facc15;--warn-text:#fde047;--urgent:#fb923c;--urgent-text:#fdba74;--bad:#f87171;--bad-text:#fca5a5;
+--review:rgb(253 224 71 / 0.12);--water:rgb(34 211 238 / 0.22);
+--protein:#f472b6;--carbs:#3ee6ff;--fat:#fbbf24;
+--blob-1:#0b3a48;--blob-2:#17195a;--blob-3:#05343a;--blob-4:#0d2449;
+--frame:#3b4756;--on-frame:#e8eef4;
+color-scheme:dark}}
+:root[data-theme="dark"]{
+--bg:#05080c;--fg:#e8eef4;--muted:#a7b4c1;--subtle:#82909d;
+--line:rgb(255 255 255 / 0.12);--surface:rgb(15 21 28 / 0.64);--surface-strong:rgb(26 34 43 / 0.8);--surface-border:rgb(255 255 255 / 0.08);
+--shadow:rgb(0 0 0 / 0.7);--track:rgb(255 255 255 / 0.07);
+--accent:#3ee6ff;--accent-2:#22b8d4;--accent-text:#6eeaff;--accent-soft:rgb(62 230 255 / 0.12);
+--ink:#3ee6ff;--on-ink:#03141a;
+--ok:#4ade80;--ok-text:#86efac;--warn:#facc15;--warn-text:#fde047;--urgent:#fb923c;--urgent-text:#fdba74;--bad:#f87171;--bad-text:#fca5a5;
+--review:rgb(253 224 71 / 0.12);--water:rgb(34 211 238 / 0.22);
+--protein:#f472b6;--carbs:#3ee6ff;--fat:#fbbf24;
+--blob-1:#0b3a48;--blob-2:#17195a;--blob-3:#05343a;--blob-4:#0d2449;
+--frame:#3b4756;--on-frame:#e8eef4;
+color-scheme:dark}
+
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%;overflow-wrap:break-word}
+h1,h2,h3{font-family:"Space Grotesk",Inter,system-ui,sans-serif;line-height:1.25;margin:1.6em 0 .5em}
+h1{font-size:1.9rem;margin-top:.4em}h2{font-size:1.4rem}h3{font-size:1.1rem}
+p,ul,ol{margin:0 0 1em}
+a{color:var(--accent-text)}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em}
+pre{white-space:pre-wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 1em}
+.num,td,.m-gauge b{font-variant-numeric:tabular-nums}
+.wrap{max-width:46rem;margin:0 auto;padding-block:24px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:radial-gradient(circle at 0 0,var(--blob-2),transparent 22rem),radial-gradient(circle at 100% 12rem,var(--blob-1),transparent 18rem)}
+.wrap>p,.wrap>ul,section>p,section>ul{max-width:65ch}
+section{scroll-margin-top:16px}
+.lead{color:var(--muted);font-size:1.05rem}
+
+.card{background:var(--surface);border:1px solid var(--surface-border);border-radius:24px;padding:16px 18px;margin:0 0 16px;box-shadow:0 14px 40px -18px var(--shadow);-webkit-backdrop-filter:blur(20px) saturate(1.5);backdrop-filter:blur(20px) saturate(1.5)}
+.card>:last-child{margin-bottom:0}
+.card h3{margin-top:0}
+.cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));margin-bottom:16px}
+.cards .card{margin:0}
+.toc{background:var(--surface);border:1px solid var(--surface-border);border-radius:24px;padding:12px 18px;margin:0 0 24px}
+.toc ul{list-style:none;padding:0;margin:0;columns:2 11rem;column-gap:16px}
+.toc a{display:block;padding:4px 0;text-decoration:none}
+
+.badge{display:inline-flex;align-items:center;gap:6px;padding:1px 9px;border-radius:999px;border:1px solid var(--line);background:var(--surface-strong);font-size:.78rem;font-weight:600;line-height:1.6;white-space:nowrap;vertical-align:.1em}
+.badge-vorschlag{background:var(--review);border-color:transparent}
+.badge-mvp{background:var(--accent-soft);color:var(--accent-text);border-color:transparent}
+.badge-spaeter{color:var(--muted)}
+.dot-ok,.dot-warn,.dot-urgent,.dot-bad{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none;background:var(--ok)}
+.dot-warn{background:var(--warn)}.dot-urgent{background:var(--urgent)}.dot-bad{background:var(--bad)}
+.note{border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:4px 16px 16px 4px;padding:12px 16px;margin:0 0 1em;max-width:65ch}
+.note>:last-child{margin-bottom:0}
+
+.scroll-x{display:flex;gap:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;padding-bottom:8px;margin:0 0 1em;max-width:100%}
+.scroll-x>*{flex:none;scroll-snap-align:start}
+.scroll-x>table,.scroll-x>pre{flex:1 0 auto;min-width:100%;margin:0}
+.scroll-x>figure{width:min-content;margin:0}
+table{border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--muted);white-space:nowrap}
+figure{margin:0 0 1.2em}
+figcaption{color:var(--muted);font-size:.85rem;margin-top:8px}
+.checklist{list-style:none;padding:0}
+.checklist li{position:relative;padding-left:30px;margin-bottom:8px}
+.checklist li::before{content:"";position:absolute;left:0;top:.2em;width:18px;height:18px;border:2px solid var(--subtle);border-radius:5px}
+pre.mermaid{background:transparent;border-color:var(--line);white-space:pre;font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px}
+
+.dev{position:relative;display:flex;flex-direction:column;gap:6px;overflow:hidden;flex:none;border:6px solid var(--frame);background:var(--bg) radial-gradient(circle at 10% 0,var(--blob-2),transparent 60%) no-repeat;color:var(--fg);font-size:9px;line-height:1.35;padding:8px}
+.dev-iphone{width:200px;height:412px;border-radius:34px;padding-top:28px}
+.dev-iphone::before{content:"";position:absolute;top:6px;left:50%;width:58px;height:16px;margin-left:-29px;border-radius:999px;background:var(--frame)}
+.dev-duo-aussen{width:170px;height:300px;border-radius:26px;padding-top:20px}
+.dev-duo-innen{width:380px;height:360px;border-radius:22px}
+.dev-pc{width:560px;height:340px;border:1px solid var(--line);border-radius:10px;padding-top:30px;box-shadow:0 14px 40px -18px var(--shadow)}
+.dev-pc::before{content:"";position:absolute;inset:0 0 auto;height:22px;border-bottom:1px solid var(--line);background:radial-gradient(circle at 12px 11px,var(--bad) 3.5px,transparent 4px),radial-gradient(circle at 24px 11px,var(--warn) 3.5px,transparent 4px),radial-gradient(circle at 36px 11px,var(--ok) 3.5px,transparent 4px),var(--surface-strong)}
+.dev:has(>.m-rail){padding-left:58px}
+.m-fold{position:absolute;top:0;bottom:0;left:50%;border-left:1px dashed var(--subtle);pointer-events:none}
+.m-head{display:flex;align-items:center;justify-content:space-between;gap:6px;font:600 12px/1.2 "Space Grotesk",Inter,sans-serif}
+.m-head small{font:500 8px ui-monospace,monospace;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.m-head i{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--muted);flex:none}
+.m-grid{display:grid;grid-template-columns:repeat(var(--cols,2),minmax(0,1fr));gap:6px}
+.m-tile{background:var(--surface);border:1px solid var(--surface-border);border-radius:14px;padding:7px;box-shadow:0 8px 20px -14px var(--shadow);min-width:0}
+.m-tile-wide{grid-column:1/-1}
+.m-tile>small,.m-label{display:block;font:500 7px ui-monospace,monospace;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.m-tile b{font:600 15px/1.1 "Space Grotesk",Inter,sans-serif;font-variant-numeric:tabular-nums}
+.m-gauge{--v:50;position:relative;display:grid;place-items:center;width:64px;aspect-ratio:1;margin:auto;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--v)*1%),var(--track) 0);-webkit-mask:radial-gradient(farthest-side,transparent 72%,var(--fg) 73%);mask:radial-gradient(farthest-side,transparent 72%,var(--fg) 73%)}
+.m-gauge-box{position:relative;display:grid;place-items:center}
+.m-gauge-box b{position:absolute}
+.m-bar{--v:50;--c:var(--accent);height:5px;border-radius:999px;background:var(--track);margin:3px 0;overflow:hidden}
+.m-bar::after{content:"";display:block;height:100%;width:calc(var(--v)*1%);background:var(--c);border-radius:inherit}
+.m-chip{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);background:var(--surface-strong);font-size:8px;white-space:nowrap}
+.m-chip.on{background:var(--accent-soft);color:var(--accent-text);border-color:transparent}
+.m-chip.review{background:var(--review);border-color:transparent}
+.m-chip [class^="dot-"]{width:6px;height:6px}
+.m-row{display:flex;align-items:center;gap:6px;padding:5px 2px;border-bottom:1px solid var(--line);min-width:0}
+.m-row>span:first-of-type{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.m-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:5px 10px;border-radius:999px;border:1px solid var(--surface-border);background:var(--surface-strong);font-weight:600;font-size:9px}
+.m-btn.ink{background:var(--ink);color:var(--on-ink);border-color:transparent}
+.m-dock{position:absolute;left:8px;right:8px;bottom:8px;display:flex;justify-content:space-between;padding:3px;border-radius:16px;background:var(--surface-strong);border:1px solid var(--surface-border);box-shadow:0 10px 24px -12px var(--shadow);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.m-dock>span{flex:1;text-align:center;padding:5px 0 4px;border-radius:12px;font-size:7px;color:var(--muted)}
+.m-dock>span::before{content:"";display:block;width:10px;height:10px;margin:0 auto 2px;border:1.5px solid currentColor;border-radius:3px}
+.m-dock>.on{background:var(--accent-soft);color:var(--accent-text)}
+.m-rail{position:absolute;top:0;bottom:0;left:0;width:50px;display:flex;flex-direction:column;gap:4px;padding:30px 4px 8px;background:var(--surface-strong);border-right:1px solid var(--line)}
+.dev-duo-innen>.m-rail{padding-top:10px}
+.m-rail>span{padding:5px 2px;border-radius:9px;text-align:center;font-size:7px;color:var(--muted)}
+.m-rail>.on{background:var(--accent-soft);color:var(--accent-text)}
+.m-table{width:100%;border-collapse:collapse;font-size:8px}
+.m-table th,.m-table td{padding:3px 4px;border-bottom:1px solid var(--line);white-space:nowrap;font-size:8px}
+.m-cam{position:relative;display:grid;place-items:end center;aspect-ratio:3/4;border-radius:14px;padding:8px;color:var(--on-frame);background:linear-gradient(var(--accent),var(--accent)) 12% 12%/14px 2px,linear-gradient(var(--accent),var(--accent)) 12% 12%/2px 14px,linear-gradient(var(--accent),var(--accent)) 88% 12%/14px 2px,linear-gradient(var(--accent),var(--accent)) 88% 12%/2px 14px,linear-gradient(var(--accent),var(--accent)) 12% 88%/14px 2px,linear-gradient(var(--accent),var(--accent)) 12% 88%/2px 14px,linear-gradient(var(--accent),var(--accent)) 88% 88%/14px 2px,linear-gradient(var(--accent),var(--accent)) 88% 88%/2px 14px,var(--frame);background-repeat:no-repeat}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+<style>
+/* Ergänzung nur für design.html: größere Mockup-Rahmen, Schrift ab 11 px, Tippflächen maßstäblich ab 44 pt. Farben nur über Tokens. */
+.dev{font-size:11px;line-height:1.4;gap:8px;padding:10px}
+.dev-iphone{width:340px;height:738px;border-radius:48px;padding-top:46px}
+.dev-iphone::before{top:10px;width:96px;height:26px;margin-left:-48px}
+.dev-duo-aussen{width:330px;height:502px;border-radius:42px;padding-top:36px}
+.dev-duo-innen{width:579px;height:750px;border-radius:30px}
+.dev-duo-innen.dev-duo-hoch{width:579px;height:750px}
+.dev-duo-innen.dev-duo-quer{width:823px;height:506px}
+.m-fold-h{position:absolute;left:0;right:0;top:50%;border-top:1px dashed var(--subtle);pointer-events:none}
+.m-dock.m-dock-links{right:calc(50% + 8px)}
+.m-row.on{background:var(--accent-soft);color:var(--accent-text);border-radius:8px}
+.m-drop{display:grid;place-items:center;min-height:60px;padding:10px;border:1.5px dashed var(--subtle);border-radius:12px;text-align:center;color:var(--muted)}
+.m-drop.on{border-color:var(--accent);background:var(--accent-soft)}
+.m-rows2{display:grid;grid-template-rows:1fr 1fr;row-gap:22px;flex:1;min-height:0}
+.m-rows2>*{min-height:0;overflow:hidden}
+.dev .m-gauge{width:84px}
+.dev-pc{width:896px;height:560px;padding-top:40px}
+.dev-pc::before{height:28px}
+.dev:has(>.m-rail){padding-left:98px}
+.m-rail{width:88px;gap:6px;padding:44px 6px 10px}
+.m-rail>span{display:flex;align-items:center;justify-content:center;min-height:38px;font-size:11px;border-radius:12px}
+.m-head{font-size:18px;min-height:38px}
+.m-head small,.m-tile>small,.m-label{font-size:11px;letter-spacing:.04em}
+.m-head i{display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--surface-border);background:var(--surface-strong);color:var(--fg);font-style:normal}
+.m-head i.on{background:var(--accent-soft);color:var(--accent-text)}
+.m-tile{border-radius:20px;padding:10px 12px}
+.m-tile b{font-size:22px}
+.m-chip{font-size:11px;padding:2px 9px;line-height:1.5}
+.m-chip [class^="dot-"]{width:8px;height:8px}
+.m-row{min-height:38px;padding:4px 2px}
+.m-btn{min-height:38px;padding:6px 14px;font-size:12px}
+.m-dock{left:10px;right:10px;bottom:12px;padding:4px;border-radius:24px;align-items:flex-end}
+.m-dock>span{min-height:44px;padding:6px 0 4px;font-size:11px;letter-spacing:-.01em;border-radius:18px}
+.m-dock>span::before{width:16px;height:16px;margin-bottom:3px;border-radius:5px}
+.m-dock>.m-fab{flex:0 0 60px;display:grid;place-items:center;min-height:60px;margin-top:-22px;padding:0;border-radius:50%;background:var(--ink);color:var(--on-ink);box-shadow:0 10px 24px -10px var(--shadow)}
+.m-dock>.m-fab::before{display:none}
+.m-table,.m-table th,.m-table td{font-size:11px}
+.m-table th,.m-table td{padding:6px}
+.m-cam{font-size:12px;border-radius:20px;text-align:center}
+.m-bar{height:7px}
+.m-ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.m-ico-lg{width:26px;height:26px}
+.m-col{display:flex;flex-direction:column;gap:8px;min-width:0}
+.m-split{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0}
+.m-wrap{display:flex;flex-wrap:wrap;gap:5px}
+.m-line{display:flex;gap:6px;overflow:hidden;white-space:nowrap}
+.m-sub{font-size:11px;color:var(--muted)}
+.m-hint{font-size:11px;line-height:1.4;color:var(--subtle)}
+.m-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+.m-ok{color:var(--ok-text)}.m-warn{color:var(--warn-text)}.m-urgent{color:var(--urgent-text)}.m-bad{color:var(--bad-text)}.m-acc{color:var(--accent-text)}
+.m-tap{min-height:38px}
+.m-pikto{display:grid;place-items:center;width:38px;height:38px;flex:none;border-radius:12px;background:var(--surface-strong);border:1px solid var(--line);font:600 13px "Space Grotesk",Inter,sans-serif;color:var(--accent-text)}
+.m-logo{display:grid;place-items:center;width:34px;height:34px;flex:none;border-radius:12px;background:var(--accent-soft);color:var(--accent-text);font:600 12px ui-monospace,monospace}
+.dev .m-big{font:300 34px/1 "Space Grotesk",Inter,sans-serif;font-variant-numeric:tabular-nums}
+.dev .m-mid{font:500 18px/1.1 "Space Grotesk",Inter,sans-serif;font-variant-numeric:tabular-nums}
+.dev .m-gauge-lg{width:150px}
+.dev .m-gauge-xl{width:200px}
+.dev .m-gauge-val{display:flex;flex-direction:column;align-items:center;font:300 40px/1 "Space Grotesk",Inter,sans-serif;font-variant-numeric:tabular-nums}
+.dev .m-gauge-val small{font:500 11px Inter,sans-serif;color:var(--muted);margin-top:4px}
+.m-read{border:1px solid var(--line);border-radius:14px;padding:6px 8px;background:var(--surface-strong)}
+.m-read.on{border-color:var(--accent);background:var(--accent-soft)}
+.m-seg{display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--track)}
+.m-seg>span{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;min-height:38px;border-radius:999px;font-weight:600;font-size:12px;color:var(--muted)}
+.m-seg>.on{background:var(--surface-strong);color:var(--fg);box-shadow:0 4px 12px -6px var(--shadow)}
+.m-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.m-steps>span{border-top:4px solid var(--track);padding-top:3px;font:500 11px Inter,system-ui,sans-serif;letter-spacing:-.01em;color:var(--subtle);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-steps>.done{border-color:var(--accent-2)}
+.m-steps>.on{border-color:var(--accent);color:var(--accent-text)}
+.m-seg10{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin:4px 0}
+.m-seg10>i{height:9px;border-radius:3px;background:var(--track)}
+.m-seg10>.on{background:var(--accent)}
+.m-ticks{display:flex;gap:3px;margin:3px 0}
+.m-ticks>i{width:6px;height:13px;border-radius:2px;background:var(--ok)}
+.m-ticks>.warn{background:var(--warn)}.m-ticks>.urgent{background:var(--urgent)}.m-ticks>.bad{background:var(--bad)}
+.m-shutter{width:62px;height:62px;margin:0 auto;border-radius:50%;background:var(--ink);border:5px solid var(--surface-strong);box-shadow:0 0 0 2px var(--ink),0 10px 24px -10px var(--shadow);flex:none}
+.m-cam-full{aspect-ratio:auto;flex:1;min-height:0}
+.dev-duo-aussen .m-cam{aspect-ratio:auto;flex:1;min-height:0}
+.m-cam .m-chip{color:var(--fg)}
+.m-switch{position:relative;width:42px;height:26px;flex:none;border-radius:999px;background:var(--track);border:1px solid var(--line)}
+.m-switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--surface-strong);box-shadow:0 2px 6px -2px var(--shadow)}
+.m-switch.on{background:var(--accent)}
+.m-switch.on::after{left:19px}
+.m-field{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:38px;padding:4px 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface-strong)}
+.m-group{display:block;font:600 11px ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:4px 2px 0}
+.m-sheet{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:8px;padding:12px 12px 18px;border-radius:26px 26px 0 0;background:var(--surface-strong);border-top:1px solid var(--line);box-shadow:0 -14px 40px -18px var(--shadow)}
+.m-dim{position:absolute;inset:0;background:var(--track)}
+.m-ok-ring{display:grid;place-items:center;width:46px;height:46px;margin:0 auto;border-radius:50%;background:var(--ok);color:var(--on-ink)}
+.m-ok-ring .m-ico{stroke-width:3}
+
+.sw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.5rem,1fr));gap:8px;margin:0 0 1em}
+.sw{border:1px solid var(--line);border-radius:14px;padding:8px;background:var(--surface);font-size:.82rem;line-height:1.35}
+.sw i{display:block;height:34px;border-radius:9px;margin-bottom:6px;border:1px solid var(--line)}
+.sw code{font-size:.78rem}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 1em}
+.parts{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;margin:0 0 1em}
+.parts .dev{font-size:11px}
+.part{position:static;width:auto;height:auto;border:0;background:none;padding:0}
+.g-dev{fill:var(--surface-strong);stroke:var(--frame);stroke-width:3}
+.g-scr{fill:var(--accent-soft)}
+.g-fold{stroke:var(--subtle);stroke-width:1.5;stroke-dasharray:5 4}
+.g-txt{fill:var(--fg);font:600 12px Inter,system-ui,sans-serif}
+.g-mut{fill:var(--muted);font:500 11px Inter,system-ui,sans-serif}
+.rate{white-space:nowrap}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7.5" stroke-width="3.2" stroke-dasharray="2.9 3"/></symbol>
+<symbol id="i-cam" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8.5 7l1.6-2.5h3.8L15.5 7"/><circle cx="12" cy="13.5" r="3.5"/></symbol>
+<symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+</svg>
+
+<div class="wrap">
+<h1>Preposaurus Design</h1>
+<p class="lead">Layout-Vorschläge für iPhone, das faltbare iPhone Duo und den PC-Browser. Alle bauen auf dem gewählten Prototyp d6 „Glas-Cockpit“ auf.</p>
+
+<nav class="toc" aria-label="Inhalt"><ul>
+<li><a href="#einstieg">Worum es geht</a></li>
+<li><a href="#bildsprache">Bildsprache</a></li>
+<li><a href="#geraete">Geräte und Umbruchpunkte</a></li>
+<li><a href="#iphone">iPhone</a></li>
+<li><a href="#duo-aussen">iPhone Duo zugeklappt</a></li>
+<li><a href="#duo-innen">iPhone Duo aufgeklappt</a></li>
+<li><a href="#duo-wechsel">Auf- und Zuklappen</a></li>
+<li><a href="#pc">PC-Browser</a></li>
+<li><a href="#erfassen">Erfassen im Detail</a></li>
+<li><a href="#einstellungen">Einstellungen im Detail</a></li>
+<li><a href="#zustaende">Zustände</a></li>
+<li><a href="#vergleich">Vergleich und Empfehlung</a></li>
+<li><a href="#offen">Offene Punkte / zur Freigabe</a></li>
+</ul></nav>
+
+<section id="einstieg">
+<h2>Worum es geht</h2>
+<p>Diese Seite beantwortet: Wie sieht Preposaurus auf den drei Gerätearten aus, und welche Anordnung soll es je Gerät werden?</p>
+<p>Entschieden ist das Design d6 „Glas-Cockpit“: helle Glasflächen, ein Raster aus Kacheln, runde Instrumente, hell als Standard und dunkel als Option. Der klickbare Prototyp liegt unter <code>prototypes/</code>, Route <code>/d6</code>. Er kennt nur zwei Größen: Handy und „ab 768 px“.</p>
+<p>Offen ist, wie die Bildschirme <strong>angeordnet</strong> werden. Dafür zeigt die Seite je Gerät zwei bis drei Varianten. Jede Variante zeigt dieselben vier Screens: <strong>Übersicht, Vorrat, Erfassen mit Kamera, Einstellungen</strong>. Am Ende steht ein Vergleich mit Empfehlung.</p>
+<div class="note">
+<p><strong>So liest man die Zeichnungen:</strong> Jede Reihe lässt sich waagrecht wischen. Alle Produkte, Zahlen und Namen in den Zeichnungen sind <strong>Beispiele</strong> aus den Prototyp-Daten (Haushalt Alex, Sam, Kim; Ziel 10 Tage bis 31.12.). Sie sind keine echten Empfehlungswerte.</p>
+<p>Variante A entspricht dem Prototyp. Alle anderen Varianten sind neue Ideen und tragen das Etikett <span class="badge badge-vorschlag">Vorschlag</span>. Sie stehen in der Checkliste am Seitenende.</p>
+</div>
+<p>Die Bereiche heißen wie im Funktionskatalog: Übersicht (UEB), Erfassen (ERF), Vorrat (VOR), Rotation (ROT), Nachkaufen (NK) und Einstellungen (EIN).</p>
+</section>
+
+<section id="bildsprache">
+<h2>Bildsprache</h2>
+<p>Dieser Abschnitt beantwortet: Aus welchen Farben und Bausteinen besteht die Oberfläche?</p>
+<ul>
+<li><strong>Glasflächen:</strong> halbtransparente, leicht verschwommene Karten auf weichem Farbverlauf. Ohne Unschärfe-Effekt bleiben sie trotzdem lesbar.</li>
+<li><strong>Bento-Raster:</strong> Kacheln in zwei Spalten (Handy) bzw. vier Spalten (breit), wichtige Kacheln über die volle Breite.</li>
+<li><strong>Instrumente:</strong> ein runder Zeiger für „Heute versorgt“, Balken für Ziel, Wasser und Warengruppen.</li>
+<li><strong>Ampel mit Punkt und Wort:</strong> Farbe allein reicht nie. Zu jedem Punkt steht ein Wort.</li>
+<li><strong>Hell als Standard, dunkel optional:</strong> umschaltbar unter Einstellungen → Mein Konto → Darstellung.</li>
+<li><strong>Ruhige Bewegung:</strong> Kacheln gleiten in den nächsten Screen, Zahlen zählen kurz hoch. Wer das nicht mag, schaltet „Animationen reduzieren“ ein. Dann bleibt alles still.</li>
+<li><strong>Ton:</strong> freundlich und sachlich, keine Warnbanner. Beim MHD steht „MHD ist kein Wegwerfdatum: anschauen, riechen, probieren“.</li>
+</ul>
+
+<h3>Farben</h3>
+<p>Alle Farben kommen aus Tokens (benannte Farbwerte), die es in hell und dunkel gibt. Die Felder unten wechseln mit dem Theme dieser Seite.</p>
+<div class="sw-grid">
+<div class="sw"><i style="background:var(--bg)"></i>Hintergrund<br><code>--bg</code></div>
+<div class="sw"><i style="background:var(--surface)"></i>Glasfläche<br><code>--surface</code></div>
+<div class="sw"><i style="background:var(--accent)"></i>Akzent<br><code>--accent</code></div>
+<div class="sw"><i style="background:var(--accent-2)"></i>Akzent 2<br><code>--accent-2</code></div>
+<div class="sw"><i style="background:var(--ink)"></i>Hauptknopf<br><code>--ink</code></div>
+<div class="sw"><i style="background:var(--water)"></i>Wasser<br><code>--water</code></div>
+<div class="sw"><i style="background:var(--protein)"></i>Eiweiß<br><code>--protein</code></div>
+<div class="sw"><i style="background:var(--carbs)"></i>Kohlenhydrate<br><code>--carbs</code></div>
+<div class="sw"><i style="background:var(--fat)"></i>Fett<br><code>--fat</code></div>
+<div class="sw"><i style="background:var(--review)"></i>bitte prüfen<br><code>--review</code></div>
+</div>
+
+<h3>Ampel</h3>
+<p>Die Ampel gilt je Einheit (eine Packung mit eigenem MHD). Die Standard-Schwellen stammen aus dem Konzept zur Rotation und sind in den Einstellungen änderbar.</p>
+<div class="legend">
+<span class="badge"><i class="dot-ok"></i>gut · mehr als 3 Monate</span>
+<span class="badge"><i class="dot-warn"></i>bald fällig · bis 3 Monate</span>
+<span class="badge"><i class="dot-urgent"></i>dringend · bis 4 Wochen</span>
+<span class="badge"><i class="dot-bad"></i>abgelaufen · vor heute</span>
+</div>
+<p>Der Status-Filter „Bald fällig“ im Vorrat fasst gelb und orange zusammen. Ampelfarben erscheinen nur als Punkt, Balken oder Rand. Text in Ampelfarbe nutzt eine dunklere Textvariante, damit er auf hell gut lesbar bleibt.</p>
+
+<h3>Bausteine</h3>
+<p>Aus diesen fünf Teilen sind alle Zeichnungen gebaut.</p>
+<div class="parts">
+<div class="dev part"><div class="m-tile" style="width:150px"><small>Wasser</small><b>27 l</b><div class="m-bar" style="--v:45;--c:var(--water)"></div><span class="m-hint">Beispiel</span></div></div>
+<div class="dev part m-col"><span class="m-chip"><i class="dot-warn"></i>bald fällig</span><span class="m-chip on m-tap">Im Vorrat <span class="m-mono">51</span></span><span class="m-chip review">bitte prüfen</span></div>
+<div class="dev part m-col"><span class="m-btn ink">Speichern</span><span class="m-btn">1 entnehmen</span></div>
+<div class="dev part"><div class="m-tile" style="width:150px;text-align:center"><small>Heute versorgt</small><div class="m-gauge-box"><div class="m-gauge" style="--v:90"></div><b>9 T</b></div><span class="m-hint">Instrument, Beispiel</span></div></div>
+<div class="dev part" style="width:320px;height:64px;position:relative"><div class="m-dock" style="left:0;right:0;bottom:0"><span class="on">Übersicht</span><span>Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div></div>
+</div>
+<p>Kachel, Chip, Knopf, Instrument und Dock (schwebende Tab-Leiste). Die Tabs heißen überall: Übersicht · Vorrat · Neu · Statistik · Nachkaufen. Der Prototyp beschriftet den letzten Tab noch mit „Einkauf“; das wird zu „Nachkaufen“.</p>
+
+<h3>Piktogramme und Schrift</h3>
+<p>Der Prototyp zeigt Lebensmittel als Emoji. Die Recherche empfiehlt Fluent Emoji (MIT-Lizenz) plus eigene Motive für Lücken wie Wasserkanister oder H-Milch. Das ist noch nicht entschieden. Die Zeichnungen hier nutzen deshalb neutrale Platzhalter mit Anfangsbuchstaben.</p>
+<p>Die Konzept-Seiten nutzen Space Grotesk und Inter. Der Prototyp nutzt Inter und Geist Mono für Etiketten. Welche Schrift die App bekommt, ist offen.</p>
+</section>
+
+<section id="geraete">
+<h2>Geräte und Umbruchpunkte</h2>
+<p>Dieser Abschnitt beantwortet: Wie breit sind die Bildschirme, und ab welcher Breite wechselt das Layout?</p>
+<p>Ein Umbruchpunkt (Breakpoint) ist die Breite, ab der die Seite ihr Layout ändert. Breiten sind in CSS-Pixeln angegeben, also der Größe, mit der eine Webseite rechnet.</p>
+<figure aria-label="Geräte maßstäblich nebeneinander">
+<div class="scroll-x">
+<svg width="850" height="250" viewBox="0 0 850 250" role="img" aria-label="Bildschirmflächen: iPhone, iPhone Duo außen, Duo innen hochkant, Duo innen quer, PC-Fenster">
+<rect class="g-dev" x="10" y="22" width="81" height="163" rx="12"/><rect class="g-scr" x="15" y="27" width="71" height="153" rx="8"/>
+<text class="g-txt" x="10" y="205">iPhone</text><text class="g-mut" x="10" y="221">375–400 breit</text>
+<rect class="g-dev" x="115" y="70" width="79" height="115" rx="12"/><rect class="g-scr" x="120" y="75" width="69" height="105" rx="8"/>
+<text class="g-txt" x="115" y="205">Duo außen</text><text class="g-mut" x="115" y="221">382 × 580</text>
+<rect class="g-dev" x="220" y="17" width="132" height="168" rx="10"/><rect class="g-scr" x="225" y="22" width="122" height="158" rx="6"/><line class="g-fold" x1="222" y1="101" x2="350" y2="101"/>
+<text class="g-txt" x="220" y="205">Duo innen hochkant</text><text class="g-mut" x="220" y="221">669 × 867</text>
+<rect class="g-dev" x="378" y="69" width="183" height="116" rx="10"/><rect class="g-scr" x="383" y="74" width="173" height="106" rx="6"/><line class="g-fold" x1="469.5" y1="71" x2="469.5" y2="183"/>
+<text class="g-txt" x="378" y="205">Duo innen quer</text><text class="g-mut" x="378" y="221">951 × 585</text>
+<rect class="g-dev" x="590" y="22" width="243" height="163" rx="6"/><rect class="g-scr" x="595" y="35" width="233" height="145" rx="3"/>
+<text class="g-txt" x="590" y="205">PC-Fenster</text><text class="g-mut" x="590" y="221">Beispiel 1280 × 800</text>
+<text class="g-mut" x="10" y="243">Maßstab 1 : 5,5. Helle Fläche = gemeldeter Viewport. Gestrichelt: abgeleitete Falz (hochkant waagrecht, quer senkrecht).</text>
+</svg>
+</div>
+<figcaption>Bildschirme in CSS-Pixeln. Duo-Werte aus dem WebKit-Blog zu Safari 27.1 (Webinhalt im Browser, kleinste Höhe). iPhone-Breite nach den Seitenregeln, die Höhe ist nur angedeutet. PC-Fenster frei gewählt.</figcaption>
+</figure>
+<p>Wichtige Punkte zum iPhone Duo:</p>
+<ul>
+<li>Außen ist es mit 382 px so breit wie ein normales iPhone.</li>
+<li>Innen hochkant sind es 669 px. Das liegt <strong>unter</strong> dem einzigen Umbruchpunkt des Prototyps (768 px). Ohne Änderung bekäme das aufgeklappte Duo hochkant das Handy-Layout, quer (951 px) das breite Layout.</li>
+<li>Safari kennt Abfragen für Falz und Haltung (Device Posture API, Viewport Segments API) bisher nur als Vorschau hinter Schaltern. Die Seite kann die Falz also nicht zuverlässig erkennen. Das Layout richtet sich deshalb nur nach der Breite.</li>
+<li>Die Falz halbiert nach einer Ableitung aus den Herstellerangaben die lange Seite des Innenbildschirms: hochkant liegt sie waagrecht, quer senkrecht. Aus zugeklappt-hochkant klappt man innen nach quer auf. Begründung im Abschnitt <a href="#duo-innen">iPhone Duo aufgeklappt</a>.</li>
+<li>Nicht geprüft sind die Maße als Home-Bildschirm-App und die genaue Lage der Falz. Das lässt sich im Duo-Simulator von Xcode testen.</li>
+</ul>
+
+<h3>Vorgeschlagene Stufen <span class="badge badge-vorschlag">Vorschlag</span></h3>
+<div class="scroll-x"><table>
+<thead><tr><th>Stufe</th><th>Regel</th><th>Geräte</th><th>Was sich ändert</th></tr></thead>
+<tbody>
+<tr><td>kompakt</td><td class="num">unter 640 px, oder niedriger als 700 px</td><td>iPhone, Duo außen hochkant (382) und quer (594), Duo innen mit zwei Fenstern (je 385)</td><td>Handy-Layout: 2 Spalten, Dock unten, Zahnrad im Kopf</td></tr>
+<tr><td>mittel</td><td class="num">640–899 px und mindestens 700 px hoch</td><td>Duo innen hochkant (669 × 867)</td><td>zwei Hälften übereinander (J), Dock unten</td></tr>
+<tr><td>breit</td><td class="num">900–1279 px</td><td>Duo innen quer (951), kleineres PC-Fenster</td><td>Leiste am Rand, Bento mit 4 Spalten, Liste und Detail nebeneinander (Duo: E und D, PC: H ohne rechte Spalte)</td></tr>
+<tr><td>weit</td><td class="num">ab 1280 px</td><td>PC-Browser</td><td>wie breit, dazu die feste rechte Spalte „Bald fällig“ (H)</td></tr>
+</tbody></table></div>
+<p>Die Stufen richten sich nach der Fenstergröße, nicht nach dem Gerät. Die Mindesthöhe bei „mittel“ hält den Außenbildschirm quer (368 px hoch) sicher in „kompakt“, auch falls er als Home-Bildschirm-App breiter als 640 px ist. Der Prototyp-Wert 768 entfiele. Details im Abschnitt <a href="#duo-innen">iPhone Duo aufgeklappt</a>.</p>
+</section>
+
+<section id="iphone">
+<h2>iPhone</h2>
+<p>Dieser Abschnitt beantwortet: Welche Anordnung passt auf dem iPhone am besten? Drei Varianten, je vier Screens.</p>
+<p>Die Rahmen sind 340 px breit, das entspricht etwa einem 390 px breiten iPhone. Tippflächen sind maßstäblich mindestens 44 pt groß.</p>
+
+<h3>Variante A „Bento-Dock“</h3>
+<p>So wie im Prototyp: Kacheln in zwei Spalten, oben das Instrument „Heute versorgt“, unten das schwebende Dock, das Zahnrad oben rechts im Kopf.</p>
+<div class="scroll-x">
+
+<figure aria-label="Variante A, Übersicht">
+<div class="dev dev-iphone">
+<div class="m-head"><span class="m-split" style="justify-content:flex-start"><span class="m-logo">PM</span><span><small>Beispiel · Mi., 07.10.</small><br>Dein Vorrat</span></span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-grid">
+<div class="m-tile m-tile-wide"><small>Heute versorgt</small>
+<div class="m-gauge-box"><div class="m-gauge m-gauge-lg" style="--v:90"></div><b class="m-gauge-val">9,0<small>Tage · Ziel 10</small></b></div>
+<div class="m-grid" style="margin-top:6px"><div class="m-read"><span class="m-sub">Energie</span><br><span class="m-mid">11,2</span> <span class="m-sub">Tage</span><br><span class="m-hint">reicht länger</span></div><div class="m-read on"><span class="m-sub">Wasser</span><br><span class="m-mid">9,0</span> <span class="m-sub">Tage</span><br><span class="m-acc">Engpass</span></div></div>
+</div>
+<div class="m-tile"><small>Ziel 31.12.</small><b>7,0</b> <span class="m-sub">von 10</span><div class="m-seg10"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div><span class="m-hint">zählt nur, was am 31.12. noch haltbar ist</span></div>
+<div class="m-tile"><small>Wasser</small><b>27 l</b><div class="m-bar" style="--v:45;--c:var(--water)"></div><span class="m-hint">18 × 1,5 l</span></div>
+<div class="m-tile m-tile-wide m-split"><span><small class="m-label">Foto aufnehmen</small>Packung &amp; MHD</span><span class="m-btn ink"><svg class="m-ico"><use href="#i-cam"/></svg></span></div>
+<div class="m-tile m-tile-wide"><small>Bald fällig</small>
+<div class="m-row"><span>1 × Walnüsse</span><span class="m-chip"><i class="dot-bad"></i>abgelaufen</span></div>
+<div class="m-row"><span>1 × Thunfisch in Öl</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+</div>
+</div>
+<div class="m-dock"><span class="on">Übersicht</span><span>Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>A · Übersicht. Darunter folgen beim Scrollen Warengruppen, Nachkaufen, Makros und Haushalt.</figcaption>
+</figure>
+
+<figure aria-label="Variante A, Vorrat">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Vorrat</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<span class="m-label">Status</span>
+<div class="m-line"><span class="m-chip on m-tap">Im Vorrat <span class="m-mono">51</span></span><span class="m-chip m-tap">Bald fällig <span class="m-mono">6</span></span><span class="m-chip m-tap">Abgelaufen <span class="m-mono">1</span></span><span class="m-chip m-tap">Nachkaufen</span></div>
+<span class="m-label">Kategorie</span>
+<div class="m-line"><span class="m-chip on m-tap">Alle Kategorien</span><span class="m-chip m-tap">Nudeln &amp; Reis</span><span class="m-chip m-tap">Hülsenfrüchte</span><span class="m-chip m-tap">Wasser</span></div>
+<span class="m-label">Behälter</span>
+<div class="m-line"><span class="m-chip on m-tap">Alle Behälter</span><span class="m-chip m-tap">Alle Dosen</span><span class="m-chip m-tap">Alle Flaschen</span></div>
+<div class="m-split"><span class="m-label">14 Produkte</span><span class="m-sub">51 Einheiten</span></div>
+<div class="m-grid">
+<div class="m-tile"><div class="m-split" style="justify-content:flex-start"><span class="m-pikto">N</span><span><strong>Nudeln</strong><br><span class="m-sub m-mono">6 × 500 g</span></span></div><span class="m-chip" style="margin-top:6px"><i class="dot-ok"></i>gut</span><div class="m-hint m-mono">ab 30.09.2027</div><div class="m-ticks"><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="m-btn" style="width:100%">1 entnehmen</span></div>
+<div class="m-tile"><div class="m-split" style="justify-content:flex-start"><span class="m-pikto">T</span><span><strong>Passierte Tomaten</strong><br><span class="m-sub m-mono">2 × 500 g</span></span></div><span class="m-chip" style="margin-top:6px"><i class="dot-urgent"></i>dringend</span><div class="m-hint m-mono">ab 28.10.2026</div><div class="m-ticks"><i class="urgent"></i><i></i></div><span class="m-btn" style="width:100%">1 entnehmen</span></div>
+<div class="m-tile"><div class="m-split" style="justify-content:flex-start"><span class="m-pikto">L</span><span><strong>Linsen</strong><br><span class="m-sub m-mono">4 × 400 g</span></span></div><span class="m-chip" style="margin-top:6px"><i class="dot-ok"></i>gut</span><div class="m-hint">Dose · Keller</div></div>
+<div class="m-tile"><div class="m-split" style="justify-content:flex-start"><span class="m-pikto">M</span><span><strong>H-Milch</strong><br><span class="m-sub m-mono">4 × 1 l</span></span></div><span class="m-chip" style="margin-top:6px"><i class="dot-warn"></i>bald fällig</span><div class="m-hint">Tetrapak · Keller</div></div>
+</div>
+<div class="m-dock"><span>Übersicht</span><span class="on">Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>A · Vorrat. Drei Filterreihen, jede seitlich wischbar (rechts angeschnitten; dahinter u. a. Verbraucht und Entsorgt). Darunter Produkt-Kacheln mit Ampel je Einheit (kleine Striche) und „1 entnehmen“.</figcaption>
+</figure>
+
+<figure aria-label="Variante A, Erfassen mit Kamera">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Hinzufügen</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-seg"><span class="on"><svg class="m-ico"><use href="#i-cam"/></svg>Foto</span><span><svg class="m-ico"><use href="#i-pen"/></svg>Manuell</span></div>
+<div class="m-steps"><span class="on">01 Verpackung</span><span>02 Nährwerte</span><span>03 MHD-Serie</span><span>04 Prüfen</span></div>
+<div class="m-cam" style="aspect-ratio:4/4.4">Vorderseite der Packung in den Rahmen halten</div>
+<div class="m-shutter" aria-hidden="true"></div>
+<div class="m-tile"><span class="m-sub">Erkannt werden Art, Behälter und Inhalt, ohne Marke und ohne Barcode.</span></div>
+<div class="m-dock"><span>Übersicht</span><span>Vorrat</span><span class="on">Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>A · Erfassen. Umschalter Foto/Manuell, Schrittanzeige, Live-Kamera mit Auslöser.</figcaption>
+</figure>
+
+<figure aria-label="Variante A, Einstellungen">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Einstellungen</span><i class="on"><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<span class="m-sub">Angemeldet als <strong>Alex</strong> · Admin</span>
+<span class="m-group">Mein Konto</span>
+<div class="m-tile"><div class="m-row"><span>Profil</span><span class="m-sub">max@example.org</span></div><div class="m-row"><span>Benachrichtigungen</span><span class="m-sub">Sa 10:00</span></div><div class="m-row" style="border:0"><span>Darstellung</span><span class="m-sub">Hell</span></div></div>
+<span class="m-group">Haushalt</span>
+<div class="m-tile"><div class="m-row"><span>Mitglieder</span><span class="m-sub">3 Personen</span></div><div class="m-row"><span>Ziel &amp; Empfehlung</span><span class="m-sub">10 Tage · 31.12.</span></div><div class="m-row"><span>Ampel &amp; Regeln</span><span class="m-sub">90 / 28 Tage</span></div><div class="m-row" style="border:0"><span>Foto-Erkennung</span><span class="m-sub">an</span></div></div>
+<span class="m-group">Nutzerverwaltung</span>
+<div class="m-tile"><div class="m-row" style="border:0"><span>Nutzer</span><span class="m-sub">2 Nutzer</span></div></div>
+<div class="m-dock"><span>Übersicht</span><span>Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>A · Einstellungen über das Zahnrad. Im Dock ist dann kein Tab hervorgehoben. Gekürzt, vollständig im Abschnitt Einstellungen.</figcaption>
+</figure>
+</div>
+<div class="cards">
+<div class="card"><h3>Stärken</h3><p>Fertig durchdacht und im Prototyp erprobt. Viel Überblick auf einen Blick. Gleiche Logik wie auf dem PC (2 statt 4 Spalten).</p></div>
+<div class="card"><h3>Schwächen</h3><p>Die Übersicht ist lang, Nachkaufen und Haushalt liegen weit unten. „Neu“ ist ein Tab unter fünf und nicht hervorgehoben.</p></div>
+<div class="card"><h3>Einhand</h3><p>Dock gut mit dem Daumen erreichbar. Das Zahnrad oben rechts braucht die zweite Hand, wird aber selten gebraucht.</p></div>
+</div>
+
+<h3>Variante B „Fokus“ <span class="badge badge-vorschlag">Vorschlag</span></h3>
+<p>Ein großes Instrument oben, darunter einspaltige Karten. Im Dock sitzt in der Mitte ein betonter, runder Kamera-Knopf für „Neu“.</p>
+<div class="scroll-x">
+
+<figure aria-label="Variante B, Übersicht">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel · Mi., 07.10.</small><br>Dein Vorrat</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-tile" style="text-align:center"><small>Heute versorgt</small>
+<div class="m-gauge-box"><div class="m-gauge m-gauge-xl" style="--v:90"></div><b class="m-gauge-val" style="font-size:52px">9,0<small>Tage · Ziel 10</small></b></div>
+<div class="m-sub" style="margin-top:6px">Engpass: <span class="m-acc">Wasser</span> · Energie reicht 11,2 Tage</div>
+</div>
+<div class="m-tile"><div class="m-split"><small class="m-label">Ziel 31.12.</small><span class="m-sub">7,0 von 10 Tagen</span></div><div class="m-seg10"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div><span class="m-hint">zählt nur, was am 31.12. noch haltbar ist</span></div>
+<div class="m-tile"><small>Bald fällig</small>
+<div class="m-row"><span>1 × Walnüsse</span><span class="m-chip"><i class="dot-bad"></i>abgelaufen</span></div>
+<div class="m-row" style="border:0"><span>1 × Thunfisch in Öl</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div></div>
+<div class="m-tile m-split"><span><small class="m-label">Nachkaufen</small>Mineralwasser 12 × 1,5 l</span><span class="m-mid">3</span></div>
+<div class="m-dock"><span class="on">Übersicht</span><span>Vorrat</span><span class="m-fab"><svg class="m-ico m-ico-lg"><use href="#i-cam"/></svg></span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>B · Übersicht. Eine Spalte, das Instrument groß. Wasser und Warengruppen folgen weiter unten.</figcaption>
+</figure>
+
+<figure aria-label="Variante B, Vorrat">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Vorrat</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-line"><span class="m-chip on m-tap">Im Vorrat <span class="m-mono">51</span></span><span class="m-chip m-tap">Bald fällig <span class="m-mono">6</span></span><span class="m-chip m-tap">Abgelaufen <span class="m-mono">1</span></span></div>
+<div class="m-split"><span class="m-sub">14 Produkte · 51 Einheiten</span><span class="m-btn m-tap">Filter · Gruppe, Behälter</span></div>
+<div class="m-tile">
+<div class="m-row"><span class="m-pikto">N</span><span><strong>Nudeln</strong><br><span class="m-hint m-mono">6 × 500 g · ab 30.09.2027</span></span><span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+<div class="m-row"><span class="m-pikto">T</span><span><strong>Passierte Tomaten</strong><br><span class="m-hint m-mono">2 × 500 g · ab 28.10.2026</span></span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+<div class="m-row"><span class="m-pikto">M</span><span><strong>H-Milch</strong><br><span class="m-hint m-mono">4 × 1 l · ab 15.11.2026</span></span><span class="m-chip"><i class="dot-warn"></i>bald fällig</span></div>
+<div class="m-row"><span class="m-pikto">L</span><span><strong>Linsen</strong><br><span class="m-hint m-mono">4 × 400 g · ab 30.06.2028</span></span><span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+<div class="m-row"><span class="m-pikto">R</span><span><strong>Reis</strong><br><span class="m-hint m-mono">2 × 1 kg · ab 31.03.2028</span></span><span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+<div class="m-row" style="border:0"><span class="m-pikto">W</span><span><strong>Mineralwasser</strong><br><span class="m-hint m-mono">18 × 1,5 l · ab 31.10.2027</span></span><span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+</div>
+<div class="m-dock"><span>Übersicht</span><span class="on">Vorrat</span><span class="m-fab"><svg class="m-ico m-ico-lg"><use href="#i-cam"/></svg></span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>B · Vorrat als Liste. Gruppe und Behälter stecken hinter „Filter“. Tippen auf eine Zeile öffnet die Einheiten.</figcaption>
+</figure>
+
+<figure aria-label="Variante B, Erfassen mit Kamera">
+<div class="dev dev-iphone">
+<div class="m-split"><span class="m-btn m-tap">Abbrechen</span><div class="m-seg" style="width:170px"><span class="on">Foto</span><span>Manuell</span></div></div>
+<div class="m-steps"><span class="done">01 Verpackung</span><span class="done">02 Nährwerte</span><span class="on">03 MHD-Serie</span><span>04 Prüfen</span></div>
+<div class="m-cam m-cam-full"><span class="m-col" style="align-items:center"><span>Packung für Packung das Datum zeigen</span><span class="m-chip on m-mono">Packung 7 · 30.11.2027 ✓</span></span></div>
+<div class="m-wrap"><span class="m-chip m-mono">1 · 09/2027</span><span class="m-chip m-mono">2 · 09/2027</span><span class="m-chip review m-mono">3 · bitte nochmal</span><span class="m-chip m-mono">…</span><span class="m-chip m-mono">7 · 11/2027</span></div>
+<div class="m-split"><span class="m-btn m-tap">Alle gleiches Datum</span><div class="m-shutter" style="margin:0" aria-hidden="true"></div><span class="m-btn m-tap">Fertig</span></div>
+</div>
+<figcaption>B · Erfassen bildschirmfüllend, ohne Dock. Auslöser unten in der Mitte, Chips der MHD-Serie darüber.</figcaption>
+</figure>
+
+<figure aria-label="Variante B, Einstellungen">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Einstellungen</span><i class="on"><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-tile m-split" style="justify-content:flex-start"><span class="m-pikto" style="width:48px;height:48px;border-radius:50%">A</span><span><strong>Alex</strong><br><span class="m-sub">Admin · alex@example.org</span></span></div>
+<div class="m-tile">
+<div class="m-row"><span>Mein Konto</span><span class="m-sub">Profil, Benachrichtigungen, Darstellung</span></div>
+<div class="m-row"><span>Haushalt</span><span class="m-sub">3 Personen, Ziel 10 Tage</span></div>
+<div class="m-row"><span>Nutzerverwaltung</span><span class="m-sub">2 Nutzer</span></div>
+<div class="m-row" style="border:0"><span>Daten &amp; System</span><span class="m-sub">Backup, Export</span></div>
+</div>
+<span class="m-hint">Erst die vier Gruppen, ein Tippen öffnet die Seiten darin. Weniger Text auf dem ersten Blick.</span>
+<div class="m-dock"><span>Übersicht</span><span>Vorrat</span><span class="m-fab"><svg class="m-ico m-ico-lg"><use href="#i-cam"/></svg></span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>B · Einstellungen als vier große Gruppen mit Profil-Karte oben.</figcaption>
+</figure>
+</div>
+<div class="cards">
+<div class="card"><h3>Stärken</h3><p>Die wichtigste Zahl ist sofort klar. Erfassen ist mit einem Daumentipp erreichbar und hat die ganze Fläche für die Kamera.</p></div>
+<div class="card"><h3>Schwächen</h3><p>Weniger Überblick, mehr Scrollen. Der runde Knopf ragt aus dem Dock und braucht etwas Platz über dem Inhalt.</p></div>
+<div class="card"><h3>Einhand</h3><p>Am besten der drei: Kamera-Knopf in der Mitte unten, Auslöser in der Daumenzone.</p></div>
+</div>
+
+<h3>Variante C „Heute zuerst“ <span class="badge badge-vorschlag">Vorschlag</span></h3>
+<p>Oben steht, was jetzt zu tun ist: Abgelaufenes, dringend Fälliges, Nachkaufen. Die Kennzahlen folgen kompakt darunter.</p>
+<div class="scroll-x">
+
+<figure aria-label="Variante C, Übersicht">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel · Mi., 07.10.</small><br>Heute</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-tile"><small>Zu tun · 3</small>
+<div class="m-row"><i class="dot-bad"></i><span>Walnüsse · abgelaufen</span><span class="m-btn">Ansehen</span></div>
+<div class="m-row"><i class="dot-urgent"></i><span>Thunfisch · dringend</span><span class="m-btn">1 entnehmen</span></div>
+<div class="m-row" style="border:0"><i class="dot-ok"></i><span>Nachkaufen · 3 offen</span><span class="m-btn">Liste</span></div>
+<div class="m-hint" style="margin-top:4px">MHD ist kein Wegwerfdatum: anschauen, riechen, probieren.</div>
+</div>
+<div class="m-grid" style="--cols:3">
+<div class="m-tile"><small>Heute</small><b>9,0</b><div class="m-hint">Tage</div></div>
+<div class="m-tile"><small>Ziel</small><b>7,0</b><div class="m-hint">von 10</div></div>
+<div class="m-tile"><small>Wasser</small><b>27 l</b><div class="m-bar" style="--v:45;--c:var(--water)"></div></div>
+</div>
+<span class="m-btn ink" style="width:100%"><svg class="m-ico"><use href="#i-cam"/></svg>Foto aufnehmen</span>
+<div class="m-tile"><small>Warengruppen · Ziel 31.12.</small>
+<div class="m-split"><span class="m-sub">Getreide, Nudeln, Reis</span><span class="m-sub m-mono">8,2 von 10 Tagen</span></div><div class="m-bar" style="--v:82"></div>
+<div class="m-split"><span class="m-sub">Wasser · 27 l</span><span class="m-sub m-mono">9,0 von 10 Tagen</span></div><div class="m-bar" style="--v:90;--c:var(--water)"></div>
+</div>
+<div class="m-dock"><span class="on">Übersicht</span><span>Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>C · Übersicht. Erst die Aufgaben, dann drei kleine Kennzahlen. Ist nichts zu tun, steht dort ein kurzer, ruhiger Satz.</figcaption>
+</figure>
+
+<figure aria-label="Variante C, Vorrat">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Vorrat</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-line"><span class="m-chip on m-tap">Nach Datum</span><span class="m-chip m-tap">Nach Gruppe</span><span class="m-chip m-tap">Filter</span></div>
+<span class="m-group">Jetzt ansehen</span>
+<div class="m-tile">
+<div class="m-row"><i class="dot-bad"></i><span>Walnüsse · 02.10.2026</span><span class="m-sub">abgelaufen</span></div>
+<div class="m-row" style="border:0"><i class="dot-urgent"></i><span>Thunfisch · 14.10.2026</span><span class="m-sub">dringend</span></div>
+</div>
+<span class="m-group">Bald fällig</span>
+<div class="m-tile">
+<div class="m-row"><i class="dot-urgent"></i><span>Passierte Tomaten · 28.10.</span><span class="m-sub">dringend</span></div>
+<div class="m-row"><i class="dot-warn"></i><span>2 × H-Milch · 15.11.2026</span><span class="m-sub">bald fällig</span></div>
+<div class="m-row" style="border:0"><i class="dot-warn"></i><span>Haferflocken · 20.11.2026</span><span class="m-sub">bald fällig</span></div>
+</div>
+<span class="m-group">Gut · 44 Einheiten</span>
+<div class="m-tile">
+<div class="m-row"><i class="dot-ok"></i><span>6 × Nudeln · ab 09/2027</span><span class="m-sub">gut</span></div>
+<div class="m-row" style="border:0"><i class="dot-ok"></i><span>18 × Mineralwasser · 10/2027</span><span class="m-sub">gut</span></div>
+</div>
+<div class="m-dock"><span>Übersicht</span><span class="on">Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>C · Vorrat nach Datum geordnet, das früheste MHD zuerst. So ist klar, was zuerst verbraucht werden sollte.</figcaption>
+</figure>
+
+<figure aria-label="Variante C, Erfassen mit Kamera">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Hinzufügen</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-tile" style="text-align:center;padding:18px 12px"><svg class="m-ico m-ico-lg m-acc" style="width:40px;height:40px"><use href="#i-cam"/></svg><div class="m-mid" style="margin:6px 0 2px">Foto aufnehmen</div><span class="m-sub">Verpackung, Nährwerte, MHD</span><br><span class="m-btn ink" style="margin-top:8px">Kamera starten</span></div>
+<div class="m-tile m-split"><span class="m-split" style="justify-content:flex-start"><svg class="m-ico"><use href="#i-pen"/></svg><span><strong>Manuell eingeben</strong><br><span class="m-sub">ohne Foto, alle Felder selbst</span></span></span><svg class="m-ico"><use href="#i-chev"/></svg></div>
+<span class="m-group">Aus Nachkaufen</span>
+<div class="m-tile">
+<div class="m-row"><span>Mineralwasser</span><span class="m-sub m-mono">12 × 1,5 l</span><span class="m-btn">Erfassen</span></div>
+<div class="m-row" style="border:0"><span>Fisch, Fleisch, Eier</span><span class="m-sub m-mono">≈ 2,5 kg</span><span class="m-btn">Erfassen</span></div>
+</div>
+<span class="m-hint">Abhaken in Nachkaufen führt direkt hierher.</span>
+<div class="m-dock"><span>Übersicht</span><span>Vorrat</span><span class="on">Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>C · Erfassen beginnt mit einer Wahl: Foto oder manuell. Offene Nachkaufen-Posten lassen sich direkt erfassen.</figcaption>
+</figure>
+
+<figure aria-label="Variante C, Einstellungen">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Einstellungen</span><i class="on"><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<span class="m-group">Schnell umstellen</span>
+<div class="m-tile">
+<div class="m-row"><span>Wochenübersicht · Sa 10:00</span><span class="m-switch on"></span></div>
+<div class="m-row"><span>Dringend</span><span class="m-switch on"></span></div>
+<div class="m-row" style="border:0"><span>Dunkles Design</span><span class="m-switch"></span></div>
+</div>
+<span class="m-group">Mein Konto</span>
+<div class="m-tile"><div class="m-row"><span>Profil</span><svg class="m-ico"><use href="#i-chev"/></svg></div><div class="m-row" style="border:0"><span>Alle Benachrichtigungen</span><svg class="m-ico"><use href="#i-chev"/></svg></div></div>
+<span class="m-group">Haushalt</span>
+<div class="m-tile"><div class="m-row"><span>Mitglieder</span><span class="m-sub">3 Personen</span></div><div class="m-row" style="border:0"><span>Ziel &amp; Empfehlung</span><span class="m-sub">10 Tage</span></div></div>
+<div class="m-dock"><span>Übersicht</span><span>Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>C · Einstellungen mit den häufigsten Schaltern oben. Darunter dieselben Gruppen wie in A.</figcaption>
+</figure>
+</div>
+<div class="cards">
+<div class="card"><h3>Stärken</h3><p>Ruhig und handlungsleitend: Man sieht sofort, ob etwas zu tun ist. Fördert die Rotation (zuerst verbrauchen, was zuerst abläuft).</p></div>
+<div class="card"><h3>Schwächen</h3><p>Das Instrument „Heute versorgt“ verliert an Gewicht, das Cockpit-Gefühl von d6 ist schwächer. Mehr neue Entwurfsarbeit.</p></div>
+<div class="card"><h3>Einhand</h3><p>Die Aufgaben-Knöpfe liegen oben, also eher zweihändig. Dock und „Foto aufnehmen“ sind gut erreichbar.</p></div>
+</div>
+
+<h3>Weitere Screens der Empfehlung</h3>
+<p>So sähen Einheiten, Nachkaufen und Statistik in der empfohlenen Mischung aus: A mit dem Kamera-Knopf aus B.</p>
+<div class="scroll-x">
+
+<figure aria-label="Empfehlung, Einheiten eines Produkts">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Vorrat</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-grid">
+<div class="m-tile"><div class="m-split" style="justify-content:flex-start"><span class="m-pikto">N</span><span><strong>Nudeln</strong><br><span class="m-sub m-mono">6 × 500 g</span></span></div></div>
+<div class="m-tile"><div class="m-split" style="justify-content:flex-start"><span class="m-pikto">T</span><span><strong>Passierte Tomaten</strong><br><span class="m-sub m-mono">2 × 500 g</span></span></div></div>
+</div>
+<div class="m-dim"></div>
+<div class="m-sheet">
+<div class="m-head" style="font-size:16px"><span><small>Einheiten</small><br>Passierte Tomaten</span></div>
+<div class="m-tile" style="padding-block:6px">
+<div class="m-split"><span class="m-mono">28.10.2026</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+<div class="m-line" style="margin-top:6px"><span class="m-btn">Verbraucht</span><span class="m-btn">Entsorgt</span><span class="m-btn">Noch gut</span></div>
+</div>
+<div class="m-tile" style="padding-block:6px">
+<div class="m-split"><span class="m-mono">28.02.2027</span><span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+</div>
+<span class="m-hint">MHD ist kein Wegwerfdatum: anschauen, riechen, probieren. „Noch gut“ lässt die Einheit im Vorrat und merkt sich „geprüft am“.</span>
+<span class="m-btn ink" style="width:100%">1 entnehmen (frühestes MHD)</span>
+</div>
+</div>
+<figcaption>Einheiten als Blatt von unten: je Packung Verbraucht, Entsorgt oder Noch gut. „1 entnehmen“ nimmt die Packung mit dem frühesten MHD.</figcaption>
+</figure>
+
+<figure aria-label="Empfehlung, Nachkaufen">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Nachkaufen</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<span class="m-sub">Gemeinsam für alle im Haushalt. Abhaken führt direkt in die Erfassung.</span>
+<span class="m-group">Offen · 3</span>
+<div class="m-tile" style="padding-block:2px">
+<div class="m-row"><span class="m-switch" style="width:26px;border-radius:7px"></span><span><strong>Mineralwasser</strong><br><span class="m-hint">aus der Ziel-Lücke</span></span><span class="m-sub m-mono">12 × 1,5 l</span></div>
+<div class="m-row"><span class="m-switch" style="width:26px;border-radius:7px"></span><span><strong>Fisch, Fleisch, Eier</strong><br><span class="m-hint">aus der Ziel-Lücke</span></span><span class="m-sub m-mono">≈ 2,5 kg</span></div>
+<div class="m-row" style="border:0"><span class="m-switch" style="width:26px;border-radius:7px"></span><span><strong>Milch &amp; Milchprodukte</strong><br><span class="m-hint">aus der Ziel-Lücke</span></span><span class="m-sub m-mono">≈ 3 kg</span></div>
+</div>
+<span class="m-group">Erledigt</span>
+<div class="m-tile" style="padding-block:2px"><div class="m-row" style="border:0"><span class="m-switch on" style="width:26px;border-radius:7px"></span><span class="m-sub">Haferflocken · nach Entnahme</span><span class="m-sub">1 Packung</span></div></div>
+<span class="m-btn" style="width:100%">+ Eintrag ergänzen</span>
+<div class="m-dock"><span>Übersicht</span><span>Vorrat</span><span class="m-fab"><svg class="m-ico m-ico-lg"><use href="#i-cam"/></svg></span><span>Statistik</span><span class="on">Nachkaufen</span></div>
+</div>
+<figcaption>Nachkaufen: Einträge aus der Ziel-Lücke, nach einer Entnahme oder von Hand. Mengen sind Beispiele.</figcaption>
+</figure>
+
+<figure aria-label="Empfehlung, Statistik">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Statistik</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-tile"><small>So viele Tage haltet ihr durch</small><span class="m-big">9,0</span> <span class="m-sub">Tage</span><div class="m-seg10"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div><span class="m-hint">Ziel 10 Tage</span></div>
+<div class="m-tile"><small>Erfüllungsgrad je Warengruppe</small>
+<div class="m-split"><span class="m-sub">Getreide, Nudeln, Reis</span><span class="m-sub m-mono">110 %</span></div><div class="m-bar" style="--v:100;--c:var(--ok)"></div>
+<div class="m-split"><span class="m-sub">Wasser</span><span class="m-sub m-mono">90 %</span></div><div class="m-bar" style="--v:90;--c:var(--water)"></div>
+<div class="m-split"><span class="m-sub">Milch &amp; Milchprodukte</span><span class="m-sub m-mono">40 %</span></div><div class="m-bar" style="--v:40"></div>
+</div>
+<div class="m-grid">
+<div class="m-tile"><small>Check-in-Serie</small><b>5</b> <span class="m-sub">Wochen</span><div class="m-hint">7 von 8 erledigt</div></div>
+<div class="m-tile"><small>Verbraucht · entsorgt</small><b>14,2</b> <span class="m-sub">kg</span><div class="m-hint">entsorgt 0,4 kg</div></div>
+</div>
+<div class="m-dock"><span>Übersicht</span><span>Vorrat</span><span class="m-fab"><svg class="m-ico m-ico-lg"><use href="#i-cam"/></svg></span><span class="on">Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>Statistik nach dem Konzept zur Rotation: Durchhaltetage, Erfüllungsgrad (auch über 100 %), Check-in-Serie, verbraucht gegen entsorgt. Zahlen sind Beispiele.</figcaption>
+</figure>
+</div>
+
+<p><span class="badge badge-vorschlag">Vorschlag</span> Die Einstellungen kennen schon „Startansicht“ unter Darstellung. Darüber ließen sich A und C verbinden: A als Übersicht, C als wählbare Startansicht „Heute“.</p>
+</section>
+
+<section id="duo-aussen">
+<h2>iPhone Duo zugeklappt</h2>
+<p>Dieser Abschnitt zeigt, wie die App auf dem Außenbildschirm aussieht, wenn das Duo zugeklappt ist.</p>
+<p>Laut Apple ist der Außenbildschirm 5,4 Zoll groß. Safari meldet hochkant <span class="num">382</span> CSS-Pixel Breite und <span class="num">580</span> bis <span class="num">618</span> Pixel Höhe. CSS-Pixel sind die Maßeinheit, mit der eine Webseite rechnet, nicht die Bildpunkte des Displays. In der Breite entspricht das einem normalen iPhone. In der Höhe ist weniger Platz, also passen auf einen Blick weniger Kacheln.</p>
+<div class="note"><p><strong>Nicht geprüft:</strong> Die Maße gelten für Safari. Wie groß die Fläche ist, wenn die App vom Home-Bildschirm startet, ist nicht bekannt. Das lässt sich mit dem iPhone-Duo-Simulator in Xcode prüfen.</p></div>
+
+<h3>Idee „Kompakt“ <span class="badge badge-vorschlag">Vorschlag</span></h3>
+<p>Das gewählte iPhone-Layout wird übernommen, nur kürzer. Grundlage ist hier Variante A „Bento-Dock“, weil sie dem Prototyp am nächsten ist. Wird auf dem iPhone B oder C gewählt, gilt dasselbe Prinzip. Oben stehen die Kennzahlen, darunter der Knopf „Foto aufnehmen“. Weitere Kacheln folgen beim Scrollen.</p>
+<div class="scroll-x">
+<figure aria-label="iPhone Duo zugeklappt, Übersicht, Idee Kompakt">
+<div class="dev dev-duo-aussen">
+<div class="m-head"><span><small>Beispiel</small><br>Übersicht</span><i></i></div>
+<div class="m-grid" style="--cols:2">
+<div class="m-tile m-tile-wide"><small>Heute versorgt</small><div class="m-gauge-box"><div class="m-gauge" style="--v:90"></div><b>9 T</b></div></div>
+<div class="m-tile"><small>Ziel 31.12.</small><b>7/10</b><div class="m-bar" style="--v:70"></div></div>
+<div class="m-tile"><small>Wasser</small><b>27 l</b><div class="m-bar" style="--v:45;--c:var(--water)"></div></div>
+</div>
+<span><span class="m-btn ink">Foto aufnehmen</span> <span class="m-btn">Manuell</span></span>
+<div class="m-dock"><span class="on">Übersicht</span><span>Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>Übersicht: nur die Kennzahlen und der Foto-Knopf auf den ersten Blick. Zahlen sind Beispiele.</figcaption>
+</figure>
+<figure aria-label="iPhone Duo zugeklappt, Vorrat, Idee Kompakt">
+<div class="dev dev-duo-aussen">
+<div class="m-head"><span><small>Beispiel</small><br>Vorrat</span><i></i></div>
+<div class="m-line"><span class="m-chip on m-tap">Im Vorrat 51</span><span class="m-chip m-tap">Bald fällig 6</span><span class="m-chip m-tap">Abgelaufen 1</span></div>
+<div>
+<div class="m-row"><span>Nudeln</span><span>6</span><span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+<div class="m-row"><span>Reis</span><span>2</span><span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+<div class="m-row"><span>Haferflocken</span><span>1</span><span class="m-chip"><i class="dot-warn"></i>bald fällig</span></div>
+<div class="m-row"><span>Passierte Tomaten</span><span>2</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+<div class="m-row"><span>Thunfisch in Öl</span><span>3</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+<div class="m-row"><span>Walnüsse</span><span>1</span><span class="m-chip"><i class="dot-bad"></i>abgelaufen</span></div>
+</div>
+<div class="m-dock"><span>Übersicht</span><span class="on">Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>Vorrat als einspaltige Liste. Die Status-Filter lassen sich seitlich wischen. Beispieldaten aus dem Prototyp.</figcaption>
+</figure>
+<figure aria-label="iPhone Duo zugeklappt, Erfassen mit Kamera">
+<div class="dev dev-duo-aussen">
+<div class="m-seg"><span class="on">Foto</span><span>Manuell</span></div>
+<div class="m-head"><span><small>03 MHD-Serie</small><br>Packung 4</span><span class="m-btn">Fertig</span></div>
+<div class="m-cam">Datum ins Feld halten</div>
+<div class="m-wrap"><span class="m-chip m-mono">1 · 09/2027</span><span class="m-chip m-mono">2 · 09/2027</span><span class="m-chip review m-mono m-tap">3 · – · bitte nochmal</span></div>
+</div>
+<figcaption>Kamera im Vollbild ohne Dock <span class="badge badge-vorschlag">Vorschlag</span>. Ein unlesbares Datum wird gelb markiert und nie geraten.</figcaption>
+</figure>
+<figure aria-label="iPhone Duo zugeklappt, Einstellungen">
+<div class="dev dev-duo-aussen">
+<div class="m-head"><span><small>Zahnrad</small><br>Einstellungen</span><span class="m-btn">Fertig</span></div>
+<div>
+<span class="m-label">Mein Konto</span>
+<div class="m-row"><span>Profil</span><span>›</span></div>
+<div class="m-row"><span>Benachrichtigungen</span><span>›</span></div>
+<div class="m-row"><span>Darstellung</span><span>›</span></div>
+<span class="m-label">Haushalt</span>
+<div class="m-row"><span>Mitglieder</span><span>›</span></div>
+<div class="m-row"><span>Ernährung</span><span>›</span></div>
+<div class="m-row"><span>Ziel &amp; Empfehlung</span><span>›</span></div>
+</div>
+</div>
+<figcaption>Einstellungen als Liste wie auf dem iPhone. Weitere Gruppen folgen beim Scrollen.</figcaption>
+</figure>
+</div>
+<ul>
+<li><strong>Plus:</strong> Es ist dasselbe Layout wie auf dem iPhone, also kein zusätzlicher Aufwand. Man findet sich sofort zurecht.</li>
+<li><strong>Minus:</strong> Makros, Warengruppen und Haushalt sieht man erst beim Scrollen.</li>
+</ul>
+
+<h3>Idee „Schnellzugriff“ <span class="badge badge-vorschlag">Vorschlag</span></h3>
+<p>Die Übersicht zeigt zugeklappt nur eine Zeile mit den Kennzahlen und drei große Aktionen: Foto aufnehmen, 1 entnehmen und Bald fällig. Für den vollen Überblick klappt man auf.</p>
+<div class="scroll-x">
+<figure aria-label="iPhone Duo zugeklappt, Übersicht, Idee Schnellzugriff">
+<div class="dev dev-duo-aussen">
+<div class="m-head"><span><small>Beispiel</small><br>Übersicht</span><i></i></div>
+<div class="m-tile"><small>Heute versorgt · Ziel 31.12.</small><b>9 T</b> · <b>7/10</b></div>
+<div class="m-tile"><small>Neu</small><span class="m-btn ink">Foto aufnehmen</span></div>
+<div class="m-tile"><small>Entnehmen</small><span class="m-btn">1 entnehmen</span></div>
+<div class="m-tile"><small>Bald fällig</small><b>6</b> Einheiten <span class="m-chip"><i class="dot-warn"></i>bald fällig</span></div>
+<div class="m-dock"><span class="on">Übersicht</span><span>Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>Drei große Aktionen statt Kacheln. Zahlen sind Beispiele.</figcaption>
+</figure>
+</div>
+<ul>
+<li><strong>Plus:</strong> Die häufigsten Handgriffe gehen mit dem Daumen und ohne Scrollen.</li>
+<li><strong>Minus:</strong> Es ist eine zweite Übersicht, die gepflegt werden muss. „1 entnehmen“ braucht vorher die Wahl des Produkts, das ist ein Schritt mehr.</li>
+</ul>
+
+<h3>Was gegenüber dem iPhone wegfällt</h3>
+<ul>
+<li>Es fällt keine Funktion weg, nur die Reihenfolge auf dem ersten Blick ändert sich.</li>
+<li>Die Kacheln Warengruppen, Makronährstoffe und Haushalt rücken nach unten.</li>
+<li>Quer meldet Safari außen <span class="num">594</span> × <span class="num">368</span> Pixel. Das ist sehr niedrig. Vorschlag: Bei so wenig Höhe wird die Kopfzeile kleiner, das Dock bleibt.</li>
+</ul>
+<div class="note"><p><strong>Empfehlung</strong> <span class="badge badge-vorschlag">Vorschlag</span>: Idee „Kompakt“. Sie kostet nichts extra und deckt sich mit dem iPhone. „Schnellzugriff“ kann später als eigene Kachel oben in der Übersicht nachgezogen werden.</p></div>
+</section>
+
+<section id="duo-innen">
+<h2>iPhone Duo aufgeklappt</h2>
+<p>Dieser Abschnitt zeigt Ideen für den großen Innenbildschirm, quer und hochkant, und schlägt passende Umbruchpunkte vor.</p>
+<p>Laut Apple ist der Innenbildschirm 7,6 Zoll groß. Safari meldet quer <span class="num">951</span> × <span class="num">585</span> Pixel und hochkant <span class="num">669</span> × <span class="num">867</span> Pixel. Teilt man den Bildschirm in zwei Fenster, ist jedes <span class="num">385</span> Pixel breit.</p>
+<div class="note"><p><strong>Lage der Falz (Ableitung aus F8, nicht geprüft):</strong> Aus Pixeln und Pixeldichte ergibt sich innen eine Fläche von etwa 6,21 × 4,37 Zoll, außen etwa 4,42 × 3,04 Zoll. Zugeklappt passt der Außenbildschirm nur dann auf eine Hälfte, wenn die Falz die <strong>lange Seite</strong> des Innenbildschirms halbiert. Daraus folgt:</p>
+<ul>
+<li>Innen <strong>quer</strong> (951 px) liegt die Falz <strong>senkrecht</strong> in der Mitte, wie bei einem aufgeschlagenen Buch.</li>
+<li>Innen <strong>hochkant</strong> (669 px) liegt die Falz <strong>waagrecht</strong> in der Mitte.</li>
+<li>Wer das zugeklappte Duo hochkant hält und aufklappt, landet innen <strong>quer</strong>.</li>
+</ul>
+<p>Safari kann die Falz derzeit nicht melden. Die passenden Schnittstellen gibt es nur als Vorschau hinter Schaltern. Das Layout darf sich also nicht auf eine Falz-Erkennung verlassen. Die Lage muss im Xcode-Simulator bestätigt werden.</p></div>
+
+<h3 id="duo-umbruch">Umbruchpunkte</h3>
+<p>Ein Umbruchpunkt ist die Breite, ab der die App ihr Layout wechselt. Der Prototyp kennt nur zwei Stufen: Handy und ab <span class="num">768</span> Pixel. Damit bekäme das aufgeklappte Duo hochkant (<span class="num">669</span>) das Handy-Layout. Der große Bildschirm bliebe hochkant ungenutzt.</p>
+<p><span class="badge badge-vorschlag">Vorschlag</span> Vier Stufen nach Breite, für „mittel“ zusätzlich eine Mindesthöhe, ohne Geräteerkennung:</p>
+<div class="scroll-x"><table>
+<thead><tr><th>Stufe</th><th>Regel</th><th>Beispiele (Safari)</th><th>Layout</th></tr></thead>
+<tbody>
+<tr><td>kompakt</td><td class="num">unter 640 px, oder niedriger als 700 px</td><td>Duo außen hochkant 382 und quer 594, Duo innen mit zwei Fenstern je 385</td><td>Handy-Layout: 2 Spalten, Dock unten</td></tr>
+<tr><td>mittel</td><td class="num">640–899 px und mindestens 700 px hoch</td><td>Duo innen hochkant 669 × 867</td><td>J „Oben und unten“: zwei Hälften übereinander, Dock unten</td></tr>
+<tr><td>breit</td><td class="num">900–1279 px</td><td>Duo innen quer 951, kleineres PC-Fenster</td><td>Leiste am Rand, Bento mit 4 Spalten, Liste und Detail nebeneinander</td></tr>
+<tr><td>weit</td><td class="num">ab 1280 px</td><td>PC-Browser</td><td>wie breit, dazu eine feste rechte Spalte „Bald fällig“</td></tr>
+</tbody></table></div>
+<p>Die Grenze bei <span class="num">640</span> liegt nur <span class="num">46</span> Pixel über dem Außenbildschirm quer. Als Home-Bildschirm-App könnte er breiter sein (nicht geprüft). Die Mindesthöhe sorgt dafür, dass er trotzdem kompakt bleibt: quer ist er nur <span class="num">368</span> Pixel hoch. Die Stufen gelten gleich im Abschnitt <a href="#geraete">Geräte und Umbruchpunkte</a>.</p>
+
+<h3>Idee D „Zwei Seiten“ (quer) <span class="badge badge-vorschlag">Vorschlag</span></h3>
+<p>Quer teilt die senkrechte Falz den Bildschirm in zwei Seiten: links Liste oder Kamera, rechts Detail oder Zusammenfassung. Auf der Falz liegt nichts, was man antippen muss. Das Dock sitzt nur unter der linken Hälfte.</p>
+<div class="scroll-x">
+<figure aria-label="iPhone Duo aufgeklappt quer, Vorrat als Liste und Detail, Idee D">
+<div class="dev dev-duo-innen dev-duo-quer">
+<div class="m-grid" style="gap:22px">
+<div class="m-col">
+<div class="m-head"><span><small>Beispiel</small><br>Vorrat</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-line"><span class="m-chip on m-tap">Im Vorrat 51</span><span class="m-chip m-tap">Bald fällig 6</span><span class="m-chip m-tap">Abgelaufen 1</span></div>
+<div class="m-tile" style="padding-block:2px">
+<div class="m-row"><span>Nudeln · 6 × 500 g</span><span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+<div class="m-row"><span>Linsen · 4 × 400 g</span><span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+<div class="m-row on"><span>Passierte Tomaten · 2</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+<div class="m-row" style="border:0"><span>H-Milch · 4 × 1 l</span><span class="m-chip"><i class="dot-warn"></i>bald fällig</span></div>
+</div>
+</div>
+<div class="m-col">
+<div class="m-head">Passierte Tomaten</div>
+<div class="m-tile"><small>Produkt</small>Gemüse &amp; Hülsenfrüchte · Tetrapak · 500 g · Küche</div>
+<span class="m-label">Einheiten</span>
+<div class="m-tile" style="padding-block:2px">
+<div class="m-row"><span class="m-mono">28.10.2026</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+<div class="m-row" style="border:0"><span class="m-mono">28.02.2027</span><span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+</div>
+<div class="m-grid"><span class="m-btn ink">1 entnehmen</span><span class="m-btn">Bearbeiten</span></div>
+</div>
+</div>
+<div class="m-fold"></div>
+<div class="m-dock m-dock-links"><span>Übersicht</span><span class="on">Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>D · Vorrat: Die Auswahl links öffnet rechts das Produkt mit seinen Einheiten. Beispieldaten.</figcaption>
+</figure>
+
+<figure aria-label="iPhone Duo aufgeklappt quer, Erfassen mit Kamera, Idee D">
+<div class="dev dev-duo-innen dev-duo-quer">
+<div class="m-grid" style="gap:22px">
+<div class="m-col">
+<div class="m-seg"><span class="on">Foto</span><span>Manuell</span></div>
+<div class="m-steps"><span class="done">01 Verpackung</span><span class="done">02 Nährwerte</span><span class="on">03 MHD-Serie</span><span>04 Prüfen</span></div>
+<div class="m-cam" style="aspect-ratio:4/2.4">Packung für Packung das Datum zeigen</div>
+<div class="m-shutter" aria-hidden="true"></div>
+</div>
+<div class="m-col">
+<div class="m-head">Vorschlag der KI</div>
+<div class="m-tile"><strong>Nudeln</strong> · 500 g · Packung<br><span class="m-hint m-mono">359 kcal/100 g → 1.795 kcal pro Packung</span></div>
+<span class="m-mono" style="font-size:14px">Packung 4 · 30.09.2027 <span class="m-ok">✓</span></span>
+<div class="m-wrap"><span class="m-chip m-mono">1 · 09/2027</span><span class="m-chip m-mono">2 · 09/2027</span><span class="m-chip review m-mono m-tap">3 · – · bitte nochmal oder manuell</span><span class="m-chip m-mono">4 · 09/2027</span></div>
+<div class="m-line"><span class="m-chip m-tap">Alle gleiches Datum</span><span class="m-chip m-tap">Datum manuell</span><span class="m-chip m-tap">Ohne Datum</span></div>
+<span class="m-btn">Erst gelben Chip klären</span>
+</div>
+</div>
+<div class="m-fold"></div>
+</div>
+<figcaption>D · Erfassen: links Kamera, rechts wächst der Vorschlag Packung für Packung mit. Gespeichert wird erst nach Bestätigung.</figcaption>
+</figure>
+
+<figure aria-label="iPhone Duo aufgeklappt quer, Einstellungen, Idee D">
+<div class="dev dev-duo-innen dev-duo-quer">
+<div class="m-grid" style="gap:22px">
+<div class="m-col">
+<div class="m-head"><span><small>Admin</small><br>Einstellungen</span><i class="on"><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<span class="m-group">Mein Konto</span>
+<div class="m-tile" style="padding-block:2px"><div class="m-row"><span>Profil</span><span class="m-sub">max@example.org</span></div><div class="m-row" style="border:0"><span>Benachrichtigungen</span><span class="m-sub">Sa 10:00</span></div></div>
+<span class="m-group">Haushalt</span>
+<div class="m-tile" style="padding-block:2px"><div class="m-row"><span>Ziel &amp; Empfehlung</span><span class="m-sub">10 Tage</span></div><div class="m-row on"><span>Ampel &amp; Regeln</span><span class="m-sub">90 / 28 Tage</span></div></div>
+</div>
+<div class="m-col">
+<div class="m-head">Ampel &amp; Regeln</div>
+<div class="m-tile" style="padding-block:2px">
+<div class="m-row"><span>Gelb · bald fällig</span><span class="m-chip m-tap"><i class="dot-warn"></i>bis 90 Tage</span></div>
+<div class="m-row"><span>Orange · dringend</span><span class="m-chip m-tap"><i class="dot-urgent"></i>bis 28 Tage</span></div>
+<div class="m-row" style="border:0"><span>Inventur</span><span class="m-chip m-tap">alle 3 Monate</span></div>
+</div>
+<span class="m-hint">Standard laut Konzept zur Rotation (03): gelb bis 3 Monate, orange bis 4 Wochen, rot vor heute.</span>
+</div>
+</div>
+<div class="m-fold"></div>
+<div class="m-dock m-dock-links"><span>Übersicht</span><span>Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>D · Einstellungen: Gruppen links, gewählte Seite rechts, das Dock bleibt zur Navigation erreichbar.</figcaption>
+</figure>
+</div>
+<ul>
+<li><strong>Plus:</strong> Die Falz trennt zwei Seiten und stört nicht. Liste und Detail passen gut zu Vorrat, Erfassen und Einstellungen.</li>
+<li><strong>Minus:</strong> Für die Übersicht ist jede Hälfte schmal. Dafür passt E besser.</li>
+</ul>
+
+<h3>Idee E „Breites Cockpit“ (quer) <span class="badge badge-vorschlag">Vorschlag</span></h3>
+<p>Die Navigation wandert als Leiste an den linken Rand. Die Übersicht wird ein Bento mit vier Spalten, wie der Prototyp ab <span class="num">768</span> Pixel. Das Raster ist so gelegt, dass die senkrechte Falz genau in eine Fuge zwischen den Kacheln fällt: links zwei Spalten, rechts zwei Spalten.</p>
+<div class="scroll-x">
+<figure aria-label="iPhone Duo aufgeklappt quer, Übersicht, Idee E">
+<div class="dev dev-duo-innen dev-duo-quer">
+<div class="m-rail"><span class="on">Übersicht</span><span>Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+<div style="display:grid;grid-template-columns:295px 384px;column-gap:24px">
+<div class="m-col">
+<div class="m-head"><span><small>Beispiel</small><br>Dein Vorrat</span></div>
+<div class="m-grid">
+<div class="m-tile m-tile-wide"><small>Heute versorgt</small><div class="m-gauge-box"><div class="m-gauge" style="--v:90"></div><b>9 T</b></div></div>
+<div class="m-tile"><small>Ziel 31.12.</small><b>7/10</b><div class="m-bar" style="--v:70"></div></div>
+<div class="m-tile"><small>Wasser</small><b>27 l</b><div class="m-bar" style="--v:45;--c:var(--water)"></div></div>
+<div class="m-tile m-tile-wide m-split"><span><small class="m-label">Foto aufnehmen</small>Packung &amp; MHD</span><span class="m-btn ink"><svg class="m-ico"><use href="#i-cam"/></svg></span></div>
+</div>
+</div>
+<div class="m-col">
+<div class="m-head" style="justify-content:flex-end"><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-grid">
+<div class="m-tile m-tile-wide"><small>Bald fällig</small>
+<div class="m-row"><span>Walnüsse</span><span class="m-chip"><i class="dot-bad"></i>abgelaufen</span></div>
+<div class="m-row"><span>Thunfisch in Öl</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+<div class="m-row" style="border:0"><span>Passierte Tomaten</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div></div>
+<div class="m-tile"><small>Nachkaufen</small><b>3</b><div class="m-hint">offen</div></div>
+<div class="m-tile"><small>Haushalt · 3</small>Alex, Sam, Kim</div>
+</div>
+</div>
+</div>
+<div class="m-fold"></div>
+</div>
+<figcaption>E · Übersicht: Die Falz liegt in der Fuge zwischen der zweiten und dritten Spalte, keine Kachel wird geknickt.</figcaption>
+</figure>
+</div>
+<ul>
+<li><strong>Plus:</strong> Quer ist das der beste Überblick. Das Layout ist fast das des Prototyps ab <span class="num">768</span> Pixel.</li>
+<li><strong>Minus:</strong> Das Raster muss an der Falz ausgerichtet sein. Liegt sie im Simulator anders als angenommen, muss es nachgezogen werden.</li>
+</ul>
+
+<h3>Idee J „Oben und unten“ (hochkant) <span class="badge badge-vorschlag">Vorschlag</span></h3>
+<p>Hochkant liegt die Falz waagrecht. Deshalb teilt sich der Bildschirm in eine obere und eine untere Hälfte. Die Reihen brechen an der Falz um, keine Kachel und kein Knopf liegt auf ihr. Das Dock bleibt unten über die volle Breite.</p>
+<div class="scroll-x">
+<figure aria-label="iPhone Duo aufgeklappt hochkant, Übersicht, Idee J">
+<div class="dev dev-duo-innen dev-duo-hoch">
+<div class="m-rows2">
+<div class="m-col">
+<div class="m-head"><span><small>Beispiel · Mi., 07.10.</small><br>Dein Vorrat</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-grid">
+<div class="m-tile" style="grid-row:span 2"><small>Heute versorgt</small><div class="m-gauge-box"><div class="m-gauge m-gauge-lg" style="--v:90"></div><b class="m-gauge-val">9,0<small>Tage · Ziel 10</small></b></div></div>
+<div class="m-tile"><small>Ziel 31.12.</small><b>7,0</b> <span class="m-sub">von 10</span><div class="m-seg10"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div></div>
+<div class="m-tile"><small>Wasser</small><b>27 l</b><div class="m-bar" style="--v:45;--c:var(--water)"></div></div>
+</div>
+</div>
+<div class="m-col">
+<div class="m-grid">
+<div class="m-tile"><small>Bald fällig</small>
+<div class="m-row"><span>Walnüsse</span><span class="m-chip"><i class="dot-bad"></i>abgelaufen</span></div>
+<div class="m-row" style="border:0"><span>Thunfisch</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div></div>
+<div class="m-tile"><small>Nachkaufen · 3</small>
+<div class="m-row"><span>Mineralwasser</span></div>
+<div class="m-row" style="border:0"><span>Fisch, Fleisch, Eier</span></div></div>
+<div class="m-tile m-tile-wide m-split"><span><small class="m-label">Foto aufnehmen</small>Packung &amp; MHD</span><span class="m-btn ink"><svg class="m-ico"><use href="#i-cam"/></svg></span></div>
+</div>
+</div>
+</div>
+<div class="m-fold-h"></div>
+<div class="m-dock"><span class="on">Übersicht</span><span>Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>J · Übersicht: oben die Kennzahlen, unten was zu tun ist. Die Falz liegt im Abstand zwischen beiden Hälften.</figcaption>
+</figure>
+
+<figure aria-label="iPhone Duo aufgeklappt hochkant, Vorrat oben Liste unten Detail, Idee J">
+<div class="dev dev-duo-innen dev-duo-hoch">
+<div class="m-rows2">
+<div class="m-col">
+<div class="m-head"><span><small>Beispiel</small><br>Vorrat</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-line"><span class="m-chip on m-tap">Im Vorrat 51</span><span class="m-chip m-tap">Bald fällig 6</span><span class="m-chip m-tap">Abgelaufen 1</span><span class="m-chip m-tap">Nachkaufen</span></div>
+<div class="m-tile" style="padding-block:2px">
+<div class="m-row"><span>Nudeln · 6 × 500 g</span><span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+<div class="m-row on"><span>Passierte Tomaten · 2 × 500 g</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+<div class="m-row" style="border:0"><span>H-Milch · 4 × 1 l</span><span class="m-chip"><i class="dot-warn"></i>bald fällig</span></div>
+</div>
+</div>
+<div class="m-col">
+<div class="m-head">Passierte Tomaten</div>
+<div class="m-tile" style="padding-block:2px">
+<div class="m-row"><span class="m-mono">28.10.2026</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+<div class="m-row" style="border:0"><span class="m-mono">28.02.2027</span><span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+</div>
+<div class="m-grid"><span class="m-btn ink">1 entnehmen</span><span class="m-btn">Bearbeiten</span></div>
+</div>
+</div>
+<div class="m-fold-h"></div>
+<div class="m-dock"><span>Übersicht</span><span class="on">Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>J · Vorrat: Liste oben, das gewählte Produkt unten. Beispieldaten.</figcaption>
+</figure>
+
+<figure aria-label="iPhone Duo aufgeklappt hochkant, Erfassen mit Kamera, Idee J">
+<div class="dev dev-duo-innen dev-duo-hoch">
+<div class="m-rows2">
+<div class="m-col">
+<div class="m-seg"><span class="on">Foto</span><span>Manuell</span></div>
+<div class="m-steps"><span class="done">01 Verpackung</span><span class="done">02 Nährwerte</span><span class="on">03 MHD-Serie</span><span>04 Prüfen</span></div>
+<div class="m-cam" style="aspect-ratio:auto;flex:1;min-height:0">Packung für Packung das Datum zeigen</div>
+</div>
+<div class="m-col">
+<div class="m-split"><span class="m-mono" style="font-size:15px">Packung 4 · 30.09.2027 <span class="m-ok">✓</span></span><div class="m-shutter" style="margin:0" aria-hidden="true"></div></div>
+<div class="m-wrap"><span class="m-chip m-mono">1 · 09/2027</span><span class="m-chip m-mono">2 · 09/2027</span><span class="m-chip review m-mono m-tap">3 · – · bitte nochmal oder manuell</span><span class="m-chip m-mono">4 · 09/2027</span></div>
+<div class="m-line"><span class="m-chip m-tap">Alle gleiches Datum</span><span class="m-chip m-tap">Datum manuell</span><span class="m-chip m-tap">Ohne Datum</span></div>
+<span class="m-btn">Erst gelben Chip klären</span>
+</div>
+</div>
+<div class="m-fold-h"></div>
+</div>
+<figcaption>J · Erfassen: Kamera oben, Auslöser und Chips unten in Daumennähe. Kein Dock während der Aufnahme.</figcaption>
+</figure>
+</div>
+<ul>
+<li><strong>Plus:</strong> Nichts liegt auf der Falz. Jede Hälfte ist fast so breit wie zwei iPhone-Spalten, die Kacheln bleiben groß.</li>
+<li><strong>Minus:</strong> Eine eigene Anordnung nur für diese Stufe. Die obere Hälfte ist mit einer Hand schwer erreichbar.</li>
+</ul>
+
+<h3>Idee F „Arbeitsfläche“ (quer) <span class="badge badge-vorschlag">Vorschlag</span></h3>
+<p>Zwei Bereiche gleichzeitig: links Nachkaufen oder Vorrat, rechts Erfassen. Wer nach dem Einkauf einräumt, hakt links ab und erfasst rechts. Dass Abhaken direkt in die Erfassung führt, steht im Konzept. Neu ist nur, dass beides nebeneinander steht.</p>
+<div class="scroll-x">
+<figure aria-label="iPhone Duo aufgeklappt quer, Nachkaufen und Erfassen nebeneinander, Idee F">
+<div class="dev dev-duo-innen dev-duo-quer">
+<div class="m-grid" style="gap:22px">
+<div class="m-col">
+<div class="m-head"><span><small>Beispiel</small><br>Nachkaufen</span></div>
+<div class="m-tile" style="padding-block:2px">
+<div class="m-row on"><span>Mineralwasser</span><span class="m-sub m-mono">12 × 1,5 l</span></div>
+<div class="m-row"><span>Fisch, Fleisch, Eier</span><span class="m-sub m-mono">≈ 2,5 kg</span></div>
+<div class="m-row"><span>Milch &amp; Milchprodukte</span><span class="m-sub m-mono">≈ 3 kg</span></div>
+<div class="m-row" style="border:0"><span>Haferflocken</span><span class="m-sub">erledigt</span></div>
+</div>
+</div>
+<div class="m-col">
+<div class="m-seg"><span class="on">Foto</span><span>Manuell</span></div>
+<div class="m-steps"><span class="on">01 Verpackung</span><span>02 Nährwerte</span><span>03 MHD-Serie</span><span>04 Prüfen</span></div>
+<div class="m-cam" style="aspect-ratio:4/2.2">Vorderseite der Packung zeigen</div>
+<div class="m-tile"><small>Vorschlag der KI</small>Mineralwasser · 1,5 l · Flasche</div>
+</div>
+</div>
+<div class="m-fold"></div>
+</div>
+<figcaption>F · Abgehakt wird links, erfasst rechts. Beispieldaten.</figcaption>
+</figure>
+</div>
+<ul>
+<li><strong>Plus:</strong> Das passt gut zum Einräumen nach dem Einkauf, ohne zwischen Tabs zu springen.</li>
+<li><strong>Minus:</strong> Es ist eine eigene Ansicht, die es nur auf dem Duo gibt. Mehr Aufwand, wenig Nutzen auf anderen Geräten.</li>
+</ul>
+
+<h3>Kamera beim Erfassen</h3>
+<ul>
+<li>Zugeklappt läuft die Kamera im Vollbild. Quer steht der Sucher links, rechts wächst der Vorschlag mit (D). Hochkant steht der Sucher oben, Auslöser und Chips unten (J).</li>
+<li>Der Umschalter Foto oder Manuell bleibt immer sichtbar, denn das Foto ist nie Pflicht.</li>
+<li>Ein Datum, das die KI nicht lesen kann, bleibt leer und wird gelb markiert („bitte nochmal oder manuell“).</li>
+<li>Nicht geprüft: welche Kamera das Duo aufgeklappt anbietet und ob die Kamera in der Home-Bildschirm-App unter iOS 27 läuft. Beides muss auf dem Gerät oder im Simulator getestet werden.</li>
+</ul>
+
+<div class="note"><p><strong>Empfehlung</strong> <span class="badge badge-vorschlag">Vorschlag</span>: quer (Stufe breit) die Übersicht als E „Breites Cockpit“ und Vorrat, Erfassen und Einstellungen als D „Zwei Seiten“. Hochkant (Stufe mittel) J „Oben und unten“. So liegt in keiner Haltung etwas Antippbares auf der Falz. Idee F erst später.</p></div>
+</section>
+
+<section id="duo-wechsel">
+<h2>Wechsel beim Auf- und Zuklappen</h2>
+<p>Dieser Abschnitt beschreibt, was beim Auf- und Zuklappen erhalten bleibt.</p>
+<p>Für die Webseite ist Auf- und Zuklappen nur eine Änderung der Fenstergröße. Die App wechselt deshalb nur das Layout, sie lädt nicht neu. Wer das zugeklappte Duo hochkant hält und aufklappt, landet nach der Ableitung oben innen quer. Ob Safari und die Home-Bildschirm-App sich so verhalten, ist nicht geprüft und muss im Simulator getestet werden.</p>
+<figure><div class="scroll-x"><pre class="mermaid">stateDiagram-v2
+  direction TB
+  state "Zu · kompakt" as Zu
+  state "Auf quer · breit" as Quer
+  state "Auf hochkant · mittel" as Hoch
+  [*] --> Zu
+  Zu --> Quer: aufklappen
+  Quer --> Zu: zuklappen
+  Quer --> Hoch: drehen
+  Hoch --> Quer: drehen
+  Hoch --> Zu: zuklappen</pre></div><figcaption>Drei Zustände, eine Seite. Nur das Layout wechselt.</figcaption></figure>
+
+<h3>Regeln <span class="badge badge-vorschlag">Vorschlag</span></h3>
+<div class="scroll-x"><table>
+<thead><tr><th>Was</th><th>Beim Aufklappen</th><th>Beim Zuklappen</th></tr></thead>
+<tbody>
+<tr><td>Seite und Tab</td><td>bleiben gleich</td><td>bleiben gleich</td></tr>
+<tr><td>Liste und Detail</td><td>quer: Detail rechts, Liste links. Hochkant: Liste oben, Detail unten</td><td>das Detail wird zur eigenen Seite, „Zurück“ führt zur Liste</td></tr>
+<tr><td>Filter und Scrollposition</td><td>bleiben, die Auswahl bleibt markiert</td><td>bleiben</td></tr>
+<tr><td>Laufende Erfassung</td><td>Schritt, Fotos und Chips bleiben, daneben bzw. darunter erscheint der Vorschlag</td><td>Schritt, Fotos und Chips bleiben, die Kamera geht ins Vollbild</td></tr>
+<tr><td>Kamera</td><td>Sucher darf kurz neu starten</td><td>Sucher darf kurz neu starten</td></tr>
+<tr><td>Eingaben im Formular</td><td>bleiben im Feld</td><td>bleiben im Feld</td></tr>
+</tbody></table></div>
+<ul>
+<li>Beim Wechsel kommt nichts in den Vorrat, das geschieht weiter erst nach Bestätigung. Den unbestätigten Stand hält laut Vorschlag der Technik-Seite ein Entwurf auf dem NAS (Abschnitt „Wann wird gespeichert“), der auch das Auf- und Zuklappen übersteht.</li>
+<li>Der Wechsel wird ruhig überblendet. Ist „Animationen reduzieren“ an, wechselt das Bild sofort.</li>
+</ul>
+
+<h3>Bildfolge Vorrat</h3>
+<div class="scroll-x">
+<figure aria-label="Wechsel Schritt 1, zugeklappt, Detail Passierte Tomaten">
+<div class="dev dev-duo-aussen">
+<div class="m-head"><span><small>‹ Vorrat</small><br>Passierte Tomaten</span></div>
+<span class="m-label">Einheiten</span>
+<div class="m-row"><span class="m-mono">28.10.2026</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+<div class="m-row"><span class="m-mono">28.02.2027</span><span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+<span class="m-btn ink">1 entnehmen</span>
+<div class="m-dock"><span>Übersicht</span><span class="on">Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>Zu: Das Produkt ist als eigene Seite offen.</figcaption>
+</figure>
+<figure aria-label="Wechsel Schritt 2, aufgeklappt quer, Liste und Detail">
+<div class="dev dev-duo-innen dev-duo-quer">
+<div class="m-grid" style="gap:22px">
+<div class="m-col">
+<div class="m-head">Vorrat</div>
+<div class="m-tile" style="padding-block:2px">
+<div class="m-row"><span>Linsen</span><span class="m-sub">4</span></div>
+<div class="m-row on"><span>Passierte Tomaten</span><span class="m-sub">2</span></div>
+<div class="m-row" style="border:0"><span>Pfirsiche</span><span class="m-sub">2</span></div>
+</div>
+</div>
+<div class="m-col">
+<div class="m-head">Passierte Tomaten</div>
+<div class="m-row"><span class="m-mono">28.10.2026</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+<div class="m-row"><span class="m-mono">28.02.2027</span><span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+<span class="m-btn ink">1 entnehmen</span>
+</div>
+</div>
+<div class="m-fold"></div>
+<div class="m-dock m-dock-links"><span>Übersicht</span><span class="on">Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>Auf (quer): Dasselbe Produkt rechts, die Liste kommt links dazu.</figcaption>
+</figure>
+<figure aria-label="Wechsel Schritt 3, wieder zugeklappt">
+<div class="dev dev-duo-aussen">
+<div class="m-head"><span><small>‹ Vorrat</small><br>Passierte Tomaten</span></div>
+<span class="m-label">Einheiten</span>
+<div class="m-row"><span class="m-mono">28.10.2026</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+<div class="m-row"><span class="m-mono">28.02.2027</span><span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+<span class="m-btn ink">1 entnehmen</span>
+<div class="m-dock"><span>Übersicht</span><span class="on">Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>Wieder zu: Man landet beim selben Produkt, „Zurück“ führt zur Liste.</figcaption>
+</figure>
+</div>
+
+<h3>Bildfolge Erfassen</h3>
+<div class="scroll-x">
+<figure aria-label="Erfassen zugeklappt, Packung 4">
+<div class="dev dev-duo-aussen">
+<div class="m-seg"><span class="on">Foto</span><span>Manuell</span></div>
+<div class="m-head"><span><small>03 MHD-Serie</small><br>Packung 4</span><span class="m-btn">Fertig</span></div>
+<div class="m-cam">Datum ins Feld halten</div>
+<div class="m-wrap"><span class="m-chip m-mono">1 · 09/2027</span><span class="m-chip m-mono">2 · 09/2027</span><span class="m-chip review m-mono m-tap">3 · – · bitte nochmal</span></div>
+</div>
+<figcaption>Zu: Drei Packungen sind aufgenommen, die dritte ist nicht lesbar.</figcaption>
+</figure>
+<figure aria-label="Erfassen aufgeklappt quer, weiter bei Packung 4">
+<div class="dev dev-duo-innen dev-duo-quer">
+<div class="m-grid" style="gap:22px">
+<div class="m-col">
+<div class="m-seg"><span class="on">Foto</span><span>Manuell</span></div>
+<div class="m-head"><span><small>03 MHD-Serie</small><br>Packung 4</span></div>
+<div class="m-cam" style="aspect-ratio:4/2.4">Datum ins Feld halten</div>
+</div>
+<div class="m-col">
+<div class="m-head">Vorschlag der KI</div>
+<div class="m-tile"><strong>Nudeln</strong> · 500 g · Packung</div>
+<div class="m-wrap"><span class="m-chip m-mono">1 · 09/2027</span><span class="m-chip m-mono">2 · 09/2027</span><span class="m-chip review m-mono m-tap">3 · – · bitte nochmal oder manuell</span></div>
+</div>
+</div>
+<div class="m-fold"></div>
+</div>
+<figcaption>Auf (quer): Es geht bei Packung 4 weiter, die drei Chips sind noch da.</figcaption>
+</figure>
+</div>
+</section>
+
+<section id="pc">
+<h2>PC-Browser</h2>
+<p>Dieser Abschnitt zeigt drei Varianten für den Browser am PC: Übersicht, Vorrat als Tabelle mit Filtern, Erfassen und Einstellungen.</p>
+<p>Am PC gibt es Maus, Tastatur und viel Breite, aber meist keine gute Kamera. Die Konzeptdateien beschreiben nur die Live-Kamera. Erfassen per Foto am PC ist deshalb <span class="badge badge-spaeter">später</span> <span class="badge badge-vorschlag">Vorschlag</span> (im Funktionskatalog ERF-18). Manuell geht immer.</p>
+
+<h3>Variante G „Säule mit Dock“</h3>
+<p>So wie der Prototyp: eine zentrierte Spalte, Bento mit vier Spalten, das Dock unten.</p>
+<div class="scroll-x">
+<figure aria-label="PC, Übersicht, Variante G">
+<div class="dev dev-pc">
+<div class="m-head"><span><small>Beispiel</small><br>Dein Vorrat</span><i></i></div>
+<div class="m-grid" style="--cols:4">
+<div class="m-tile"><small>Heute versorgt</small><div class="m-gauge-box"><div class="m-gauge" style="--v:90"></div><b>9 T</b></div></div>
+<div class="m-tile"><small>Ziel 31.12.</small><b>7/10</b><div class="m-bar" style="--v:70"></div></div>
+<div class="m-tile"><small>Wasser</small><b>27 l</b><div class="m-bar" style="--v:45;--c:var(--water)"></div></div>
+<div class="m-tile"><small>Neu</small><span class="m-btn ink">Foto aufnehmen</span></div>
+<div class="m-tile"><small>Warengruppen</small><div class="m-bar" style="--v:80"></div><div class="m-bar" style="--v:55"></div></div>
+<div class="m-tile"><small>Bald fällig</small><b>6</b></div>
+<div class="m-tile"><small>Nachkaufen</small><b>3</b></div>
+<div class="m-tile"><small>Haushalt · 3</small>Alex, Sam, Kim</div>
+</div>
+<div class="m-dock"><span class="on">Übersicht</span><span>Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>Übersicht wie im Prototyp ab 768 px. Zahlen sind Beispiele.</figcaption>
+</figure>
+<figure aria-label="PC, Vorrat, Variante G">
+<div class="dev dev-pc">
+<div class="m-head"><span><small>Beispiel</small><br>Vorrat</span><i></i></div>
+<div><span class="m-chip on">Im Vorrat 51</span> <span class="m-chip">Bald fällig 6</span> <span class="m-chip">Abgelaufen 1</span> <span class="m-chip">Nachkaufen</span> <span class="m-chip">Verbraucht</span> <span class="m-chip">Entsorgt</span></div>
+<div class="m-grid" style="--cols:3">
+<div class="m-tile"><b>Nudeln</b><br>6 Einheiten <span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+<div class="m-tile"><b>Haferflocken</b><br>1 Einheit <span class="m-chip"><i class="dot-warn"></i>bald fällig</span></div>
+<div class="m-tile"><b>Thunfisch in Öl</b><br>3 Einheiten <span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+</div>
+<div class="m-dock"><span>Übersicht</span><span class="on">Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>Vorrat als Kacheln mit Status-Filtern. Beispieldaten.</figcaption>
+</figure>
+<figure aria-label="PC, Erfassen, Variante G">
+<div class="dev dev-pc">
+<div class="m-head"><span><small>Neu</small><br>Hinzufügen</span><span><span class="m-chip on">Foto</span> <span class="m-chip">Manuell</span></span></div>
+<div class="m-drop">Fotos hierher ziehen oder Datei wählen</div>
+<div class="m-dock"><span>Übersicht</span><span>Vorrat</span><span class="on">Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>Erfassen in der schmalen Spalte, Fotos als Datei <span class="badge badge-spaeter">später</span> <span class="badge badge-vorschlag">Vorschlag</span>.</figcaption>
+</figure>
+<figure aria-label="PC, Einstellungen, Variante G">
+<div class="dev dev-pc">
+<div class="m-head"><span><small>Zahnrad</small><br>Einstellungen</span><span class="m-btn">Fertig</span></div>
+<span class="m-label">Mein Konto</span>
+<div class="m-row"><span>Profil · Benachrichtigungen · Darstellung</span><span>›</span></div>
+<span class="m-label">Haushalt</span>
+<div class="m-row"><span>Mitglieder · Ernährung · Ziel &amp; Empfehlung</span><span>›</span></div>
+<span class="m-label">Nutzerverwaltung</span>
+<div class="m-row"><span>Nutzer · Nutzer einladen</span><span>›</span></div>
+<span class="m-label">Daten &amp; System</span>
+<div class="m-row"><span>Export, Backup, Version</span><span>›</span></div>
+</div>
+<figcaption>Einstellungen als Liste, eine Seite nach der anderen.</figcaption>
+</figure>
+</div>
+<ul>
+<li><strong>Plus:</strong> Ist im Prototyp schon gebaut und sieht überall gleich aus.</li>
+<li><strong>Minus:</strong> Breite Bildschirme bleiben links und rechts leer. Kacheln statt Tabelle sind am PC langsam zu durchsuchen.</li>
+</ul>
+
+<h3>Variante H „Seitenleiste“ <span class="badge badge-vorschlag">Vorschlag</span></h3>
+<p>Die Navigation steht links als Leiste, in der Mitte das Bento. Ab der Stufe „weit“ (1280 px) kommt rechts eine feste Spalte „Bald fällig“ dazu. Darunter (Stufe „breit“) entfällt sie, „Bald fällig“ ist dann eine Kachel im Bento.</p>
+<div class="scroll-x">
+<figure aria-label="PC, Übersicht, Variante H">
+<div class="dev dev-pc">
+<div class="m-rail"><span class="on">Übersicht</span><span>Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+<div class="m-head"><span><small>Beispiel</small><br>Dein Vorrat</span><i></i></div>
+<div class="m-grid" style="--cols:3">
+<div>
+<div class="m-tile"><small>Heute versorgt</small><div class="m-gauge-box"><div class="m-gauge" style="--v:90"></div><b>9 T</b></div></div>
+<div class="m-tile"><small>Wasser</small><b>27 l</b><div class="m-bar" style="--v:45;--c:var(--water)"></div></div>
+</div>
+<div>
+<div class="m-tile"><small>Ziel 31.12.</small><b>7/10</b><div class="m-bar" style="--v:70"></div></div>
+<div class="m-tile"><small>Warengruppen</small><div class="m-bar" style="--v:80"></div><div class="m-bar" style="--v:55"></div><div class="m-bar" style="--v:30"></div></div>
+<div class="m-tile"><small>Neu</small><span class="m-btn ink">Foto aufnehmen</span></div>
+</div>
+<div class="m-tile"><small>Bald fällig</small>
+<div class="m-row"><span>Walnüsse</span><span class="m-chip"><i class="dot-bad"></i>abgelaufen</span></div>
+<div class="m-row"><span>Thunfisch</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+<div class="m-row"><span>Pass. Tomaten</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+<div class="m-row"><span>H-Milch</span><span class="m-chip"><i class="dot-warn"></i>bald fällig</span></div>
+<div class="m-row"><span>Haferflocken</span><span class="m-chip"><i class="dot-warn"></i>bald fällig</span></div>
+</div>
+</div>
+</div>
+<figcaption>Stufe „weit“: Leiste links, Bald fällig rechts immer sichtbar. Beispieldaten.</figcaption>
+</figure>
+<figure aria-label="PC, Vorrat als Tabelle, Variante H">
+<div class="dev dev-pc">
+<div class="m-rail"><span>Übersicht</span><span class="on">Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+<div><span class="m-chip on">Im Vorrat 51</span> <span class="m-chip">Bald fällig 6</span> <span class="m-chip">Abgelaufen 1</span> <span class="m-chip">Alle Kategorien</span> <span class="m-chip">Alle Behälter</span></div>
+<table class="m-table"><thead><tr><th>Produkt</th><th>Kategorie</th><th>Behälter</th><th>Lagerort</th><th>Einh.</th><th>nächstes MHD</th><th>Zustand</th></tr></thead>
+<tbody>
+<tr><td>Walnüsse</td><td>Obst &amp; Nüsse</td><td>Beutel</td><td>Küche</td><td>1</td><td>02.10.2026</td><td><span class="m-chip"><i class="dot-bad"></i>abgelaufen</span></td></tr>
+<tr><td>Thunfisch in Öl</td><td>Fisch, Fleisch, Eier</td><td>Dose</td><td>Keller</td><td>3</td><td>14.10.2026</td><td><span class="m-chip"><i class="dot-urgent"></i>dringend</span></td></tr>
+<tr><td>Passierte Tomaten</td><td>Gemüse</td><td>Tetrapak</td><td>Küche</td><td>2</td><td>28.10.2026</td><td><span class="m-chip"><i class="dot-urgent"></i>dringend</span></td></tr>
+<tr><td>H-Milch</td><td>Milch</td><td>Tetrapak</td><td>Keller</td><td>4</td><td>15.11.2026</td><td><span class="m-chip"><i class="dot-warn"></i>bald fällig</span></td></tr>
+<tr><td>Haferflocken</td><td>Getreide</td><td>Packung</td><td>Küche</td><td>1</td><td>20.11.2026</td><td><span class="m-chip"><i class="dot-warn"></i>bald fällig</span></td></tr>
+<tr><td>Nudeln</td><td>Getreide</td><td>Packung</td><td>Keller</td><td>6</td><td>30.09.2027</td><td><span class="m-chip"><i class="dot-ok"></i>gut</span></td></tr>
+</tbody></table>
+</div>
+<figcaption>Vorrat als Tabelle, sortiert nach dem nächsten MHD. Filter für Status, Kategorie und Behälter. Beispieldaten, Stichtag 07.10.2026.</figcaption>
+</figure>
+<figure aria-label="PC, Erfassen, Variante H">
+<div class="dev dev-pc">
+<div class="m-rail"><span>Übersicht</span><span>Vorrat</span><span class="on">Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+<div class="m-head"><span><small>Neu</small><br>Hinzufügen</span><span><span class="m-chip on">Foto</span> <span class="m-chip">Manuell</span></span></div>
+<div class="m-grid" style="--cols:2">
+<div class="m-drop">Fotos hierher ziehen<br>oder Datei wählen</div>
+<div class="m-drop">Mit dem Handy aufnehmen<br>QR-Code scannen</div>
+</div>
+<span class="m-label">Ohne Foto</span>
+<span class="m-btn">Manuell eingeben</span>
+</div>
+<figcaption>Zwei Wege zum Foto, dazu immer manuell <span class="badge badge-spaeter">später</span> <span class="badge badge-vorschlag">Vorschlag</span>.</figcaption>
+</figure>
+<figure aria-label="PC, Einstellungen, Variante H">
+<div class="dev dev-pc">
+<div class="m-rail"><span>Übersicht</span><span>Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+<div class="m-head"><span><small>Zahnrad</small><br>Einstellungen</span></div>
+<div class="m-grid" style="--cols:2">
+<div class="m-tile"><small>Mein Konto</small>Profil · Benachrichtigungen · Darstellung</div>
+<div class="m-tile"><small>Haushalt</small>Mitglieder · Ernährung · Ziel &amp; Empfehlung · Vorrat-Stammdaten · Ampel &amp; Regeln · Foto-Erkennung</div>
+<div class="m-tile"><small>Nutzerverwaltung</small>Nutzer · Nutzer einladen</div>
+<div class="m-tile"><small>Daten &amp; System</small>Export, Import, Backup, Version</div>
+</div>
+</div>
+<figcaption>Die vier Gruppen als Kacheln. Ein Klick öffnet die Seite. Ansicht für Admin.</figcaption>
+</figure>
+</div>
+<ul>
+<li><strong>Plus:</strong> Die Leiste ist am PC üblich und spart Höhe. „Bald fällig“ ist ständig im Blick.</li>
+<li><strong>Minus:</strong> Weicht vom Prototyp ab, dort sitzt die Navigation unten. Die rechte Spalte braucht viel Breite.</li>
+</ul>
+
+<h3>Variante I „Arbeitsplatz“ <span class="badge badge-vorschlag">Vorschlag</span></h3>
+<p>Für Pflege am Schreibtisch: Vorrat als Tabelle mit Detail-Spalte, Erfassen mit Ablagefeldern je Foto-Art, Einstellungen zweispaltig. Die Übersicht ist wie bei H.</p>
+<div class="scroll-x">
+<figure aria-label="PC, Vorrat als Tabelle mit Detail, Variante I">
+<div class="dev dev-pc">
+<div class="m-rail"><span>Übersicht</span><span class="on">Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+<div><span class="m-chip on">Bald fällig 6</span> <span class="m-chip">Alle Kategorien</span> <span class="m-chip">Alle Dosen</span></div>
+<div class="m-grid" style="--cols:2">
+<table class="m-table"><thead><tr><th>Produkt</th><th>Einh.</th><th>MHD</th></tr></thead>
+<tbody>
+<tr><td>Thunfisch in Öl</td><td>1</td><td>14.10.2026</td></tr>
+<tr><td><b>Pass. Tomaten</b></td><td>1</td><td>28.10.2026</td></tr>
+<tr><td>H-Milch</td><td>2</td><td>15.11.2026</td></tr>
+<tr><td>Haferflocken</td><td>1</td><td>20.11.2026</td></tr>
+</tbody></table>
+<div class="m-tile"><small>Detail</small><b>Passierte Tomaten</b>
+<div class="m-row"><span>28.10.2026</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+<div class="m-row"><span>28.02.2027</span><span class="m-chip"><i class="dot-ok"></i>gut</span></div>
+<span><span class="m-btn ink">1 entnehmen</span> <span class="m-btn">Verbraucht</span> <span class="m-btn">Entsorgt</span></span></div>
+</div>
+</div>
+<figcaption>Gefiltert auf „Bald fällig“, rechts das gewählte Produkt mit Aktionen je Einheit. Beispieldaten.</figcaption>
+</figure>
+<figure aria-label="PC, Erfassen per Drag-and-drop, Variante I">
+<div class="dev dev-pc">
+<div class="m-rail"><span>Übersicht</span><span>Vorrat</span><span class="on">Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+<div class="m-head"><span><small>Neu · Foto</small><br>Hinzufügen</span><span class="m-btn">Manuell</span></div>
+<div class="m-grid" style="--cols:3">
+<div class="m-drop on">Verpackung<br>1 Foto</div>
+<div class="m-drop">Nährwerte<br>optional</div>
+<div class="m-drop on">MHD-Fotos<br>10 Fotos = 10 Einheiten</div>
+</div>
+<div class="m-tile"><small>Vorschlag der KI</small>Nudeln · 500 g · Packung ·
+<span class="m-chip on m-tap">09/2027 × 5</span> <span class="m-chip review m-tap">3 · – · bitte nochmal oder manuell</span> <span class="m-chip on m-tap">11/2027 × 4</span></div>
+<span><span class="m-btn">Alle gleiches Datum</span> <span class="m-btn">Datum manuell</span> <span class="m-btn">Ohne Datum</span> <span class="m-btn ink">Prüfen und speichern</span></span>
+</div>
+<figcaption>Je Foto-Art ein Ablagefeld. Die Zahl der MHD-Fotos ergibt die Zahl der Einheiten <span class="badge badge-spaeter">später</span> <span class="badge badge-vorschlag">Vorschlag</span>. Beispieldaten.</figcaption>
+</figure>
+<figure aria-label="PC, Erfassen mit dem Handy, Variante I">
+<div class="dev dev-pc">
+<div class="m-rail"><span>Übersicht</span><span>Vorrat</span><span class="on">Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+<div class="m-head"><span><small>Neu · Handy</small><br>Mit dem Handy aufnehmen</span></div>
+<div class="m-grid" style="--cols:2">
+<div class="m-drop">QR-Code<br>öffnet „Neu“ am Handy</div>
+<div class="m-tile"><small>Vom Handy</small>
+<div class="m-row"><span>Verpackung</span><span class="m-chip"><i class="dot-ok"></i>da</span></div>
+<div class="m-row"><span>Nährwerte</span><span>übersprungen</span></div>
+<div class="m-row"><span>MHD-Fotos</span><span>2 von ?</span></div></div>
+</div>
+<span class="m-label">Prüfen und speichern danach hier am PC</span>
+</div>
+<figcaption>Aufnehmen am Handy, prüfen am großen Bildschirm <span class="badge badge-spaeter">später</span> <span class="badge badge-vorschlag">Vorschlag</span>. Braucht den Entwurf auf dem NAS, den die Technik-Seite vorschlägt (noch nicht freigegeben).</figcaption>
+</figure>
+<figure aria-label="PC, Einstellungen zweispaltig, Variante I">
+<div class="dev dev-pc">
+<div class="m-rail"><span>Übersicht</span><span>Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+<div class="m-grid" style="--cols:2">
+<div>
+<div class="m-head"><span><small>Admin</small><br>Einstellungen</span></div>
+<span class="m-label">Mein Konto</span>
+<div class="m-row"><span>Profil</span><span>›</span></div>
+<div class="m-row"><span>Benachrichtigungen</span><span>›</span></div>
+<span class="m-label">Haushalt</span>
+<div class="m-row"><span>Mitglieder</span><span>›</span></div>
+<div class="m-row on"><span>Foto-Erkennung</span><span>›</span></div>
+<span class="m-label">Nutzerverwaltung</span>
+<div class="m-row"><span>Nutzer</span><span>›</span></div>
+</div>
+<div>
+<div class="m-head">Foto-Erkennung</div>
+<div class="m-row"><span>Erkennung mit KI</span><span class="m-chip on">an</span></div>
+<div class="m-row"><span>Modell je Foto-Art</span><span>Sonnet 5.5</span></div>
+<div class="m-row"><span>Schlüssel</span><span class="m-chip"><i class="dot-ok"></i>hinterlegt</span></div>
+<div class="m-row"><span>Kosten diesen Monat</span><span>Übersicht ›</span></div>
+</div>
+</div>
+</div>
+<figcaption>Gruppen links, Seite rechts. Inhalte nach dem Einstellungs-Konzept, Werte sind Beispiele.</figcaption>
+</figure>
+</div>
+<ul>
+<li><strong>Plus:</strong> Am schnellsten beim Pflegen vieler Einheiten. Fotos vom Handy oder aus der Kamera-App lassen sich gesammelt hochladen.</li>
+<li><strong>Minus:</strong> Am meisten neue Arbeit. Die Übergabe vom Handy braucht einen gespeicherten Entwurf. Die Technik-Seite schlägt ihn vor, freigegeben ist er noch nicht.</li>
+</ul>
+
+<div class="note"><p><strong>Empfehlung</strong> <span class="badge badge-vorschlag">Vorschlag</span>: H als Rahmen (Leiste, Übersicht mit „Bald fällig“) und dazu die Ansichten aus I für Vorrat (Tabelle mit Detail) und Einstellungen (zweispaltig). Beim Erfassen am PC zuerst Drag-and-drop und manuell. Die Übergabe vom Handy kommt erst, wenn die Frage zum Entwurf geklärt ist. Eine Webcam ist nicht vorgesehen, weil kleine MHD-Aufdrucke damit vermutlich schlecht lesbar sind.</p></div>
+</section>
+
+<section id="erfassen">
+<h2>Erfassen im Detail</h2>
+<p>Dieser Abschnitt beantwortet: Wie läuft eine Erfassung per Foto Schritt für Schritt, und wo geht es manuell weiter?</p>
+<p>Gezeigt in Variante A. Die Folge stammt aus dem Konzept zur Foto-Erkennung: Verpackung → Nährwerte (optional) → MHD-Serie → Zusammenfassung → Speichern. Jeder Schritt geht auch manuell. Das Foto ist eine Abkürzung, nie Pflicht.</p>
+<p>Die KI liefert nur Vorschläge. Gespeichert wird erst nach „Speichern“. Kann die KI ein Datum nicht lesen, bleibt das Feld leer und der Chip wird gelb. <strong>Die App setzt kein Datum ein.</strong> (Der Prototyp übernimmt dort noch das vorige Datum als Vorschlag; das entfällt.)</p>
+<div class="scroll-x">
+
+<figure aria-label="Erfassen Schritt 1, Verpackung erkannt">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Hinzufügen</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-seg"><span class="on">Foto</span><span>Manuell</span></div>
+<div class="m-steps"><span class="on">01 Verpackung</span><span>02 Nährwerte</span><span>03 MHD-Serie</span><span>04 Prüfen</span></div>
+<div class="m-cam" style="aspect-ratio:4/3.6">Vorderseite der Packung in den Rahmen halten</div>
+<div class="m-shutter" aria-hidden="true"></div>
+<div class="m-tile"><small>Vorschlag der KI</small>
+<div class="m-field"><span><strong>Nudeln</strong> · 500 g · Packung</span><svg class="m-ico"><use href="#i-pen"/></svg></div>
+<div class="m-wrap" style="margin-top:6px"><span class="m-chip">Kategorie: Nudeln &amp; Reis</span><span class="m-chip">+ Neue Kategorie</span></div>
+</div>
+<div class="m-dock"><span>Übersicht</span><span>Vorrat</span><span class="on">Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>1 · Verpackung. Ergebnis als Karte, sofort änderbar. Ohne Marke, ohne Barcode.</figcaption>
+</figure>
+
+<figure aria-label="Erfassen Schritt 2, Nährwerte optional">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Hinzufügen</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-steps"><span class="done">01 Verpackung</span><span class="on">02 Nährwerte</span><span>03 MHD-Serie</span><span>04 Prüfen</span></div>
+<div class="m-cam" style="aspect-ratio:4/3.6">Nährwerttabelle zeigen (optional)</div>
+<div class="m-shutter" aria-hidden="true"></div>
+<div class="m-tile"><small>Vorschlag der KI</small>
+<div class="m-mono" style="font-size:13px">359 kcal/100 g → 1.795 kcal pro Packung</div>
+<div class="m-hint">Eiweiß 13 g · KH 71 g · Fett 2 g je 100 g</div>
+</div>
+<span class="m-btn" style="width:100%">Nährwerte überspringen</span>
+<span class="m-hint" style="text-align:center">Ohne Foto gilt der Durchschnitt der Kategorie, markiert als „geschätzt“.</span>
+</div>
+<figcaption>2 · Nährwerte. Optional; überspringen ist immer möglich.</figcaption>
+</figure>
+
+<figure aria-label="Erfassen Schritt 3, MHD-Serie mit Zähler und Chips">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Hinzufügen</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-steps"><span class="done">01 Verpackung</span><span class="done">02 Nährwerte</span><span class="on">03 MHD-Serie</span><span>04 Prüfen</span></div>
+<div class="m-cam" style="aspect-ratio:4/3">Packung für Packung das Datum zeigen</div>
+<div class="m-split"><span class="m-mono" style="font-size:15px">Packung 7 · 30.11.2027 <span class="m-ok">✓</span></span><div class="m-shutter" style="margin:0;width:54px;height:54px" aria-hidden="true"></div></div>
+<div class="m-wrap">
+<span class="m-chip m-mono"><span class="m-ok">✓</span> 1 · 09/2027</span><span class="m-chip m-mono"><span class="m-ok">✓</span> 2 · 09/2027</span>
+<span class="m-chip review m-mono m-tap">3 · – · bitte nochmal oder manuell</span>
+<span class="m-chip m-mono"><span class="m-ok">✓</span> 4 · 09/2027</span><span class="m-chip m-mono"><span class="m-ok">✓</span> 5 · 09/2027</span><span class="m-chip m-mono"><span class="m-ok">✓</span> 6 · 09/2027</span><span class="m-chip m-mono"><span class="m-ok">✓</span> 7 · 11/2027</span>
+</div>
+<div class="m-line"><span class="m-chip m-tap">Alle gleiches Datum</span><span class="m-chip m-tap">Datum manuell</span><span class="m-chip m-tap">Ohne Datum</span></div>
+<span class="m-btn" style="width:100%">Erst gelben Chip klären</span>
+</div>
+<figcaption>3 · MHD-Serie. Ein Foto je Packung, die Zahl der Fotos ist die Stückzahl. Der gelbe Chip hat kein Datum.</figcaption>
+</figure>
+
+<figure aria-label="Erfassen, Korrektur eines nicht lesbaren Datums">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Hinzufügen</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-steps"><span class="done">01 Verpackung</span><span class="done">02 Nährwerte</span><span class="on">03 MHD-Serie</span><span>04 Prüfen</span></div>
+<div class="m-cam" style="aspect-ratio:4/3">Sucher</div>
+<div class="m-dim"></div>
+<div class="m-sheet">
+<div class="m-head" style="font-size:16px">Packung 3: Datum nicht lesbar</div>
+<span class="m-sub">Die Erkennung hat kein Datum gefunden. Bitte nochmal fotografieren oder selbst eingeben.</span>
+<span class="m-btn" style="width:100%"><svg class="m-ico"><use href="#i-cam"/></svg>Nochmal fotografieren</span>
+<span class="m-label">Monat / Jahr</span>
+<div class="m-grid"><div class="m-field m-mono"><span>Monat</span><span>– –</span></div><div class="m-field m-mono"><span>Jahr</span><span>– – – –</span></div></div>
+<div class="m-wrap"><span class="m-chip m-tap">+6 Mon.</span><span class="m-chip m-tap">+1 J.</span><span class="m-chip m-tap">+2 J.</span></div>
+<span class="m-btn ink" style="width:100%">Übernehmen</span>
+</div>
+</div>
+<figcaption>3a · Gelben Chip antippen öffnet die Korrektur. Die Felder starten leer, die Schnellknöpfe rechnen ab heute.</figcaption>
+</figure>
+
+<figure aria-label="Erfassen Schritt 4, Zusammenfassung">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Hinzufügen</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-steps"><span class="done">01 Verpackung</span><span class="done">02 Nährwerte</span><span class="done">03 MHD-Serie</span><span class="on">04 Prüfen</span></div>
+<div class="m-tile" style="text-align:center;padding:18px 12px">
+<span class="m-ok-ring"><svg class="m-ico m-ico-lg"><use href="#i-check"/></svg></span>
+<small class="m-label" style="margin-top:8px">Zusammenfassung</small>
+<div class="m-mono" style="font-size:15px;line-height:1.45"><strong>10 × Nudeln 500 g</strong><br>= 5 kg · <span class="m-acc">17.950 kcal</span></div>
+<div class="m-sub m-mono" style="margin-top:6px">MHDs: 09/2027 (6×), 11/2027 (4×)</div>
+<div class="m-hint">Fotos: 1 Verpackung · 1 Nährwerte · 10 MHD</div>
+</div>
+<div class="m-tile"><div class="m-row"><span>Lagerort</span><span class="m-sub">Keller</span></div><div class="m-row" style="border:0"><span>Behälter</span><span class="m-sub">Packung</span></div></div>
+<div class="m-grid"><span class="m-btn">Zurück</span><span class="m-btn ink">Speichern</span></div>
+<span class="m-hint" style="text-align:center">Erst mit „Speichern“ kommt es in den Vorrat.</span>
+</div>
+<figcaption>4 · Zusammenfassung und Bestätigen. Erst danach wird gespeichert.</figcaption>
+</figure>
+
+<figure aria-label="Erfassen manuell">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Hinzufügen</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-seg"><span>Foto</span><span class="on">Manuell</span></div>
+<div class="m-col">
+<div class="m-field"><span class="m-sub">Bezeichnung</span><span>Nudeln</span></div>
+<div class="m-field"><span class="m-sub">Kategorie</span><span>Nudeln &amp; Reis</span></div>
+<div class="m-grid"><div class="m-field"><span class="m-sub">Behälter</span><span>Packung</span></div><div class="m-field"><span class="m-sub">Inhalt</span><span class="m-mono">500 g</span></div></div>
+<div class="m-grid"><div class="m-field"><span class="m-sub">Anzahl</span><span class="m-mono">10</span></div><div class="m-field"><span class="m-sub">MHD</span><span class="m-mono">09/2027</span></div></div>
+<div class="m-wrap"><span class="m-chip m-tap">+6 Mon.</span><span class="m-chip m-tap">+1 J.</span><span class="m-chip m-tap">+2 J.</span></div>
+<div class="m-field"><span class="m-sub">kcal je 100 g</span><span class="m-sub">leer = geschätzt</span></div>
+<div class="m-field"><span class="m-sub">Lagerort</span><span>Keller</span></div>
+</div>
+<span class="m-btn ink" style="width:100%">Weiter zur Prüfung</span>
+<div class="m-dock"><span>Übersicht</span><span>Vorrat</span><span class="on">Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>Manuell: dieselben Angaben als Formular, ohne Foto. Fehlende kcal werden aus der Kategorie geschätzt und markiert.</figcaption>
+</figure>
+</div>
+<p>Die drei Abkürzungen aus dem Konzept: „Alle gleiches Datum“ (ein MHD-Foto plus Anzahl mit −/+), „Datum manuell“ (Monat/Jahr mit Schnellknöpfen) und „Ohne Datum“. Bei „Ohne Datum“ entsteht eine Schätzung nur auf ausdrücklichen Wunsch und ist sichtbar als „geschätzt“ markiert. Die Technik-Seite schlägt dafür das Feld <code>mhd_geschaetzt</code> an der Einheit vor, freigegeben ist das noch nicht.</p>
+</section>
+
+<section id="einstellungen">
+<h2>Einstellungen im Detail</h2>
+<p>Dieser Abschnitt beantwortet: Was sieht ein Admin, was ein Mitglied?</p>
+<p>Grundsatz aus dem Konzept: Die Übersicht zeigt an, die Einstellungen ändern. Kacheln wie „Ziel“ oder „Haushalt“ haben ein dezentes „Bearbeiten →“, das direkt in die passende Einstellungsseite springt. Erreichbar sind die Einstellungen über das Zahnrad, nicht über einen Tab.</p>
+<div class="scroll-x">
+
+<figure aria-label="Einstellungen aus Sicht eines Admins">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Einstellungen</span><i class="on"><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<span class="m-sub">Angemeldet als <strong>Alex</strong> · Admin</span>
+<span class="m-group">Mein Konto</span>
+<div class="m-tile" style="padding-block:2px"><div class="m-row"><span>Profil</span><span class="m-sub">max@example.org</span></div><div class="m-row"><span>Benachrichtigungen</span><span class="m-sub">Sa 10:00</span></div><div class="m-row" style="border:0"><span>Darstellung</span><span class="m-sub">Hell</span></div></div>
+<span class="m-group">Haushalt</span>
+<div class="m-tile" style="padding-block:2px"><div class="m-row"><span>Mitglieder</span><span class="m-sub">3 Personen</span></div><div class="m-row"><span>Ernährung</span><span class="m-sub">Alles</span></div><div class="m-row"><span>Ziel &amp; Empfehlung</span><span class="m-sub">10 Tage · 31.12.</span></div><div class="m-row"><span>Vorrat-Stammdaten</span><span class="m-sub">10 Kategorien</span></div><div class="m-row"><span>Ampel &amp; Regeln</span><span class="m-sub">90 / 28 Tage</span></div><div class="m-row" style="border:0"><span>Foto-Erkennung</span><span class="m-sub">an</span></div></div>
+<span class="m-group">Nutzerverwaltung</span>
+<div class="m-tile" style="padding-block:2px"><div class="m-row" style="border:0"><span>Nutzer · Nutzer einladen</span><span class="m-sub">2 Nutzer</span></div></div>
+<span class="m-group">Daten &amp; System</span>
+<div class="m-tile" style="padding-block:2px"><div class="m-row" style="border:0"><span>Daten &amp; System</span><span class="m-sub">v0.1.0</span></div></div>
+</div>
+<figcaption>Admin: alle vier Gruppen, alles änderbar. Rechts steht je Seite der aktuelle Stand.</figcaption>
+</figure>
+
+<figure aria-label="Einstellungen aus Sicht eines Mitglieds">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Einstellungen</span><i class="on"><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<span class="m-sub">Angemeldet als <strong>Sam</strong> · Mitglied</span>
+<span class="m-group">Mein Konto</span>
+<div class="m-tile" style="padding-block:2px"><div class="m-row"><span>Profil</span><span class="m-sub">lena@example.org</span></div><div class="m-row"><span>Benachrichtigungen</span><span class="m-sub">Sa 10:00</span></div><div class="m-row" style="border:0"><span>Darstellung</span><span class="m-sub">Hell</span></div></div>
+<span class="m-group">Haushalt · nur lesen</span>
+<span class="m-hint">Gilt für alle im Haushalt.</span>
+<div class="m-tile" style="padding-block:2px"><div class="m-row"><span>Mitglieder</span><span class="m-sub">3 Personen</span><svg class="m-ico" aria-label="nur lesen"><use href="#i-lock"/></svg></div><div class="m-row"><span>Ernährung</span><span class="m-sub">Alles</span><svg class="m-ico"><use href="#i-lock"/></svg></div><div class="m-row"><span>Ziel &amp; Empfehlung</span><span class="m-sub">10 Tage</span><svg class="m-ico"><use href="#i-lock"/></svg></div><div class="m-row"><span>Vorrat-Stammdaten</span><span class="m-sub">10 Kategorien</span><svg class="m-ico"><use href="#i-lock"/></svg></div><div class="m-row"><span>Ampel &amp; Regeln</span><span class="m-sub">90 / 28</span><svg class="m-ico"><use href="#i-lock"/></svg></div><div class="m-row" style="border:0"><span>Foto-Erkennung</span><span class="m-sub">an</span><svg class="m-ico"><use href="#i-lock"/></svg></div></div>
+<span class="m-hint">Nutzerverwaltung sowie Daten &amp; System sehen nur Admins.</span>
+</div>
+<figcaption>Mitglied: Mein Konto voll, Haushalt nur lesen (Schloss), Nutzerverwaltung und Daten &amp; System ausgeblendet.</figcaption>
+</figure>
+</div>
+<div class="scroll-x"><table>
+<thead><tr><th>Gruppe</th><th>Seiten</th><th>Admin</th><th>Mitglied</th></tr></thead>
+<tbody>
+<tr><td>Mein Konto</td><td>Profil, Benachrichtigungen, Darstellung</td><td>ändern</td><td>ändern</td></tr>
+<tr><td>Haushalt</td><td>Mitglieder, Ernährung, Ziel &amp; Empfehlung, Vorrat-Stammdaten, Ampel &amp; Regeln, Foto-Erkennung</td><td>ändern</td><td>nur lesen</td></tr>
+<tr><td>Nutzerverwaltung</td><td>Nutzer, Nutzer einladen</td><td>ändern</td><td>ausgeblendet</td></tr>
+<tr><td>Daten &amp; System</td><td>Export, Import, Backup-Status, Verlauf, Version, Lizenzen</td><td>ändern</td><td>ausgeblendet</td></tr>
+</tbody></table></div>
+<p>Zwei Punkte sind in den Konzeptdateien nicht geklärt: Wo die Inventur-Erinnerung eingestellt wird (die Benachrichtigungsliste unter Mein Konto nennt sie nicht), und ob ein Mitglied in der Erfassung eine neue Kategorie anlegen darf, obwohl es die Stammdaten nur lesen kann.</p>
+</section>
+
+<section id="zustaende">
+<h2>Zustände</h2>
+<p>Dieser Abschnitt beantwortet: Wie sieht die App aus, wenn etwas fehlt oder nicht klappt? Alle Hinweise bleiben ruhig und zeigen immer einen Weg weiter. Gezeigt in der empfohlenen iPhone-Variante.</p>
+<div class="scroll-x">
+
+<figure aria-label="Zustand, Erkennung antwortet nicht">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Hinzufügen</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-seg"><span class="on">Foto</span><span>Manuell</span></div>
+<div class="m-steps"><span class="on">01 Verpackung</span><span>02 Nährwerte</span><span>03 MHD-Serie</span><span>04 Prüfen</span></div>
+<div class="m-cam" style="aspect-ratio:4/3.2">Foto aufgenommen</div>
+<div class="m-tile"><small>Erkennung</small><strong>Die Erkennung antwortet gerade nicht.</strong><br><span class="m-sub">Du kannst es gleich nochmal versuchen oder die Angaben selbst eintragen. Es wird nichts geraten.</span></div>
+<div class="m-grid"><span class="m-btn">Nochmal versuchen</span><span class="m-btn ink">Manuell weiter</span></div>
+</div>
+<figcaption>a · KI antwortet nicht oder meldet einen Fehler: Es geht manuell weiter, ohne Vorschlag.</figcaption>
+</figure>
+
+<figure aria-label="Zustand, Kamera nicht erlaubt">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Hinzufügen</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-seg"><span class="on">Foto</span><span>Manuell</span></div>
+<div class="m-tile" style="text-align:center;padding:22px 14px"><svg class="m-ico m-ico-lg m-acc" style="width:40px;height:40px"><use href="#i-cam"/></svg>
+<div class="m-mid" style="margin:8px 0 4px">Kein Zugriff auf die Kamera</div>
+<span class="m-sub">Du kannst ihn in den Einstellungen des iPhones für diese App erlauben. Bis dahin geht alles auch ohne Foto.</span></div>
+<span class="m-btn ink" style="width:100%"><svg class="m-ico"><use href="#i-pen"/></svg>Manuell eingeben</span>
+<span class="m-btn" style="width:100%">Erneut prüfen</span>
+<div class="m-dock"><span>Übersicht</span><span>Vorrat</span><span class="m-fab"><svg class="m-ico m-ico-lg"><use href="#i-cam"/></svg></span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>b · Kamera nicht erlaubt: kurzer Hinweis, der Weg zu „Manuell“ ist der Hauptknopf.</figcaption>
+</figure>
+
+<figure aria-label="Zustand, Foto-Erkennung im Haushalt aus">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Hinzufügen</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="note" style="font-size:12px;margin:0">Foto-Erkennung ist im Haushalt ausgeschaltet. Ein Admin kann sie unter Einstellungen → Foto-Erkennung einschalten.</div>
+<div class="m-col">
+<div class="m-field"><span class="m-sub">Bezeichnung</span><span>Reis</span></div>
+<div class="m-field"><span class="m-sub">Kategorie</span><span>Nudeln &amp; Reis</span></div>
+<div class="m-grid"><div class="m-field"><span class="m-sub">Behälter</span><span>Packung</span></div><div class="m-field"><span class="m-sub">Inhalt</span><span class="m-mono">1 kg</span></div></div>
+<div class="m-grid"><div class="m-field"><span class="m-sub">Anzahl</span><span class="m-mono">2</span></div><div class="m-field"><span class="m-sub">MHD</span><span class="m-mono">03/2028</span></div></div>
+</div>
+<span class="m-btn ink" style="width:100%">Weiter zur Prüfung</span>
+<div class="m-dock"><span>Übersicht</span><span>Vorrat</span><span class="m-fab"><svg class="m-ico m-ico-lg"><use href="#i-pen"/></svg></span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>c · KI im Haushalt aus: Erfassen startet direkt im Formular.</figcaption>
+</figure>
+
+<figure aria-label="Zustand, keine Verbindung, nur letzter Stand">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Vorschlag · Beispiel</small><br>Dein Vorrat</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-tile" style="border-color:var(--line)"><strong>Keine Verbindung zum NAS</strong><br><span class="m-sub">Du siehst den Stand von Mi., 07.10., 07:42. Ist Tailscale verbunden? Erfassen und Entnehmen gehen wieder, sobald die Verbindung steht.</span></div>
+<div class="m-grid">
+<div class="m-tile m-tile-wide"><small>Heute versorgt · letzter Stand</small><div class="m-gauge-box"><div class="m-gauge" style="--v:90"></div><b>9 T</b></div></div>
+<div class="m-tile"><small>Ziel 31.12.</small><b>7/10</b></div>
+<div class="m-tile"><small>Wasser</small><b>27 l</b></div>
+</div>
+<span class="m-btn" style="width:100%;opacity:.55">Foto aufnehmen · gerade nicht möglich</span>
+<div class="m-dock"><span class="on">Übersicht</span><span>Vorrat</span><span style="opacity:.45">Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>d1 · Offline, nur lesen <span class="badge badge-vorschlag">Vorschlag</span>: letzter Stand sichtbar, Erfassen gesperrt.</figcaption>
+</figure>
+
+<figure aria-label="Zustand, keine Verbindung, eintragen und später abgleichen">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Vorschlag · Beispiel</small><br>Vorrat</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-tile" style="border-color:var(--line)"><strong>Keine Verbindung zum NAS</strong><br><span class="m-sub">Änderungen bleiben auf diesem Gerät und werden abgeglichen, sobald Tailscale wieder verbunden ist.</span><div class="m-split" style="margin-top:6px"><span class="m-chip review">2 Änderungen warten</span><span class="m-sub">Foto-Erkennung erst danach</span></div></div>
+<div class="m-tile" style="padding-block:2px">
+<div class="m-row"><span>Nudeln · 5 × 500 g</span><span class="m-chip">−1 wartet</span></div>
+<div class="m-row"><span>Thunfisch in Öl · 3</span><span class="m-chip"><i class="dot-urgent"></i>dringend</span></div>
+<div class="m-row" style="border:0"><span>Reis · 2 × 1 kg</span><span class="m-chip">neu · wartet</span></div>
+</div>
+<span class="m-btn" style="width:100%"><svg class="m-ico"><use href="#i-pen"/></svg>Manuell eintragen</span>
+<div class="m-dock"><span>Übersicht</span><span class="on">Vorrat</span><span class="m-fab"><svg class="m-ico m-ico-lg"><use href="#i-pen"/></svg></span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>d2 · Offline, eintragen und später abgleichen <span class="badge badge-vorschlag">Vorschlag</span>: wartende Änderungen sind markiert, Fotos werden erst mit Verbindung erkannt.</figcaption>
+</figure>
+
+<figure aria-label="Zustand, erster Start mit leerem Vorrat">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Dein Vorrat</span><i><svg class="m-ico"><use href="#i-gear"/></svg></i></div>
+<div class="m-tile" style="text-align:center;padding:20px 14px">
+<div class="m-gauge-box"><div class="m-gauge m-gauge-lg" style="--v:0"></div><b class="m-gauge-val">0<small>Tage · Ziel 10</small></b></div>
+<div class="m-mid" style="margin:10px 0 4px">Noch nichts im Vorrat</div>
+<span class="m-sub">Fang mit einem Produkt an, das schon im Schrank steht. Per Foto oder von Hand, beides dauert nur kurz.</span>
+</div>
+<span class="m-btn ink" style="width:100%"><svg class="m-ico"><use href="#i-cam"/></svg>Foto aufnehmen</span>
+<span class="m-btn" style="width:100%"><svg class="m-ico"><use href="#i-pen"/></svg>Manuell eingeben</span>
+<div class="m-tile m-split"><span><small class="m-label">Ziel</small>10 Tage bis 31.12.</span><span class="m-sub">Bearbeiten →</span></div>
+<div class="m-dock"><span class="on">Übersicht</span><span>Vorrat</span><span class="m-fab"><svg class="m-ico m-ico-lg"><use href="#i-cam"/></svg></span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>e · Erster Start: ein freundlicher Einstieg statt leerer Kacheln. Die Ersteinrichtung davor ist noch nicht gestaltet.</figcaption>
+</figure>
+</div>
+<p>Ob die App offline nur den letzten Stand zeigt (d1) oder auch Eintragen mit späterem Abgleich erlaubt (d2), ist eine offene Frage. Beide Bilder sind deshalb Vorschläge. Die Foto-Erkennung braucht in beiden Fällen die Verbindung zum NAS.</p>
+</section>
+
+<section id="vergleich">
+<h2>Vergleich und Empfehlung</h2>
+<p>Dieser Abschnitt beantwortet: Welche Variante je Gerät? Die Bewertung ist eine Einschätzung, keine Messung.</p>
+<div class="scroll-x"><table>
+<thead><tr><th>Variante</th><th>Einhand</th><th>Überblick</th><th>Erfassungstempo</th><th>Aufwand</th><th>Nähe zum Prototyp</th></tr></thead>
+<tbody>
+<tr><td>A Bento-Dock</td><td class="rate">mittel</td><td class="rate">hoch</td><td class="rate">mittel</td><td class="rate">gering</td><td class="rate">sehr hoch</td></tr>
+<tr><td>B Fokus</td><td class="rate">hoch</td><td class="rate">mittel</td><td class="rate">hoch</td><td class="rate">gering bis mittel</td><td class="rate">hoch</td></tr>
+<tr><td>C Heute zuerst</td><td class="rate">eher zweihändig</td><td class="rate">mittel</td><td class="rate">mittel</td><td class="rate">mittel</td><td class="rate">mittel</td></tr>
+<tr><td><strong>Empfehlung iPhone: A + B</strong></td><td class="rate">hoch</td><td class="rate">hoch</td><td class="rate">hoch</td><td class="rate">gering bis mittel</td><td class="rate">sehr hoch</td></tr>
+<tr><td>Duo außen Kompakt</td><td class="rate">hoch</td><td class="rate">mittel</td><td class="rate">mittel</td><td class="rate">gering</td><td class="rate">sehr hoch</td></tr>
+<tr><td>Duo außen Schnellzugriff</td><td class="rate">hoch</td><td class="rate">gering</td><td class="rate">hoch</td><td class="rate">mittel</td><td class="rate">mittel</td></tr>
+<tr><td>D Zwei Seiten (quer)</td><td class="rate">–</td><td class="rate">mittel</td><td class="rate">hoch</td><td class="rate">mittel</td><td class="rate">mittel</td></tr>
+<tr><td>E Breites Cockpit (quer)</td><td class="rate">–</td><td class="rate">sehr hoch</td><td class="rate">mittel</td><td class="rate">gering bis mittel</td><td class="rate">hoch</td></tr>
+<tr><td>J Oben und unten (hochkant)</td><td class="rate">mittel</td><td class="rate">hoch</td><td class="rate">hoch</td><td class="rate">mittel</td><td class="rate">mittel</td></tr>
+<tr><td>F Arbeitsfläche (quer)</td><td class="rate">–</td><td class="rate">mittel</td><td class="rate">hoch</td><td class="rate">hoch</td><td class="rate">gering</td></tr>
+<tr><td><strong>Empfehlung Duo: Kompakt · E + D quer · J hochkant</strong></td><td class="rate">hoch (zu)</td><td class="rate">hoch</td><td class="rate">hoch</td><td class="rate">mittel</td><td class="rate">hoch</td></tr>
+<tr><td>G Säule mit Dock</td><td class="rate">–</td><td class="rate">mittel</td><td class="rate">mittel</td><td class="rate">gering</td><td class="rate">sehr hoch</td></tr>
+<tr><td>H Seitenleiste</td><td class="rate">–</td><td class="rate">hoch</td><td class="rate">mittel</td><td class="rate">mittel</td><td class="rate">mittel</td></tr>
+<tr><td>I Arbeitsplatz</td><td class="rate">–</td><td class="rate">hoch</td><td class="rate">hoch</td><td class="rate">hoch</td><td class="rate">gering</td></tr>
+<tr><td><strong>Empfehlung PC: H + I</strong></td><td class="rate">–</td><td class="rate">hoch</td><td class="rate">hoch</td><td class="rate">mittel bis hoch</td><td class="rate">mittel</td></tr>
+</tbody></table></div>
+<p>„Einhand“ spielt am PC und beim aufgeklappten Duo quer kaum eine Rolle (Strich), dort hält man das Gerät mit zwei Händen oder es steht.</p>
+
+<h3>Empfehlung <span class="badge badge-vorschlag">Vorschlag</span></h3>
+<div class="cards">
+<div class="card"><h3>iPhone</h3><p><strong>A</strong> als Grundlage, dazu aus B den betonten Kamera-Knopf in der Mitte des Docks und die bildschirmfüllende Kamera beim Erfassen. C als wählbare Startansicht „Heute“ prüfen.</p><p><strong>Ausschlag gibt:</strong> Einhand-Bedienung beim häufigsten Tun (Erfassen), ohne die Nähe zum Prototyp aufzugeben.</p></div>
+<div class="card"><h3>iPhone Duo</h3><p>Zugeklappt <strong>„Kompakt“</strong>. Aufgeklappt quer (Stufe breit) die Übersicht als <strong>E</strong>, die übrigen Screens als <strong>D „Zwei Seiten“</strong>. Hochkant (Stufe mittel) <strong>J „Oben und unten“</strong>. F erst später.</p><p><strong>Ausschlag gibt:</strong> In keiner Haltung liegt etwas Antippbares oder eine Kachel auf der Falz.</p></div>
+<div class="card"><h3>PC-Browser</h3><p><strong>H „Seitenleiste“</strong> als Rahmen, die rechte Spalte „Bald fällig“ erst ab Stufe weit (1280 px). Dazu aus I die Vorrat-Tabelle und die zweispaltigen Einstellungen. Erfassen per Foto am PC ist später.</p><p><strong>Ausschlag gibt:</strong> Überblick und Tempo beim Pflegen vieler Einheiten.</p></div>
+</div>
+<p>Alle Empfehlungen nutzen dieselben Bausteine und dieselben Tabs. Sie unterscheiden sich nur in der Anordnung je Stufe (kompakt, mittel, breit, weit).</p>
+</section>
+
+<section id="offen">
+<h2>Offene Punkte / zur Freigabe</h2>
+<ul class="checklist">
+<li>iPhone: Variante wählen (A, B, C oder Mischung). Empfohlen: A mit Kamera-Knopf und Vollbild-Kamera aus B.</li>
+<li>Variante C als wählbare Startansicht „Heute“ unter Darstellung → Startansicht: ja oder nein?</li>
+<li>Umbruchpunkte bestätigen: kompakt unter 640 px · mittel 640–899 px · breit 900–1279 px · weit ab 1280 px (statt bisher 768 px).</li>
+<li>Mindesthöhe für „mittel“ (Vorschlag <code>min-height: 700px</code>) bestätigen. Risiko: Die 640er-Grenze liegt nur 46 px über dem Außenbildschirm quer (594 px); als Home-Bildschirm-App ist er eventuell breiter (nicht geprüft).</li>
+<li>Falz-Lage im Simulator bestätigen. Abgeleitet: Die Falz halbiert die lange Seite, innen hochkant waagrecht, innen quer senkrecht; aus zugeklappt-hochkant klappt man nach quer auf.</li>
+<li>Viewport der Home-Bildschirm-App auf dem Duo und Verhalten beim Auf- und Zuklappen im Simulator prüfen.</li>
+<li>Duo zugeklappt: Idee „Kompakt“ (Empfehlung) oder „Schnellzugriff“?</li>
+<li>Kamera beim Erfassen im Vollbild ohne Dock (iPhone und Duo).</li>
+<li>Bei sehr niedriger Höhe (Duo außen quer, 368 px) kleinere Kopfzeile.</li>
+<li>Duo aufgeklappt: quer E für die Übersicht und D für die übrigen Screens, hochkant J „Oben und unten“ (Empfehlung); F „Arbeitsfläche“ später.</li>
+<li>Duo aufgeklappt: quer das Dock nur unter der linken Hälfte, hochkant Reihen an der Falz umbrechen. Nichts Antippbares auf der Falz.</li>
+<li>Regeln beim Auf- und Zuklappen bestätigen: Seite, Auswahl, Filter und laufende Erfassung bleiben, Kamera startet neu, ruhige Überblendung.</li>
+<li>PC: H „Seitenleiste“ mit Vorrat-Tabelle und zweispaltigen Einstellungen aus I (Empfehlung).</li>
+<li>PC: feste rechte Spalte „Bald fällig“ in der Übersicht, erst ab Stufe weit (1280 px).</li>
+<li>PC: Vorrat-Tabelle sortiert nach nächstem MHD, Spalten Produkt · Kategorie · Behälter · Lagerort · Einheiten · nächstes MHD · Zustand.</li>
+<li>PC Erfassen (später, in den Konzeptdateien nicht beschrieben): Drag-and-drop bzw. Datei-Auswahl mit drei Ablagefeldern (Verpackung, Nährwerte optional, MHD-Fotos).</li>
+<li>PC Erfassen: Übergabe vom Handy per QR-Code. Hängt am Vorschlag „Entwurf auf dem NAS“ der Technik-Seite.</li>
+<li>PC Erfassen: keine Webcam.</li>
+<li><a href="#zustaende">Zustände</a> bestätigen: KI-Fehler und Kamera ohne Erlaubnis führen zu „Manuell“, KI aus startet im Formular, ruhiger Einstieg beim ersten Start.</li>
+<li>Offline: nur anzeigen oder auch eintragen (mit späterem Abgleich)? Bilder d1 und d2, siehe <a href="#zustaende">Zustände</a>.</li>
+<li>Schrift der App: Inter mit Geist Mono (wie Prototyp) oder Space Grotesk mit Inter (wie diese Seiten)?</li>
+<li>Piktogramme: Emoji wie im Prototyp, Fluent Emoji plus eigene Motive (Empfehlung der Recherche) oder nur Symbole?</li>
+<li>Vorrat-Filter: drei sichtbare Reihen (A) oder eine Reihe plus „Filter“ (B)?</li>
+<li>Einheiten als Blatt von unten mit Verbraucht · Entsorgt · Noch gut (Empfehlung) bestätigen.</li>
+<li>Gelber MHD-Chip ohne Datum (statt Vorschlag aus dem vorigen Foto wie im Prototyp) bestätigen.</li>
+<li>Abkürzung „Ohne Datum“: Schätzung nur auf Wunsch, sichtbar als „geschätzt“. Speichern über das Feld <code>mhd_geschaetzt</code> (Vorschlag der Technik-Seite)?</li>
+<li>Ampel: eigene Stufe oder eigener Hinweis für Verbrauchsdatum (Vorschlag der Recherche), getrennt vom MHD?</li>
+<li>Ort der Einstellung für die Inventur-Erinnerung festlegen.</li>
+<li>Darf ein Mitglied beim Erfassen eine neue Kategorie anlegen?</li>
+<li>Nicht Teil dieser Seite, aber noch ohne Gestaltung: Login, Einladung und Ersteinrichtung.</li>
+</ul>
+</section>
+</div>

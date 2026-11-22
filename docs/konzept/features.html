@@ -1,0 +1,1637 @@
+<title>Preposaurus Funktionen</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+:root{
+--bg:#f4f3fa;--fg:#0f172a;--muted:#475569;--subtle:#5b6678;
+--line:rgb(15 23 42 / 0.12);--surface:rgb(255 255 255 / 0.58);--surface-strong:rgb(255 255 255 / 0.85);--surface-border:rgb(255 255 255 / 0.85);
+--shadow:rgb(70 60 140 / 0.3);--track:rgb(15 23 42 / 0.07);
+--accent:#5b5bd6;--accent-2:#a78bfa;--accent-text:#4338ca;--accent-soft:rgb(99 102 241 / 0.12);
+--ink:#0f172a;--on-ink:#ffffff;
+--ok:#10b981;--ok-text:#047857;--warn:#f59e0b;--warn-text:#854d0e;--urgent:#f97316;--urgent-text:#c2410c;--bad:#f43f5e;--bad-text:#be123c;
+--review:rgb(253 224 71 / 0.55);--water:rgb(56 189 248 / 0.38);
+--protein:#e11d74;--carbs:#5b5bd6;--fat:#d97706;
+--blob-1:#ffd6e0;--blob-2:#d7d4ff;--blob-3:#c9f2e3;--blob-4:#cfe8ff;
+--frame:#1e293b;--on-frame:#f8fafc;
+color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+--bg:#05080c;--fg:#e8eef4;--muted:#a7b4c1;--subtle:#82909d;
+--line:rgb(255 255 255 / 0.12);--surface:rgb(15 21 28 / 0.64);--surface-strong:rgb(26 34 43 / 0.8);--surface-border:rgb(255 255 255 / 0.08);
+--shadow:rgb(0 0 0 / 0.7);--track:rgb(255 255 255 / 0.07);
+--accent:#3ee6ff;--accent-2:#22b8d4;--accent-text:#6eeaff;--accent-soft:rgb(62 230 255 / 0.12);
+--ink:#3ee6ff;--on-ink:#03141a;
+--ok:#4ade80;--ok-text:#86efac;--warn:#facc15;--warn-text:#fde047;--urgent:#fb923c;--urgent-text:#fdba74;--bad:#f87171;--bad-text:#fca5a5;
+--review:rgb(253 224 71 / 0.12);--water:rgb(34 211 238 / 0.22);
+--protein:#f472b6;--carbs:#3ee6ff;--fat:#fbbf24;
+--blob-1:#0b3a48;--blob-2:#17195a;--blob-3:#05343a;--blob-4:#0d2449;
+--frame:#3b4756;--on-frame:#e8eef4;
+color-scheme:dark}}
+:root[data-theme="dark"]{
+--bg:#05080c;--fg:#e8eef4;--muted:#a7b4c1;--subtle:#82909d;
+--line:rgb(255 255 255 / 0.12);--surface:rgb(15 21 28 / 0.64);--surface-strong:rgb(26 34 43 / 0.8);--surface-border:rgb(255 255 255 / 0.08);
+--shadow:rgb(0 0 0 / 0.7);--track:rgb(255 255 255 / 0.07);
+--accent:#3ee6ff;--accent-2:#22b8d4;--accent-text:#6eeaff;--accent-soft:rgb(62 230 255 / 0.12);
+--ink:#3ee6ff;--on-ink:#03141a;
+--ok:#4ade80;--ok-text:#86efac;--warn:#facc15;--warn-text:#fde047;--urgent:#fb923c;--urgent-text:#fdba74;--bad:#f87171;--bad-text:#fca5a5;
+--review:rgb(253 224 71 / 0.12);--water:rgb(34 211 238 / 0.22);
+--protein:#f472b6;--carbs:#3ee6ff;--fat:#fbbf24;
+--blob-1:#0b3a48;--blob-2:#17195a;--blob-3:#05343a;--blob-4:#0d2449;
+--frame:#3b4756;--on-frame:#e8eef4;
+color-scheme:dark}
+
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%;overflow-wrap:break-word}
+h1,h2,h3{font-family:"Space Grotesk",Inter,system-ui,sans-serif;line-height:1.25;margin:1.6em 0 .5em}
+h1{font-size:1.9rem;margin-top:.4em}h2{font-size:1.4rem}h3{font-size:1.1rem}
+p,ul,ol{margin:0 0 1em}
+a{color:var(--accent-text)}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em}
+pre{white-space:pre-wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 1em}
+.num,td,.m-gauge b{font-variant-numeric:tabular-nums}
+.wrap{max-width:46rem;margin:0 auto;padding-block:24px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:radial-gradient(circle at 0 0,var(--blob-2),transparent 22rem),radial-gradient(circle at 100% 12rem,var(--blob-1),transparent 18rem)}
+.wrap>p,.wrap>ul,section>p,section>ul{max-width:65ch}
+section{scroll-margin-top:16px}
+.lead{color:var(--muted);font-size:1.05rem}
+
+.card{background:var(--surface);border:1px solid var(--surface-border);border-radius:24px;padding:16px 18px;margin:0 0 16px;box-shadow:0 14px 40px -18px var(--shadow);-webkit-backdrop-filter:blur(20px) saturate(1.5);backdrop-filter:blur(20px) saturate(1.5)}
+.card>:last-child{margin-bottom:0}
+.card h3{margin-top:0}
+.cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));margin-bottom:16px}
+.cards .card{margin:0}
+.toc{background:var(--surface);border:1px solid var(--surface-border);border-radius:24px;padding:12px 18px;margin:0 0 24px}
+.toc ul{list-style:none;padding:0;margin:0;columns:2 11rem;column-gap:16px}
+.toc a{display:block;padding:4px 0;text-decoration:none}
+
+.badge{display:inline-flex;align-items:center;gap:6px;padding:1px 9px;border-radius:999px;border:1px solid var(--line);background:var(--surface-strong);font-size:.78rem;font-weight:600;line-height:1.6;white-space:nowrap;vertical-align:.1em}
+.badge-vorschlag{background:var(--review);border-color:transparent}
+.badge-mvp{background:var(--accent-soft);color:var(--accent-text);border-color:transparent}
+.badge-spaeter{color:var(--muted)}
+.dot-ok,.dot-warn,.dot-urgent,.dot-bad{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none;background:var(--ok)}
+.dot-warn{background:var(--warn)}.dot-urgent{background:var(--urgent)}.dot-bad{background:var(--bad)}
+.note{border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:4px 16px 16px 4px;padding:12px 16px;margin:0 0 1em;max-width:65ch}
+.note>:last-child{margin-bottom:0}
+
+.scroll-x{display:flex;gap:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;padding-bottom:8px;margin:0 0 1em;max-width:100%}
+.scroll-x>*{flex:none;scroll-snap-align:start}
+.scroll-x>table,.scroll-x>pre{flex:1 0 auto;min-width:100%;margin:0}
+.scroll-x>figure{width:min-content;margin:0}
+table{border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--muted);white-space:nowrap}
+figure{margin:0 0 1.2em}
+figcaption{color:var(--muted);font-size:.85rem;margin-top:8px}
+.checklist{list-style:none;padding:0}
+.checklist li{position:relative;padding-left:30px;margin-bottom:8px}
+.checklist li::before{content:"";position:absolute;left:0;top:.2em;width:18px;height:18px;border:2px solid var(--subtle);border-radius:5px}
+pre.mermaid{background:transparent;border-color:var(--line);white-space:pre;font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px}
+
+.dev{position:relative;display:flex;flex-direction:column;gap:6px;overflow:hidden;flex:none;border:6px solid var(--frame);background:var(--bg) radial-gradient(circle at 10% 0,var(--blob-2),transparent 60%) no-repeat;color:var(--fg);font-size:9px;line-height:1.35;padding:8px}
+.dev-iphone{width:200px;height:412px;border-radius:34px;padding-top:28px}
+.dev-iphone::before{content:"";position:absolute;top:6px;left:50%;width:58px;height:16px;margin-left:-29px;border-radius:999px;background:var(--frame)}
+.dev-duo-aussen{width:170px;height:300px;border-radius:26px;padding-top:20px}
+.dev-duo-innen{width:380px;height:360px;border-radius:22px}
+.dev-pc{width:560px;height:340px;border:1px solid var(--line);border-radius:10px;padding-top:30px;box-shadow:0 14px 40px -18px var(--shadow)}
+.dev-pc::before{content:"";position:absolute;inset:0 0 auto;height:22px;border-bottom:1px solid var(--line);background:radial-gradient(circle at 12px 11px,var(--bad) 3.5px,transparent 4px),radial-gradient(circle at 24px 11px,var(--warn) 3.5px,transparent 4px),radial-gradient(circle at 36px 11px,var(--ok) 3.5px,transparent 4px),var(--surface-strong)}
+.dev:has(>.m-rail){padding-left:58px}
+.m-fold{position:absolute;top:0;bottom:0;left:50%;border-left:1px dashed var(--subtle);pointer-events:none}
+.m-head{display:flex;align-items:center;justify-content:space-between;gap:6px;font:600 12px/1.2 "Space Grotesk",Inter,sans-serif}
+.m-head small{font:500 8px ui-monospace,monospace;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.m-head i{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--muted);flex:none}
+.m-grid{display:grid;grid-template-columns:repeat(var(--cols,2),minmax(0,1fr));gap:6px}
+.m-tile{background:var(--surface);border:1px solid var(--surface-border);border-radius:14px;padding:7px;box-shadow:0 8px 20px -14px var(--shadow);min-width:0}
+.m-tile-wide{grid-column:1/-1}
+.m-tile>small,.m-label{display:block;font:500 7px ui-monospace,monospace;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.m-tile b{font:600 15px/1.1 "Space Grotesk",Inter,sans-serif;font-variant-numeric:tabular-nums}
+.m-gauge{--v:50;position:relative;display:grid;place-items:center;width:64px;aspect-ratio:1;margin:auto;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--v)*1%),var(--track) 0);-webkit-mask:radial-gradient(farthest-side,transparent 72%,var(--fg) 73%);mask:radial-gradient(farthest-side,transparent 72%,var(--fg) 73%)}
+.m-gauge-box{position:relative;display:grid;place-items:center}
+.m-gauge-box b{position:absolute}
+.m-bar{--v:50;--c:var(--accent);height:5px;border-radius:999px;background:var(--track);margin:3px 0;overflow:hidden}
+.m-bar::after{content:"";display:block;height:100%;width:calc(var(--v)*1%);background:var(--c);border-radius:inherit}
+.m-chip{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);background:var(--surface-strong);font-size:8px;white-space:nowrap}
+.m-chip.on{background:var(--accent-soft);color:var(--accent-text);border-color:transparent}
+.m-chip.review{background:var(--review);border-color:transparent}
+.m-chip [class^="dot-"]{width:6px;height:6px}
+.m-row{display:flex;align-items:center;gap:6px;padding:5px 2px;border-bottom:1px solid var(--line);min-width:0}
+.m-row>span:first-of-type{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.m-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:5px 10px;border-radius:999px;border:1px solid var(--surface-border);background:var(--surface-strong);font-weight:600;font-size:9px}
+.m-btn.ink{background:var(--ink);color:var(--on-ink);border-color:transparent}
+.m-dock{position:absolute;left:8px;right:8px;bottom:8px;display:flex;justify-content:space-between;padding:3px;border-radius:16px;background:var(--surface-strong);border:1px solid var(--surface-border);box-shadow:0 10px 24px -12px var(--shadow);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.m-dock>span{flex:1;text-align:center;padding:5px 0 4px;border-radius:12px;font-size:7px;color:var(--muted)}
+.m-dock>span::before{content:"";display:block;width:10px;height:10px;margin:0 auto 2px;border:1.5px solid currentColor;border-radius:3px}
+.m-dock>.on{background:var(--accent-soft);color:var(--accent-text)}
+.m-rail{position:absolute;top:0;bottom:0;left:0;width:50px;display:flex;flex-direction:column;gap:4px;padding:30px 4px 8px;background:var(--surface-strong);border-right:1px solid var(--line)}
+.dev-duo-innen>.m-rail{padding-top:10px}
+.m-rail>span{padding:5px 2px;border-radius:9px;text-align:center;font-size:7px;color:var(--muted)}
+.m-rail>.on{background:var(--accent-soft);color:var(--accent-text)}
+.m-table{width:100%;border-collapse:collapse;font-size:8px}
+.m-table th,.m-table td{padding:3px 4px;border-bottom:1px solid var(--line);white-space:nowrap;font-size:8px}
+.m-cam{position:relative;display:grid;place-items:end center;aspect-ratio:3/4;border-radius:14px;padding:8px;color:var(--on-frame);background:linear-gradient(var(--accent),var(--accent)) 12% 12%/14px 2px,linear-gradient(var(--accent),var(--accent)) 12% 12%/2px 14px,linear-gradient(var(--accent),var(--accent)) 88% 12%/14px 2px,linear-gradient(var(--accent),var(--accent)) 88% 12%/2px 14px,linear-gradient(var(--accent),var(--accent)) 12% 88%/14px 2px,linear-gradient(var(--accent),var(--accent)) 12% 88%/2px 14px,linear-gradient(var(--accent),var(--accent)) 88% 88%/14px 2px,linear-gradient(var(--accent),var(--accent)) 88% 88%/2px 14px,var(--frame);background-repeat:no-repeat}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<h1>Preposaurus Funktionen</h1>
+<p class="lead">Dieser Katalog listet jede geplante Funktion: was sie tut, wer sie nutzen darf und woran man erkennt, dass sie fertig ist. Er beschreibt nur, es gibt noch keinen App-Code.</p>
+
+<nav class="toc" aria-label="Inhalt"><ul>
+<li><a href="#lesehilfe">So liest man den Katalog</a></li>
+<li><a href="#rollen">Rollen</a></li>
+<li><a href="#ers">Einrichtung &amp; Anmeldung</a></li>
+<li><a href="#hh">Haushalt</a></li>
+<li><a href="#ziel">Ziel &amp; Empfehlung</a></li>
+<li><a href="#ueb">Übersicht</a></li>
+<li><a href="#erf">Erfassen</a></li>
+<li><a href="#vor">Vorrat</a></li>
+<li><a href="#rot">Rotation</a></li>
+<li><a href="#nk">Nachkaufen</a></li>
+<li><a href="#eri">Erinnerungen</a></li>
+<li><a href="#sta">Statistik</a></li>
+<li><a href="#ein">Einstellungen</a></li>
+<li><a href="#sys">Daten &amp; System</a></li>
+<li><a href="#pwa">Installation &amp; Offline</a></li>
+<li><a href="#nicht">Bewusst nicht dabei</a></li>
+<li><a href="#spaeter">Später</a></li>
+<li><a href="#offen">Offene Punkte / zur Freigabe</a></li>
+</ul></nav>
+
+<section id="lesehilfe">
+<h2>So liest man den Katalog</h2>
+<p>Jeder Bereich beginnt mit einem Satz zum Zweck. Danach folgt eine Karte pro Funktion.</p>
+<div class="note"><p><strong>Wichtig:</strong> Der MVP-Zuschnitt ist noch nicht abgenommen. MVP heißt „erste nutzbare Version“. Jede Zuordnung zu MVP oder später ist deshalb ein <strong>Vorschlag</strong>. Nur wo „laut Konzept später“ steht, nennen die Konzeptdateien die Funktion ausdrücklich als spätere Erweiterung.</p></div>
+
+<h3>Etiketten</h3>
+<ul>
+<li><span class="badge badge-mvp">MVP</span> Vorschlag für die erste Version.</li>
+<li><span class="badge badge-spaeter">später</span> Vorschlag für eine spätere Version.</li>
+<li><span class="badge badge-vorschlag">Vorschlag</span> Die Funktion oder ein Teil davon steht so nicht in den Konzeptdateien. Sie braucht deine Freigabe und steht in der Checkliste am Ende.</li>
+<li><span class="badge">offen</span> Hängt an einer offenen Frage. Beide Wege sind beschrieben.</li>
+<li><span class="badge badge-spaeter">Kandidat für später</span> Steht als MVP im Katalog, könnte aber für ein schlankeres MVP nach hinten rücken. Die Begründung steht auf der Karte. Du entscheidest in der Checkliste am Ende.</li>
+</ul>
+
+<h3>Rollen auf den Karten</h3>
+<ul>
+<li><strong>beide</strong>: Admin und Mitglied.</li>
+<li><strong>Admin</strong>: nur Admin. Für Mitglieder ausgeblendet.</li>
+<li><strong>Admin · Mitglied liest</strong>: Admin ändert, Mitglied sieht die Werte nur an.</li>
+</ul>
+
+<h3>Kennungen</h3>
+<p>Jede Funktion hat eine Kennung nach dem Muster <code>BEREICH-NN</code>, zum Beispiel <code>ERF-05</code>. Die Seiten zu Technik und Design verweisen nur auf das Bereichskürzel, etwa „Bereich ERF“.</p>
+
+<h3>Akzeptanzkriterien</h3>
+<p>Das sind prüfbare Sätze in der Form „Wenn …, dann …“. Ist jeder Satz erfüllt, gilt die Funktion als fertig. Die Fundstelle nennt die Konzeptdatei, zum Beispiel „01, Erfassungs-Maske“. „Prototyp d6“ meint den gewählten UI-Prototyp.</p>
+
+<h3>Begriffe</h3>
+<div class="scroll-x"><table>
+<thead><tr><th>Begriff</th><th>Bedeutung</th></tr></thead>
+<tbody>
+<tr><td>Produkt</td><td>Stammdaten: Bezeichnung, Kategorie, Behälter, Inhalt, Nährwerte, Fotos</td></tr>
+<tr><td>Einheit</td><td>eine Packung mit eigenem MHD und Status</td></tr>
+<tr><td>MHD</td><td>Mindesthaltbarkeitsdatum. Davon getrennt: das Verbrauchsdatum („zu verbrauchen bis“)</td></tr>
+<tr><td>Warengruppe</td><td>Rechenebene aus der Quelle (BBK/BLE). Sie zählt für „Tage versorgt“</td></tr>
+<tr><td>Kategorie</td><td>Anzeige-Ebene, vom System oder selbst angelegt. Gehört immer zu einer Warengruppe</td></tr>
+<tr><td>Merkmale</td><td>Behälter (Dose, Glas …), Lagerort, Schlagwörter</td></tr>
+<tr><td>Status der Einheit</td><td><code>vorrat</code> · <code>verbraucht</code> · <code>entsorgt</code></td></tr>
+<tr><td>Zustand</td><td>gut · bald fällig · dringend · abgelaufen. Wird aus dem MHD berechnet, nie gespeichert</td></tr>
+<tr><td>dringend</td><td>orange Stufe innerhalb von „bald fällig“: MHD in höchstens 4 Wochen (28 Tagen), als Standard</td></tr>
+<tr><td>BBK/BLE</td><td>Bundesamt für Bevölkerungsschutz und Katastrophenhilfe / Bundesanstalt für Landwirtschaft und Ernährung. Sie geben die offiziellen Empfehlungen heraus</td></tr>
+<tr><td>NAS</td><td>Netzwerkspeicher zu Hause. Darauf läuft die ganze App mit Datenbank und Fotos</td></tr>
+<tr><td>HTTPS</td><td>verschlüsselte Verbindung. Kamera, Push und Home-Bildschirm-App brauchen sie</td></tr>
+<tr><td>Sitzung</td><td>eine Anmeldung auf einem Gerät. Wer auf Handy und PC angemeldet ist, hat zwei Sitzungen</td></tr>
+<tr><td>Piktogramm</td><td>kleines Bildzeichen, etwa für eine Kategorie oder einen Typ im Haushalt</td></tr>
+<tr><td>Engpass</td><td>der kleinere Wert aus Energie-Tagen und Wasser-Tagen</td></tr>
+<tr><td>Kennzahlen</td><td>„Heute versorgt: X Tage“ und „Ziel &lt;Datum&gt;: X von Y Tagen“</td></tr>
+<tr><td>Nachkaufen</td><td>die schlanke Liste mit dem, was dem Vorrat fehlt</td></tr>
+<tr><td>Nutzer</td><td>Login-Konto mit Rolle Admin oder Mitglied</td></tr>
+<tr><td>Haushaltsmitglied</td><td>Person im Haushalt, für die gerechnet wird. Braucht keinen Login</td></tr>
+<tr><td>FIFO</td><td>„first in, first out“: Was zuerst abläuft, wird zuerst verbraucht</td></tr>
+<tr><td>PWA</td><td>Web-App, die man wie eine App auf den Home-Bildschirm legen kann</td></tr>
+<tr><td>Push</td><td>Benachrichtigung auf dem Gerät, auch wenn die App zu ist</td></tr>
+<tr><td>Passkey</td><td>Anmeldung per Face ID oder Fingerabdruck statt Passwort</td></tr>
+<tr><td>Tailscale</td><td>privates Netz zwischen deinen Geräten und dem NAS. Nur darüber ist die App erreichbar</td></tr>
+</tbody></table></div>
+
+<h3>Umfang je Bereich</h3>
+<div class="scroll-x"><table>
+<thead><tr><th>Bereich</th><th>Kürzel</th><th>Funktionen</th><th>MVP</th><th>später</th><th>offen</th></tr></thead>
+<tbody>
+<tr><td>Einrichtung &amp; Anmeldung</td><td>ERS</td><td class="num">6</td><td class="num">5</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td>Haushalt</td><td>HH</td><td class="num">7</td><td class="num">6</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td>Ziel &amp; Empfehlung</td><td>ZIEL</td><td class="num">7</td><td class="num">6</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td>Übersicht</td><td>UEB</td><td class="num">10</td><td class="num">10</td><td class="num">0</td><td class="num">0</td></tr>
+<tr><td>Erfassen</td><td>ERF</td><td class="num">18</td><td class="num">16</td><td class="num">2</td><td class="num">0</td></tr>
+<tr><td>Vorrat</td><td>VOR</td><td class="num">8</td><td class="num">7</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td>Rotation</td><td>ROT</td><td class="num">9</td><td class="num">8</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td>Nachkaufen</td><td>NK</td><td class="num">7</td><td class="num">6</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td>Erinnerungen</td><td>ERI</td><td class="num">8</td><td class="num">7</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td>Statistik</td><td>STA</td><td class="num">4</td><td class="num">3</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td>Einstellungen</td><td>EIN</td><td class="num">11</td><td class="num">10</td><td class="num">1</td><td class="num">0</td></tr>
+<tr><td>Daten &amp; System</td><td>SYS</td><td class="num">6</td><td class="num">4</td><td class="num">2</td><td class="num">0</td></tr>
+<tr><td>Installation &amp; Offline</td><td>PWA</td><td class="num">5</td><td class="num">4</td><td class="num">0</td><td class="num">1</td></tr>
+<tr><td><strong>Summe</strong></td><td></td><td class="num"><strong>106</strong></td><td class="num"><strong>92</strong></td><td class="num"><strong>13</strong></td><td class="num"><strong>1</strong></td></tr>
+</tbody></table></div>
+</section>
+
+<section id="rollen">
+<h2>Rollen</h2>
+<p>Es gibt zwei Rollen. Der Admin darf alles. Das Mitglied pflegt den Vorrat und sein eigenes Konto.</p>
+<div class="scroll-x"><table>
+<thead><tr><th>Bereich</th><th>Admin</th><th>Mitglied</th></tr></thead>
+<tbody>
+<tr><td>Übersicht, Statistik ansehen</td><td>ja</td><td>ja</td></tr>
+<tr><td>Erfassen, entnehmen, Verbraucht, Entsorgt, Noch gut</td><td>ja</td><td>ja</td></tr>
+<tr><td>Nachkaufen ergänzen und abhaken</td><td>ja</td><td>ja</td></tr>
+<tr><td>Mein Konto: Profil, Benachrichtigungen, Darstellung</td><td>ja, eigenes</td><td>ja, eigenes</td></tr>
+<tr><td>Haushalt: Mitglieder, Ernährung, Ziel &amp; Empfehlung, Vorrat-Stammdaten, Ampel &amp; Regeln, Foto-Erkennung</td><td>ändern</td><td>nur lesen</td></tr>
+<tr><td>Nutzerverwaltung</td><td>ja</td><td>ausgeblendet</td></tr>
+<tr><td>Daten &amp; System</td><td>ja</td><td>ausgeblendet</td></tr>
+<tr><td>Produkt bearbeiten, Fehlerfassung löschen</td><td>ja</td><td>offen <span class="badge badge-vorschlag">Vorschlag</span></td></tr>
+<tr><td>Neue Kategorie direkt beim Erfassen</td><td>ja</td><td>offen</td></tr>
+</tbody></table></div>
+<p>Der erste Nutzer bei der Einrichtung wird Admin. Es muss immer mindestens ein aktiver Admin bleiben. Der letzte Admin kann deshalb weder herabgestuft noch deaktiviert noch entfernt werden.</p>
+<p>Fundstelle: 04, Rollen; Prototyp d6, <code>settings/routes.ts</code> und <code>lib/user-rules.ts</code>.</p>
+<p><span class="badge badge-vorschlag">Vorschlag</span> 04 nennt für Mitglieder nur „erfassen, entnehmen, entsorgen“. Ob sie Produkte bearbeiten und Entscheidungen anderer rückgängig machen dürfen, ist nicht geregelt. Vorschlag: Mitglieder dürfen Produkte und Einheiten bearbeiten, Löschen bleibt beim Admin.</p>
+</section>
+
+<section id="ers">
+<h2>Einrichtung &amp; Anmeldung</h2>
+<p>Hier geht es darum, wie der Haushalt startet und wie sich jeder Nutzer sicher anmeldet.</p>
+
+<div class="card" id="ers-01">
+<h3>ERS-01 · Ersteinrichtung</h3>
+<p><span class="badge badge-mvp">MVP</span> <span class="badge badge-vorschlag">Vorschlag</span> Rolle: wer die App zuerst öffnet</p>
+<p>Beim allerersten Start legt man den ersten Nutzer an. Er wird Admin. Danach führt die App kurz durch Haushalt, Ziel und „Zum Home-Bildschirm“.</p>
+<ul>
+<li>Wenn noch kein Nutzer existiert, dann zeigt die App statt der Anmeldung die Einrichtung.</li>
+<li>Wenn der erste Nutzer angelegt ist, dann hat er die Rolle Admin.</li>
+<li>Wenn bereits ein Nutzer existiert, dann ist die Einrichtung nicht mehr erreichbar.</li>
+</ul>
+<p>Fundstelle: 04, Rollen („Der erste Nutzer … ist Admin“). Die geführten Schritte sind ein Vorschlag, weil kein Ablauf beschrieben ist.</p>
+</div>
+
+<div class="card" id="ers-02">
+<h3>ERS-02 · Anmelden</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Jeder Nutzer meldet sich mit eigenem Login an, also mit E-Mail und Passwort.</p>
+<ul>
+<li>Wenn jemand nicht angemeldet ist, dann sieht er nur die Anmeldeseite.</li>
+<li>Wenn E-Mail oder Passwort falsch sind, dann erscheint ein ruhiger Hinweis, ohne zu verraten, welches von beiden falsch war.</li>
+<li>Wenn ein Nutzer deaktiviert ist, dann kann er sich nicht anmelden.</li>
+</ul>
+<p>Fundstelle: 02, Entscheidungen („mehrere Nutzer mit eigenem Login“); 04, Mein Konto. Der Hinweistext bei falschen Daten ist ein Vorschlag.</p>
+</div>
+
+<div class="card" id="ers-03">
+<h3>ERS-03 · Nutzer einladen</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin</p>
+<p>Der Admin lädt weitere Nutzer per Einladungslink ein oder vergibt ein Startpasswort. Dabei setzt er die Rolle und kann ein Haushaltsmitglied verknüpfen.</p>
+<ul>
+<li>Wenn der Admin einen Nutzer einlädt, dann steht dieser als „eingeladen“ in der Liste.</li>
+<li>Wenn der Eingeladene den Link öffnet, dann ist sein Konto aktiv.</li>
+<li>Wenn der Admin statt des Links ein Startpasswort vergibt, dann kann sich der Nutzer damit sofort anmelden.</li>
+<li>Wenn ein Einladungslink 7 Tage nicht genutzt wurde, dann ist er ungültig und der Admin kann einen neuen erzeugen. <span class="badge badge-vorschlag">Vorschlag</span></li>
+<li>Wenn ein Mitglied eingeladen wird, dann sieht es Nutzerverwaltung sowie Daten &amp; System nicht.</li>
+</ul>
+<p>Fundstelle: 04, Nutzerverwaltung; Prototyp d6, Nutzer einladen.</p>
+</div>
+
+<div class="card" id="ers-04">
+<h3>ERS-04 · Passkey hinzufügen</h3>
+<p><span class="badge badge-spaeter">später</span> Rolle: beide</p>
+<p>Unter Mein Konto kann man einen Passkey anlegen und sich danach ohne Passwort anmelden.</p>
+<ul>
+<li>Wenn ein Passkey angelegt ist, dann klappt die Anmeldung auf diesem Gerät per Face ID oder Fingerabdruck.</li>
+<li>Wenn der Passkey nicht mehr gilt, dann bleibt die Anmeldung mit Passwort möglich.</li>
+</ul>
+<p>Fundstelle: 04, Mein Konto („Passkey hinzufügen“); Prototyp d6, Profil und Einladung nennen den Passkey ebenfalls. Dieser Katalog weicht davon ab: Ein Passkey hängt am Namen der Adresse im Tailscale-Netz. Ändert sich dieser Name, gilt er nicht mehr. Deshalb hier als „später“ vorgeschlagen.</p>
+</div>
+
+<div class="card" id="ers-05">
+<h3>ERS-05 · Sitzungen ansehen und beenden</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide für sich selbst, Admin für alle</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Die Liste ist Komfort. Deaktivieren eines Nutzers beendet seine Sitzungen auch ohne sie (EIN-10).</p>
+<p>Jeder sieht, auf welchen Geräten er angemeldet ist. Der Admin sieht zusätzlich den letzten Login aller Nutzer.</p>
+<ul>
+<li>Wenn ein Nutzer eine Sitzung beendet, dann ist das betroffene Gerät abgemeldet.</li>
+<li>Wenn der Admin einen Nutzer deaktiviert, dann enden alle seine Sitzungen.</li>
+</ul>
+<p>Fundstelle: 04, Mein Konto und Nutzerverwaltung; Prototyp d6, Nutzer-Detail.</p>
+</div>
+
+<div class="card" id="ers-06">
+<h3>ERS-06 · Passwort zurücksetzen ohne E-Mail</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin</p>
+<p>Hat jemand sein Passwort vergessen, setzt der Admin es zurück. Dafür ist kein Mailversand nötig.</p>
+<ul>
+<li>Wenn der Admin ein Passwort zurücksetzt, dann kann sich der Nutzer mit dem neuen Startpasswort anmelden.</li>
+<li>Wenn kein Mailversand eingerichtet ist, dann funktioniert das Zurücksetzen trotzdem.</li>
+</ul>
+<p>Fundstelle: 04, Nutzerverwaltung („lokal, ohne E-Mail-Zwang“).</p>
+</div>
+</section>
+
+<section id="hh">
+<h2>Haushalt</h2>
+<p>Der Haushalt bestimmt, für wen gerechnet wird. Daraus ergibt sich der Bedarf.</p>
+
+<div class="card" id="hh-01">
+<h3>HH-01 · Haushaltsmitglieder verwalten</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin · Mitglied liest</p>
+<p>Liste aller Personen im Haushalt. Der Admin legt an, bearbeitet und entfernt.</p>
+<ul>
+<li>Wenn der Admin ein Haushaltsmitglied anlegt oder entfernt, dann rechnet die Übersicht sofort mit dem neuen Bedarf.</li>
+<li>Wenn ein Mitglied die Seite öffnet, dann sieht es die Liste, kann aber nichts ändern.</li>
+<li>Wenn ein Haushaltsmitglied keinen Login hat, etwa ein Kind, dann zählt es trotzdem voll mit.</li>
+</ul>
+<p>Fundstelle: 02, Haushalt; 04, Haushalt → Mitglieder; Prototyp d6, Mitglieder.</p>
+</div>
+
+<div class="card" id="hh-02">
+<h3>HH-02 · Angaben je Haushaltsmitglied</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin · Mitglied liest</p>
+<p>Pflicht sind Name, Typ (Baby, Kind, Jugendliche:r, Erwachsene:r, Senior:in) und Geburtsjahr, bei Babys der Monat. Optional sind Geschlecht, Aktivität, Gewicht und schwanger oder stillend.</p>
+<ul>
+<li>Wenn ein Geburtsjahr eingetragen ist, dann rechnet sich das Alter jedes Jahr von selbst fort.</li>
+<li>Wenn Aktivität leer bleibt, dann gilt „normal“.</li>
+<li>Wenn das Gewicht fehlt, dann nutzt die App ein Referenzgewicht je Alter und Geschlecht.</li>
+<li>Wenn das Geschlecht fehlt, dann rechnet die App im Modus „Individuell“ mit einem Mittelwert beider Geschlechter. <span class="badge badge-vorschlag">Vorschlag</span></li>
+</ul>
+<p>Fundstelle: 02, Mitglied und Makronährstoffe; 04, Mitglieder. Der Prototyp kennt keinen Typ „Jugendliche:r“, hier gilt 02. Den Standard für ein fehlendes Geschlecht regeln die Konzeptdateien nicht.</p>
+</div>
+
+<div class="card" id="hh-03">
+<h3>HH-03 · Ernährungsform</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin · Mitglied liest</p>
+<p>Der Haushalt hat einen Standard: alles, vegetarisch oder vegan. Jede Person kann davon abweichen. Die Energiemenge bleibt gleich, nur die Verteilung auf die Warengruppen ändert sich.</p>
+<ul>
+<li>Wenn bei einer Person nichts gewählt ist, dann gilt „wie Haushalt“.</li>
+<li>Wenn der Haushalt gemischt ist, dann werden die Zielmengen je Person berechnet und summiert.</li>
+<li>Wenn jemand vegetarisch lebt, dann wird die Warengruppe „Fisch, Fleisch, Eier“ für diese Person durch passende Alternativen ersetzt.</li>
+</ul>
+<p>Fundstelle: 02, Ernährungsform; 04, Ernährung. Die genauen Ersatzregeln sind noch an Primärquellen zu prüfen.</p>
+</div>
+
+<div class="card" id="hh-04">
+<h3>HH-04 · Allergien und Unverträglichkeiten</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin · Mitglied liest</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Nur der Hinweis bei Nachkaufen. Das Feld zum Eintragen bleibt im MVP.</p>
+<p>Je Person lassen sich Allergien eintragen, etwa „glutenfrei“. Sie erscheinen als Hinweis bei Nachkaufen.</p>
+<ul>
+<li>Wenn eine Allergie eingetragen ist, dann zeigt Nachkaufen einen passenden Hinweis.</li>
+<li>Wenn keine eingetragen ist, dann erscheint kein Hinweis.</li>
+</ul>
+<p>Fundstelle: 02, Mitglied („Hinweise beim Einkaufsplan“).</p>
+</div>
+
+<div class="card" id="hh-05">
+<h3>HH-05 · Sonderbedarf für Babys</h3>
+<p><span class="badge badge-mvp">MVP</span> <span class="badge badge-vorschlag">Vorschlag</span> Rolle: Admin · Mitglied liest</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Die Rechenregel fehlt noch ganz. Sie erst festzulegen, würde das MVP aufhalten.</p>
+<p>Babys brauchen Säuglingsnahrung und abgekochtes Wasser. Dieser Bedarf zählt nicht in die normalen Warengruppen.</p>
+<ul>
+<li>Wenn ein Baby im Haushalt ist, dann zählt es nicht zum normalen Warengruppen-Bedarf.</li>
+<li>Wenn ein Baby im Haushalt ist, dann zeigt die Übersicht einen eigenen Hinweis zum Sonderbedarf.</li>
+</ul>
+<p>Fundstelle: 02, Haushalt. Wie der Sonderbedarf angezeigt und gerechnet wird, regeln die Konzeptdateien nicht. Der eigene Hinweis ist ein Vorschlag.</p>
+</div>
+
+<div class="card" id="hh-06">
+<h3>HH-06 · Nutzer mit Haushaltsmitglied verknüpfen</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin</p>
+<p>Ein Login-Nutzer kann mit einem Haushaltsmitglied verbunden werden, zum Beispiel Nutzer Alex mit Mitglied Alex. Das ist freiwillig.</p>
+<ul>
+<li>Wenn ein Haushaltsmitglied schon mit einem Nutzer verknüpft ist und neu verknüpft wird, dann löst sich die alte Verknüpfung.</li>
+<li>Wenn ein Nutzer nicht verknüpft ist, dann funktioniert die App für ihn genauso.</li>
+</ul>
+<p>Fundstelle: 04, Nutzerverwaltung („Nutzer ≠ Haushaltsmitglied“); Prototyp d6, <code>lib/user-rules.ts</code>.</p>
+</div>
+
+<div class="card" id="hh-07">
+<h3>HH-07 · Haustiere</h3>
+<p><span class="badge badge-spaeter">später</span> laut Konzept später · Rolle: Admin · Mitglied liest</p>
+<p>Haustiere werden ein eigener Typ mit Futter in Gramm pro Tag und Wasser. Dazu passt eine Kategorie Tierfutter.</p>
+<ul>
+<li>Wenn ein Haustier angelegt ist, dann fließen Futter und Wasser in den Bedarf ein.</li>
+</ul>
+<p>Fundstelle: 02, Haushalt; 01, Ordnungssystem; 04, Mitglieder.</p>
+</div>
+</section>
+
+<section id="ziel">
+<h2>Ziel &amp; Empfehlung</h2>
+<p>Hier legt man fest, nach welcher offiziellen Empfehlung gerechnet wird und wie lange der Vorrat reichen soll.</p>
+
+<div class="card" id="ziel-01">
+<h3>ZIEL-01 · Quelle BBK/BLE</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin · Mitglied liest</p>
+<p>Der Haushalt hat genau eine aktive Quelle. Zum Start ist das BBK/BLE für Deutschland. Die Quelle liefert Standard-Zeitraum, Wasser pro Person und Tag sowie Mengen je Warengruppe. Die Werte werden vor der Übernahme von Hand gegen das Original geprüft.</p>
+<ul>
+<li>Wenn die Quelle angezeigt wird, dann steht ihr Stand dabei, zusammen mit Name und Link.</li>
+<li>Wenn neue Werte einer Quelle kommen, dann bleibt die alte Version erhalten.</li>
+</ul>
+<p>Fundstelle: 02, Quelle; 05, Nächste Schritte Nr. 3; CLAUDE.md, Datenbank.</p>
+</div>
+
+<div class="card" id="ziel-02">
+<h3>ZIEL-02 · Rechenmodus</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin · Mitglied liest</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Nur der Modus „Individuell“, weil die DGE-Werte noch ungeprüft sind. „Offiziell“ bleibt im MVP.</p>
+<p>„Offiziell“ rechnet mit den Pauschalwerten der Quelle. „Individuell“ rechnet nach Alter, Geschlecht und Aktivität mit Werten der DGE (Deutsche Gesellschaft für Ernährung).</p>
+<ul>
+<li>Wenn nichts gewählt ist, dann gilt „Offiziell“.</li>
+<li>Wenn der Modus wechselt, dann rechnen Übersicht und Nachkaufen sofort neu.</li>
+</ul>
+<p>Fundstelle: 02, Zwei Rechenmodi. Die DGE-Werte sind vor der Umsetzung an der Primärquelle zu prüfen.</p>
+</div>
+
+<div class="card" id="ziel-03">
+<h3>ZIEL-03 · Zieldauer</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin · Mitglied liest</p>
+<p>Wie viele Tage soll der Vorrat reichen? Zur Wahl stehen 3, 10, 14 Tage oder ein eigener Wert.</p>
+<ul>
+<li>Wenn nichts gewählt ist, dann gilt der Standard der Quelle, bei BBK/BLE 10 Tage.</li>
+<li>Wenn ein eigener Wert eingegeben wird, dann rechnet die App damit.</li>
+</ul>
+<p>Fundstelle: 02, Ziel; 00, Kernbaustein C.</p>
+</div>
+
+<div class="card" id="ziel-04">
+<h3>ZIEL-04 · Zieldatum</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin · Mitglied liest</p>
+<p>Bis wann soll das Ziel erreicht sein? Das Datum ist auch Stichtag für die zweite Kennzahl.</p>
+<ul>
+<li>Wenn ein Zieldatum gesetzt ist, dann zählt für „Ziel &lt;Datum&gt;“ nur, was an diesem Tag noch haltbar ist.</li>
+<li>Wenn das Zieldatum in der Vergangenheit liegt, dann bittet die App freundlich um ein neues Datum. <span class="badge badge-vorschlag">Vorschlag</span></li>
+</ul>
+<p>Fundstelle: 02, Ziel und Entscheidungen.</p>
+</div>
+
+<div class="card" id="ziel-05">
+<h3>ZIEL-05 · Etappen</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin · Mitglied liest</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Optional und ohne Einfluss auf die Kennzahlen. Gehört mit ERI-04 zusammen.</p>
+<p>Optional lässt sich das Ziel in Etappen teilen, etwa erst 3 Tage, dann 10 Tage. Beispiel: „3 Tage bis 31.10.“, dann „10 Tage bis 31.12.“.</p>
+<ul>
+<li>Wenn Etappen gesetzt sind, dann zeigt die Übersicht die nächste Etappe.</li>
+<li>Wenn eine Etappe erreicht ist, dann kann eine Benachrichtigung folgen (siehe ERI-04).</li>
+</ul>
+<p>Fundstelle: 02, Ziel; 04, Ziel &amp; Empfehlung.</p>
+</div>
+
+<div class="card" id="ziel-06">
+<h3>ZIEL-06 · „So wird gerechnet“</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Neben jeder Rechnung steht ein kleines ⓘ. Es erklärt die Rechnung und nennt Quelle und Stand.</p>
+<ul>
+<li>Wenn man das ⓘ antippt, dann erscheinen Rechenweg, Quelle, Stand und Link.</li>
+<li>Wenn Schätzwerte in die Rechnung eingehen, dann steht das dabei.</li>
+</ul>
+<p>Fundstelle: 02, Zwei Rechenmodi („So wird gerechnet + Quelle + Stand“).</p>
+</div>
+
+<div class="card" id="ziel-07">
+<h3>ZIEL-07 · Weitere Quellen</h3>
+<p><span class="badge badge-spaeter">später</span> laut Konzept später · Rolle: Admin · Mitglied liest</p>
+<p>Österreich, Schweiz und EU sind im Datenmodell vorbereitet, aber nicht im ersten Umfang.</p>
+<ul>
+<li>Wenn eine weitere Quelle ergänzt wird, dann ist dafür kein Umbau der Datenbank nötig.</li>
+</ul>
+<p>Fundstelle: 02, Quelle; 05, Markt/Quelle.</p>
+</div>
+</section>
+
+<section id="ueb">
+<h2>Übersicht</h2>
+<p>Die Übersicht zeigt auf einen Blick, wie gut der Haushalt versorgt ist. Sie zeigt nur an. Geändert wird in den Einstellungen.</p>
+
+<div class="card" id="ueb-01">
+<h3>UEB-01 · Kennzahl „Heute versorgt“</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Die große Zahl: „Heute versorgt: X Tage“. Gezählt wird alles, was heute haltbar ist. Maßgeblich ist der Engpass aus Energie und Wasser.</p>
+<ul>
+<li>Wenn Energie für 8 Tage und Wasser für 4 Tage reicht, dann zeigt die Kennzahl 4 Tage. (Beispiel)</li>
+<li>Wenn eine Einheit abgelaufen ist, dann zählt sie nicht mehr mit.</li>
+<li>Wenn kcal geschätzt sind, dann ist das an der Kennzahl erkennbar.</li>
+</ul>
+<p>Fundstelle: 02, Fortschritt und Entscheidungen; 03, Status-Ansichten („Abgelaufene zählen nicht mehr“).</p>
+</div>
+
+<div class="card" id="ueb-02">
+<h3>UEB-02 · Kennzahl „Ziel &lt;Datum&gt;“</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Die zweite Zahl: „Ziel &lt;Datum&gt;: X von Y Tagen“. Hier zählt nur, was am Zieldatum noch haltbar ist.</p>
+<ul>
+<li>Wenn eine Einheit vor dem Zieldatum abläuft, dann zählt sie hier nicht mit.</li>
+<li>Wenn Einheiten vor dem Zieldatum ablaufen, dann erscheint ein Hinweis „läuft vor Zieldatum ab“.</li>
+<li>Wenn das Ziel erreicht oder übertroffen ist, dann ist das sichtbar.</li>
+</ul>
+<p>Fundstelle: 02, Entscheidungen („MHD-Zählweise: beides anzeigen“).</p>
+</div>
+
+<div class="card" id="ueb-03">
+<h3>UEB-03 · Balken je Warengruppe</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Je Warengruppe ein Balken mit „X von Y Tagen“. Die knappste Warengruppe ist hervorgehoben. „Engpass“ heißt in diesem Katalog nur der kleinere Wert aus Energie und Wasser.</p>
+<ul>
+<li>Wenn eine Warengruppe den kleinsten Wert hat, dann ist sie als „knappste Warengruppe“ markiert, mit Wort und nicht nur mit Farbe.</li>
+<li>Wenn man auf die Kachel tippt, dann öffnet sich der Vorrat.</li>
+</ul>
+<p>Fundstelle: 02, Fortschritt; Prototyp d6, Warengruppen-Kachel.</p>
+</div>
+
+<div class="card" id="ueb-04">
+<h3>UEB-04 · Wasser</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Eigene Kachel für Wasser in Litern, weil Wasser der wichtigste Einzelwert ist.</p>
+<ul>
+<li>Wenn Wasser im Vorrat ist, dann zeigt die Kachel Liter und Tage im Verhältnis zum Bedarf.</li>
+</ul>
+<p>Fundstelle: 01, Ordnungssystem (Wasser getrennt, als vorgeschlagene Ergänzung); Prototyp d6, Wasser-Kachel. Die Trennung von Getränken ist noch zu bestätigen.</p>
+</div>
+
+<div class="card" id="ueb-05">
+<h3>UEB-05 · Bald fällig</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Kurze Liste der Einheiten, die bald ablaufen, sortiert nach Datum.</p>
+<ul>
+<li>Wenn Einheiten gelb oder orange sind, dann stehen sie hier mit Punkt und Wort.</li>
+<li>Wenn man tippt, dann öffnet sich der Vorrat mit dem Filter „Bald fällig“.</li>
+</ul>
+<p>Fundstelle: 03, Ansichten; Prototyp d6, Bald-fällig-Kachel.</p>
+</div>
+
+<div class="card" id="ueb-06">
+<h3>UEB-06 · Nachkaufen-Kachel</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Zeigt, wie viele Einträge auf Nachkaufen offen sind.</p>
+<ul>
+<li>Wenn man tippt, dann öffnet sich der Tab Nachkaufen.</li>
+</ul>
+<p>Fundstelle: Prototyp d6, Nachkaufen-Kachel; 03, Nachkaufen.</p>
+</div>
+
+<div class="card" id="ueb-07">
+<h3>UEB-07 · Makro-Kachel</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Die Bedarfswerte sind ungeprüft. Die Nährwerte werden trotzdem schon erfasst.</p>
+<p>Zeigt, wie lange Eiweiß, Kohlenhydrate und Fett reichen. Das ist ein Hinweis. Die Kennzahl „versorgt“ bleibt bei Energie und Wasser.</p>
+<ul>
+<li>Wenn Eiweiß kürzer reicht als Energie, dann erscheint ein Hinweis, zum Beispiel „Energie reicht 6 Tage, Eiweiß nur 3“. (Beispiel)</li>
+<li>Wenn Nährwerte geschätzt sind, dann ist das erkennbar.</li>
+</ul>
+<p>Fundstelle: 02, Makronährstoffe. Die Bedarfswerte sind noch an der DGE-Quelle zu prüfen.</p>
+</div>
+
+<div class="card" id="ueb-08">
+<h3>UEB-08 · Haushalt-Kachel</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Zeigt die Haushaltsmitglieder und ihre Ernährungsform als Text. Es gibt hier keinen Umschalter.</p>
+<ul>
+<li>Wenn man „Bearbeiten →“ tippt, dann öffnen sich die Einstellungen bei Mitglieder.</li>
+</ul>
+<p>Fundstelle: 04, Was aus dem Dashboard rausfliegt.</p>
+</div>
+
+<div class="card" id="ueb-09">
+<h3>UEB-09 · Schnellzugriff „Foto aufnehmen“</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Eine Kachel führt direkt in die Erfassung.</p>
+<ul>
+<li>Wenn man die Kachel tippt, dann öffnet sich der Tab Neu.</li>
+</ul>
+<p>Fundstelle: Prototyp d6, Kachel „Foto aufnehmen“.</p>
+</div>
+
+<div class="card" id="ueb-10">
+<h3>UEB-10 · Nur anzeigen, „Bearbeiten →“</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Die Übersicht ändert keine Einstellungen. Ein dezentes „Bearbeiten →“ springt in den passenden Bereich der Einstellungen.</p>
+<ul>
+<li>Wenn man beim Ziel „Bearbeiten →“ tippt, dann öffnet sich Ziel &amp; Empfehlung.</li>
+<li>Wenn ein Mitglied „Bearbeiten →“ tippt, dann sieht es den Bereich nur lesend.</li>
+</ul>
+<p>Fundstelle: 04, Grundsatz.</p>
+</div>
+</section>
+
+<section id="erf">
+<h2>Erfassen</h2>
+<p>So kommt ein Produkt in den Vorrat: per Foto oder manuell. Das Foto ist immer nur eine Abkürzung, nie Pflicht. KI-Ergebnisse sind Vorschläge, gespeichert wird erst nach Bestätigung.</p>
+
+<div class="card" id="erf-01">
+<h3>ERF-01 · Foto oder manuell, bei jedem Schritt</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Jeder Schritt der Erfassung geht wahlweise per Foto oder per Eingabe. Man kann jederzeit wechseln.</p>
+<ul>
+<li>Wenn man bei einem Schritt „Manuell“ wählt, dann erscheinen die Eingabefelder dieses Schritts.</li>
+<li>Wenn man nie ein Foto macht, dann lässt sich das Produkt trotzdem vollständig erfassen.</li>
+</ul>
+<p>Fundstelle: 01, Entscheidungen; CLAUDE.md, Fachliche Grundregeln.</p>
+</div>
+
+<div class="card" id="erf-02">
+<h3>ERF-02 · Live-Kamera</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Die Kamera läuft direkt in der App. Ein Druck auf den Auslöser, dann kommt die nächste Packung.</p>
+<ul>
+<li>Wenn man den Auslöser drückt, dann ist die Kamera sofort für das nächste Foto bereit.</li>
+<li>Wenn die App über ihre HTTPS-Adresse geöffnet ist, dann funktioniert die Kamera. Das ist auf einem echten Gerät zu testen.</li>
+<li>Wenn die Kamera nicht erlaubt oder nicht verfügbar ist, dann bietet die App die manuelle Eingabe an.</li>
+</ul>
+<p>Fundstelle: 01, Entscheidungen („Live-Kamera“); FAKTEN F12 (Kamera braucht HTTPS). Das Verhalten ohne Kamera folgt aus ERF-01.</p>
+</div>
+
+<div class="card" id="erf-03">
+<h3>ERF-03 · Foto der Verpackung</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Die Vorderseite wird fotografiert. Die KI schlägt eine allgemeine Bezeichnung ohne Marke vor, dazu Kategorie, Behälter und Inhalt pro Stück.</p>
+<ul>
+<li>Wenn das Foto erkannt ist, dann erscheint eine Karte wie „Nudeln · 500 g · Packung“, die sofort bearbeitbar ist.</li>
+<li>Wenn ein Wert nicht sicher lesbar ist, dann bleibt das Feld leer, statt geraten zu werden.</li>
+<li>Wenn eine Dose ein Abtropfgewicht nennt, dann wird es mit übernommen.</li>
+</ul>
+<p>Fundstelle: 01, Erfassungs-Maske und Aufruf A.</p>
+</div>
+
+<div class="card" id="erf-04">
+<h3>ERF-04 · Foto der Nährwerttabelle</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Optional. Die KI liest kcal pro 100 g oder 100 ml, dazu Eiweiß, Kohlenhydrate und Fett. Die App rechnet auf die Packung hoch.</p>
+<ul>
+<li>Wenn kcal und kJ dastehen, dann gilt kcal.</li>
+<li>Wenn nur kJ dastehen, dann rechnet die App in kcal um.</li>
+<li>Wenn der Schritt übersprungen wird, dann gilt der Durchschnitt der Kategorie, markiert als „geschätzt“ (ERF-11).</li>
+</ul>
+<p>Fundstelle: 01, Erfassungs-Maske und Aufruf B; 02, Makronährstoffe.</p>
+</div>
+
+<div class="card" id="erf-05">
+<h3>ERF-05 · MHD-Serie</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Packung für Packung wird das Datum fotografiert. Jedes Foto ergibt eine Einheit. Die Anzahl der Fotos ist also die Stückzahl. Ein Zähler läuft mit.</p>
+<ul>
+<li>Wenn ein MHD-Foto gemacht ist, dann zählt der Zähler hoch, etwa „Packung 7“.</li>
+<li>Wenn mindestens ein Datum vorliegt, per Foto oder manuell, oder bewusst „Ohne Datum“ gewählt ist, dann lässt sich die Serie abschließen.</li>
+<li>Wenn ein Aufdruck „zu verbrauchen bis“ lautet, dann wird er als Verbrauchsdatum erkannt, nicht als MHD.</li>
+<li>Wenn auf der Packung nur Monat und Jahr stehen, dann gilt das Monatsende, Genauigkeit „Monat“.</li>
+<li>Wenn auf der Packung nur das Jahr steht, dann gilt der 31.12., Genauigkeit „Jahr“.</li>
+</ul>
+<p>Fundstelle: 01, Erfassungs-Maske und Aufruf C.</p>
+</div>
+
+<div class="card" id="erf-06">
+<h3>ERF-06 · Datums-Chips mit Korrektur</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Jedes Datum wird im Hintergrund erkannt und erscheint als kleiner Chip. Antippen öffnet die Korrektur.</p>
+<ul>
+<li>Wenn ein Datum nicht lesbar ist, dann wird kein Datum erfunden. Der Chip wird gelb mit „bitte nochmal oder manuell“.</li>
+<li>Wenn ein Datum in der Vergangenheit liegt oder weit vom Üblichen der Kategorie abweicht, dann steht „bitte prüfen“ dabei.</li>
+<li>Wenn ein Chip mit „bitte prüfen“ offen ist, dann muss er vor dem Speichern bestätigt oder korrigiert werden.</li>
+<li>Wenn ein Chip „nicht lesbar“ ist, dann muss man vor dem Speichern eins davon tun: neu fotografieren, das Datum manuell eintragen, bewusst „Ohne Datum“ wählen oder die Packung entfernen.</li>
+<li>Wenn ein Chip leer ist, dann wird er nie stillschweigend gespeichert.</li>
+</ul>
+<p>Fundstelle: 01, Ablauf in der Maske und Aufruf C („ERFINDE NIEMALS EIN DATUM“); Prototyp d6 („Erst gelben Chip bestätigen“).</p>
+</div>
+
+<div class="card" id="erf-07">
+<h3>ERF-07 · Abkürzung „Alle gleiches Datum“</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Haben alle Packungen dasselbe MHD, reicht ein Foto plus Anzahl.</p>
+<ul>
+<li>Wenn „Alle gleiches Datum“ gewählt ist, dann legt ein Foto mit Anzahl 10 zehn Einheiten mit gleichem Datum an. (Beispiel)</li>
+<li>Wenn die Anzahl mit − und + geändert wird, dann passt sich die Zusammenfassung sofort an.</li>
+</ul>
+<p>Fundstelle: 01, Abkürzungen.</p>
+</div>
+
+<div class="card" id="erf-08">
+<h3>ERF-08 · Abkürzung „Datum manuell“</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Ein Auswahlfeld für Monat und Jahr, mit Schnellknöpfen +6 Monate, +1 Jahr, +2 Jahre.</p>
+<ul>
+<li>Wenn ein Schnellknopf getippt wird, dann springt das Datum entsprechend weiter, ausgehend von heute. <span class="badge badge-vorschlag">Vorschlag</span></li>
+<li>Wenn nur Monat und Jahr gewählt sind, dann gilt das Monatsende.</li>
+</ul>
+<p>Fundstelle: 01, Abkürzungen.</p>
+</div>
+
+<div class="card" id="erf-09">
+<h3>ERF-09 · Abkürzung „Ohne Datum“</h3>
+<p><span class="badge badge-mvp">MVP</span> <span class="badge badge-vorschlag">Vorschlag</span> Rolle: beide</p>
+<p>Wer kein Datum hat, kann bewusst „Ohne Datum“ wählen. Dann setzt die App eine Schätzung nach Kategorie und markiert sie deutlich als „geschätzt“.</p>
+<ul>
+<li>Wenn „Ohne Datum“ gewählt ist, dann trägt die Einheit sichtbar die Markierung „geschätzt“.</li>
+<li>Wenn die KI kein Datum lesen kann, dann setzt sie nie selbst eine Schätzung. Das passiert nur auf ausdrücklichen Wunsch.</li>
+</ul>
+<p>Fundstelle: 01, Abkürzungen. Die Grundregel lautet: Ein Datum wird nie erfunden. Deshalb ist die Schätzung nur als bewusste Wahl vorgeschlagen.</p>
+</div>
+
+<div class="card" id="erf-10">
+<h3>ERF-10 · Manuelle Erfassung</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Ein Formular ohne Foto: Kategorie, Bezeichnung, Behälter, Inhalt pro Stück, Anzahl, MHD, optional kcal und Makros.</p>
+<ul>
+<li>Wenn Bezeichnung fehlt oder der Inhalt nicht größer als null ist, dann lässt sich nicht speichern.</li>
+<li>Wenn kcal leer bleiben, dann gilt der Durchschnitt der Kategorie, markiert als „geschätzt“.</li>
+</ul>
+<p>Fundstelle: 00, Kernbaustein D; 01, Entscheidungen; Prototyp d6, Manuell. Die Pflichtfelder stammen aus dem Prototyp und sind zu bestätigen.</p>
+</div>
+
+<div class="card" id="erf-11">
+<h3>ERF-11 · Schätzwerte für Nährwerte</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Fehlen Nährwerte, nimmt die App den Durchschnitt der Kategorie. Jeder Schätzwert ist als „geschätzt“ markiert.</p>
+<ul>
+<li>Wenn ein Produkt geschätzte Nährwerte hat, dann ist das in Vorrat und Übersicht erkennbar.</li>
+<li>Wenn später echte Werte eingetragen werden, dann verschwindet die Markierung.</li>
+</ul>
+<p>Fundstelle: 01, Abkürzungen; 02, Fortschritt und Makronährstoffe.</p>
+</div>
+
+<div class="card" id="erf-12">
+<h3>ERF-12 · Zusammenfassung und Bestätigen</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Am Ende steht eine Zusammenfassung. Beispiel: „10 × Nudeln 500 g = 5 kg · 17.950 kcal · MHDs: 09/2027 (6×), 11/2027 (4×)“. Erst der Knopf „Speichern“ übernimmt alles in den Vorrat.</p>
+<ul>
+<li>Wenn man nicht auf „Speichern“ tippt, dann landet nichts im Vorrat.</li>
+<li>Wenn gespeichert wird, dann entstehen ein Produkt und je Packung eine Einheit mit eigenem MHD.</li>
+<li>Wenn gleiche Daten vorkommen, dann fasst die Anzeige sie zusammen, etwa „09/2027 (6×)“.</li>
+</ul>
+<p>Fundstelle: 01, Ablauf in der Maske und Datenmodell; CLAUDE.md, Fachliche Grundregeln.</p>
+</div>
+
+<div class="card" id="erf-13">
+<h3>ERF-13 · Neue Kategorie beim Erfassen</h3>
+<p><span class="badge badge-mvp">MVP</span> <span class="badge">offen</span> Rolle: offen</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Die Rechtefrage ist offen. Der Admin kann Kategorien auch in den Stammdaten anlegen (EIN-04).</p>
+<p>In der Erfassung gibt es „+ Neue Kategorie“. Jede neue Kategorie braucht eine Warengruppe, damit die Rechnung stimmt.</p>
+<ul>
+<li>Wenn eine neue Kategorie angelegt wird, dann muss eine Warengruppe gewählt werden. Standard ist „per kcal zählen“.</li>
+<li>Wenn die Kategorie angelegt ist, dann steht sie sofort in der Auswahl.</li>
+</ul>
+<p>Fundstelle: 01, Ordnungssystem. 04 erlaubt Stammdaten nur dem Admin. Ob ein Mitglied hier eine Kategorie anlegen darf, ist offen.</p>
+</div>
+
+<div class="card" id="erf-14">
+<h3>ERF-14 · Hinweis zur Ernährungsform</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Die Ersatzregeln für vegetarisch und vegan sind noch ungeprüft.</p>
+<p>Passt ein Produkt nicht zur Ernährungsform, sagt die App das freundlich.</p>
+<ul>
+<li>Wenn der Haushalt vegan ist und Thunfisch erfasst wird, dann erscheint „Thunfisch zählt bei vegan nicht zum Ziel“. (Beispiel)</li>
+<li>Wenn der Hinweis erscheint, dann lässt sich trotzdem speichern.</li>
+</ul>
+<p>Fundstelle: 02, Ernährungsform.</p>
+</div>
+
+<div class="card" id="erf-15">
+<h3>ERF-15 · Fotos speichern</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Die Fotos bleiben erhalten, etwa als Produktbild in der Liste. Vor dem Senden an die KI werden Standortdaten (EXIF/GPS) entfernt und das Bild verkleinert.</p>
+<ul>
+<li>Wenn ein Foto gespeichert wird, dann liegt die Datei im Foto-Speicher auf dem NAS und die Datenbank kennt nur den Verweis.</li>
+<li>Wenn ein Foto an die KI geht, dann enthält es keine Standortdaten.</li>
+</ul>
+<p>Fundstelle: 01, Entscheidungen und Hinweis Datenschutz; CLAUDE.md, Datenbank.</p>
+</div>
+
+<div class="card" id="erf-16">
+<h3>ERF-16 · Weiter ohne KI</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Ist die Foto-Erkennung ausgeschaltet oder antwortet sie nicht, geht die Erfassung manuell weiter.</p>
+<ul>
+<li>Wenn die KI im Haushalt aus ist, dann bietet die Erfassung nur die manuelle Eingabe an. <span class="badge badge-vorschlag">Vorschlag</span></li>
+<li>Wenn die Erkennung fehlschlägt, dann bleiben die bisherigen Eingaben erhalten und die Felder lassen sich von Hand füllen.</li>
+</ul>
+<p>Fundstelle: 04, Foto-Erkennung („KI an/aus“); 01, Entscheidungen. Ob bei ausgeschalteter KI Fotos trotzdem als Produktbild möglich sind, regeln die Konzeptdateien nicht.</p>
+</div>
+
+<div class="card" id="erf-17">
+<h3>ERF-17 · Gleiches Produkt nochmal</h3>
+<p><span class="badge badge-spaeter">später</span> laut Konzept später · Rolle: beide</p>
+<p>Wer ein Produkt erneut kauft, übernimmt Verpackung und Nährwerte und fotografiert nur noch die MHDs.</p>
+<ul>
+<li>Wenn ein bekanntes Produkt gewählt wird, dann startet die Erfassung direkt bei der MHD-Serie.</li>
+</ul>
+<p>Fundstelle: 01, Erfassungs-Maske („Später möglich“).</p>
+</div>
+
+<div class="card" id="erf-18">
+<h3>ERF-18 · Erfassen am PC</h3>
+<p><span class="badge badge-spaeter">später</span> <span class="badge badge-vorschlag">Vorschlag</span> Rolle: beide</p>
+<p>Am PC gibt es meist keine passende Kamera. Vorschlag: Fotos per Dateiauswahl hochladen oder manuell erfassen.</p>
+<ul>
+<li>Wenn am PC ein Foto per Dateiauswahl gewählt wird, dann läuft die Erkennung wie mit der Live-Kamera.</li>
+<li>Wenn keine Kamera da ist, dann bleibt die manuelle Erfassung immer möglich.</li>
+</ul>
+<p>Fundstelle: keine. Die Konzeptdateien kennen nur die Live-Kamera.</p>
+</div>
+</section>
+
+<section id="vor">
+<h2>Vorrat</h2>
+<p>Der Vorrat zeigt alle Produkte mit ihren Einheiten und lässt sich filtern.</p>
+
+<div class="card" id="vor-01">
+<h3>VOR-01 · Vorratsliste</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Je Produkt eine Kachel mit Foto, Bezeichnung und Einheiten. Einheiten mit gleichem Datum werden zusammengefasst.</p>
+<ul>
+<li>Wenn ein Produkt sechs Einheiten mit 09/2027 hat, dann steht dort „09/2027 (6×)“. (Beispiel)</li>
+<li>Wenn ein Produkt keine Einheit mehr im Vorrat hat, dann erscheint es nicht unter „Im Vorrat“.</li>
+<li>Wenn ein Foto vorhanden ist, dann dient es als Produktbild.</li>
+</ul>
+<p>Fundstelle: 01, Datenmodell und Entscheidungen; Prototyp d6, Vorrat.</p>
+</div>
+
+<div class="card" id="vor-02">
+<h3>VOR-02 · Status-Filter</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Sechs Filter: Im Vorrat · Bald fällig · Abgelaufen · Nachkaufen · Verbraucht · Entsorgt. Jeder Filter zeigt einen Zähler.</p>
+<ul>
+<li>Wenn nichts gewählt ist, dann gilt „Im Vorrat“.</li>
+<li>Wenn „Bald fällig“ gewählt ist, dann erscheinen alle gelben und orangen Einheiten, sortiert nach Datum.</li>
+<li>Wenn „Abgelaufen“ gewählt ist, dann erscheinen rote Einheiten, über die noch nicht entschieden wurde.</li>
+<li>Wenn „Verbraucht“ oder „Entsorgt“ gewählt ist, dann erscheint die Historie (ROT-07).</li>
+</ul>
+<p>Fundstelle: 03, Status-Ansichten &amp; Filter und Ansichten; Prototyp d6, <code>data/stock-status.ts</code>.</p>
+</div>
+
+<div class="card" id="vor-03">
+<h3>VOR-03 · Kategorie- und Behälterfilter</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Zusätzlich lässt sich nach Kategorie und nach Behälter filtern. „Alle Dosen“ ist ein Filter, keine Kategorie.</p>
+<ul>
+<li>Wenn „Dose“ gewählt ist, dann erscheinen auch Thunfischdosen, obwohl sie zur Warengruppe „Fisch, Fleisch, Eier“ gehören.</li>
+<li>Wenn Status- und Kategoriefilter gleichzeitig aktiv sind, dann gelten beide.</li>
+</ul>
+<p>Fundstelle: 01, Ordnungssystem; 03, Status-Ansichten.</p>
+</div>
+
+<div class="card" id="vor-04">
+<h3>VOR-04 · Produkt und Einheiten bearbeiten</h3>
+<p><span class="badge badge-mvp">MVP</span> <span class="badge badge-vorschlag">Vorschlag</span> Rolle: beide</p>
+<p>Nach dem Speichern lassen sich Bezeichnung, Kategorie, Behälter, Inhalt, Nährwerte und das MHD einer Einheit korrigieren.</p>
+<ul>
+<li>Wenn ein MHD korrigiert wird, dann passen sich Ampel und Kennzahlen sofort an.</li>
+<li>Wenn Nährwerte nachgetragen werden, dann entfällt die Markierung „geschätzt“.</li>
+</ul>
+<p>Fundstelle: Bearbeiten nach dem Speichern ist in den Konzeptdateien nicht beschrieben. Auch die Rechte dafür sind offen.</p>
+</div>
+
+<div class="card" id="vor-05">
+<h3>VOR-05 · Lagerort</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Jedem Produkt lässt sich ein Lagerort zuweisen, etwa Keller oder Küche. Danach kann man filtern.</p>
+<ul>
+<li>Wenn ein Lagerort gewählt ist, dann lässt sich der Vorrat danach filtern.</li>
+<li>Wenn ein neuer Lagerort gebraucht wird, dann legt ihn der Admin in den Stammdaten an (EIN-04).</li>
+</ul>
+<p>Fundstelle: 01, Ordnungssystem; 04, Vorrat-Stammdaten. Ob der Lagerort am Produkt oder an der einzelnen Einheit hängt, ist offen.</p>
+</div>
+
+<div class="card" id="vor-06">
+<h3>VOR-06 · Schlagwörter</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Kategorie, Behälter und Lagerort reichen zum Filtern für den Anfang.</p>
+<p>Freie Schlagwörter am Produkt, zum Beispiel „Camping“. Sie dienen als Filter. (Beispiel)</p>
+<ul>
+<li>Wenn ein Schlagwort vergeben ist, dann lässt sich der Vorrat danach filtern.</li>
+<li>Wenn ein Produkt mehrere Schlagwörter hat, dann erscheint es unter jedem davon.</li>
+</ul>
+<p>Fundstelle: 01, Ordnungssystem (Tabellen <code>tag</code> und <code>produkt_tag</code>).</p>
+</div>
+
+<div class="card" id="vor-07">
+<h3>VOR-07 · Fehlerfassung löschen</h3>
+<p><span class="badge badge-mvp">MVP</span> <span class="badge badge-vorschlag">Vorschlag</span> Rolle: Admin</p>
+<p>Normalerweise wird nichts gelöscht, sondern als verbraucht oder entsorgt vermerkt. Für echte Fehleingaben schlägt dieser Katalog ein Löschen vor, samt Fotos.</p>
+<ul>
+<li>Wenn ein Produkt gelöscht wird, dann fragt die App vorher nach und sagt, dass es nicht rückgängig zu machen ist.</li>
+<li>Wenn ein Produkt gelöscht ist, dann taucht es nicht in Historie und Statistik auf.</li>
+</ul>
+<p>Fundstelle: 03, Verbrauchen („nicht gelöscht“). Echtes Löschen und wer es darf, regeln die Konzeptdateien nicht.</p>
+</div>
+
+<div class="card" id="vor-08">
+<h3>VOR-08 · Angebrochene Packung und lose Ware</h3>
+<p><span class="badge badge-spaeter">später</span> <span class="badge badge-vorschlag">Vorschlag</span> Rolle: beide</p>
+<p>Bisher ist jede Einheit eine ganze Packung. Teilentnahmen oder lose Ware, etwa Reis im Vorratsglas, sind nicht geregelt.</p>
+<ul>
+<li>Wenn eine Packung angebrochen ist, dann lässt sich die Restmenge angeben.</li>
+</ul>
+<p>Fundstelle: keine. Lücke in den Konzeptdateien.</p>
+</div>
+</section>
+
+<section id="rot">
+<h2>Rotation</h2>
+<p>Rotation hält den Vorrat lebendig: Was zuerst abläuft, wird zuerst verbraucht und dann nachgekauft. Entnommene Einheiten werden nicht gelöscht, sondern bekommen einen Status mit Datum.</p>
+
+<div class="card" id="rot-01">
+<h3>ROT-01 · Ampel je Einheit</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Jede Einheit hat einen Zustand aus dem MHD. Er wird berechnet, nie gespeichert.</p>
+<div class="scroll-x"><table>
+<thead><tr><th>Zustand</th><th>Standard</th></tr></thead>
+<tbody>
+<tr><td><span class="badge"><i class="dot-ok"></i>gut</span></td><td>mehr als 3 Monate</td></tr>
+<tr><td><span class="badge"><i class="dot-warn"></i>bald fällig</span></td><td>bis 3 Monate</td></tr>
+<tr><td><span class="badge"><i class="dot-urgent"></i>dringend</span></td><td>bis 4 Wochen</td></tr>
+<tr><td><span class="badge"><i class="dot-bad"></i>abgelaufen</span></td><td>vor heute</td></tr>
+</tbody></table></div>
+<ul>
+<li>Wenn der Admin die Schwellen ändert, dann gilt die neue Ampel sofort überall (EIN-05).</li>
+<li>Wenn eine Einheit eine Farbe hat, dann steht immer auch das Wort dabei.</li>
+</ul>
+<p>Fundstelle: 03, Ampel pro Einheit und Entscheidungen; 03, Status-Ansichten („berechnet, nicht gespeichert“).</p>
+</div>
+
+<div class="card" id="rot-02">
+<h3>ROT-02 · „1 entnehmen“</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Ein Knopf je Produkt. Die App nimmt automatisch die Einheit mit dem frühesten MHD. Die Auswahl lässt sich ändern.</p>
+<ul>
+<li>Wenn man „1 entnehmen“ tippt, dann ist die Einheit mit dem frühesten MHD vorgeschlagen.</li>
+<li>Wenn man eine andere Einheit wählt, dann wird diese entnommen.</li>
+<li>Wenn entnommen ist, dann hat die Einheit den Status <code>verbraucht</code> mit Datum und Nutzer.</li>
+</ul>
+<p>Fundstelle: 03, Verbrauchen; 03, DB-Skizze (<code>entnommen_am</code>, <code>entnommen_von</code>).</p>
+</div>
+
+<div class="card" id="rot-03">
+<h3>ROT-03 · Verbraucht</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Aktion an einer einzelnen Einheit: gegessen oder getrunken.</p>
+<ul>
+<li>Wenn „Verbraucht“ getippt wird, dann verlässt die Einheit den Vorrat und erscheint im Filter „Verbraucht“.</li>
+<li>Wenn eine Einheit verbraucht ist, dann zählt sie nicht mehr zu den Kennzahlen.</li>
+</ul>
+<p>Fundstelle: 03, Status-Ansichten (Aktionen pro Einheit).</p>
+</div>
+
+<div class="card" id="rot-04">
+<h3>ROT-04 · Entsorgt</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Aktion an einer Einheit, die weg musste. Datum und Nutzer werden festgehalten.</p>
+<ul>
+<li>Wenn „Entsorgt“ getippt wird, dann hat die Einheit den Status <code>entsorgt</code> und erscheint im Filter „Entsorgt“.</li>
+<li>Wenn eine Einheit entsorgt ist, dann fließt sie in die Statistik „verbraucht gegen entsorgt“ ein.</li>
+</ul>
+<p>Fundstelle: 03, Status-Ansichten.</p>
+</div>
+
+<div class="card" id="rot-05">
+<h3>ROT-05 · „Noch gut“</h3>
+<p><span class="badge badge-mvp">MVP</span> <span class="badge">offen</span> Rolle: beide</p>
+<p>Für abgelaufene Einheiten mit MHD: angeschaut, für gut befunden. Die Einheit bleibt im Vorrat mit dem Vermerk „geprüft am …“.</p>
+<ul>
+<li>Wenn „Noch gut“ getippt wird, dann bleibt die Einheit im Vorrat und zeigt „geprüft am &lt;Datum&gt;“.</li>
+<li>Wenn eine Einheit abgelaufen ist, dann bleibt sie sichtbar, bis jemand entscheidet.</li>
+</ul>
+<p>Fundstelle: 03, Status-Ansichten. Offen ist, ob eine als „Noch gut“ geprüfte Einheit zu „versorgt“ zählt und wie lange die Prüfung gilt. Der Prototyp zählt sie vorsichtshalber nicht mit.</p>
+</div>
+
+<div class="card" id="rot-06">
+<h3>ROT-06 · MHD ist kein Wegwerfdatum</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Beim abgelaufenen MHD steht ein freundlicher Hinweis: anschauen, riechen, probieren. Beim Verbrauchsdatum steht er nicht.</p>
+<ul>
+<li>Wenn eine Einheit mit MHD abgelaufen ist, dann erscheint der Hinweis.</li>
+<li>Wenn eine Einheit mit Verbrauchsdatum abgelaufen ist, dann erscheint der Hinweis nicht und „Noch gut“ wird nicht angeboten. <span class="badge badge-vorschlag">Vorschlag</span></li>
+</ul>
+<p>Fundstelle: 03, Ampel pro Einheit. Dass „Noch gut“ beim Verbrauchsdatum fehlt, ist ein Vorschlag.</p>
+</div>
+
+<div class="card" id="rot-07">
+<h3>ROT-07 · Historie</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Verbrauchte und entsorgte Einheiten bleiben als Historie erhalten, mit Datum und Nutzer. Sie lassen sich nach Zeitraum filtern.</p>
+<ul>
+<li>Wenn ein Zeitraum gewählt ist, dann zeigt die Historie nur Einträge aus diesem Zeitraum.</li>
+<li>Wenn man einen Eintrag ansieht, dann steht dabei, wer ihn wann vermerkt hat.</li>
+</ul>
+<p>Fundstelle: 03, Verbrauchen und Status-Ansichten.</p>
+</div>
+
+<div class="card" id="rot-08">
+<h3>ROT-08 · Inventur-Modus</h3>
+<p><span class="badge badge-mvp">MVP</span> <span class="badge badge-vorschlag">Vorschlag</span> Rolle: beide</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Der Ablauf ist noch nicht beschrieben. Gehört mit ERI-05 und dem Inventur-Intervall (EIN-05) zusammen.</p>
+<p>Produkt für Produkt durchgehen und die Menge bestätigen oder korrigieren. Ziel: in etwa 5 Minuten fertig.</p>
+<ul>
+<li>Wenn die Inventur startet, dann zeigt die App ein Produkt nach dem anderen.</li>
+<li>Wenn eine Menge bestätigt ist, dann geht es zum nächsten Produkt.</li>
+<li>Wenn man unterbricht, dann lässt sich später an derselben Stelle weitermachen. <span class="badge badge-vorschlag">Vorschlag</span></li>
+</ul>
+<p>Fundstelle: 03, Ansichten. Ein genauer Ablauf fehlt, die Kriterien sind deshalb ein Vorschlag.</p>
+</div>
+
+<div class="card" id="rot-09">
+<h3>ROT-09 · Rezepte aus „Bald fällig“</h3>
+<p><span class="badge badge-spaeter">später</span> laut Konzept später · Rolle: beide</p>
+<p>Die KI schlägt Rezepte aus Einheiten vor, die bald ablaufen.</p>
+<ul>
+<li>Wenn man Rezepte anfragt, dann nutzt der Vorschlag nur Produkte aus dem Vorrat.</li>
+</ul>
+<p>Fundstelle: 03, Ansichten („Später“); 00, Später erweiterbar.</p>
+</div>
+</section>
+
+<section id="nk">
+<h2>Nachkaufen</h2>
+<p>Nachkaufen ist eine schlanke Liste mit dem, was dem Vorrat fehlt. Sie ist gemeinsam für alle Nutzer des Haushalts.</p>
+
+<div class="card" id="nk-01">
+<h3>NK-01 · Automatisch aus der Ziel-Lücke</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Die Lücke ist Ziel minus Bestand, je Warengruppe in kg oder Liter. Daraus entstehen Einträge auf der Liste.</p>
+<ul>
+<li>Wenn eine Warengruppe unter dem Ziel liegt, dann steht ein Eintrag mit der fehlenden Menge auf der Liste.</li>
+<li>Wenn die Lücke geschlossen ist, dann verschwindet der automatische Eintrag. <span class="badge badge-vorschlag">Vorschlag</span></li>
+</ul>
+<p>Fundstelle: 02, Einkaufsplan; 03, Nachkaufen.</p>
+</div>
+
+<div class="card" id="nk-02">
+<h3>NK-02 · Vorschlag nach dem Entnehmen</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Nach einer Entnahme fragt die App, ob das Produkt auf die Liste soll.</p>
+<ul>
+<li>Wenn man nach dem Entnehmen „Ja“ wählt, dann steht das Produkt auf Nachkaufen.</li>
+<li>Wenn man ablehnt, dann ändert sich die Liste nicht.</li>
+</ul>
+<p>Fundstelle: 03, Verbrauchen („optional“) und Nachkaufen.</p>
+</div>
+
+<div class="card" id="nk-03">
+<h3>NK-03 · Von Hand ergänzen</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Einträge lassen sich auch selbst hinzufügen.</p>
+<ul>
+<li>Wenn ein Eintrag von Hand angelegt wird, dann bleibt er stehen, bis er abgehakt ist.</li>
+</ul>
+<p>Fundstelle: 03, Nachkaufen.</p>
+</div>
+
+<div class="card" id="nk-04">
+<h3>NK-04 · Gemeinsam abhaken</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Alle Nutzer sehen dieselbe Liste. Erledigte Einträge rutschen nach unten.</p>
+<ul>
+<li>Wenn ein Nutzer abhakt, dann sehen alle anderen den Eintrag als erledigt.</li>
+<li>Wenn alles erledigt ist, dann zeigt die Liste „0 offen“.</li>
+</ul>
+<p>Fundstelle: 03, Nachkaufen; Prototyp d6, Nachkaufen.</p>
+</div>
+
+<div class="card" id="nk-05">
+<h3>NK-05 · Abhaken und gleich erfassen</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Vom abgehakten Eintrag geht es direkt in die Erfassung, per Foto oder manuell.</p>
+<ul>
+<li>Wenn ein Eintrag abgehakt wird, dann bietet die App „Jetzt erfassen“ an.</li>
+<li>Wenn man das annimmt, dann öffnet sich die Erfassung mit der passenden Kategorie. <span class="badge badge-vorschlag">Vorschlag</span></li>
+</ul>
+<p>Fundstelle: 02, Einkaufsplan; 03, Nachkaufen.</p>
+</div>
+
+<div class="card" id="nk-06">
+<h3>NK-06 · Hinweise zu Ernährung und Allergien</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Die Hinweise beruhen auf noch ungeprüften Werten.</p>
+<p>Die Liste zeigt passende Hinweise, etwa „glutenfrei“ oder bei vegan „Vitamin B12 mitdenken“.</p>
+<ul>
+<li>Wenn ein Haushaltsmitglied vegan ist, dann erscheint ein Hinweis zu Vitamin B12.</li>
+<li>Wenn eine Allergie eingetragen ist, dann erscheint ein Hinweis dazu.</li>
+</ul>
+<p>Fundstelle: 02, Mitglied und Ernährungsform. Die genauen Hinweise sind an Primärquellen zu prüfen.</p>
+</div>
+
+<div class="card" id="nk-07">
+<h3>NK-07 · Aufteilung auf Wochen</h3>
+<p><span class="badge badge-spaeter">später</span> <span class="badge">offen</span> Rolle: beide</p>
+<p>Die Lücke wird auf die Wochen bis zum Zieldatum verteilt. Beispiel: „Diese Woche: 6 l Wasser, 1 kg Reis, 2 Dosen Linsen“.</p>
+<ul>
+<li>Wenn ein Zieldatum gesetzt ist, dann zeigt die Liste, was diese Woche dran ist.</li>
+</ul>
+<p>Fundstelle: 02, Einkaufsplan. 03 will die Liste dagegen bewusst schlank halten. Ob die Wochenplanung dazugehört, ist offen.</p>
+</div>
+</section>
+
+<section id="eri">
+<h2>Erinnerungen</h2>
+<p>Erinnerungen kommen gebündelt statt einzeln. Es gibt keine Nachricht pro Packung. Jeder Nutzer stellt sie selbst ein.</p>
+
+<div class="card" id="eri-01">
+<h3>ERI-01 · Push je Gerät</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Benachrichtigungen kommen als Web-Push. Jedes Gerät lässt sich einzeln ein- und ausschalten.</p>
+<ul>
+<li>Wenn Push auf einem Gerät aus ist, dann bekommt nur dieses Gerät nichts mehr.</li>
+<li>Wenn die App auf dem iPhone nicht auf dem Home-Bildschirm liegt, dann erklärt die App, dass Push erst danach geht.</li>
+</ul>
+<p>Fundstelle: 03, Erinnerungen; 04, Benachrichtigungen; Prototyp d6, Benachrichtigungen.</p>
+</div>
+
+<div class="card" id="eri-02">
+<h3>ERI-02 · Wochenübersicht</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Einmal pro Woche eine Sammelnachricht. Beispiel: „3 Einheiten bald verbrauchen · Ziel: 6 von 10 Tagen · Nachkaufen: 6 l Wasser“.</p>
+<ul>
+<li>Wenn nichts eingestellt ist, dann kommt sie samstags um 10:00 Uhr.</li>
+<li>Wenn Tag und Uhrzeit geändert werden, dann kommt sie zum neuen Zeitpunkt.</li>
+</ul>
+<p>Fundstelle: 03, Erinnerungen.</p>
+</div>
+
+<div class="card" id="eri-03">
+<h3>ERI-03 · Dringend</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Sofortige Nachricht, wenn etwas sehr bald abläuft. Beispiel: „Thunfisch läuft in 7 Tagen ab“.</p>
+<ul>
+<li>Wenn mehrere Einheiten dringend werden, dann kommt höchstens eine Nachricht am Tag.</li>
+<li>Wenn „Dringend“ ausgeschaltet ist, dann kommt keine.</li>
+</ul>
+<p>Fundstelle: 03, Erinnerungen.</p>
+</div>
+
+<div class="card" id="eri-04">
+<h3>ERI-04 · Ziel-Etappe</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Hängt an den Etappen (ZIEL-05).</p>
+<p>Eine Nachricht, wenn eine Etappe erreicht ist, und eine zwei Wochen vor dem Zieldatum.</p>
+<ul>
+<li>Wenn eine Etappe erreicht ist, dann kommt etwa „Geschafft: 3 Tage versorgt“. (Beispiel)</li>
+<li>Wenn noch zwei Wochen bis zum Zieldatum bleiben und das Ziel fehlt, dann kommt ein freundlicher Stand.</li>
+</ul>
+<p>Fundstelle: 03, Erinnerungen.</p>
+</div>
+
+<div class="card" id="eri-05">
+<h3>ERI-05 · Inventur-Erinnerung</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Hängt am Inventur-Modus (ROT-08).</p>
+<p>Lädt zu einem kurzen Vorrats-Check ein, der etwa 5 Minuten dauert.</p>
+<ul>
+<li>Wenn nichts eingestellt ist, dann kommt sie alle 3 Monate.</li>
+<li>Wenn der Admin das Intervall ändert, dann gilt es für den Haushalt (EIN-05).</li>
+</ul>
+<p>Fundstelle: 03, Erinnerungen; 04, Ampel &amp; Regeln. 04 führt sie nicht unter Mein Konto. Ob jeder Nutzer sie selbst abschalten kann, ist offen.</p>
+</div>
+
+<div class="card" id="eri-06">
+<h3>ERI-06 · Check-in-Mail</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Eine regelmäßige, freundliche Mail. Beispiel: „Wie sieht’s aus? Zeit für einen Blick in den Vorrat: X ist abgelaufen, Y bald fällig.“</p>
+<ul>
+<li>Wenn „wöchentlich“, „monatlich“ oder „aus“ gewählt ist, dann richtet sich der Versand danach.</li>
+<li>Wenn die Mail kommt, dann geht sie an die E-Mail-Adresse des Nutzers.</li>
+<li>Wenn auf dem NAS kein Mailversand eingerichtet ist, dann ist die Check-in-Mail nicht wählbar und die Seite sagt das ruhig. <span class="badge badge-vorschlag">Vorschlag</span></li>
+</ul>
+<p>Fundstelle: 03, Entscheidungen; 04, Benachrichtigungen. Offen ist, ob sie dieselbe Mail ist wie die „E-Mail-Zusammenfassung“ als Ausweichkanal aus 03. Offen ist auch, ob bei ausgeschaltetem Push automatisch eine Mail kommt.</p>
+</div>
+
+<div class="card" id="eri-07">
+<h3>ERI-07 · Benachrichtigungen einstellen</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide, jeder für sich</p>
+<p>Unter Mein Konto → Benachrichtigungen stellt jeder ein, was er bekommt.</p>
+<ul>
+<li>Wenn ein Nutzer nur die Wochenübersicht möchte, dann kann er alles andere abschalten.</li>
+<li>Wenn ein Nutzer etwas ändert, dann betrifft das niemand anderen.</li>
+</ul>
+<p>Fundstelle: 03, Erinnerungen; 04, Mein Konto.</p>
+</div>
+
+<div class="card" id="eri-08">
+<h3>ERI-08 · ntfy als weiterer Kanal</h3>
+<p><span class="badge badge-spaeter">später</span> laut Konzept später · Rolle: beide</p>
+<p>ntfy ist ein freier Dienst für Benachrichtigungen. Er kommt als weiterer Ausweichkanal infrage.</p>
+<ul>
+<li>Wenn ntfy eingerichtet ist, dann kommen die Erinnerungen auch darüber.</li>
+</ul>
+<p>Fundstelle: 03, Erinnerungen („später ntfy“).</p>
+</div>
+</section>
+
+<section id="sta">
+<h2>Statistik</h2>
+<p>Die Statistik zeigt, wie gut der Vorrat über die Zeit gepflegt ist. Sie ist freundlich und ohne Druck formuliert.</p>
+
+<div class="card" id="sta-01">
+<h3>STA-01 · Erfüllungsgrad</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Wie viel Prozent der Empfehlung sind erreicht? Übererfüllung ist sichtbar, etwa 110 % oder 120 %.</p>
+<ul>
+<li>Wenn mehr im Vorrat ist als empfohlen, dann zeigt die Anzeige mehr als 100 %.</li>
+</ul>
+<p>Fundstelle: 03, Entscheidungen. Offen ist, worauf sich der Wert bezieht: auf die Zieldauer, auf den Standard der Quelle oder je Warengruppe.</p>
+</div>
+
+<div class="card" id="sta-02">
+<h3>STA-02 · So viele Tage haltet ihr durch</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Zeigt die Durchhaltezeit des Haushalts im Verhältnis zum Ziel.</p>
+<ul>
+<li>Wenn sich der Bestand ändert, dann ändert sich die Zahl passend zu „Heute versorgt“.</li>
+</ul>
+<p>Fundstelle: 03, Entscheidungen; Prototyp d6, Statistik.</p>
+</div>
+
+<div class="card" id="sta-03">
+<h3>STA-03 · Verbraucht gegen entsorgt</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Vergleich aus der Historie. Beispiel: „2026: 0,4 kg entsorgt“.</p>
+<ul>
+<li>Wenn ein Zeitraum gewählt ist, dann bezieht sich der Vergleich darauf.</li>
+<li>Wenn nichts entsorgt wurde, dann steht dort ein freundlicher Satz.</li>
+</ul>
+<p>Fundstelle: 03, Verbrauchen und Entscheidungen; Prototyp d6 („Nichts entsorgt – schön so.“).</p>
+</div>
+
+<div class="card" id="sta-04">
+<h3>STA-04 · Check-in-Serie</h3>
+<p><span class="badge badge-spaeter">später</span> <span class="badge">offen</span> Rolle: beide</p>
+<p>Zählt, wie viele Wochen oder Monate in Folge ein Check-in erledigt wurde.</p>
+<ul>
+<li>Wenn ein Check-in erledigt ist, dann wächst die Serie um eins.</li>
+</ul>
+<p>Fundstelle: 03, Entscheidungen. Was genau als Check-in zählt, ist offen. Die Recherche rät von Serien eher ab, deshalb hier als „später“ vorgeschlagen.</p>
+</div>
+</section>
+
+<section id="ein">
+<h2>Einstellungen</h2>
+<p>Die Einstellungen öffnen sich über das Zahnrad im Kopf. Hier wird geändert, die Übersicht zeigt nur an. Mitglieder, Ernährung und Ziel stehen in den Bereichen HH und ZIEL.</p>
+
+<div class="card" id="ein-01">
+<h3>EIN-01 · Aufbau und Sichtbarkeit</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Vier Gruppen: Mein Konto · Haushalt · Nutzerverwaltung · Daten &amp; System. Die Tabs unten bleiben für den Alltag: Übersicht · Vorrat · Neu · Statistik · Nachkaufen.</p>
+<ul>
+<li>Wenn ein Mitglied die Einstellungen öffnet, dann sieht es Haushalt nur lesend und Nutzerverwaltung sowie Daten &amp; System gar nicht.</li>
+<li>Wenn ein Admin sie öffnet, dann kann er alles ändern.</li>
+</ul>
+<p>Fundstelle: 04, Grundsatz und Struktur; Prototyp d6, <code>settings/routes.ts</code>.</p>
+</div>
+
+<div class="card" id="ein-02">
+<h3>EIN-02 · Profil</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Name, E-Mail und Passwort ändern. Dazu die eigenen Geräte und Sitzungen (ERS-05).</p>
+<ul>
+<li>Wenn das Passwort geändert wird, dann gilt ab sofort nur noch das neue.</li>
+<li>Wenn der Name geändert wird, dann erscheint er überall in der App neu.</li>
+</ul>
+<p>Fundstelle: 04, Mein Konto.</p>
+</div>
+
+<div class="card" id="ein-03">
+<h3>EIN-03 · Darstellung</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Die Schalter für dunkel, Startansicht und Animationen. Die Systemeinstellung des Geräts zu reduzierter Bewegung wird trotzdem beachtet.</p>
+<p>Hell oder dunkel, Animationen reduzieren, Startansicht. Gilt nur für den eigenen Nutzer.</p>
+<ul>
+<li>Wenn nichts gewählt ist, dann ist die App hell.</li>
+<li>Wenn „Animationen reduzieren“ an ist, dann laufen Übergänge ruhiger.</li>
+<li>Wenn eine Startansicht gewählt ist, dann öffnet die App dort.</li>
+</ul>
+<p>Fundstelle: 04, Mein Konto; 05, Design.</p>
+</div>
+
+<div class="card" id="ein-04">
+<h3>EIN-04 · Vorrat-Stammdaten</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin · Mitglied liest</p>
+<p>Kategorien anlegen, umbenennen, Piktogramm wählen, Warengruppe zuordnen, ausblenden und sortieren. Dazu Lagerorte und Schlagwörter.</p>
+<ul>
+<li>Wenn eine System-Kategorie nicht gebraucht wird, dann lässt sie sich ausblenden, aber nicht löschen.</li>
+<li>Wenn eine eigene Kategorie angelegt wird, dann muss sie einer Warengruppe zugeordnet sein.</li>
+</ul>
+<p>Fundstelle: 01, Ordnungssystem; 04, Haushalt. Ob Wasser eine eigene Kategorie wird, getrennt von Getränken, ist noch zu bestätigen.</p>
+</div>
+
+<div class="card" id="ein-05">
+<h3>EIN-05 · Ampel &amp; Regeln</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin · Mitglied liest</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Nur das Inventur-Intervall, zusammen mit ROT-08 und ERI-05. Die Schwellen bleiben im MVP.</p>
+<p>Schwellen für gelb und orange sowie das Inventur-Intervall.</p>
+<ul>
+<li>Wenn die Schwelle für gelb geändert wird, dann kann orange nicht größer sein als gelb. <span class="badge badge-vorschlag">Vorschlag</span></li>
+<li>Wenn eine Schwelle geändert wird, dann zeigt der Vorrat sofort die neue Ampel.</li>
+</ul>
+<p>Fundstelle: 03, Ampel pro Einheit; 04, Ampel &amp; Regeln; Prototyp d6, Ampel &amp; Regeln.</p>
+</div>
+
+<div class="card" id="ein-06">
+<h3>EIN-06 · Foto-Erkennung an oder aus</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin · Mitglied liest</p>
+<p>Ein Schalter für den ganzen Haushalt. Dazu der Hinweis: „Fotos werden zur Erkennung an Anthropic (USA) gesendet.“</p>
+<ul>
+<li>Wenn die KI aus ist, dann geht kein Foto an Anthropic.</li>
+<li>Wenn die KI an ist, dann steht der Datenschutzhinweis sichtbar auf der Seite.</li>
+</ul>
+<p>Fundstelle: 04, Foto-Erkennung; 01, Hinweis Datenschutz.</p>
+</div>
+
+<div class="card" id="ein-07">
+<h3>EIN-07 · Modell je Foto-Art</h3>
+<p><span class="badge badge-mvp">MVP</span> <span class="badge badge-vorschlag">Vorschlag</span> Rolle: Admin · Mitglied liest</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Im MVP nur über die Server-Konfiguration. Die Auswahl in der Oberfläche kommt später.</p>
+<p>Für Verpackung, Nährwerte und MHD lässt sich je ein KI-Modell wählen. Zum Start gilt Sonnet für alle. Ob Haiku reicht, zeigt erst der Test mit echten Fotos.</p>
+<ul>
+<li>Wenn nichts gewählt ist, dann gilt der Standard aus der Server-Konfiguration.</li>
+<li>Wenn der Admin ein Modell wählt, dann gilt es für diese Foto-Art.</li>
+</ul>
+<p>Fundstelle: 01, Entscheidung KI-Anbieter („per Konfiguration“); 04, Foto-Erkennung („Modell je Foto-Art“). Beides zusammen ist ein Vorschlag: Die Konfiguration gibt den Standard vor, der Admin kann ihn übersteuern.</p>
+</div>
+
+<div class="card" id="ein-08">
+<h3>EIN-08 · Status des API-Schlüssels</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin · Mitglied liest</p>
+<p>Der API-Schlüssel ist das Zugangsrecht zur KI. Die Seite zeigt nur „hinterlegt ✓“. Der Schlüssel selbst steht nur in der Konfigurationsdatei auf dem NAS.</p>
+<ul>
+<li>Wenn ein Schlüssel hinterlegt ist, dann zeigt die Seite „hinterlegt ✓“.</li>
+<li>Wenn man die Seite öffnet, dann ist der Schlüssel nirgends lesbar.</li>
+</ul>
+<p>Fundstelle: 04, Foto-Erkennung.</p>
+</div>
+
+<div class="card" id="ein-09">
+<h3>EIN-09 · Kosten des Monats</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin · Mitglied liest</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Komfort. Die Kosten lassen sich auch direkt bei Anthropic ansehen.</p>
+<p>Zeigt, wie viele Fotos diesen Monat erkannt wurden und was das ungefähr gekostet hat.</p>
+<ul>
+<li>Wenn ein Foto erkannt wurde, dann steigen Zähler und Kosten des Monats.</li>
+<li>Wenn ein neuer Monat beginnt, dann startet die Anzeige bei null.</li>
+</ul>
+<p>Fundstelle: 04, Foto-Erkennung („Kostenübersicht des Monats“).</p>
+</div>
+
+<div class="card" id="ein-10">
+<h3>EIN-10 · Nutzerverwaltung</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin</p>
+<p>Liste aller Nutzer mit Rolle, Status und letztem Login. Der Admin setzt Rollen, deaktiviert und entfernt Nutzer.</p>
+<ul>
+<li>Wenn nur noch ein aktiver Admin da ist, dann kann er weder herabgestuft noch deaktiviert noch entfernt werden.</li>
+<li>Wenn ein Nutzer deaktiviert wird, dann enden seine Sitzungen und er kann sich nicht mehr anmelden.</li>
+</ul>
+<p>Fundstelle: 04, Rollen und Nutzerverwaltung; Prototyp d6, <code>lib/user-rules.ts</code>.</p>
+</div>
+
+<div class="card" id="ein-11">
+<h3>EIN-11 · Einwilligung zur KI je Nutzer</h3>
+<p><span class="badge badge-spaeter">später</span> <span class="badge">offen</span> Rolle: beide</p>
+<p>Zusätzlich zum Haushaltsschalter könnte jeder Nutzer selbst zustimmen, bevor seine Fotos an Anthropic gehen.</p>
+<ul>
+<li>Wenn ein Nutzer nicht zugestimmt hat, dann erfasst er nur manuell.</li>
+</ul>
+<p>Fundstelle: Die Tech-Recherche nennt eine Einwilligung pro Nutzer, 04 nur den Haushaltsschalter. Offen.</p>
+</div>
+</section>
+
+<section id="sys">
+<h2>Daten &amp; System</h2>
+<p>Hier sichert und verwaltet der Admin die Daten. Alles liegt auf dem eigenen NAS.</p>
+
+<div class="card" id="sys-01">
+<h3>SYS-01 · Export komplett (JSON)</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin</p>
+<p>JSON ist ein Textformat für strukturierte Daten. Der Export enthält alle Daten des Haushalts.</p>
+<ul>
+<li>Wenn der Admin exportiert, dann entsteht eine Datei mit allen Daten.</li>
+<li>Wenn ein Mitglied die Einstellungen öffnet, dann sieht es den Export nicht.</li>
+</ul>
+<p>Fundstelle: 04, Daten &amp; System. Ob Fotos im Export enthalten sind, ist nicht geregelt.</p>
+</div>
+
+<div class="card" id="sys-02">
+<h3>SYS-02 · Export Vorrat (CSV)</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Der JSON-Export sichert schon alle Daten.</p>
+<p>CSV ist eine Tabelle, die sich zum Beispiel in Excel oder Numbers öffnen lässt. Der Export enthält den Vorrat.</p>
+<ul>
+<li>Wenn der Admin den CSV-Export startet, dann enthält die Datei je Einheit eine Zeile. <span class="badge badge-vorschlag">Vorschlag</span></li>
+</ul>
+<p>Fundstelle: 04, Daten &amp; System.</p>
+</div>
+
+<div class="card" id="sys-03">
+<h3>SYS-03 · Import</h3>
+<p><span class="badge badge-spaeter">später</span> <span class="badge">offen</span> Rolle: Admin</p>
+<p>Daten aus einem Export wieder einlesen.</p>
+<ul>
+<li>Wenn ein Import auf vorhandene Daten trifft, dann fragt die App vorher, was passieren soll. <span class="badge badge-vorschlag">Vorschlag</span></li>
+</ul>
+<p>Fundstelle: 04, Daten &amp; System. Format und Verhalten bei vorhandenen Daten sind offen.</p>
+</div>
+
+<div class="card" id="sys-04">
+<h3>SYS-04 · Backup-Status</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin</p>
+<p><span class="badge badge-spaeter">Kandidat für später</span> Das Backup selbst läuft auch ohne Anzeige. Wie es läuft, hängt am NAS-Modell.</p>
+<p>Zeigt, wann das letzte Backup der Datenbank lief.</p>
+<ul>
+<li>Wenn ein Backup gelaufen ist, dann zeigt die Seite Datum und Uhrzeit.</li>
+<li>Wenn länger kein Backup lief, dann erscheint ein ruhiger Hinweis. <span class="badge badge-vorschlag">Vorschlag</span></li>
+</ul>
+<p>Fundstelle: 04, Daten &amp; System. Wie das Backup auf dem NAS läuft, hängt am noch offenen NAS-Modell und steht auf der Technik-Seite.</p>
+</div>
+
+<div class="card" id="sys-05">
+<h3>SYS-05 · Alte Historie archivieren</h3>
+<p><span class="badge badge-spaeter">später</span> Rolle: Admin</p>
+<p>Ältere Historie lässt sich archivieren oder der Verlauf leeren.</p>
+<ul>
+<li>Wenn Historie archiviert ist, dann steht sie nicht mehr in der Liste, zählt aber weiter in der Statistik.</li>
+</ul>
+<p>Fundstelle: 04, Daten &amp; System; Prototyp d6 („Archivierte Einträge zählen weiter in die Statistik“).</p>
+</div>
+
+<div class="card" id="sys-06">
+<h3>SYS-06 · Version, Lizenz und Quellen</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: Admin</p>
+<p>Zeigt Version der App, ihre Lizenz, die genutzten Quellen mit Stand und die Lizenzen Dritter, etwa für Piktogramme.</p>
+<ul>
+<li>Wenn man die Seite öffnet, dann stehen BBK/BLE mit Stand und Link dort.</li>
+<li>Wenn die Lizenz der App feststeht, dann steht sie hier.</li>
+</ul>
+<p>Fundstelle: 04, Daten &amp; System. Die Lizenz der App ist noch offen: MIT, GPL-3.0 oder AGPL-3.0. Der Vergleich steht auf der Technik-Seite.</p>
+</div>
+</section>
+
+<section id="pwa">
+<h2>Installation &amp; Offline</h2>
+<p>Preposaurus ist eine Web-App für Handy und PC mit denselben Daten. Sie läuft komplett auf dem NAS und ist nur über Tailscale erreichbar.</p>
+
+<div class="card" id="pwa-01">
+<h3>PWA-01 · Zum Home-Bildschirm</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Die App lässt sich auf dem iPhone über „Zum Home-Bildschirm“ wie eine App ablegen.</p>
+<ul>
+<li>Wenn die App auf dem Home-Bildschirm liegt, dann öffnet sie ohne Browser-Leiste.</li>
+<li>Wenn sie dort liegt, dann ist Push nutzbar. Auf dem iPhone geht Push nur so.</li>
+</ul>
+<p>Fundstelle: 00, Entscheidungen; 03, Erinnerungen.</p>
+</div>
+
+<div class="card" id="pwa-02">
+<h3>PWA-02 · Hinweis beim ersten Start</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Beim ersten Start erklärt die App, wie man sie zum Home-Bildschirm hinzufügt und warum das für Push nötig ist.</p>
+<ul>
+<li>Wenn die App im normalen Browser auf dem iPhone geöffnet wird, dann erscheint der Hinweis.</li>
+<li>Wenn sie schon installiert ist, dann erscheint er nicht.</li>
+</ul>
+<p>Fundstelle: 03, Erinnerungen („das Onboarding erklärt das“).</p>
+</div>
+
+<div class="card" id="pwa-03">
+<h3>PWA-03 · Handy und PC, gleiche Daten</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Die App passt sich an Handy und PC an. Alle Geräte arbeiten mit denselben Daten auf dem NAS.</p>
+<ul>
+<li>Wenn am Handy etwas erfasst wird, dann ist es am PC nach dem Neuladen sichtbar.</li>
+<li>Wenn der Bildschirm breiter ist, dann nutzt die Übersicht mehr Spalten.</li>
+</ul>
+<p>Fundstelle: 05, Plattform; Prototyp d6 (2 Spalten am Handy, 4 am PC). Varianten für iPhone, iPhone Duo und PC stehen auf der Design-Seite.</p>
+</div>
+
+<div class="card" id="pwa-04">
+<h3>PWA-04 · Zugriff nur über Tailscale</h3>
+<p><span class="badge badge-mvp">MVP</span> Rolle: beide</p>
+<p>Die App ist nicht öffentlich im Internet. Man erreicht sie nur mit aktivem Tailscale, verschlüsselt über HTTPS.</p>
+<ul>
+<li>Wenn Tailscale auf dem Gerät aus ist, dann erreicht die App das NAS nicht. Was sie dann anzeigt, hängt an PWA-05.</li>
+<li>Wenn Tailscale aus ist, dann kommen Benachrichtigungen trotzdem an. Öffnen lassen sie sich erst mit Tailscale.</li>
+<li>Wenn Tailscale an ist, dann öffnet die App über eine sichere HTTPS-Adresse.</li>
+</ul>
+<p>Fundstelle: 05, Hosting. Das Verhalten bei ausgeschaltetem Tailscale ist abgeleitet (Tech-Recherche, FAKTEN F13), nicht in den Konzeptdateien beschrieben. Wie weitere Haushaltsmitglieder Zugang zu Tailscale bekommen und ob das etwas kostet, ist noch zu klären.</p>
+</div>
+
+<div class="card" id="pwa-05">
+<h3>PWA-05 · Verhalten ohne Verbindung</h3>
+<p><span class="badge">offen</span> Rolle: beide</p>
+<p>Noch nicht entschieden. Zwei Varianten stehen zur Wahl. Für jede gibt es eigene Kriterien.</p>
+<p><strong>Variante A: nur anzeigen</strong></p>
+<ul>
+<li>Wenn keine Verbindung besteht, dann zeigt die App den zuletzt geladenen Stand mit Hinweis „offline“.</li>
+<li>Wenn keine Verbindung besteht, dann sind Erfassen und Entnehmen gesperrt.</li>
+</ul>
+<p><strong>Variante B: auch eintragen, später abgleichen</strong></p>
+<ul>
+<li>Wenn keine Verbindung besteht, dann lassen sich Erfassen und Entnehmen trotzdem ausführen.</li>
+<li>Wenn die Verbindung zurück ist, dann werden die Änderungen übertragen.</li>
+<li>Wenn zwei Geräte dieselbe Einheit geändert haben, dann zeigt die App das an.</li>
+</ul>
+<p>Fundstelle: 05, Offene Fragen Nr. 1. Variante B ist deutlich aufwendiger. Die Technik-Seite vergleicht beide.</p>
+</div>
+</section>
+
+<section id="nicht">
+<h2>Bewusst nicht dabei</h2>
+<p>Diese Dinge sind entschieden ausgeschlossen. Das hält die App schlank.</p>
+<ul>
+<li><strong>Kein Barcode und keine Marken.</strong> Es zählt nur: Was ist es, wie viel, bis wann haltbar. Fundstelle: 01, Grundsatz.</li>
+<li><strong>Keine allgemeine Einkaufslisten-App.</strong> Nachkaufen enthält nur, was dem Vorrat fehlt. Fundstelle: 03, Entscheidungen.</li>
+<li><strong>Kein öffentliches Hosting.</strong> Zugriff nur über Tailscale. Fundstelle: 05, Hosting.</li>
+<li><strong>Nur ein Haushalt pro Installation.</strong> Die Datenbank ist für mehrere vorbereitet. Fundstelle: 02, Entscheidungen.</li>
+<li><strong>Kein zweiter KI-Anbieter.</strong> Nur Anthropic. Der Anschluss bleibt austauschbar. Fundstelle: 01, Entscheidung KI-Anbieter.</li>
+<li><strong>Kein geratenes Datum durch die KI.</strong> Fundstelle: CLAUDE.md, Fachliche Grundregeln.</li>
+</ul>
+</section>
+
+<section id="spaeter">
+<h2>Später</h2>
+<p>Diese Ideen nennen die Konzeptdateien ausdrücklich als spätere Erweiterung.</p>
+<ul>
+<li>Nicht-Lebensmittel, aufgeteilt in Hygiene, Hausapotheke, Energie &amp; Licht. Fundstelle: 00, Später erweiterbar; 01, Ordnungssystem.</li>
+<li>Haustiere und Tierfutter (HH-07). Fundstelle: 02; 01.</li>
+<li>Rezepte aus dem Vorrat, auch „Notfallküche ohne Strom“ (ROT-09). Fundstelle: 00; 03.</li>
+<li>Notfallplan, Treffpunkte, Kontakte, Dokumentenmappe. Fundstelle: 00, Später erweiterbar.</li>
+<li>Weitere Quellen: Österreich, Schweiz, EU (ZIEL-07). Fundstelle: 02, Quelle.</li>
+<li>Mehrere Haushalte pro Installation. Fundstelle: 02, Entscheidungen.</li>
+<li>Anbindung an Warn-Apps wie NINA und KATWARN. Fundstelle: 00, Später erweiterbar.</li>
+<li>Spielerische Elemente. Fundstelle: 00, Später erweiterbar.</li>
+<li>„Gleiches Produkt nochmal“ (ERF-17) und ntfy (ERI-08). Fundstelle: 01; 03.</li>
+</ul>
+</section>
+
+<section id="offen">
+<h2>Offene Punkte / zur Freigabe</h2>
+<p>Bitte jeden Punkt bestätigen, ändern oder streichen. Nach dem MVP-Zuschnitt folgen die drei offenen Fragen aus dem Status-Dokument.</p>
+<ul class="checklist">
+<li><strong>MVP-Zuschnitt bestätigen.</strong> Alle Etiketten MVP und später in diesem Katalog sind Vorschläge.</li>
+<li><strong>Offline:</strong> nur anzeigen oder auch eintragen (mit späterem Abgleich)? Varianten A und B in PWA-05.</li>
+<li><strong>Lizenz:</strong> MIT, GPL-3.0 oder AGPL-3.0? Der Vergleich steht auf der Technik-Seite. (SYS-06)</li>
+<li><strong>NAS:</strong> Welches Modell bzw. Hersteller (Synology, QNAP, Unraid; x86 oder ARM)? Betrifft Backup (SYS-04) und Tailscale (PWA-04).</li>
+<li>Ersteinrichtung mit geführten Schritten Haushalt, Ziel, Home-Bildschirm (ERS-01).</li>
+<li>Hinweistext bei falscher Anmeldung (ERS-02).</li>
+<li>Einladungslink nach 7 Tagen ungültig (ERS-03).</li>
+<li>Fehlendes Geschlecht im Modus „Individuell“: Mittelwert beider Geschlechter (HH-02).</li>
+<li>Schnellknöpfe beim Datum rechnen ab heute (ERF-08).</li>
+<li>Begriffe: „Engpass“ nur für Energie und Wasser, bei den Balken „knappste Warengruppe“ (UEB-03).</li>
+<li>Passkey erst später, wegen der Bindung an den Tailscale-Namen (ERS-04).</li>
+<li>Tailscale-Zugang und mögliche Kosten für weitere Haushaltsmitglieder (PWA-04).</li>
+<li>Eigener Hinweis zum Sonderbedarf von Babys in der Übersicht (HH-05).</li>
+<li>Zieldatum in der Vergangenheit: freundlich nach neuem Datum fragen (ZIEL-04).</li>
+<li>Wasser als eigene Kategorie, getrennt von Getränken (UEB-04, EIN-04).</li>
+<li>„Ohne Datum“ nur als bewusste Wahl, sichtbar als „geschätzt“. Dafür braucht die Einheit ein eigenes Feld (ERF-09).</li>
+<li>Pflichtfelder der manuellen Erfassung wie im Prototyp (ERF-10).</li>
+<li>Darf ein Mitglied beim Erfassen eine neue Kategorie anlegen? (ERF-13)</li>
+<li>Bei ausgeschalteter KI nur manuelle Eingabe, Fotos als Produktbild ja oder nein? (ERF-16)</li>
+<li>Erfassen am PC per Dateiauswahl (ERF-18).</li>
+<li>Produkt und Einheiten nach dem Speichern bearbeiten. Mitglieder dürfen bearbeiten, Löschen nur der Admin (VOR-04, Rollen).</li>
+<li>Echtes Löschen von Fehlerfassungen samt Fotos, nur Admin (VOR-07).</li>
+<li>Lagerort am Produkt oder an der Einheit? (VOR-05)</li>
+<li>Angebrochene Packungen und lose Ware (VOR-08).</li>
+<li>Zählt „Noch gut“ zu „versorgt“, und wie lange gilt die Prüfung? (ROT-05)</li>
+<li>Kein „Noch gut“ beim Verbrauchsdatum (ROT-06).</li>
+<li>Ablauf des Inventur-Modus, mit Weitermachen nach Unterbrechung (ROT-08).</li>
+<li>Automatischer Eintrag verschwindet, sobald die Lücke geschlossen ist (NK-01).</li>
+<li>Nach dem Abhaken die Erfassung mit passender Kategorie öffnen (NK-05).</li>
+<li>Aufteilung von Nachkaufen auf Wochen: MVP, später oder gar nicht? (NK-07)</li>
+<li>Tabellenname <code>einkaufsliste_eintrag</code> in <code>nachkauf_eintrag</code> umbenennen.</li>
+<li>Ist die Check-in-Mail dieselbe wie die „E-Mail-Zusammenfassung“ als Ausweichkanal? (ERI-06)</li>
+<li>Kommt bei ausgeschaltetem Push automatisch eine Mail? Ohne eingerichteten Mailversand ist die Check-in-Mail nicht wählbar (ERI-06).</li>
+<li>Worauf bezieht sich der Erfüllungsgrad: Zieldauer, Standard der Quelle oder je Warengruppe? (STA-01)</li>
+<li>Orange-Schwelle darf nicht größer sein als Gelb (EIN-05).</li>
+<li>Verhalten bei ausgeschaltetem Tailscale, abgeleitet: Benachrichtigungen kommen an, öffnen erst mit Tailscale (PWA-04).</li>
+<li>Inventur-Erinnerung: Kann jeder Nutzer sie unter Mein Konto abschalten? (ERI-05)</li>
+<li>Check-in-Serie: Was zählt als Check-in, und soll es sie überhaupt geben? (STA-04)</li>
+<li>KI-Modell: Standard aus der Konfiguration, Admin kann übersteuern (EIN-07).</li>
+<li>Einwilligung zur KI je Nutzer (EIN-11).</li>
+<li>Fotos im JSON-Export ja oder nein, eine Zeile je Einheit im CSV-Export (SYS-01, SYS-02).</li>
+<li>Format und Verhalten beim Import (SYS-03).</li>
+<li>Hinweis, wenn länger kein Backup lief (SYS-04).</li>
+<li>Bedarfswerte, Makro-Werte und Ersatzregeln für vegetarisch und vegan an Primärquellen (BBK/BLE, DGE) prüfen (HH-03, UEB-07, NK-06).</li>
+</ul>
+
+<h3>MVP schlanker? (92 → ca. 73)</h3>
+<p>Diese Funktionen tragen das Etikett „Kandidat für später“. Abhaken heißt: kommt erst nach dem MVP. Nichts davon ist schon verschoben.</p>
+<ul class="checklist">
+<li>ZIEL-02: Rechenmodus „Individuell“, weil die DGE-Werte ungeprüft sind.</li>
+<li>UEB-07, NK-06, ERF-14: Makro-Kachel, Ernährungshinweise, Hinweis zur Ernährungsform, weil die Werte ungeprüft sind. Nährwerte werden weiter erfasst.</li>
+<li>HH-05: Sonderbedarf für Babys.</li>
+<li>HH-04: nur der Hinweis bei Nachkaufen. Das Feld bleibt.</li>
+<li>ZIEL-05 und ERI-04: Etappen und ihre Benachrichtigung.</li>
+<li>ROT-08, ERI-05 und das Inventur-Intervall in EIN-05: Inventur.</li>
+<li>ERF-13: neue Kategorie direkt in der Erfassung.</li>
+<li>VOR-06: Schlagwörter.</li>
+<li>EIN-07: Modellwahl in der Oberfläche. Im MVP nur Server-Konfiguration.</li>
+<li>EIN-09: Kosten des Monats.</li>
+<li>EIN-03: Schalter für dunkel, Startansicht und Animationen. Die Systemeinstellung wird trotzdem beachtet.</li>
+<li>SYS-02: CSV-Export.</li>
+<li>SYS-04: Backup-Status.</li>
+<li>ERS-05: Liste der Sitzungen.</li>
+</ul>
+
+<h3>Zusammenlegen?</h3>
+<p><span class="badge badge-vorschlag">Vorschlag</span> Diese Karten überschneiden sich und könnten zu einer werden.</p>
+<ul class="checklist">
+<li>STA-02 „So viele Tage haltet ihr durch“ mit UEB-01 „Heute versorgt“.</li>
+<li>UEB-09 Schnellzugriff und UEB-10 „Bearbeiten →“ mit UEB-01 beziehungsweise EIN-01.</li>
+<li>ROT-02 „1 entnehmen“ mit ROT-03 „Verbraucht“.</li>
+</ul>
+</section>
+</div>

@@ -1,0 +1,1230 @@
+<title>Preposaurus Technik</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+:root{
+--bg:#f4f3fa;--fg:#0f172a;--muted:#475569;--subtle:#5b6678;
+--line:rgb(15 23 42 / 0.12);--surface:rgb(255 255 255 / 0.58);--surface-strong:rgb(255 255 255 / 0.85);--surface-border:rgb(255 255 255 / 0.85);
+--shadow:rgb(70 60 140 / 0.3);--track:rgb(15 23 42 / 0.07);
+--accent:#5b5bd6;--accent-2:#a78bfa;--accent-text:#4338ca;--accent-soft:rgb(99 102 241 / 0.12);
+--ink:#0f172a;--on-ink:#ffffff;
+--ok:#10b981;--ok-text:#047857;--warn:#f59e0b;--warn-text:#854d0e;--urgent:#f97316;--urgent-text:#c2410c;--bad:#f43f5e;--bad-text:#be123c;
+--review:rgb(253 224 71 / 0.55);--water:rgb(56 189 248 / 0.38);
+--protein:#e11d74;--carbs:#5b5bd6;--fat:#d97706;
+--blob-1:#ffd6e0;--blob-2:#d7d4ff;--blob-3:#c9f2e3;--blob-4:#cfe8ff;
+--frame:#1e293b;--on-frame:#f8fafc;
+color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+--bg:#05080c;--fg:#e8eef4;--muted:#a7b4c1;--subtle:#82909d;
+--line:rgb(255 255 255 / 0.12);--surface:rgb(15 21 28 / 0.64);--surface-strong:rgb(26 34 43 / 0.8);--surface-border:rgb(255 255 255 / 0.08);
+--shadow:rgb(0 0 0 / 0.7);--track:rgb(255 255 255 / 0.07);
+--accent:#3ee6ff;--accent-2:#22b8d4;--accent-text:#6eeaff;--accent-soft:rgb(62 230 255 / 0.12);
+--ink:#3ee6ff;--on-ink:#03141a;
+--ok:#4ade80;--ok-text:#86efac;--warn:#facc15;--warn-text:#fde047;--urgent:#fb923c;--urgent-text:#fdba74;--bad:#f87171;--bad-text:#fca5a5;
+--review:rgb(253 224 71 / 0.12);--water:rgb(34 211 238 / 0.22);
+--protein:#f472b6;--carbs:#3ee6ff;--fat:#fbbf24;
+--blob-1:#0b3a48;--blob-2:#17195a;--blob-3:#05343a;--blob-4:#0d2449;
+--frame:#3b4756;--on-frame:#e8eef4;
+color-scheme:dark}}
+:root[data-theme="dark"]{
+--bg:#05080c;--fg:#e8eef4;--muted:#a7b4c1;--subtle:#82909d;
+--line:rgb(255 255 255 / 0.12);--surface:rgb(15 21 28 / 0.64);--surface-strong:rgb(26 34 43 / 0.8);--surface-border:rgb(255 255 255 / 0.08);
+--shadow:rgb(0 0 0 / 0.7);--track:rgb(255 255 255 / 0.07);
+--accent:#3ee6ff;--accent-2:#22b8d4;--accent-text:#6eeaff;--accent-soft:rgb(62 230 255 / 0.12);
+--ink:#3ee6ff;--on-ink:#03141a;
+--ok:#4ade80;--ok-text:#86efac;--warn:#facc15;--warn-text:#fde047;--urgent:#fb923c;--urgent-text:#fdba74;--bad:#f87171;--bad-text:#fca5a5;
+--review:rgb(253 224 71 / 0.12);--water:rgb(34 211 238 / 0.22);
+--protein:#f472b6;--carbs:#3ee6ff;--fat:#fbbf24;
+--blob-1:#0b3a48;--blob-2:#17195a;--blob-3:#05343a;--blob-4:#0d2449;
+--frame:#3b4756;--on-frame:#e8eef4;
+color-scheme:dark}
+
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%;overflow-wrap:break-word}
+h1,h2,h3{font-family:"Space Grotesk",Inter,system-ui,sans-serif;line-height:1.25;margin:1.6em 0 .5em}
+h1{font-size:1.9rem;margin-top:.4em}h2{font-size:1.4rem}h3{font-size:1.1rem}
+p,ul,ol{margin:0 0 1em}
+a{color:var(--accent-text)}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em}
+pre{white-space:pre-wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 1em}
+.num,td,.m-gauge b{font-variant-numeric:tabular-nums}
+.wrap{max-width:46rem;margin:0 auto;padding-block:24px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:radial-gradient(circle at 0 0,var(--blob-2),transparent 22rem),radial-gradient(circle at 100% 12rem,var(--blob-1),transparent 18rem)}
+.wrap>p,.wrap>ul,section>p,section>ul{max-width:65ch}
+section{scroll-margin-top:16px}
+.lead{color:var(--muted);font-size:1.05rem}
+
+.card{background:var(--surface);border:1px solid var(--surface-border);border-radius:24px;padding:16px 18px;margin:0 0 16px;box-shadow:0 14px 40px -18px var(--shadow);-webkit-backdrop-filter:blur(20px) saturate(1.5);backdrop-filter:blur(20px) saturate(1.5)}
+.card>:last-child{margin-bottom:0}
+.card h3{margin-top:0}
+.cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));margin-bottom:16px}
+.cards .card{margin:0}
+.toc{background:var(--surface);border:1px solid var(--surface-border);border-radius:24px;padding:12px 18px;margin:0 0 24px}
+.toc ul{list-style:none;padding:0;margin:0;columns:2 11rem;column-gap:16px}
+.toc a{display:block;padding:4px 0;text-decoration:none}
+
+.badge{display:inline-flex;align-items:center;gap:6px;padding:1px 9px;border-radius:999px;border:1px solid var(--line);background:var(--surface-strong);font-size:.78rem;font-weight:600;line-height:1.6;white-space:nowrap;vertical-align:.1em}
+.badge-vorschlag{background:var(--review);border-color:transparent}
+.badge-mvp{background:var(--accent-soft);color:var(--accent-text);border-color:transparent}
+.badge-spaeter{color:var(--muted)}
+.dot-ok,.dot-warn,.dot-urgent,.dot-bad{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none;background:var(--ok)}
+.dot-warn{background:var(--warn)}.dot-urgent{background:var(--urgent)}.dot-bad{background:var(--bad)}
+.note{border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:4px 16px 16px 4px;padding:12px 16px;margin:0 0 1em;max-width:65ch}
+.note>:last-child{margin-bottom:0}
+
+.scroll-x{display:flex;gap:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;padding-bottom:8px;margin:0 0 1em;max-width:100%}
+.scroll-x>*{flex:none;scroll-snap-align:start}
+.scroll-x>table,.scroll-x>pre{flex:1 0 auto;min-width:100%;margin:0}
+.scroll-x>figure{width:min-content;margin:0}
+table{border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--muted);white-space:nowrap}
+figure{margin:0 0 1.2em}
+figcaption{color:var(--muted);font-size:.85rem;margin-top:8px}
+.checklist{list-style:none;padding:0}
+.checklist li{position:relative;padding-left:30px;margin-bottom:8px}
+.checklist li::before{content:"";position:absolute;left:0;top:.2em;width:18px;height:18px;border:2px solid var(--subtle);border-radius:5px}
+pre.mermaid{background:transparent;border-color:var(--line);white-space:pre;font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px}
+
+.dev{position:relative;display:flex;flex-direction:column;gap:6px;overflow:hidden;flex:none;border:6px solid var(--frame);background:var(--bg) radial-gradient(circle at 10% 0,var(--blob-2),transparent 60%) no-repeat;color:var(--fg);font-size:9px;line-height:1.35;padding:8px}
+.dev-iphone{width:200px;height:412px;border-radius:34px;padding-top:28px}
+.dev-iphone::before{content:"";position:absolute;top:6px;left:50%;width:58px;height:16px;margin-left:-29px;border-radius:999px;background:var(--frame)}
+.dev-duo-aussen{width:170px;height:300px;border-radius:26px;padding-top:20px}
+.dev-duo-innen{width:380px;height:360px;border-radius:22px}
+.dev-pc{width:560px;height:340px;border:1px solid var(--line);border-radius:10px;padding-top:30px;box-shadow:0 14px 40px -18px var(--shadow)}
+.dev-pc::before{content:"";position:absolute;inset:0 0 auto;height:22px;border-bottom:1px solid var(--line);background:radial-gradient(circle at 12px 11px,var(--bad) 3.5px,transparent 4px),radial-gradient(circle at 24px 11px,var(--warn) 3.5px,transparent 4px),radial-gradient(circle at 36px 11px,var(--ok) 3.5px,transparent 4px),var(--surface-strong)}
+.dev:has(>.m-rail){padding-left:58px}
+.m-fold{position:absolute;top:0;bottom:0;left:50%;border-left:1px dashed var(--subtle);pointer-events:none}
+.m-head{display:flex;align-items:center;justify-content:space-between;gap:6px;font:600 12px/1.2 "Space Grotesk",Inter,sans-serif}
+.m-head small{font:500 8px ui-monospace,monospace;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.m-head i{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--muted);flex:none}
+.m-grid{display:grid;grid-template-columns:repeat(var(--cols,2),minmax(0,1fr));gap:6px}
+.m-tile{background:var(--surface);border:1px solid var(--surface-border);border-radius:14px;padding:7px;box-shadow:0 8px 20px -14px var(--shadow);min-width:0}
+.m-tile-wide{grid-column:1/-1}
+.m-tile>small,.m-label{display:block;font:500 7px ui-monospace,monospace;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.m-tile b{font:600 15px/1.1 "Space Grotesk",Inter,sans-serif;font-variant-numeric:tabular-nums}
+.m-gauge{--v:50;position:relative;display:grid;place-items:center;width:64px;aspect-ratio:1;margin:auto;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--v)*1%),var(--track) 0);-webkit-mask:radial-gradient(farthest-side,transparent 72%,var(--fg) 73%);mask:radial-gradient(farthest-side,transparent 72%,var(--fg) 73%)}
+.m-gauge-box{position:relative;display:grid;place-items:center}
+.m-gauge-box b{position:absolute}
+.m-bar{--v:50;--c:var(--accent);height:5px;border-radius:999px;background:var(--track);margin:3px 0;overflow:hidden}
+.m-bar::after{content:"";display:block;height:100%;width:calc(var(--v)*1%);background:var(--c);border-radius:inherit}
+.m-chip{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);background:var(--surface-strong);font-size:8px;white-space:nowrap}
+.m-chip.on{background:var(--accent-soft);color:var(--accent-text);border-color:transparent}
+.m-chip.review{background:var(--review);border-color:transparent}
+.m-chip [class^="dot-"]{width:6px;height:6px}
+.m-row{display:flex;align-items:center;gap:6px;padding:5px 2px;border-bottom:1px solid var(--line);min-width:0}
+.m-row>span:first-of-type{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.m-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:5px 10px;border-radius:999px;border:1px solid var(--surface-border);background:var(--surface-strong);font-weight:600;font-size:9px}
+.m-btn.ink{background:var(--ink);color:var(--on-ink);border-color:transparent}
+.m-dock{position:absolute;left:8px;right:8px;bottom:8px;display:flex;justify-content:space-between;padding:3px;border-radius:16px;background:var(--surface-strong);border:1px solid var(--surface-border);box-shadow:0 10px 24px -12px var(--shadow);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.m-dock>span{flex:1;text-align:center;padding:5px 0 4px;border-radius:12px;font-size:7px;color:var(--muted)}
+.m-dock>span::before{content:"";display:block;width:10px;height:10px;margin:0 auto 2px;border:1.5px solid currentColor;border-radius:3px}
+.m-dock>.on{background:var(--accent-soft);color:var(--accent-text)}
+.m-rail{position:absolute;top:0;bottom:0;left:0;width:50px;display:flex;flex-direction:column;gap:4px;padding:30px 4px 8px;background:var(--surface-strong);border-right:1px solid var(--line)}
+.dev-duo-innen>.m-rail{padding-top:10px}
+.m-rail>span{padding:5px 2px;border-radius:9px;text-align:center;font-size:7px;color:var(--muted)}
+.m-rail>.on{background:var(--accent-soft);color:var(--accent-text)}
+.m-table{width:100%;border-collapse:collapse;font-size:8px}
+.m-table th,.m-table td{padding:3px 4px;border-bottom:1px solid var(--line);white-space:nowrap;font-size:8px}
+.m-cam{position:relative;display:grid;place-items:end center;aspect-ratio:3/4;border-radius:14px;padding:8px;color:var(--on-frame);background:linear-gradient(var(--accent),var(--accent)) 12% 12%/14px 2px,linear-gradient(var(--accent),var(--accent)) 12% 12%/2px 14px,linear-gradient(var(--accent),var(--accent)) 88% 12%/14px 2px,linear-gradient(var(--accent),var(--accent)) 88% 12%/2px 14px,linear-gradient(var(--accent),var(--accent)) 12% 88%/14px 2px,linear-gradient(var(--accent),var(--accent)) 12% 88%/2px 14px,linear-gradient(var(--accent),var(--accent)) 88% 88%/14px 2px,linear-gradient(var(--accent),var(--accent)) 88% 88%/2px 14px,var(--frame);background-repeat:no-repeat}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+<style>
+details.grafik{margin:0 0 1.2em}
+details.grafik>summary{display:inline-flex;align-items:center;min-height:44px;padding:6px 16px;border-radius:999px;border:1px solid var(--line);background:var(--surface-strong);color:var(--accent-text);font-weight:600;font-size:.95rem;cursor:pointer;list-style:none}
+details.grafik>summary::-webkit-details-marker{display:none}
+details.grafik>summary::before{content:"+";margin-right:8px;font-weight:700}
+details.grafik[open]>summary::before{content:"−"}
+details.grafik[open]>summary{margin-bottom:12px}
+.toc-g{margin:10px 0 4px;font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.toc .toc-g:first-child{margin-top:0}
+</style>
+
+<div class="wrap">
+<h1>Preposaurus Technik</h1>
+<p class="lead">Wie die App aufgebaut ist, wann sie was speichert, wie sie auf dem NAS läuft und unter welcher Lizenz sie stehen könnte. Stand: 22.11.2026, Konzeptphase. Hier wird nichts umgesetzt, die Seite beschreibt nur.</p>
+
+<div class="note"><p><strong>So liest man die Seite:</strong> Was die Konzeptdateien festlegen, steht ohne Etikett. Was dort fehlt und hier ergänzt wird, trägt das Etikett <span class="badge badge-vorschlag">Vorschlag</span> und steht noch einmal in der Checkliste am Ende. Zahlen in Beispielen sind Beispiele, keine geprüften Empfehlungswerte. Lizenzfragen sind in Alltagssprache erklärt, das ist keine Rechtsberatung.</p></div>
+
+<div class="card">
+<h3>Kurzfassung</h3>
+<ul>
+<li><strong>Was wo läuft:</strong> Alles läuft auf dem NAS in Docker-Containern: App, Worker, Datenbank, Fotos, Backup. Zugriff nur über Tailscale, nicht aus dem offenen Internet (<a href="#architektur">Architektur</a>).</li>
+<li><strong>Was das NAS verlässt:</strong> Fotos zur Erkennung an Anthropic, Erinnerungen über Push-Dienste, Mails über SMTP. Dazu die Tailscale-Verbindung, Zertifikate und Updates. Vorrat und Gesundheitsangaben bleiben auf dem NAS (<a href="#sicherheit">Sicherheit</a>).</li>
+<li><strong>Wann gespeichert wird:</strong> Fotos gehen sofort aufs NAS, aber in einen unsichtbaren Entwurf. In den Vorrat kommt erst etwas nach „Bestätigen“ (<a href="#speicherpunkte">Speicherpunkte</a>, Vorschlag).</li>
+<li><strong>KI:</strong> Vorschläge kommen als festes Datenschema. Nicht Lesbares bleibt leer, ein Datum wird nie erfunden. Manuell geht immer (<a href="#api-ki">Anthropic</a>).</li>
+<li><strong>Offene Entscheidungen:</strong> <a href="#offline">Offline</a>, <a href="#lizenz">Lizenz</a>, NAS-Modell (<a href="#docker">Container</a>), Stack-Abnahme. Alles Weitere steht in der <a href="#offen">Checkliste</a>.</li>
+</ul>
+</div>
+
+<nav class="toc" aria-label="Inhalt">
+<p class="toc-g">Aufbau</p>
+<ul>
+<li><a href="#ueberblick">Überblick</a></li>
+<li><a href="#architektur">Architektur</a></li>
+<li><a href="#schichten">Schichten der App</a></li>
+<li><a href="#speicherpunkte">Wann wird gespeichert</a></li>
+</ul>
+<p class="toc-g">Abläufe</p>
+<ul>
+<li><a href="#ablauf-foto">Per Foto hinzufügen</a></li>
+<li><a href="#ablauf-manuell">Manuell hinzufügen</a></li>
+<li><a href="#ablauf-entnehmen">Entnehmen</a></li>
+<li><a href="#ablauf-abgelaufen">Abgelaufen, entsorgen, „Noch gut“</a></li>
+<li><a href="#ablauf-verwalten">Bearbeiten, löschen, Historie</a></li>
+<li><a href="#ablauf-erinnerungen">Erinnerungen</a></li>
+<li><a href="#ablauf-nachkaufen">Nachkaufen</a></li>
+<li><a href="#rechnung">Rechnung „Tage versorgt“</a></li>
+</ul>
+<p class="toc-g">Daten &amp; Schnittstellen</p>
+<ul>
+<li><a href="#api-intern">Schnittstellen intern</a></li>
+<li><a href="#api-ki">Schnittstelle Anthropic</a></li>
+<li><a href="#datenmodell">Datenmodell</a></li>
+</ul>
+<p class="toc-g">Betrieb &amp; Lizenz</p>
+<ul>
+<li><a href="#docker">Container</a></li>
+<li><a href="#tailscale">Tailscale und HTTPS</a></li>
+<li><a href="#sicherheit">Sicherheit und Datenschutz</a></li>
+<li><a href="#backups">Backups</a></li>
+<li><a href="#offline">Offline</a></li>
+<li><a href="#lizenz">Lizenzen</a></li>
+<li><a href="#einrichtung">Vorschau Einrichtung</a></li>
+<li><a href="#offen">Offene Punkte</a></li>
+</ul>
+</nav>
+
+<section id="ueberblick">
+<h2>Überblick</h2>
+<p class="lead">Was läuft wo?</p>
+<p>Preposaurus ist eine Web-App: Man öffnet sie im Browser oder als App auf dem Home-Bildschirm des iPhones, am PC im normalen Browser. Alles, was die App braucht, läuft auf dem eigenen NAS (Netzwerkspeicher zu Hause) in mehreren <strong>Docker-Containern</strong>. Ein Container ist ein abgeschlossenes Programmpaket, das auf jedem Gerät mit Docker gleich läuft. Gestartet werden sie gemeinsam über eine Datei für <strong>Docker Compose</strong>, genau wie bei Paperless-ngx oder Audiobookshelf.</p>
+<p>Erreichbar ist die App nur über <strong>Tailscale</strong>, ein privates, verschlüsseltes Netz zwischen den eigenen Geräten (das „Tailnet“). Aus dem offenen Internet kommt niemand an die App. Das NAS selbst spricht nur nach außen, wenn es nötig ist: Fotos zur Erkennung an Anthropic, Benachrichtigungen an die Push-Dienste und Mails an einen Mail-Server.</p>
+<p>Der empfohlene Stack (Next.js 16, PostgreSQL 18, Drizzle, Zod, Better Auth, Anthropic SDK, sharp, pg-boss) ist laut Status-Dokument noch nicht final abgenommen. Er steht deshalb mit in der Checkliste.</p>
+</section>
+
+<section id="architektur">
+<h2>Architektur</h2>
+<p class="lead">Welche Teile gibt es, wie hängen sie zusammen, und was verlässt das NAS?</p>
+<figure>
+<svg viewBox="0 0 360 650" role="img" aria-label="Architektur: Geräte oben, NAS in der Mitte, externe Dienste unten" style="width:100%;height:auto;max-width:440px;display:block;margin:0 auto">
+<defs><marker id="pfeil-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill:var(--muted)"/></marker></defs>
+<g text-anchor="middle" style="font-family:Inter,system-ui,sans-serif;font-size:13px;fill:var(--fg)">
+<text x="180" y="20" style="fill:var(--muted);font-size:12px;font-weight:600;letter-spacing:.06em">GERÄTE MIT TAILSCALE-APP</text>
+<rect x="20" y="32" width="140" height="48" rx="12" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<text x="90" y="61">iPhone (Web-App)</text>
+<rect x="200" y="32" width="140" height="48" rx="12" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<text x="270" y="61">PC (Browser)</text>
+<line x1="90" y1="80" x2="150" y2="154" style="stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-a)"/>
+<line x1="270" y1="80" x2="210" y2="154" style="stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-a)"/>
+<text x="180" y="114" style="fill:var(--accent-text);font-size:12px;font-weight:600">HTTPS im Tailnet</text>
+<rect x="8" y="132" width="344" height="330" rx="20" style="fill:var(--accent-soft);stroke:var(--accent);stroke-dasharray:6 4"/>
+<rect x="60" y="158" width="240" height="40" rx="12" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<text x="180" y="183">Tailscale Serve (HTTPS)</text>
+<line x1="100" y1="198" x2="100" y2="234" style="stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-a)"/>
+<rect x="30" y="238" width="140" height="44" rx="12" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<text x="100" y="265">App (web)</text>
+<rect x="190" y="238" width="140" height="44" rx="12" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<text x="260" y="265">Worker (Jobs)</text>
+<rect x="30" y="318" width="140" height="44" rx="12" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<text x="100" y="345">Foto-Volume</text>
+<rect x="190" y="318" width="140" height="44" rx="12" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<text x="260" y="345">PostgreSQL</text>
+<line x1="100" y1="282" x2="100" y2="314" style="stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-a)"/>
+<line x1="160" y1="282" x2="210" y2="314" style="stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-a)"/>
+<line x1="260" y1="282" x2="260" y2="314" style="stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-a)"/>
+<line x1="205" y1="282" x2="152" y2="314" style="stroke:var(--muted);stroke-width:1.5;stroke-dasharray:4 3" marker-end="url(#pfeil-a)"/>
+<rect x="60" y="396" width="240" height="36" rx="12" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<text x="180" y="419">Backup (Datenbank + Fotos)</text>
+<line x1="100" y1="362" x2="120" y2="392" style="stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-a)"/>
+<line x1="260" y1="362" x2="240" y2="392" style="stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-a)"/>
+<text x="180" y="452" style="fill:var(--muted);font-size:12px;font-weight:600;letter-spacing:.06em">NAS · DOCKER COMPOSE</text>
+<path d="M30 260 H18 V508" style="fill:none;stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-a)"/>
+<path d="M330 260 H342 V508" style="fill:none;stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-a)"/>
+<path d="M342 478 H210 V508" style="fill:none;stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-a)"/>
+<text x="110" y="500" style="fill:var(--muted);font-size:12px;font-weight:600;letter-spacing:.06em">NUR AUSGEHEND</text>
+<rect x="8" y="512" width="108" height="56" rx="12" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<text x="62" y="535">Anthropic</text>
+<text x="62" y="555" style="fill:var(--muted);font-size:12px">Fotos, Schema</text>
+<rect x="126" y="512" width="108" height="56" rx="12" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<text x="180" y="535">Push-Dienste</text>
+<text x="180" y="555" style="fill:var(--muted);font-size:12px">Erinnerungen</text>
+<rect x="244" y="512" width="108" height="56" rx="12" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<text x="298" y="535">SMTP</text>
+<text x="298" y="555" style="fill:var(--muted);font-size:12px">Check-in-Mail</text>
+<text x="180" y="596" style="fill:var(--muted);font-size:12px">Push und Mail erreichen die Geräte über</text>
+<text x="180" y="614" style="fill:var(--muted);font-size:12px">den Push-Dienst (iPhone: Apple) bzw. das Postfach.</text>
+<text x="180" y="638" style="fill:var(--muted);font-size:12px">Die App selbst öffnet nur mit aktivem Tailscale.</text>
+</g>
+</svg>
+<figcaption>Drei Ebenen: Geräte, das NAS mit allen Containern, externe Dienste. Pfeile zeigen, wer wen anspricht. Gestrichelt: Der Worker greift nur zum Aufräumen auf die Fotos zu.</figcaption>
+</figure>
+<h3>Was das NAS verlässt</h3>
+<ul>
+<li><strong>Fotos an Anthropic</strong>, nur wenn die Foto-Erkennung eingeschaltet ist und jemand per Foto erfasst. Vorher werden sie verkleinert und Standortdaten entfernt.</li>
+<li><strong>Benachrichtigungen an die Push-Dienste.</strong> Auf dem iPhone läuft Web-Push über Apples Push-Server. Der Worker braucht dafür ausgehendes Internet.</li>
+<li><strong>Mails an den Mail-Server (SMTP)</strong>, also Check-in-Mails und Mails statt Push.</li>
+<li><strong>Tailscale-Verbindung:</strong> Das NAS meldet sich bei Tailscale an, damit die Geräte es im Tailnet finden.</li>
+<li><strong>Zertifikat:</strong> Das HTTPS-Zertifikat holt Tailscale bei Let's Encrypt, alle 90 Tage neu.</li>
+<li><strong>Image-Downloads</strong> bei Updates (neue Fassungen der Container).</li>
+</ul>
+<h3>Was das NAS nicht verlässt</h3>
+<p>Die Datenbank mit Vorrat, Haushalt, Gesundheitsangaben (Alter, Gewicht, Schwangerschaft, Allergien) und Konten, die gespeicherten Fotos und die API-Schlüssel, außer als verschlüsseltes Backup am zweiten Ort (siehe <a href="#backups">Backups</a>). Es gibt keinen offenen Port ins Internet.</p>
+</section>
+
+<section id="schichten">
+<h2>Schichten der App</h2>
+<p class="lead">Wie ist der Code innen geordnet, damit er klein, testbar und austauschbar bleibt?</p>
+<p>Die Projektregeln verlangen klare Schichten: Oberfläche, dann Anwendungslogik, dann Datenzugriff. Abhängigkeiten zeigen nur nach unten: Jede Schicht darf nur die darunter liegenden benutzen. So lässt sich die Fachlogik (zum Beispiel die Rechnung „Tage versorgt“) ohne Datenbank und ohne Oberfläche testen, und ein Anbieterwechsel betrifft nur eine Datei.</p>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20}}}%%
+flowchart TD
+  A["Oberfläche"] --> B["Actions und Routen"]
+  B --> C["Use-Cases"]
+  C --> D["Fachlogik, rein"]
+  C --> E["Datenzugriff, Adapter"]
+  E --> F[("PostgreSQL")]
+  E --> G["Anthropic, Push, Mail"]</pre></div><figcaption>Abhängigkeiten zeigen nur nach unten.</figcaption></figure>
+<div class="scroll-x"><table>
+<thead><tr><th>Schicht</th><th>Aufgabe</th><th>Beispiel</th></tr></thead>
+<tbody>
+<tr><td>Oberfläche</td><td>Seiten und Bausteine, nur Anzeige und Eingabe</td><td>Erfassungs-Maske, Kacheln</td></tr>
+<tr><td>Actions und Routen</td><td>Eingang vom Gerät: Eingaben prüfen, Anmeldung und Rolle prüfen, Use-Case aufrufen. Eine <strong>Server Action</strong> ist eine Funktion auf dem Server, die ein Formular direkt aufruft. Eine <strong>Route</strong> ist eine feste Adresse für alles andere, etwa den Foto-Upload</td><td>„1 entnehmen“</td></tr>
+<tr><td>Use-Cases</td><td>Ein fachlicher Vorgang von Anfang bis Ende, kennt weder Browser noch Datenbank-Details</td><td>Einheit verbrauchen</td></tr>
+<tr><td>Fachlogik</td><td>reine Rechenfunktionen ohne Seiteneffekte, voll per Test prüfbar</td><td>Ampel, FIFO, Tage versorgt</td></tr>
+<tr><td>Datenzugriff, Adapter</td><td>Lesen und Schreiben in der Datenbank. Ein <strong>Adapter</strong> kapselt einen externen Dienst hinter einer festen Schnittstelle</td><td>KI-Adapter, Foto-Speicher</td></tr>
+</tbody></table></div>
+<p>Der Worker (siehe <a href="#docker">Container</a>) nutzt dieselben Use-Cases und Adapter, nur ohne Oberfläche.</p>
+</section>
+
+<section id="speicherpunkte">
+<h2>Wann wird gespeichert</h2>
+<p class="lead">Wann landet was auf dem NAS, in der Datenbank und bei Anthropic, besonders bei Fotos, Entwurf, Bestätigung und Abbruch?</p>
+<p>Die Konzeptdateien sagen dazu nur: „KI-Ergebnisse sind Vorschläge, gespeichert wird erst nach Bestätigung.“ Wann Fotos hochgeladen werden und was bei einem Abbruch passiert, ist offen. Diese Lücke füllt der folgende Vorschlag.</p>
+
+<div class="card">
+<h3>Vorschlag: Entwurf auf dem NAS <span class="badge badge-vorschlag">Vorschlag</span></h3>
+<p><strong>Kernidee:</strong> Jedes Foto geht sofort nach dem Auslösen auf das NAS. Das muss so sein, weil die Erkennung nur auf dem NAS laufen kann: Nur dort liegt der API-Schlüssel. Fotos und KI-Vorschläge landen in einem <strong>Entwurf</strong> (Tabelle <code>erfassung_entwurf</code>). Ein Entwurf ist unsichtbar für den Vorrat: Er zählt nicht zu „versorgt“, erscheint in keiner Liste und gehört nur dem Nutzer, der ihn begonnen hat.</p>
+<p><strong>Lesart der Grundregel:</strong> „Gespeichert“ heißt hier „im Vorrat gespeichert“. Erst das Bestätigen legt Produkt und Einheiten an. Diese Lesart muss freigegeben werden.</p>
+</div>
+
+<div class="scroll-x"><table>
+<thead><tr><th>Schritt</th><th>Was</th><th>Wohin</th><th>Wann</th></tr></thead>
+<tbody>
+<tr><td>Foto aufnehmen</td><td>Kamerabild</td><td>nur Gerät</td><td>bis zum Upload, Sekunden</td></tr>
+<tr><td>Upload klappt nicht</td><td>Foto</td><td>bleibt im Gerät</td><td>Netz oder Tailscale weg: Der Chip zeigt „nicht hochgeladen, erneut versuchen“. Alternativ geht es manuell weiter <span class="badge badge-vorschlag">Vorschlag</span></td></tr>
+<tr><td>Upload</td><td>Foto verkleinert (lange Kante etwa 1600 px), ohne EXIF-Daten (Kamera- und Standortangaben im Bild), dazu ein Vorschaubild (etwa 400 px). Das Original wird nicht aufbewahrt</td><td>Foto-Volume. In der DB eine Zeile <code>foto</code> mit Status „Entwurf“. Beim ersten Foto entsteht der <code>erfassung_entwurf</code></td><td>direkt nach dem Auslösen</td></tr>
+<tr><td>Erkennung</td><td>verkleinertes Foto, Prompt, Schema</td><td>Anthropic (USA). Antwort in den Entwurf, Verbrauch und Kosten in <code>ki_aufruf</code></td><td>direkt nach dem Upload, nur wenn KI an</td></tr>
+<tr><td>Korrigieren</td><td>geänderte Felder, Stand der Schritte</td><td>DB, im Entwurf</td><td>bei jedem Schrittwechsel</td></tr>
+<tr><td>Manuell erfassen</td><td>Formularwerte</td><td>nur Gerät</td><td>bis zum Bestätigen. Einen Entwurf auf dem NAS gibt es nur, wenn Fotos dabei sind</td></tr>
+<tr><td>Bestätigen</td><td>In dieser Reihenfolge: Produkt und Einheiten anlegen, die Fotos auf Produkt bzw. Einheit umhängen und auf „fest“ setzen, erst danach den Entwurf löschen</td><td>DB, in einer <strong>Transaktion</strong> (alles oder nichts: entweder ist alles gespeichert oder gar nichts)</td><td>Tippen auf „Speichern“. Der Knopf ist danach gesperrt, ein doppeltes Tippen legt nichts doppelt an</td></tr>
+<tr><td>Abbrechen</td><td>Entwurf und seine Fotos</td><td>zuerst die DB-Zeilen, danach die Dateien im Foto-Volume</td><td>sofort</td></tr>
+<tr><td>Verlassen ohne Abbruch</td><td>Entwurf bleibt liegen</td><td>DB</td><td>Beim nächsten Öffnen von „Neu“ fragt die App: „Erfassung fortsetzen oder verwerfen?“</td></tr>
+<tr><td>Aufräumen</td><td>Entwürfe älter als 7 Tage samt Fotos (erst DB, dann Dateien). Dateien ohne DB-Zeile nur, wenn sie älter als 24 Stunden sind</td><td>Worker löscht sie</td><td>einmal täglich</td></tr>
+</tbody></table></div>
+
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"sequence": {"useMaxWidth": false, "width": 110, "actorMargin": 20}}}%%
+sequenceDiagram
+  participant G as Gerät
+  participant W as App
+  participant S as NAS-Speicher
+  participant K as Anthropic
+  G->>W: Foto
+  W->>S: Foto, Entwurf
+  W->>K: Bild und Schema
+  K-->>W: Vorschlag
+  W->>S: in den Entwurf
+  W-->>G: Chip
+  G->>W: Bestätigen
+  W->>S: Produkt, Einheiten
+  W->>S: Entwurf weg</pre></div><figcaption>Ein Foto vom Auslösen bis zum Speichern im Vorrat. „NAS-Speicher“ steht für Datenbank und Foto-Volume.</figcaption></figure>
+
+<details class="grafik"><summary>Grafik anzeigen</summary>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"state": {"useMaxWidth": false}}}%%
+stateDiagram-v2
+  [*] --> offen: erstes Foto
+  offen --> offen: Foto, Korrektur
+  offen --> bestaetigt: Bestätigen
+  offen --> verworfen: Abbrechen
+  offen --> verfallen: 7 Tage alt
+  bestaetigt --> [*]
+  verworfen --> [*]
+  verfallen --> [*]</pre></div><figcaption>Lebenslauf eines Entwurfs.</figcaption></figure>
+</details>
+
+<p><strong>Reihenfolge und Verweise</strong> <span class="badge badge-vorschlag">Vorschlag</span>: Der Verweis vom Foto auf den Entwurf wird beim Löschen des Entwurfs automatisch geleert (<code>ON DELETE SET NULL</code>). So kann das Löschen des Entwurfs nie ein schon festes Foto mitreißen. Beim Löschen kommt erst die Datenbank, dann die Datei: Bricht der Vorgang dazwischen ab, bleibt höchstens eine verwaiste Datei, die das Aufräumen später findet. Die 24-Stunden-Grenze schützt Fotos, die gerade erst hochgeladen werden.</p>
+<p><strong>Warum so?</strong> Ein Entwurf übersteht ein Neuladen der Seite, das Auf- und Zuklappen des iPhone Duo und einen kurzen Verbindungsabbruch. Die Fotos werden nur einmal hochgeladen und beim Bestätigen nicht verschoben. Es ändert sich nur ihr Status in der Datenbank. Der Speicherpfad bleibt gleich.</p>
+<p><strong>Was sich nicht zurückholen lässt:</strong> Ein Foto, das schon bei Anthropic war, bleibt dort auch nach einem Abbruch eine Weile gespeichert. Laut Anthropic sind das höchstens 30 Tage, und API-Daten werden ohne ausdrückliche Erlaubnis nicht zum Training genutzt.</p>
+<p><strong>Alternative B:</strong> Der Zwischenstand der Felder bleibt nur im Gerät, das NAS hält die Fotos nur in einem temporären Ordner. Das wäre etwas einfacher, aber nach einem Neuladen der Seite wären alle Korrekturen weg. Empfohlen wird deshalb der Entwurf auf dem NAS.</p>
+</section>
+
+<section id="ablauf-foto">
+<h2>Ablauf: per Foto hinzufügen</h2>
+<p class="lead">Was passiert Schritt für Schritt, wenn jemand ein Produkt per Foto erfasst, und was, wenn etwas nicht klappt? (Bereich ERF)</p>
+<p>Die Maske hat vier Schritte: Verpackung, Nährwerte (optional), MHD-Serie (MHD = Mindesthaltbarkeitsdatum, ein Foto je Packung, die Anzahl der Fotos ist die Stückzahl) und Zusammenfassung. <strong>Jeder Schritt geht auch manuell.</strong> Das Foto ist eine Abkürzung, nie Pflicht. Die Kamera läuft live: Auslöser drücken, nächste Packung.</p>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20}}}%%
+flowchart TD
+  A["Verpackung fotografieren"] --> B{"KI an, erreichbar?"}
+  B -->|nein| M["Felder manuell"]
+  B -->|ja| C["Vorschlag Verpackung"]
+  C --> D{"alles lesbar?"}
+  D -->|nein| E["Feld leer, gelb"]
+  D -->|ja| F["Karte prüfen"]
+  E --> F
+  M --> F
+  F --> G{"Nährwertfoto?"}
+  G -->|ja| H["Vorschlag Nährwerte"]
+  G -->|nein| I["kcal geschätzt"]
+  H --> J["weiter zur MHD-Serie"]
+  I --> J</pre></div><figcaption>Schritte 1 und 2: Verpackung und Nährwerte.</figcaption></figure>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20}}}%%
+flowchart TD
+  A["MHD-Serie"] --> B{"Weg wählen"}
+  B -->|"je Packung"| C["Foto je Packung"]
+  B -->|"alle gleich"| D["1 Foto und Anzahl"]
+  B -->|"Datum manuell"| E["Monat/Jahr wählen"]
+  B -->|"ohne Datum"| F["Schätzung, markiert"]
+  C --> G{"Datum lesbar?"}
+  D --> G
+  G -->|nein| H["null, gelber Chip"]
+  H -->|nochmal| C
+  H -->|manuell| E
+  G -->|ja| I{"plausibel?"}
+  I -->|nein| J["bitte prüfen"]
+  I -->|ja| K["Zusammenfassung"]
+  J --> K
+  E --> K
+  F --> K</pre></div><figcaption>Schritte 3 und 4: MHD-Serie und Zusammenfassung. „Bestätigen“ speichert.</figcaption></figure>
+<h3>Wenn-Dann-Regeln</h3>
+<div class="scroll-x"><table>
+<thead><tr><th>Wenn …</th><th>dann …</th></tr></thead>
+<tbody>
+<tr><td>ein Wert auf dem Foto nicht sicher lesbar ist</td><td>liefert die KI <code>null</code>, das Feld bleibt leer und gelb, und man trägt den Wert von Hand ein. <strong>Ein Datum wird nie erfunden.</strong></td></tr>
+<tr><td>ein MHD nicht lesbar ist</td><td>erscheint ein gelber Chip „bitte nochmal oder manuell“. Antippen öffnet die Korrektur</td></tr>
+<tr><td>das erkannte Datum in der Vergangenheit liegt oder weit vom üblichen Wert der Kategorie entfernt ist</td><td>markiert die App den Chip mit „bitte prüfen“</td></tr>
+<tr><td>die KI ihre Sicherheit als niedrig angibt <span class="badge badge-vorschlag">Vorschlag</span></td><td>ebenfalls „bitte prüfen“</td></tr>
+<tr><td>die Foto-Erkennung ausgeschaltet ist, Anthropic nicht antwortet oder ein Fehler kommt</td><td>sagt die App das freundlich und bietet die manuelle Eingabe an. Das Foto bleibt im Entwurf und kann als Produktbild dienen. Ob das auch bei ausgeschalteter KI gilt, ist offen (Funktionskatalog ERF-16)</td></tr>
+<tr><td>ein KI-Aufruf hängt oder scheitert <span class="badge badge-vorschlag">Vorschlag</span></td><td>bricht er nach einem Zeitlimit ab. Bei „zu viele Anfragen“ (429) oder einem Serverfehler (5xx) gibt es höchstens einen automatischen Wiederholversuch, danach geht es manuell weiter. Jeder Fehlschlag steht in <code>ki_aufruf</code> (Feld „Erfolg“)</td></tr>
+<tr><td>viele MHD-Fotos schnell hintereinander kommen <span class="badge badge-vorschlag">Vorschlag</span></td><td>laufen nur wenige Erkennungen gleichzeitig, der Rest wartet kurz. Die Chips erscheinen nacheinander</td></tr>
+<tr><td>das Foto gar nicht aufs NAS kommt (Netz oder Tailscale weg) <span class="badge badge-vorschlag">Vorschlag</span></td><td>bleibt es im Gerät, der Chip zeigt „nicht hochgeladen, erneut versuchen“. Alternativ geht es manuell weiter</td></tr>
+<tr><td>„Alle gleiches Datum“ gewählt ist</td><td>genügt ein MHD-Foto, dazu ein Zähler (−/+) für die Anzahl</td></tr>
+<tr><td>„Datum manuell“ gewählt ist</td><td>gibt es einen Monat/Jahr-Wähler mit Schnellknöpfen (+6 Mon., +1 J., +2 J.)</td></tr>
+<tr><td>„Ohne Datum“ gewählt ist</td><td>schätzt die App nur auf ausdrücklichen Wunsch nach Kategorie und markiert das Datum sichtbar als „geschätzt“. Die KI schätzt nie. Für diese Kennzeichnung fehlt in der DB-Skizze ein Feld, siehe <a href="#datenmodell">Datenmodell</a></td></tr>
+<tr><td>kein Nährwertfoto da ist</td><td>gilt der kcal-Durchschnitt der Kategorie, markiert als „geschätzt“</td></tr>
+<tr><td>nur Monat und Jahr aufgedruckt sind</td><td>gilt das Monatsende, Genauigkeit „Monat“. Nur ein Jahr: 31.12., Genauigkeit „Jahr“</td></tr>
+<tr><td>„zu verbrauchen bis“ aufgedruckt ist</td><td>wird die Art „Verbrauchsdatum“ gespeichert. Das ändert später den Hinweis bei Ablauf</td></tr>
+<tr><td>jemand mitten in der Serie abbricht</td><td>siehe <a href="#speicherpunkte">Wann wird gespeichert</a></td></tr>
+</tbody></table></div>
+<p><strong>Speicherregel zum Bestätigen</strong> <span class="badge badge-vorschlag">Vorschlag</span>: Speichern geht erst, wenn jede Einheit ein Datum hat, und zwar erkannt und geprüft, von Hand eingetragen oder auf Wunsch geschätzt und markiert. Ein leeres Datum blockiert das Speichern mit einem Hinweis am Feld. So zählt nichts ohne Datum zu „versorgt“.</p>
+<p>Ein Beispiel für die Zusammenfassung aus dem Konzept: „10 × Nudeln 500 g = 5 kg · 17.950 kcal · MHDs: 09/2027 (6×), 11/2027 (4×)“.</p>
+</section>
+
+<section id="ablauf-manuell">
+<h2>Ablauf: manuell hinzufügen</h2>
+<p class="lead">Wie läuft die Erfassung ganz ohne Foto? (Bereich ERF)</p>
+<details class="grafik"><summary>Grafik anzeigen</summary>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20}}}%%
+flowchart TD
+  A["Neu: manuell"] --> B["Bezeichnung, Kategorie"]
+  B --> C["Behälter, Inhalt"]
+  C --> D{"Nährwerte bekannt?"}
+  D -->|ja| E["kcal je 100 g"]
+  D -->|nein| F["Kategorie-Ø, geschätzt"]
+  E --> G["Anzahl und MHD"]
+  F --> G
+  G --> H{"gültig?"}
+  H -->|nein| I["Hinweis am Feld"]
+  I --> G
+  H -->|ja| J["Zusammenfassung"]
+  J --> K["Bestätigen speichert"]</pre></div><figcaption>Gleiche Maske wie beim Foto, nur ohne Kamera.</figcaption></figure>
+</details>
+<ul>
+<li><strong>Pflichtfelder</strong> <span class="badge badge-vorschlag">Vorschlag</span>: Bezeichnung, Kategorie, Inhalt je Stück (g oder ml), Anzahl und für jede Einheit ein MHD (oder ausdrücklich „geschätzt“). Behälter und Nährwerte sind optional.</li>
+<li><strong>Ohne Nährwerte</strong> rechnet die App mit dem kcal-Durchschnitt der Kategorie und zeigt „geschätzt“.</li>
+<li><strong>Prüfung</strong>: Die App prüft auf dem Gerät und noch einmal auf dem Server mit demselben Schema (Menge größer null, gültiges Datum). Fehler stehen direkt am Feld.</li>
+<li><strong>Speichern</strong>: Manuell und per Foto nutzen denselben Speichervorgang auf dem Server <span class="badge badge-vorschlag">Vorschlag</span>. So gibt es die Logik nur einmal.</li>
+<li><strong>Neue Kategorie</strong> direkt in der Maske („+ Neue Kategorie“) ist im Konzept vorgesehen. Ob auch ein Mitglied das darf oder nur ein Admin, ist offen.</li>
+</ul>
+</section>
+
+<section id="ablauf-entnehmen">
+<h2>Ablauf: entnehmen und verbrauchen</h2>
+<p class="lead">Was passiert bei „1 entnehmen“? (Bereich ROT)</p>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20}}}%%
+flowchart TD
+  A["1 entnehmen"] --> B["früheste MHD vorschlagen"]
+  B --> C{"andere Packung?"}
+  C -->|ja| D["Packung wählen"]
+  C -->|nein| E["Status verbraucht"]
+  D --> E
+  E --> F["Datum und Nutzer"]
+  F --> G{"Nachkaufen?"}
+  G -->|ja| H["Eintrag Nachkaufen"]
+  G -->|nein| I["fertig"]
+  H --> I</pre></div><figcaption>Entnahme nach FIFO.</figcaption></figure>
+<p><strong>FIFO</strong> heißt „first in, first out“: Die App schlägt die Packung mit dem frühesten MHD vor, damit nichts hinten im Regal abläuft. Die Auswahl lässt sich ändern. Die Einheit wird nicht gelöscht. Sie bekommt den Status <code>verbraucht</code>, das Datum (<code>entnommen_am</code>) und den Nutzer (<code>entnommen_von</code>). Danach fragt die App optional: „Auf Nachkaufen setzen?“</p>
+</section>
+
+<section id="ablauf-abgelaufen">
+<h2>Ablauf: abgelaufen, entsorgen, „Noch gut“</h2>
+<p class="lead">Welche Zustände hat eine Einheit, und was zählt zu „versorgt“? (Bereich ROT)</p>
+<p>Gespeichert wird nur der <strong>Status</strong>: <code>vorrat</code>, <code>verbraucht</code> oder <code>entsorgt</code>. Die Ampel wird bei jeder Anzeige aus dem MHD berechnet und nie gespeichert:</p>
+<p><span class="badge"><i class="dot-ok"></i>gut</span> mehr als 3 Monate · <span class="badge"><i class="dot-warn"></i>bald fällig</span> bis 3 Monate · <span class="badge"><i class="dot-urgent"></i>dringend</span> bis 4 Wochen · <span class="badge"><i class="dot-bad"></i>abgelaufen</span> vor heute. „Dringend“ ist die orange Stufe innerhalb von „bald fällig“ (der Filter „Bald fällig“ zeigt gelb und orange). Die Schwellen sind Standardwerte und in den Einstellungen änderbar.</p>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"state": {"useMaxWidth": false}}}%%
+stateDiagram-v2
+  [*] --> vorrat: Bestätigen
+  vorrat --> vorrat: Noch gut, geprueft_am
+  vorrat --> verbraucht: entnommen
+  vorrat --> entsorgt: entsorgt
+  verbraucht --> [*]
+  entsorgt --> [*]</pre></div><figcaption>Lebenszyklus einer Einheit. „Noch gut“ ist eine Schleife: Die Einheit bleibt im Vorrat, das Prüfdatum wird gesetzt.</figcaption></figure>
+<ul>
+<li><strong>MHD und Verbrauchsdatum:</strong> Das MHD ist kein Wegwerfdatum. Beim abgelaufenen MHD zeigt die App einen freundlichen Hinweis: anschauen, riechen, probieren. Beim Verbrauchsdatum („zu verbrauchen bis“) entfällt dieser Hinweis.</li>
+<li><strong>Abgelaufene Einheiten</strong> zählen nicht mehr zu „versorgt“. Sie bleiben sichtbar (Filter „Abgelaufen“), bis jemand entscheidet: verbraucht, entsorgt oder „Noch gut“.</li>
+<li><strong>Entsorgt</strong> speichert Datum und Nutzer, wie beim Verbrauchen. Das speist die Statistik „verbraucht gegen entsorgt“.</li>
+<li><strong>„Noch gut“</strong> setzt <code>geprueft_am</code>, die Einheit bleibt im Vorrat mit dem Hinweis „geprüft am …“. <strong>Offen:</strong> Zählt eine geprüfte Einheit wieder zu „versorgt“, und wie lange gilt die Prüfung? Der Prototyp sagt „zählt vorsichtshalber nicht“, das Konzept regelt es nicht.</li>
+</ul>
+</section>
+
+<section id="ablauf-verwalten">
+<h2>Ablauf: bearbeiten, löschen, Historie</h2>
+<p class="lead">Wie ändert man Einträge, und was wird wirklich gelöscht? (Bereiche VOR und SYS)</p>
+<details class="grafik"><summary>Grafik anzeigen</summary>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20}}}%%
+flowchart TD
+  A["Produkt öffnen"] --> B{"Was tun?"}
+  B -->|ändern| C["Produkt oder MHD"]
+  B -->|"aus Vorrat"| F["verbraucht/entsorgt"]
+  F --> G["bleibt in Historie"]
+  G --> K["leeren: nur Admin"]
+  B -->|Fehler| H{"Admin?"}
+  H -->|ja| I["endgültig löschen"]
+  H -->|nein| J["Admin bitten"]</pre></div><figcaption>Historie statt Löschen. Echtes Löschen nur als Ausnahme.</figcaption></figure>
+</details>
+<ul>
+<li><strong>Bearbeiten:</strong> Am Produkt lassen sich Bezeichnung, Kategorie, Behälter, Inhalt, Nährwerte, Lagerort und Schlagwörter ändern. An der Einheit das MHD. Ob ein Mitglied Produkte bearbeiten und Entscheidungen anderer rückgängig machen darf, ist offen (das Konzept nennt für Mitglieder nur erfassen, entnehmen, entsorgen).</li>
+<li><strong>Historie statt Löschen:</strong> Verbrauchte und entsorgte Einheiten bleiben gespeichert, filterbar nach Zeitraum.</li>
+<li><strong>Verlauf leeren oder archivieren</strong> kann nur ein Admin (Einstellungen, Daten &amp; System).</li>
+<li><strong>Echtes Löschen bei Fehlerfassung</strong> <span class="badge badge-vorschlag">Vorschlag</span>: Nur ein Admin kann ein Produkt samt Einheiten und Fotos endgültig löschen, nach einer Rückfrage mit dem Hinweis, dass es nicht rückgängig zu machen ist. Fotos werden dabei auch aus dem Foto-Volume entfernt. In Backups bleiben sie bis zu deren Ablauf erhalten.</li>
+</ul>
+</section>
+
+<section id="ablauf-erinnerungen">
+<h2>Ablauf: Erinnerungen</h2>
+<p class="lead">Wer verschickt wann welche Benachrichtigung, und was passiert, wenn Push nicht geht? (Bereich ERI)</p>
+<p>Erinnerungen verschickt der <strong>Worker</strong>, ein eigener Container, der geplante Aufgaben („Jobs“) abarbeitet. Die Warteschlange liegt in derselben Datenbank (pg-boss), ein zusätzlicher Dienst ist nicht nötig. Grundsatz: gebündelt statt einzeln, keine Benachrichtigung pro Packung. Jeder Nutzer stellt seine eigenen Benachrichtigungen ein.</p>
+<div class="scroll-x"><table>
+<thead><tr><th>Job</th><th>Wann</th><th>Inhalt (Beispiel)</th></tr></thead>
+<tbody>
+<tr><td>Wochenübersicht</td><td>1× pro Woche, Tag und Uhrzeit je Nutzer, Standard Sa 10:00</td><td>„3 Einheiten bald verbrauchen · Ziel: 6 von 10 Tagen · Nachkaufen: 6 l Wasser“</td></tr>
+<tr><td>Dringend</td><td>täglich geprüft, höchstens 1× pro Tag</td><td>„Thunfisch läuft in 7 Tagen ab“</td></tr>
+<tr><td>Etappe</td><td>bei Erreichen und 2 Wochen vor dem Zieldatum</td><td>„Geschafft: 3 Tage versorgt“</td></tr>
+<tr><td>Inventur</td><td>alle 3 Monate (wählbar)</td><td>„Kurzer Vorrats-Check? Dauert etwa 5 Minuten.“</td></tr>
+<tr><td>Check-in-Mail</td><td>wöchentlich, monatlich oder aus, je Nutzer</td><td>„Zeit für einen Blick in den Vorrat: X ist abgelaufen, Y bald fällig.“</td></tr>
+<tr><td>Push-Abos aufräumen</td><td>bei jedem Versand</td><td>ungültige Geräte-Abos werden gelöscht</td></tr>
+<tr><td>Entwürfe aufräumen <span class="badge badge-vorschlag">Vorschlag</span></td><td>täglich</td><td>siehe <a href="#speicherpunkte">Wann wird gespeichert</a></td></tr>
+</tbody></table></div>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"sequence": {"useMaxWidth": false, "width": 110, "actorMargin": 20}}}%%
+sequenceDiagram
+  participant J as Worker
+  participant P as Push-Dienst
+  participant M as SMTP
+  participant G as Gerät
+  Note over J: Job fällig, liest DB
+  alt Push an
+    J->>P: Benachrichtigung
+    alt Gerät erreichbar
+      P-->>G: anzeigen
+    else Abo ungültig
+      P-->>J: 404 oder 410
+      Note over J: Abo löschen
+    end
+  else Push aus
+    J->>M: Mail
+    M-->>G: Postfach
+  end
+  Note over G: Tippen öffnet App</pre></div><figcaption>Versand einer Erinnerung. Der Worker liest Vorrat und Einstellungen aus der DB. „Abo ungültig“ kommt nur, wenn ein Gerät nicht mehr erreichbar ist.</figcaption></figure>
+<ul>
+<li><strong>Web-Push</strong> sind Benachrichtigungen einer Web-App, wie bei einer normalen App. Auf dem iPhone gehen sie ab iOS 16.4 und <strong>nur, wenn die App zum Home-Bildschirm hinzugefügt ist</strong>. Die Erlaubnis fragt die App erst, wenn man aktiv tippt. Ein Apple-Entwicklerkonto ist nicht nötig.</li>
+<li><strong>Abo ungültig:</strong> Meldet der Push-Dienst ein Abo als nicht mehr gültig (Antwort 404 oder 410), löscht der Worker es.</li>
+<li><strong>Push aus, dann Mail</strong> <span class="badge badge-vorschlag">Vorschlag</span>: Hat ein Nutzer kein gültiges Push-Abo oder Push ausgeschaltet, geht die Wochenübersicht als Mail. Das Konzept nennt eine „E-Mail-Zusammenfassung als Ausweichkanal“ und daneben die „Check-in-Mail“. Ob das eine Mail ist oder zwei, ist offen.</li>
+<li><strong>Tailscale:</strong> Die Benachrichtigung kommt auch ohne aktives Tailscale an, weil sie über den Push-Dienst läuft. Zum Öffnen der App muss Tailscale aber laufen, denn die App lädt vom NAS. Das ist ein eigener Schluss aus den Quellen, kein Herstellerhinweis.</li>
+<li><strong>Zeitzone</strong> der Zeitpläne: Europe/Berlin.</li>
+<li><strong>Ort der Einstellung für die Inventur-Erinnerung</strong>: Das Konzept führt sie als Benachrichtigungsart, die Kontoeinstellungen listen sie nicht. Offen.</li>
+</ul>
+</section>
+
+<section id="ablauf-nachkaufen">
+<h2>Ablauf: Nachkaufen</h2>
+<p class="lead">Woher kommen die Einträge der Nachkaufen-Liste, und was passiert beim Abhaken? (Bereich NK)</p>
+<details class="grafik"><summary>Grafik anzeigen</summary>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20}}}%%
+flowchart TD
+  A["Ziel-Lücke je Warengruppe"] --> D["Liste Nachkaufen"]
+  B["nach Entnahme: ja"] --> D
+  C["manuell ergänzt"] --> D
+  D --> E["gemeinsam für alle"]
+  E --> F["Abhaken"]
+  F --> G{"Erfassen wie?"}
+  G -->|Foto| H["Erfassung per Foto"]
+  G -->|manuell| I["Erfassung manuell"]</pre></div><figcaption>Drei Quellen, ein Ziel: die Erfassung.</figcaption></figure>
+</details>
+<ul>
+<li><strong>Quellen</strong> (Feld <code>quelle</code>): <code>ziel</code> (Lücke zwischen Ziel und Bestand je Warengruppe), <code>nachkauf</code> (Frage nach der Entnahme), <code>manuell</code>.</li>
+<li>Die Liste ist <strong>gemeinsam für alle Nutzer</strong> des Haushalts, bewusst schlank, keine allgemeine Einkaufslisten-App.</li>
+<li><strong>Abhaken</strong> führt direkt in die Erfassung, per Foto oder manuell.</li>
+<li><strong>Vorschlag</strong> <span class="badge badge-vorschlag">Vorschlag</span>: Der Haken setzt den Eintrag sofort auf „erledigt“, die Erfassung öffnet sich mit der Bezeichnung vorausgefüllt. Einträge aus der Ziel-Lücke rechnet die App nach jeder Änderung am Vorrat neu, statt sie fest zu speichern.</li>
+<li><strong>Offen:</strong> Gehört die Aufteilung auf Wochen bis zum Zieldatum („Diese Woche: 6 l Wasser …“) dazu?</li>
+</ul>
+</section>
+
+<section id="rechnung">
+<h2>Rechnung „Tage versorgt“</h2>
+<p class="lead">Wie entstehen die beiden Kennzahlen „Heute versorgt: X Tage“ und „Ziel &lt;Datum&gt;: X von Y Tagen“? (Bereiche ZIEL und UEB)</p>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20}}}%%
+flowchart TD
+  A["Einheiten im Vorrat"] --> B{"haltbar am Stichtag?"}
+  B -->|nein| X["zählt nicht"]
+  B -->|ja| C["kcal summieren"]
+  B -->|ja| W["Liter Wasser"]
+  H["Bedarf Haushalt"] --> E
+  H --> F
+  C --> E["Energie-Tage"]
+  W --> F["Wasser-Tage"]
+  E --> M["Minimum = versorgt"]
+  F --> M</pre></div><figcaption>Stichtag ist entweder heute oder das Zieldatum.</figcaption></figure>
+<ul>
+<li><strong>Engpass:</strong> „Versorgt“ ist der kleinere Wert aus Energie-Tagen und Wasser-Tagen. Das ist die Kernzahl wie beim BBK.</li>
+<li><strong>Zwei Zählweisen:</strong> „Heute versorgt“ zählt alles, was heute haltbar ist. „Ziel &lt;Datum&gt;“ zählt nur, was am Zieldatum noch haltbar ist. Dazu zeigt die App, welche Einheiten vor dem Zieldatum ablaufen.</li>
+<li><strong>kcal einer Einheit</strong> = Inhalt je Stück × kcal je 100 g ÷ 100. Fehlen Nährwerte, gilt der Kategorie-Durchschnitt, markiert als „geschätzt“.</li>
+<li><strong>Bedarf:</strong> Rechenmodus „offiziell“ (Standard) nutzt laut Konzept einen festen Wert je Person für Energie und Wasser. Modus „individuell“ rechnet nach DGE mit Alter, Geschlecht, Aktivität und Zuschlägen. Alle Werte sind laut Status-Dokument vor der Übernahme an der Primärquelle zu prüfen.</li>
+<li><strong>Wasser</strong> braucht dafür eine eigene Kategorie, getrennt von Getränken. Das Konzept nennt die Trennung bisher nur als vorgeschlagene Ergänzung, der Prototyp rechnet schon so. Offen.</li>
+<li><strong>Baby:</strong> eigener Sonderbedarf, zählt nicht in die normalen Warengruppen. Wie er angezeigt und gerechnet wird, ist noch nicht geregelt.</li>
+<li><strong>Ernährungsform</strong> (alles, vegetarisch, vegan) verschiebt nur die Zielmengen zwischen den Warengruppen, die kcal-Summe bleibt gleich. Gerechnet wird je Person, dann summiert. Die Verteilung im Prototyp ist eine ungeprüfte Annahme.</li>
+<li><strong>Makros</strong> (Eiweiß, Kohlenhydrate, Fett) fließen nur als Hinweis ein („Energie reicht 6 Tage, Eiweiß nur 3“). Die Bedarfswerte im Prototyp sind ungeprüft.</li>
+<li>Die Balken je Warengruppe vergleichen Bestand mit der Zielmenge aus der gewählten Quelle (versioniert, mit Stand und Link).</li>
+<li>Die Rechnung ist eine <strong>reine Funktion</strong> in der Fachlogik und wird mit Tests abgesichert.</li>
+</ul>
+<div class="note">
+<p><strong>Beispiel</strong> (Bedarfswerte nach Konzept, ungeprüft. Bestand frei gewählt): Haushalt mit 2 Erwachsenen, Bedarf je Tag 4.400 kcal und 4 l Wasser.</p>
+<p>Heute haltbar: 33.000 kcal und 26 l Wasser. Energie: 33.000 ÷ 4.400 = 7,5 Tage. Wasser: 26 ÷ 4 = 6,5 Tage. <strong>Heute versorgt: 6,5 Tage</strong>, Engpass ist das Wasser.</p>
+<p>Bis zum Zieldatum laufen 3 Packungen Nudeln zu je 1.795 kcal ab. Am Zieldatum bleiben 27.615 kcal, das sind 6,2 Tage. Wasser bleibt bei 6,5. <strong>Ziel: 6,2 von 10 Tagen.</strong></p>
+<p>Der Prototyp rundet auf eine Nachkommastelle ab. Wie die App rundet, wird mit dem Design festgelegt.</p>
+</div>
+</section>
+
+<section id="api-intern">
+<h2>Schnittstellen intern</h2>
+<p class="lead">Welche Aufrufe gibt es zwischen Gerät und NAS, und wer darf sie nutzen?</p>
+<p>Formulare rufen <strong>Server Actions</strong> auf. Alles, was kein Formular ist, läuft über <strong>Routen</strong> unter <code>/api/…</code>. Jede Action und jede Route prüft selbst, ob jemand angemeldet ist und die nötige Rolle hat, und filtert jede Abfrage auf den eigenen Haushalt. Die Routen stammen aus der Stack-Empfehlung, die Namen der Actions sind ein <span class="badge badge-vorschlag">Vorschlag</span> (englisch, wie es die Code-Prinzipien vorsehen). Rollen nach dem Einstellungs-Konzept: <strong>Admin</strong> darf alles, <strong>Mitglied</strong> pflegt den Vorrat, Nachkaufen und das eigene Konto.</p>
+<h3>Server Actions</h3>
+<div class="scroll-x"><table>
+<thead><tr><th>Bereich</th><th>Name</th><th>Zweck</th><th>Rolle</th></tr></thead>
+<tbody>
+<tr><td>ERF</td><td><code>saveDraftAction</code></td><td>Zwischenstand eines Foto-Entwurfs sichern</td><td>beide, nur eigener Entwurf</td></tr>
+<tr><td>ERF</td><td><code>createStockAction</code></td><td>Bestätigen: Produkt und Einheiten anlegen, per Foto und manuell. Mit Idempotenz-Schlüssel (Entwurfs-ID bzw. eine im Gerät erzeugte ID): Kommt derselbe Aufruf zweimal an, wird nur einmal gespeichert</td><td>beide</td></tr>
+<tr><td>ERF</td><td><code>discardDraftAction</code></td><td>Entwurf verwerfen, Fotos löschen</td><td>beide, nur eigener Entwurf</td></tr>
+<tr><td>ERF</td><td><code>createCategoryAction</code></td><td>„+ Neue Kategorie“ in der Maske</td><td>offen: Admin oder beide</td></tr>
+<tr><td>VOR</td><td><code>updateProductAction</code></td><td>Produkt bearbeiten</td><td>offen: Admin oder beide</td></tr>
+<tr><td>VOR</td><td><code>updateUnitAction</code></td><td>MHD einer Einheit korrigieren</td><td>offen: Admin oder beide</td></tr>
+<tr><td>ROT</td><td><code>consumeUnitAction</code></td><td>Einheit verbraucht (FIFO-Vorschlag). Ändert nur, wenn der Status noch <code>vorrat</code> ist. So kann dieselbe Packung nicht zweimal entnommen werden</td><td>beide</td></tr>
+<tr><td>ROT</td><td><code>discardUnitAction</code></td><td>Einheit entsorgt</td><td>beide</td></tr>
+<tr><td>ROT</td><td><code>markStillGoodAction</code></td><td>„Noch gut“, setzt <code>geprueft_am</code></td><td>beide</td></tr>
+<tr><td>VOR</td><td><code>deleteProductAction</code></td><td>Fehlerfassung endgültig löschen</td><td>Admin (Vorschlag)</td></tr>
+<tr><td>SYS</td><td><code>archiveHistoryAction</code></td><td>Verlauf leeren oder archivieren</td><td>Admin</td></tr>
+<tr><td>NK</td><td><code>addRestockItemAction</code></td><td>Eintrag ergänzen</td><td>beide</td></tr>
+<tr><td>NK</td><td><code>checkRestockItemAction</code></td><td>abhaken, weiter zur Erfassung</td><td>beide</td></tr>
+<tr><td>HH</td><td><code>saveMemberAction</code>, <code>removeMemberAction</code></td><td>Haushaltsmitglieder pflegen</td><td>Admin</td></tr>
+<tr><td>ZIEL</td><td><code>saveGoalAction</code></td><td>Quelle, Rechenmodus, Zieldauer, Zieldatum, Etappen</td><td>Admin</td></tr>
+<tr><td>EIN</td><td><code>saveHouseholdSettingsAction</code></td><td>Ernährung, Stammdaten, Ampel, Inventur, Foto-Erkennung</td><td>Admin</td></tr>
+<tr><td>EIN</td><td><code>saveMySettingsAction</code></td><td>Profil, Darstellung, Benachrichtigungen</td><td>beide, nur für sich</td></tr>
+<tr><td>ERS</td><td><code>inviteUserAction</code>, <code>setUserRoleAction</code>, <code>deactivateUserAction</code>, <code>removeUserAction</code>, <code>resetPasswordAction</code></td><td>Nutzerverwaltung: einladen, Rolle setzen, deaktivieren, entfernen, Passwort ohne Mail zurücksetzen. Mindestens ein Admin bleibt</td><td>Admin</td></tr>
+<tr><td>ERS</td><td><code>revokeSessionAction</code></td><td>Sitzung beenden</td><td>Admin für alle, jeder für sich</td></tr>
+<tr><td>SYS</td><td><code>exportDataAction</code>, <code>importDataAction</code></td><td>Export JSON/CSV, Import</td><td>Admin</td></tr>
+</tbody></table></div>
+<h3>Routen</h3>
+<div class="scroll-x"><table>
+<thead><tr><th>Route</th><th>Zweck</th><th>Rolle</th></tr></thead>
+<tbody>
+<tr><td><code>/api/auth/*</code></td><td>Anmeldung, Sitzungen, Passkeys (Better Auth)</td><td>öffentlich nur die Anmeldung. Die freie Registrierung ist nach dem ersten Nutzer aus. Wie der erste Admin angelegt wird, ist noch offen</td></tr>
+<tr><td><code>/api/photos</code></td><td>Foto hochladen, verkleinern, EXIF entfernen, in den Entwurf legen</td><td>beide, nur in den eigenen Entwurf</td></tr>
+<tr><td><code>/api/photos/[id]</code> <span class="badge badge-vorschlag">Vorschlag</span></td><td>Foto oder Vorschaubild ausliefern</td><td>beide, nur eigener Haushalt</td></tr>
+<tr><td><code>/api/recognize</code></td><td>Erkennung eines Fotos für eine Rolle (Verpackung, Nährwerte, MHD)</td><td>beide, nur wenn KI an und nur für Fotos aus dem eigenen Entwurf bzw. Haushalt</td></tr>
+<tr><td><code>/api/push/subscribe</code></td><td>Push-Abo dieses Geräts speichern oder entfernen</td><td>beide</td></tr>
+<tr><td><code>/api/health</code></td><td>Lebenszeichen für Docker</td><td>ohne Anmeldung, gibt keine Daten preis (Vorschlag)</td></tr>
+</tbody></table></div>
+<p><strong>Eigentumsprüfung:</strong> Jede Route und Action prüft nicht nur die Rolle, sondern auch, ob der Datensatz zum eigenen Haushalt bzw. Entwurf gehört. Wer eine fremde ID schickt, bekommt „nicht gefunden“.</p>
+<p>Alle Eingaben werden mit einem <strong>Schema</strong> geprüft, also einer festen Beschreibung, welche Felder es gibt und welche Werte erlaubt sind (Zod). Dasselbe Schema dient für Formular, Action, Route und KI-Antwort.</p>
+</section>
+
+<section id="api-ki">
+<h2>Schnittstelle Anthropic</h2>
+<p class="lead">Wie fragt die App die KI, und wie stellt sie sicher, dass nichts erfunden wird?</p>
+<p>Für jede Foto-Rolle gibt es einen eigenen, kurzen Aufruf mit eigenem Prompt und Schema. So erscheinen die MHD-Chips schnell, und je Rolle kann ein anderes Modell laufen. Die Antwort kommt als <strong>Structured Output</strong>: Anthropic erzwingt technisch, dass die Antwort genau dem mitgeschickten JSON-Schema entspricht (JSON ist ein einfaches Textformat für Daten). Im TypeScript-SDK geht das mit <code>zodOutputFormat()</code> und <code>client.messages.parse()</code>, technisch über <code>output_config.format</code> mit <code>type: "json_schema"</code>.</p>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"sequence": {"useMaxWidth": false, "width": 110, "actorMargin": 20}}}%%
+sequenceDiagram
+  participant W as App
+  participant A as KI-Adapter
+  participant K as Anthropic
+  W->>A: Foto und Rolle
+  A->>A: Modell für Rolle
+  A->>K: Bild, Prompt, Schema
+  K-->>A: JSON nach Schema
+  A->>A: mit Zod prüfen
+  A-->>W: Vorschlag
+  W->>W: Plausibilität prüfen</pre></div><figcaption>Ein Erkennungs-Aufruf. Der Adapter ist die einzige Datei, die Anthropic kennt.</figcaption></figure>
+<h3>Die drei Schemas</h3>
+<p>Alle Felder sind Pflicht. Was nicht lesbar sein kann, ist <code>null</code> oder „unbekannt“. Ist ein Wert nicht sicher lesbar, liefert die KI also nie eine Schätzung. Der gemeinsame Prompt-Kopf sagt: „Wenn ein Wert nicht sicher lesbar ist, setze null – schätze und erfinde nichts.“</p>
+<div class="cards">
+<div class="card"><h3>A · Verpackung</h3>
+<pre>bezeichnung       Text oder null
+                  (generisch, deutsch,
+                   ohne Marke)
+kategorie         Liste oder null
+behaelter         dose | glas | packung |
+                  flasche | tetrapak |
+                  beutel | sonstiges
+inhalt.wert       Zahl oder null
+inhalt.einheit    g | ml | null
+abtropfgewicht_g  Zahl oder null
+sicherheit        hoch | mittel | niedrig</pre></div>
+<div class="card"><h3>B · Nährwerte</h3>
+<pre>bezug             100g | 100ml | portion
+kcal              Zahl oder null
+eiweiss_g         Zahl oder null
+kohlenhydrate_g   Zahl oder null
+fett_g            Zahl oder null
+sicherheit        hoch | mittel | niedrig</pre>
+<p>Nur kJ aufgedruckt: Die App rechnet um (÷ 4,184). Bei <code>portion</code> ohne bekannte Portionsgröße fragt die App nach der Portionsgröße oder führt den Wert als „geschätzt“ <span class="badge badge-vorschlag">Vorschlag</span>.</p></div>
+<div class="card"><h3>C · MHD</h3>
+<pre>roh_text      Text wie aufgedruckt
+              oder null
+datum         JJJJ-MM-TT oder null
+genauigkeit   tag | monat | jahr |
+              unbekannt
+art           mhd | verbrauchen_bis |
+              unbekannt
+sicherheit    hoch | mittel | niedrig</pre>
+<p>Prompt: „ERFINDE NIEMALS EIN DATUM.“ Chargennummern und Uhrzeiten sind kein Datum.</p></div>
+</div>
+<p>Die Werte von <code>sicherheit</code> (hoch, mittel, niedrig) sind ein <span class="badge badge-vorschlag">Vorschlag</span>, das Konzept zeigt nur „hoch“ als Beispiel.</p>
+<p><strong>Feld <code>kategorie</code></strong> <span class="badge badge-vorschlag">Vorschlag</span>: Weil es eigene Kategorien gibt, baut die App die erlaubte Liste bei jedem Aufruf aus den Kategorien des Haushalts. Anthropic speichert ein Schema bis zu 24 Stunden zwischen. Nach einer neuen Kategorie ist das Schema ein anderes und wird einfach neu verarbeitet, das kostet beim ersten Aufruf etwas mehr Zeit.</p>
+<h3>Grenzen der Schemas bei Anthropic</h3>
+<ul>
+<li>Nicht unterstützt: rekursive Schemas, <code>oneOf</code> (stattdessen <code>anyOf</code>), <code>not</code>, Zahlengrenzen (<code>minimum</code>, <code>maximum</code>), Längengrenzen. <code>minItems</code> nur 0 oder 1. <code>additionalProperties</code> muss <code>false</code> sein.</li>
+<li>Die SDK-Helfer schieben nicht unterstützte Grenzen in die Feldbeschreibung und prüfen sie danach lokal.</li>
+<li>Deshalb gibt es ein schlankes <strong>KI-Schema</strong> ohne Grenzen. Danach prüft die App mit dem strengen Fach-Schema: Menge größer null, Datum gültig, Datum plausibel.</li>
+</ul>
+<h3>Nach der Antwort</h3>
+<p>Die App prüft die Plausibilität (Datum in der Vergangenheit? weit weg vom üblichen Wert der Kategorie?) und markiert Auffälliges mit „bitte prüfen“. Das Ergebnis ist immer nur ein Vorschlag im Entwurf, bis jemand bestätigt.</p>
+<h3>Modelle</h3>
+<ul>
+<li>Start: <strong>Claude Sonnet 5.5</strong> (<code>claude-sonnet-5-5</code>) für alle drei Rollen. Im Machbarkeitstest wird je Rolle gegen <strong>Claude Haiku 5.5</strong> (<code>claude-haiku-5-5</code>) gemessen. Wichtigste Kennzahl: erfundene MHDs, Ziel etwa null.</li>
+<li>Beide Modelle können Bilder lesen und unterstützen Structured Outputs. Anthropic schaltet sie frühestens am 28.09.2027 (Sonnet 5.5) bzw. 07.10.2027 (Haiku 5.5) ab.</li>
+<li><strong>Wo das Modell gewählt wird:</strong> Das Konzept nennt einmal eine Umgebungsvariable (<code>.env</code>), einmal eine Auswahl je Foto-Art in den Einstellungen. <span class="badge badge-vorschlag">Vorschlag</span>: Die <code>.env</code> gibt den Standard vor, ein Admin kann in den Einstellungen je Rolle übersteuern.</li>
+</ul>
+<h3>Kosten</h3>
+<p>Ein Bild kostet <code>⌈Breite ÷ 28⌉ × ⌈Höhe ÷ 28⌉</code> Token (Token sind die Recheneinheit der KI, hier Bildfelder von 28 × 28 Pixeln). Bei Sonnet 5.5 und Haiku 5.5 ist die lange Kante auf 2576 px und das Bild auf 4784 Token begrenzt, größere Bilder werden verkleinert. Preise laut Anthropic, Stand 22.11.2026, je 1 Mio. Token: Sonnet 5.5 Eingabe 2 $, Ausgabe 10 $. Haiku 5.5 (Prompt bis 100.000 Token) Eingabe 0,10 $, Ausgabe 0,50 $.</p>
+<div class="note">
+<p><strong>Beispiel</strong> (Rechnung, nicht gemessen): Foto mit 1600 × 1200 px = 58 × 43 = 2.494 Bild-Token. Dazu angenommen 500 Token Prompt und 300 Token Antwort.</p>
+<p>Sonnet 5.5: 2.994 × 2 $ + 300 × 10 $ je Mio. ≈ 0,009 $, also knapp <strong>1 US-Cent je Foto</strong>. Haiku 5.5: ≈ 0,00045 $, also rund <strong>0,05 US-Cent je Foto</strong>.</p>
+<p>Eine Erfassung mit Verpackung, Nährwerten und 10 MHD-Fotos (12 Fotos) kostet mit Sonnet also rund 11 US-Cent. Die tatsächlichen Werte meldet die API bei jedem Aufruf. Sie landen in <code>ki_aufruf</code> und in der Kostenübersicht des Monats.</p>
+</div>
+<h3>Datenschutz bei Anthropic</h3>
+<p>Anthropic nutzt API-Daten ohne ausdrückliche Erlaubnis nicht zum Training. Ein- und Ausgaben werden nach höchstens 30 Tagen gelöscht, Inhalte, die Sicherheitssysteme markieren, bis zu 2 Jahre. Eine Verarbeitung nur in der EU gibt es nicht, nur „global“ oder „us“. Deshalb steht in den Einstellungen der Hinweis „Fotos werden zur Erkennung an Anthropic (USA) gesendet“.</p>
+</section>
+
+<section id="datenmodell">
+<h2>Datenmodell</h2>
+<p class="lead">Welche Tabellen gibt es, welche Felder sind wichtig, und wie hängen sie zusammen?</p>
+<p>Die Grafiken sind <strong>ER-Diagramme</strong> (Entity-Relationship): Jeder Kasten ist eine Tabelle, die Linien zeigen Beziehungen. „Eins zu viele“ heißt zum Beispiel: Ein Produkt hat viele Einheiten. <code>PK</code> ist der Schlüssel einer Zeile, <code>FK</code> ein Verweis auf eine andere Tabelle. Jede Tabelle hat zusätzlich <code>id</code>, <code>created_at</code> und <code>updated_at</code> <span class="badge badge-vorschlag">Vorschlag</span>, diese drei Felder sind in den Grafiken weggelassen. Felder mit dem Vermerk „Vorschlag“ stehen in keiner Skizze der Konzeptdateien.</p>
+<p>Regeln aus dem Projekt: sauber normalisiert (Produkt, darunter Einheiten mit je eigenem MHD), Stammdaten in eigenen Tabellen bzw. versionierten Seed-Daten (<strong>Seed</strong> = mitgelieferte Grunddaten wie Kategorien), Schemaänderungen nur über <strong>Migrationen</strong> (kleine, nummerierte Änderungsskripte), Fotos im Foto-Volume und in der DB nur die Referenz. Jede Tabelle mit Haushaltsbezug trägt <code>haushalt_id</code>, auch wenn es im MVP nur einen Haushalt gibt.</p>
+
+<h3>Haushalt und Konto</h3>
+<details class="grafik"><summary>Grafik anzeigen</summary>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"er": {"useMaxWidth": false}}}%%
+erDiagram
+  haushalt ||--|| haushalt_einstellung : hat
+  haushalt ||--o{ mitglied : hat
+  mitglied ||--o{ mitglied_allergie : hat
+  haushalt {
+    uuid aktive_quelle_id FK
+    text rechenmodus
+  }
+  haushalt_einstellung {
+    text standard_ernaehrungsform
+    int ampel_gelb_tage
+    int ampel_orange_tage
+    text inventur_intervall
+    bool ki_aktiv
+    text ki_modell_verpackung
+    text ki_modell_naehrwerte
+    text ki_modell_mhd
+  }
+  mitglied {
+    text name
+    text piktogramm
+    text typ
+    date geburtsdatum
+    text geschlecht
+    text aktivitaet
+    numeric gewicht_kg
+    text zustand
+    text ernaehrungsform
+  }</pre></div><figcaption>Haushalt mit Einstellungen und Mitgliedern (Personen, auch ohne Login).</figcaption></figure>
+</details>
+<details class="grafik"><summary>Grafik anzeigen</summary>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"er": {"useMaxWidth": false}}}%%
+erDiagram
+  haushalt ||--o{ nutzer : hat
+  nutzer |o--o| mitglied : "verknüpft"
+  nutzer ||--|| nutzer_einstellung : hat
+  nutzer ||--o{ sitzung : hat
+  nutzer ||--o{ passkey : hat
+  nutzer {
+    text name
+    text email
+    text rolle
+    bool aktiv
+    uuid mitglied_id FK
+  }
+  nutzer_einstellung {
+    text theme
+    bool animationen_reduziert
+    text startansicht
+  }</pre></div><figcaption>Nutzer (Login) und Haushaltsmitglied (Person) sind getrennt und nur optional verknüpft. Sitzungen und Passkeys legt Better Auth an, die genauen Tabellennamen gibt die Bibliothek vor.</figcaption></figure>
+</details>
+<ul>
+<li><code>mitglied.typ</code>: Baby, Kind, Jugendliche:r, Erwachsene:r, Senior:in. <code>zustand</code>: schwanger oder stillend. <code>rolle</code>: admin oder mitglied.</li>
+<li><code>ernaehrungsform</code> am Mitglied darf leer sein, dann gilt der Haushalts-Standard.</li>
+</ul>
+
+<h3>Empfehlung und Ziel</h3>
+<details class="grafik"><summary>Grafik anzeigen</summary>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"er": {"useMaxWidth": false}}}%%
+erDiagram
+  quelle ||--o{ quelle_version : hat
+  quelle ||--o{ haushalt : "aktiv in"
+  quelle_version ||--o{ quelle_bedarf : enthaelt
+  quelle_version ||--o{ quelle_wert : enthaelt
+  warengruppe ||--o{ quelle_wert : "Menge für"
+  haushalt ||--o{ ziel : hat
+  ziel ||--o{ ziel_etappe : hat
+  quelle {
+    text name
+    text land
+  }
+  quelle_version {
+    text stand
+    text link
+    int standard_tage "Vorschlag"
+  }
+  quelle_bedarf {
+    text personengruppe "Vorschlag"
+    numeric kcal_tag "Vorschlag"
+    numeric wasser_l_tag "Vorschlag"
+  }
+  warengruppe {
+    text schluessel "fest, Vorschlag"
+    text name
+  }
+  quelle_wert {
+    uuid warengruppe_id FK
+    numeric menge_pro_person_tag
+  }
+  ziel {
+    int tage
+    date zieldatum
+  }
+  ziel_etappe {
+    int tage
+    date bis
+  }</pre></div><figcaption>Empfehlungswerte sind versioniert, mit Quelle, Stand und Link. Werte werden vor dem Import von Hand gegen das Original geprüft.</figcaption></figure>
+</details>
+<ul>
+<li><strong>Bedarf je Person</strong> <span class="badge badge-vorschlag">Vorschlag</span>: Der Modus „offiziell“ braucht einen Ort für den Bedarf je Person (laut Konzept zum Beispiel 2.200 kcal, Wasser 2 l bzw. 1 l für Kinder, ungeprüft) und den Standardzeitraum der Quelle (laut Konzept 10 Tage). Dafür gibt es <code>quelle_bedarf</code> je Personengruppe und <code>standard_tage</code> an der <code>quelle_version</code>.</li>
+<li><strong>Warengruppe mit festem Schlüssel</strong> <span class="badge badge-vorschlag">Vorschlag</span>: Das Konzept nennt die Warengruppe „je Quelle versioniert“. Vorschlag: Die Warengruppe hat einen festen Schlüssel (etwa <code>getreide</code>), versioniert sind nur die Mengen in <code>quelle_wert</code>. So müssen Kategorien bei einer neuen Quellenversion nicht neu zugeordnet werden.</li>
+</ul>
+
+<h3>Vorrat</h3>
+<details class="grafik"><summary>Grafik anzeigen</summary>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"er": {"useMaxWidth": false}}}%%
+erDiagram
+  warengruppe ||--o{ kategorie : zaehlt
+  kategorie ||--o{ produkt : ordnet
+  behaelter ||--o{ produkt : ordnet
+  lagerort ||--o{ produkt : ordnet
+  produkt ||--o{ produkt_tag : hat
+  tag ||--o{ produkt_tag : hat
+  produkt ||--o{ einheit : hat
+  produkt ||--o{ foto : hat
+  einheit |o--o{ foto : "MHD-Foto"
+  erfassung_entwurf ||--o{ foto : sammelt
+  foto ||--o{ ki_aufruf : erzeugt
+  produkt {
+    text bezeichnung
+    numeric inhalt_wert
+    text inhalt_einheit
+    numeric abtropfgewicht_g
+    numeric kcal_100
+    numeric eiweiss_100
+    numeric kh_100
+    numeric fett_100
+    bool naehrwerte_geschaetzt
+  }
+  einheit {
+    date mhd
+    text mhd_genauigkeit "Vorschlag"
+    text mhd_art "Vorschlag"
+    bool mhd_geschaetzt "Vorschlag"
+    text status
+    timestamptz entnommen_am
+    uuid entnommen_von FK
+    date geprueft_am
+  }
+  foto {
+    text rolle "Vorschlag"
+    text pfad
+    text hash
+    text status
+    uuid entwurf_id FK "SET NULL"
+  }
+  erfassung_entwurf {
+    uuid nutzer_id FK
+    jsonb daten "Vorschlag"
+  }
+  ki_aufruf {
+    text modell
+    int tokens_ein
+    int tokens_aus
+    numeric kosten_usd
+    bool erfolg
+  }</pre></div><figcaption>Produkt mit Einheiten (je Packung ein MHD). Die Tabellen foto, erfassung_entwurf und ki_aufruf sind Vorschläge.</figcaption></figure>
+</details>
+<ul>
+<li><code>einheit.status</code>: <code>vorrat</code>, <code>verbraucht</code> oder <code>entsorgt</code>. „Gut“, „bald fällig“ und „abgelaufen“ werden berechnet, nie gespeichert.</li>
+<li><strong>Neue Felder an <code>einheit</code></strong> <span class="badge badge-vorschlag">Vorschlag</span>: <code>mhd_genauigkeit</code> (tag, monat, jahr), <code>mhd_art</code> (mhd, verbrauchen_bis) und <code>mhd_geschaetzt</code>. Das KI-Schema liefert die ersten beiden schon, die Skizze speichert sie aber nicht. Das dritte braucht die Abkürzung „Ohne Datum“.</li>
+<li><strong>Neue Tabellen</strong> <span class="badge badge-vorschlag">Vorschlag</span>: <code>foto</code> (Rolle Verpackung, Nährwerte oder MHD, Pfad, Prüfsumme, Größe, Dateityp, Status Entwurf oder fest, Bezug zu Produkt, Einheit oder Entwurf), <code>erfassung_entwurf</code> (unbestätigte Erfassung) und <code>ki_aufruf</code> (Modell, Token, Kosten, Dauer, Erfolg) für die Kostenübersicht. Dazu kommen die Tabellen, die pg-boss für seine Warteschlange selbst anlegt.</li>
+<li><code>behaelter</code> wird eine eigene Stammdaten-Tabelle <span class="badge badge-vorschlag">Vorschlag</span>. Die Skizze nennt nur den Fremdschlüssel.</li>
+<li><strong>Lagerort am Produkt oder an der Einheit?</strong> Das Konzept nennt ihn als Merkmal, der Prototyp führt ihn am Produkt. <span class="badge badge-vorschlag">Vorschlag</span>: am Produkt, wie im Prototyp. Wer dasselbe Produkt an zwei Orten lagert, legt es zweimal an.</li>
+<li>Optional am Produkt laut Konzept: <code>ballaststoffe_100</code>, <code>zucker_100</code>, <code>salz_100</code>.</li>
+</ul>
+
+<h3>Erinnerungen und Nachkaufen</h3>
+<details class="grafik"><summary>Grafik anzeigen</summary>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"er": {"useMaxWidth": false}}}%%
+erDiagram
+  nutzer ||--o{ benachrichtigung_einstellung : hat
+  nutzer ||--o{ push_abo : hat
+  benachrichtigung_einstellung {
+    text art
+    bool aktiv
+    text zeitplan
+  }
+  push_abo {
+    text geraet
+    text endpoint
+    text keys
+  }</pre></div><figcaption>Benachrichtigungen je Nutzer, ein Push-Abo je Gerät.</figcaption></figure>
+</details>
+<details class="grafik"><summary>Grafik anzeigen</summary>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"er": {"useMaxWidth": false}}}%%
+erDiagram
+  haushalt ||--o{ einkaufsliste_eintrag : hat
+  warengruppe |o--o{ einkaufsliste_eintrag : betrifft
+  produkt |o--o{ einkaufsliste_eintrag : betrifft
+  einkaufsliste_eintrag {
+    numeric menge
+    text quelle
+    bool erledigt
+  }</pre></div><figcaption>Ein Eintrag auf der Nachkaufen-Liste betrifft eine Warengruppe oder ein Produkt.</figcaption></figure>
+</details>
+<ul>
+<li><code>benachrichtigung_einstellung.art</code>: Wochenübersicht, Dringend, Etappe, Inventur, Check-in-Mail.</li>
+<li><code>einkaufsliste_eintrag.quelle</code>: <code>ziel</code>, <code>nachkauf</code> oder <code>manuell</code>.</li>
+<li>Der Tabellenname <code>einkaufsliste_eintrag</code> stammt aus dem Konzept. <span class="badge badge-vorschlag">Vorschlag</span>: umbenennen in <code>nachkauf_eintrag</code>, passend zum Begriff „Nachkaufen“.</li>
+</ul>
+</section>
+
+<section id="docker">
+<h2>Container</h2>
+<p class="lead">Welche Container laufen auf dem NAS, wo liegen die Daten, und in welcher Reihenfolge starten sie?</p>
+<figure>
+<svg viewBox="0 0 360 540" role="img" aria-label="Container im NAS: tailscale, web, worker, migrate, db, backup und drei Ordner" style="width:100%;height:auto;max-width:440px;display:block;margin:0 auto">
+<defs><marker id="pfeil-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill:var(--muted)"/></marker></defs>
+<g text-anchor="middle" style="font-family:Inter,system-ui,sans-serif;font-size:13px;fill:var(--fg)">
+<rect x="6" y="6" width="348" height="528" rx="20" style="fill:var(--accent-soft);stroke:var(--accent);stroke-dasharray:6 4"/>
+<text x="180" y="30" style="fill:var(--muted);font-size:12px;font-weight:600;letter-spacing:.06em">NAS · DOCKER COMPOSE</text>
+<rect x="90" y="44" width="180" height="48" rx="12" style="fill:var(--surface-strong);stroke:var(--line);stroke-dasharray:5 4"/>
+<text x="180" y="64">tailscale</text>
+<text x="180" y="82" style="fill:var(--muted);font-size:12px">Sidecar oder Host-Paket</text>
+<line x1="110" y1="92" x2="110" y2="116" style="stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-d)"/>
+<rect x="20" y="120" width="130" height="48" rx="12" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<text x="85" y="140">web</text>
+<text x="85" y="158" style="fill:var(--muted);font-size:12px">App, Port 3000</text>
+<rect x="210" y="120" width="130" height="48" rx="12" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<text x="275" y="140">worker</text>
+<text x="275" y="158" style="fill:var(--muted);font-size:12px">Jobs</text>
+<rect x="210" y="196" width="130" height="48" rx="12" style="fill:var(--surface-strong);stroke:var(--line);stroke-dasharray:5 4"/>
+<text x="275" y="216">migrate</text>
+<text x="275" y="234" style="fill:var(--muted);font-size:12px">einmal beim Start</text>
+<rect x="115" y="268" width="130" height="48" rx="12" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<text x="180" y="288">db</text>
+<text x="180" y="306" style="fill:var(--muted);font-size:12px">PostgreSQL 18</text>
+<rect x="210" y="340" width="130" height="48" rx="12" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<text x="275" y="360">backup</text>
+<text x="275" y="378" style="fill:var(--muted);font-size:12px">liest db und fotos</text>
+<path d="M100 168 V292 H111" style="fill:none;stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-d)"/>
+<path d="M230 168 V182 H195 V264" style="fill:none;stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-d)"/>
+<path d="M300 244 V292 H249" style="fill:none;stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-d)"/>
+<path d="M50 168 V418" style="fill:none;stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-d)"/>
+<path d="M180 316 V418" style="fill:none;stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-d)"/>
+<path d="M290 388 V418" style="fill:none;stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-d)"/>
+<path d="M226 340 V320" style="fill:none;stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-d)"/>
+<path d="M210 404 H96 V418" style="fill:none;stroke:var(--muted);stroke-width:1.5" marker-end="url(#pfeil-d)"/>
+<path d="M340 144 H348 V497 H64 V492" style="fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:4 3" marker-end="url(#pfeil-d)"/>
+<path d="M18 432 a46 10 0 0 0 92 0 v46 a46 10 0 0 1 -92 0 z" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<ellipse cx="64" cy="432" rx="46" ry="10" style="fill:var(--surface);stroke:var(--line)"/>
+<text x="64" y="466">fotos</text>
+<path d="M134 432 a46 10 0 0 0 92 0 v46 a46 10 0 0 1 -92 0 z" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<ellipse cx="180" cy="432" rx="46" ry="10" style="fill:var(--surface);stroke:var(--line)"/>
+<text x="180" y="466">db</text>
+<path d="M250 432 a46 10 0 0 0 92 0 v46 a46 10 0 0 1 -92 0 z" style="fill:var(--surface-strong);stroke:var(--line)"/>
+<ellipse cx="296" cy="432" rx="46" ry="10" style="fill:var(--surface);stroke:var(--line)"/>
+<text x="296" y="466">backups</text>
+<text x="180" y="515" style="fill:var(--muted);font-size:12px">Ordner auf dem NAS (Volumes)</text>
+</g>
+</svg>
+<figcaption>Gestrichelte Kästen: optional (tailscale als Container) oder nur kurz aktiv (migrate). Pfeile zeigen, wer worauf zugreift. Die gestrichelte Linie rechts außen: Der Worker greift zum Aufräumen auf die Fotos zu.</figcaption>
+</figure>
+<p>Ein <strong>Volume</strong> ist ein Ordner, den ein Container dauerhaft nutzt. Der Container selbst kann gelöscht und neu gestartet werden, die Daten im Volume bleiben. <code>web</code>, <code>worker</code> und <code>migrate</code> nutzen dasselbe App-Image (Programmpaket), nur mit anderem Startbefehl.</p>
+<div class="scroll-x"><table>
+<thead><tr><th>Dienst</th><th>Aufgabe</th><th>Daten</th><th>Hinweise</th></tr></thead>
+<tbody>
+<tr><td><code>db</code></td><td>PostgreSQL 18, Daten und Job-Warteschlange</td><td>Ordner <code>db</code></td><td>Meldet per <strong>Healthcheck</strong> (ein regelmäßiger Selbsttest, den Docker abfragt), ob sie bereit ist. Nicht nach außen erreichbar. Ab Version 18 liegt das Volume eine Ebene höher (<code>/var/lib/postgresql</code>) als bei 17</td></tr>
+<tr><td><code>migrate</code></td><td>Migrationen und Seed-Daten einspielen, dann Ende</td><td>–</td><td>startet, sobald <code>db</code> bereit ist</td></tr>
+<tr><td><code>web</code></td><td>Oberfläche, Server Actions, Routen</td><td>Ordner <code>fotos</code></td><td>startet erst nach erfolgreichem <code>migrate</code>. Port 3000 nur intern bzw. an 127.0.0.1. Schlüssel aus <code>.env</code></td></tr>
+<tr><td><code>worker</code></td><td>Erinnerungen, Mails, Aufräumen</td><td>Ordner <code>fotos</code> (zum Aufräumen)</td><td>startet erst nach erfolgreichem <code>migrate</code>, gleiche <code>.env</code> wie <code>web</code></td></tr>
+<tr><td><code>backup</code></td><td>tägliche Sicherung von Datenbank und Fotos</td><td>liest <code>fotos</code>, schreibt <code>backups</code></td><td>siehe <a href="#backups">Backups</a></td></tr>
+<tr><td><code>tailscale</code></td><td>HTTPS im Tailnet</td><td>eigener Zustandsordner</td><td>nur beim Weg „Sidecar“ (ein Hilfscontainer, der direkt neben der App läuft), siehe <a href="#tailscale">Tailscale</a></td></tr>
+</tbody></table></div>
+<p><strong>Start-Reihenfolge:</strong> <code>db</code> (bereit) → <code>migrate</code> (erfolgreich beendet) → <code>web</code> und <code>worker</code>. <code>backup</code> läuft unabhängig nach Zeitplan.</p>
+<p><strong>Ordner als Bind-Mount</strong> <span class="badge badge-vorschlag">Vorschlag</span>: Ein <strong>Bind-Mount</strong> bindet einen normalen Ordner des NAS direkt in einen Container ein. Die drei Ordner <code>db</code>, <code>fotos</code> und <code>backups</code> liegen sichtbar in einem freigegebenen Ordner des NAS statt in versteckten Docker-Volumes. So erfassen die Snapshot- und Sicherungsfunktionen des NAS sie mit.</p>
+<h3>Welches NAS?</h3>
+<p>Das NAS-Modell ist noch offen. Fest steht: PostgreSQL 18 gibt es unter anderem für x86-64 und ARM64. Das Node-24-Image, auf dem die App laufen würde, gibt es für x86-64 und ARM64, aber <strong>nicht für 32-Bit-ARM</strong>. Solche älteren NAS-Geräte scheiden also aus. Ob alte NAS-Kernel genügen, ist nicht geprüft.</p>
+<h3>Updates</h3>
+<p><span class="badge badge-vorschlag">Vorschlag</span> Images mit fester Versionsnummer, kein „latest“. Ablauf: Backup prüfen, neue Version in der Compose-Datei eintragen, Image ziehen, neu starten. <code>migrate</code> spielt neue Migrationen automatisch ein. Migrationen laufen nur vorwärts. Der Rückweg ist deshalb: alte Version eintragen und das Backup von vor dem Update einspielen.</p>
+</section>
+
+<section id="tailscale">
+<h2>Tailscale und HTTPS</h2>
+<p class="lead">Warum braucht die App HTTPS, und wie kommt es ohne offenen Port aufs NAS?</p>
+<p><strong>HTTPS</strong> ist die verschlüsselte Variante von HTTP, erkennbar am Schloss im Browser. Die App braucht es zwingend: Die Kamera im Browser gibt es nur in sicheren Verbindungen (HTTPS oder localhost). Auch Service Worker (das Programmteil, das die App installierbar und offline lesbar macht), Push und Passkeys setzen eine sichere Verbindung voraus.</p>
+<details class="grafik"><summary>Grafik anzeigen</summary>
+<figure><div class="scroll-x"><pre class="mermaid">%%{init: {"flowchart": {"useMaxWidth": false, "nodeSpacing": 20}}}%%
+flowchart TD
+  A["iPhone/PC mit Tailscale"] -->|verschlüsselt| B["Tailnet"]
+  B --> C["Tailscale Serve, HTTPS"]
+  C --> D["App, Port 3000"]
+  E["Gerät ohne Tailscale"] -.->|"kein Zugang"| C
+  F["Let's Encrypt"] -.->|Zertifikat| C</pre></div><figcaption>Nur Geräte im eigenen Tailnet erreichen die App.</figcaption></figure>
+</details>
+<ul>
+<li><strong>Tailscale Serve</strong> stellt die App unter einer Adresse wie <code>https://name.tailnet-name.ts.net</code> bereit und leitet intern auf Port 3000 weiter. Serve ist nur im Tailnet erreichbar.</li>
+<li><strong>MagicDNS</strong> (Tailscales Namensdienst für die eigenen Geräte) und <strong>HTTPS-Zertifikate</strong> müssen im Tailscale-Admin-Bereich unter DNS eingeschaltet sein. Die Zertifikate kommen von Let's Encrypt, gelten 90 Tage und werden automatisch geholt. Der private Schlüssel bleibt auf dem Gerät. Ein eigenes Stammzertifikat auf den Handys ist nicht nötig.</li>
+<li><strong>Funnel bleibt aus.</strong> Funnel würde die App öffentlich ins Internet stellen. Er ist standardmäßig deaktiviert und braucht eine eigene Freigabe in der Tailnet-Richtlinie.</li>
+<li><strong>Gerätename ist öffentlich:</strong> Geräte- und Tailnet-Name landen im öffentlichen Certificate-Transparency-Log (CT-Log), einem Verzeichnis aller ausgestellten Zertifikate. Deshalb keinen sprechenden Namen wählen.</li>
+<li><strong>Passkeys</strong> (Anmeldung per Face ID statt Passwort) hängen am Hostnamen. Ändert sich der Name, sind registrierte Passkeys ungültig. Deshalb den Namen vor dem Einführen von Passkeys festlegen. Ob Passkeys ins MVP gehören, ist offen.</li>
+<li><strong>Jedes Gerät braucht die Tailscale-App</strong>, und zum Öffnen der App muss sie verbunden sein. Was das iPhone anzeigt, wenn Tailscale aus ist, ist nicht geprüft.</li>
+</ul>
+<h3>Zwei Wege aufs NAS</h3>
+<div class="cards">
+<div class="card"><h3>Host-Paket</h3>
+<p>Tailscale als Paket direkt auf dem NAS, <code>tailscale serve --bg 3000</code> (läuft dauerhaft im Hintergrund).</p>
+<ul>
+<li><strong>Synology:</strong> Das Paket im Package Center wird laut Tailscale nicht mehr unterstützt, empfohlen ist die manuelle Installation. Unter DSM 7 nur eingehende Verbindungen, ausgehend erst über eine Startaufgabe, die nach jedem Paket-Update neu laufen muss. In Foren wird ein Konflikt mit Port 443 berichtet, das ist nicht offiziell bestätigt.</li>
+<li><strong>QNAP:</strong> Paket über das App Center. Zu Serve sagt die Anleitung nichts.</li>
+<li><strong>Unraid:</strong> offizielle App, je Container ein Schalter „Use Tailscale“ mit Serve.</li>
+</ul></div>
+<div class="card"><h3>Sidecar-Container</h3>
+<p>Ein <strong>Sidecar</strong> ist ein Hilfscontainer, der direkt neben der App läuft. Hier ist es ein eigener Tailscale-Container im Compose-Stack, an den sich <code>web</code> anhängt. Diesen Weg beschreibt Tailscale offiziell und herstellerunabhängig. Die Serve-Einstellung liegt in einer kleinen Datei, der Zustand in einem eigenen Ordner.</p>
+<p>Der Container ist ein eigenes Gerät im Tailnet mit eigener Adresse. Daraus folgt (eigener Schluss, keine Herstellerangabe), dass er einen Portkonflikt auf dem NAS umgeht.</p>
+<p><strong>Netz:</strong> Mit <code>network_mode: service:tailscale</code> teilt <code>web</code> das Netz des Tailscale-Containers und hat keine eigene Netzwerkverbindung mehr. Damit <code>web</code> die Datenbank weiter unter ihrem Dienstnamen <code>db</code> erreicht, muss der Tailscale-Container im selben Compose-Netz hängen (beim Bau prüfen).</p></div>
+</div>
+<p>Welcher Weg passt, hängt am NAS-Modell und bleibt offen.</p>
+<h3>Weitere Haushaltsmitglieder</h3>
+<p>Der kostenlose Tarif „Personal“ erlaubt bis zu 6 Nutzer und unbegrenzt viele Geräte, nur für nicht-kommerzielle Nutzung. Jede Person braucht ein eigenes Tailscale-Konto: entweder als Nutzer im eigenen Tailnet oder über die Freigabe des NAS an ein fremdes Tailnet. Ob freigegebene Personen auf die 6 Nutzer angerechnet werden, steht nirgends. Ein Haushalt mit bis zu 6 Personen kommt also ohne Kosten aus (eigener Schluss).</p>
+</section>
+
+<section id="sicherheit">
+<h2>Sicherheit und Datenschutz</h2>
+<p class="lead">Wer kommt an welche Daten, und was geht nach außen?</p>
+<ul>
+<li><strong>Kein offener Port:</strong> Die App ist nur im Tailnet erreichbar. Port 3000 hängt nur intern am NAS, Funnel bleibt aus.</li>
+<li><strong>Login für alles</strong> außer der Anmeldeseite und dem Lebenszeichen <code>/api/health</code>. Der erste Nutzer wird Admin, danach ist die freie Registrierung aus. Weitere Nutzer lädt ein Admin ein oder legt sie mit Startpasswort an.</li>
+<li><strong>Rollen</strong> Admin und Mitglied. Jede Server Action prüft selbst Anmeldung und Rolle. Jede Abfrage ist auf den eigenen Haushalt gefiltert.</li>
+<li><strong>Schlüssel</strong> (Anthropic, SMTP, VAPID-Schlüssel für Push, Geheimnis für Better Auth, DB-Passwort) liegen nur in der <code>.env</code> auf dem NAS und nie im Code-Repository. Die Oberfläche zeigt nur „API-Schlüssel hinterlegt“, nie den Schlüssel selbst.</li>
+<li><strong>Fotos:</strong> EXIF-Daten einschließlich Standort werden beim Upload entfernt, das Bild wird verkleinert, das Original nicht aufbewahrt.</li>
+<li><strong>Protokolle</strong> enthalten keine Fotos, Schlüssel oder personenbezogenen Daten.</li>
+<li><strong>Hinweis in der Oberfläche:</strong> „Fotos werden zur Erkennung an Anthropic (USA) gesendet“. Manuell erfassen geht immer, auch mit ausgeschalteter KI.</li>
+<li><strong>Einwilligung zur KI</strong> <span class="badge badge-vorschlag">Vorschlag</span>: Die Stack-Recherche nennt eine Einwilligung je Nutzer, das Einstellungs-Konzept nur den Haushaltsschalter „KI an/aus“. Vorschlag: Der Admin schaltet die KI für den Haushalt an. Jeder Nutzer bestätigt den Hinweis einmal vor seinem ersten Foto.</li>
+</ul>
+<div class="scroll-x"><table>
+<thead><tr><th>Daten</th><th>Ort</th><th>Wer sieht sie</th></tr></thead>
+<tbody>
+<tr><td>Vorrat, Produkte, Einheiten, Historie</td><td>DB auf dem NAS</td><td>angemeldete Nutzer des Haushalts</td></tr>
+<tr><td>Gesundheitsangaben (Alter, Geschlecht, Gewicht, schwanger oder stillend, Allergien)</td><td>DB auf dem NAS, verlassen es nie</td><td>Nutzer des Haushalts, ändern nur Admins</td></tr>
+<tr><td>Fotos</td><td>Foto-Volume auf dem NAS</td><td>Nutzer des Haushalts. Zur Erkennung kurz Anthropic, dort höchstens 30 Tage, kein Training</td></tr>
+<tr><td>Konten, Passwörter, Passkeys, Sitzungen</td><td>DB auf dem NAS (Better Auth)</td><td>Admin sieht Nutzer, letzte Anmeldung, Sitzungen. Passwörter nicht im Klartext (beim Bau prüfen)</td></tr>
+<tr><td>E-Mail-Adressen</td><td>DB auf dem NAS</td><td>Admin. Beim Versand der SMTP-Anbieter</td></tr>
+<tr><td>Push-Abos (je Gerät eine Zustelladresse beim Push-Dienst, der „Endpoint“, plus Schlüssel)</td><td>DB auf dem NAS</td><td>Der Push-Dienst des Geräteherstellers stellt die Benachrichtigung zu</td></tr>
+<tr><td>API-Schlüssel, Passwörter der Dienste</td><td><code>.env</code> auf dem NAS</td><td>nur die Container, wer Zugriff aufs NAS hat</td></tr>
+<tr><td>Geräte- und Tailnet-Name</td><td>öffentliches CT-Log</td><td>jeder, deshalb neutral benennen</td></tr>
+<tr><td>Backups</td><td>Ordner <code>backups</code>, dazu ein zweiter Ort</td><td>wer Zugriff aufs NAS bzw. den zweiten Ort hat</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="backups">
+<h2>Backups</h2>
+<p class="lead">Wie sind Datenbank und Fotos gesichert, und wie kommt man im Notfall zurück?</p>
+<p>Die Stack-Recherche wurde für den Mac geschrieben (Time Machine, Sicherung in den Benutzerordner). Das passt nicht mehr. Für das NAS gilt deshalb der folgende <span class="badge badge-vorschlag">Vorschlag</span>:</p>
+<ul>
+<li><strong>Datenbank:</strong> Der Container <code>backup</code> erzeugt täglich mit <code>pg_dump</code> in Version 18 (passend zur Datenbank) eine Sicherungsdatei der Datenbank (Format <code>-Fc</code>, komprimiert) im Ordner <code>backups</code>. Aufbewahrung zum Beispiel 7 tägliche und 4 wöchentliche Stände, ältere werden gelöscht.</li>
+<li><strong>Fotos:</strong> Derselbe Container sichert den Ordner <code>fotos</code> täglich in den Ordner <code>backups</code>, versioniert bzw. ohne dort zu löschen, mit derselben Aufbewahrung wie die Datenbank. Ein einfacher Abgleich würde ein versehentlich gelöschtes Foto auch im Backup löschen.</li>
+<li><strong>NAS-Snapshots:</strong> Falls das NAS Snapshots bietet (eingefrorene Stände eines Ordners), werden sie für die drei Ordner eingeschaltet. Ob und wie, hängt am NAS-Modell. Ein Snapshot des laufenden <code>db</code>-Ordners ersetzt den Dump nicht, weil die Datenbank darin mitten im Schreiben eingefroren sein kann.</li>
+<li><strong>Zweiter Ort:</strong> Eine Kopie des Ordners <code>backups</code> liegt außerhalb des NAS, etwa auf einer externen Platte. Ein Backup nur auf demselben Gerät hilft nicht, wenn das Gerät ausfällt. Diese Kopie ist verschlüsselt, weil sie Gesundheitsangaben enthält.</li>
+<li><strong>Wiederherstellung testen:</strong> Einmal nach der Einrichtung und nach größeren Updates eine Sicherung in eine leere Test-Datenbank einspielen und die App damit starten. Der Ablauf wird in der Einrichtungsanleitung dokumentiert.</li>
+<li><strong>Status in der App:</strong> Unter Daten &amp; System zeigt die App das letzte DB-Backup an.</li>
+<li><strong>Zusätzlich</strong> gibt es den Export als JSON (alles) und CSV (Vorrat) für Admins. Er ersetzt das Backup nicht.</li>
+</ul>
+</section>
+
+<section id="offline">
+<h2>Offline</h2>
+<p class="lead">Was geht, wenn das Handy das NAS nicht erreicht, etwa im Keller ohne Netz oder mit ausgeschaltetem Tailscale?</p>
+<p>Das ist eine offene Frage. Die Stack-Recherche plant nur Offline-Lesen, ein früherer Recherche-Bericht nennt Offline-Schreiben als Pflicht. Beide Varianten neutral nebeneinander:</p>
+<div class="scroll-x"><table>
+<thead><tr><th></th><th>Nur lesen</th><th>Auch eintragen, mit späterem Abgleich</th></tr></thead>
+<tbody>
+<tr><td>Ohne Verbindung möglich</td><td>Übersicht und Vorrat im zuletzt geladenen Stand ansehen</td><td>zusätzlich entnehmen, entsorgen, manuell erfassen</td></tr>
+<tr><td>Fotos und KI</td><td>brauchen Verbindung</td><td>brauchen trotzdem Verbindung, weil die KI über das NAS läuft</td></tr>
+<tr><td>Technik</td><td>Service Worker speichert App und zuletzt geladene Daten. Schreiben zeigt freundlich „keine Verbindung“</td><td>zusätzlich eine Warteschlange auf dem Gerät, Abgleich beim nächsten Kontakt, Regeln für Konflikte</td></tr>
+<tr><td>Aufwand</td><td>gering, im Stack schon vorgesehen</td><td>deutlich höher</td></tr>
+<tr><td>Risiko</td><td>Anzeige kann veraltet sein, Eintragen wartet auf Verbindung</td><td>Konflikte, etwa wenn zwei Personen offline dieselbe Packung entnehmen. Doppelte Einträge möglich</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="lizenz">
+<h2>Lizenzen</h2>
+<p class="lead">Was bedeuten MIT, GPL-3.0 und AGPL-3.0, und welche passt zu Preposaurus?</p>
+<p>Eine Open-Source-Lizenz regelt, was andere mit dem Code tun dürfen. Wichtig ist der Unterschied zwischen <strong>Weitergeben</strong> (jemand verteilt das Programm oder eine geänderte Fassung) und <strong>Betreiben</strong> (jemand lässt das Programm auf einem Server laufen und andere nutzen es über das Netz). Die Erklärung ist in Alltagssprache und keine Rechtsberatung.</p>
+<div class="scroll-x"><table>
+<thead><tr><th>Lizenz</th><th>Erlaubt</th><th>Verlangt</th><th>Folge für Eigennutzer</th><th>Folge für Fremd-Hosting</th></tr></thead>
+<tbody>
+<tr><td>MIT</td><td>nutzen, kopieren, ändern, verbreiten, verkaufen, unter eine andere Lizenz stellen</td><td>Copyright- und Lizenzhinweis bleibt erhalten. Keine Gewährleistung</td><td>keine</td><td>Jemand darf eine geänderte Fassung als geschlossenen Dienst anbieten, ohne Code zu teilen</td></tr>
+<tr><td>GPL-3.0</td><td>nutzen, ändern, verbreiten, auch kommerziell</td><td>Wer das Programm oder eine Änderung <strong>weitergibt</strong>, muss den Quelltext unter GPL-3.0 mitliefern oder anbieten</td><td>keine, solange man nichts weitergibt</td><td>Reiner Betrieb auf einem Server ohne Weitergabe löst keine Pflicht aus</td></tr>
+<tr><td>AGPL-3.0</td><td>wie GPL-3.0</td><td>zusätzlich § 13: Wer eine <strong>geänderte</strong> Fassung betreibt und andere über das Netz damit arbeiten lässt, muss ihnen den Quelltext dieser Fassung anbieten</td><td>Wer unverändert betreibt, hat keine Pflicht. Wer selbst ändert, muss den Quelltext auch den Haushaltsmitgliedern anbieten, die die App nutzen (praktisch unkritisch)</td><td>Ein Hosting-Dienst mit geänderter Fassung muss seine Änderungen offenlegen</td></tr>
+</tbody></table></div>
+<p><strong>„or later“:</strong> Steht im Lizenzhinweis „Version 3 oder (nach Wahl) jede spätere Version“, dürfen Nutzer auch spätere Fassungen der Lizenz wählen. Die Kurzkennungen lauten dann <code>GPL-3.0-or-later</code> bzw. <code>AGPL-3.0-or-later</code>, sonst <code>-only</code>.</p>
+<h3>Was vergleichbare Projekte nutzen</h3>
+<div class="scroll-x"><table>
+<thead><tr><th>Projekt</th><th>Wofür</th><th>Lizenz</th></tr></thead>
+<tbody>
+<tr><td>Paperless-ngx</td><td>Dokumente</td><td>GPL-3.0</td></tr>
+<tr><td>Audiobookshelf</td><td>Hörbücher</td><td>GPL-3.0</td></tr>
+<tr><td>Immich</td><td>Fotos</td><td>AGPL-3.0</td></tr>
+<tr><td>Mealie</td><td>Rezepte</td><td>AGPL-3.0</td></tr>
+<tr><td>Grocy</td><td>Haushalt und Vorrat</td><td>MIT</td></tr>
+</tbody></table></div>
+<p>Die beiden Vorbilder für den Betrieb (Paperless-ngx, Audiobookshelf) nutzen also GPL-3.0, nicht AGPL.</p>
+<h3>Bibliotheken: passt alles zusammen?</h3>
+<ul>
+<li><strong>GSAP</strong> (Animationen, im Prototyp genutzt) hat eine eigene Lizenz von Webflow und ist keine Open-Source-Lizenz. Kostenlos, auch kommerziell. Verboten ist ohne Zustimmung die Nutzung in No-Code-Werkzeugen, die mit Webflows Animations-Baukasten konkurrieren. Webflow kann die Bedingungen ändern. Wegen dieser Beschränkungen ist GSAP nicht mit GPL oder AGPL vereinbar (eigener Schluss aus den Quellen). Bei GPL oder AGPL bräuchte es deshalb eine <strong>Zusatzerlaubnis nach § 7</strong> in den eigenen Dateien, also einen Satz im Lizenzhinweis wie „Zusätzlich darf dieses Programm mit GSAP verbunden werden“ (geht, solange nur eigener Code betroffen ist) oder eine freie Animations-Bibliothek. Bei MIT entsteht kein Lizenzkonflikt, die GSAP-Bedingungen gelten aber weiter für alle, die das Projekt nutzen.</li>
+<li><strong>web-push</strong>: MPL-2.0, ausdrücklich mit AGPL-3.0 und GPL kombinierbar.</li>
+<li><strong>sharp</strong>: Apache-2.0, mit GPL-3.0 vereinbar. Die mitgelieferten libvips-Pakete stehen unter LGPL-3.0-or-later.</li>
+<li><strong>Lucide</strong> (Symbole, falls genutzt): ISC, GPL-kompatibel.</li>
+<li><strong>Schriften</strong> Inter, Space Grotesk, Geist Mono: SIL Open Font License, eine freie Lizenz für Schriften.</li>
+<li><strong>MIT-Code</strong> lässt sich in GPL-Projekten verwenden.</li>
+<li><strong>Übrige Abhängigkeiten</strong> (Next.js, Drizzle, Better Auth, pg-boss, Serwist, Nodemailer) sind noch nicht geprüft. Das muss vor der Lizenzwahl passieren.</li>
+</ul>
+<div class="card">
+<h3>Empfehlung <span class="badge badge-vorschlag">Vorschlag</span></h3>
+<p>Die Stack-Recherche empfiehlt <strong>AGPL-3.0-or-later</strong>: typisch für selbst gehostete Apps (wie Immich und Mealie), für Eigennutzer ändert sich nichts, und wer aus Preposaurus einen Hosting-Dienst macht, muss Änderungen offenlegen. Dazu käme eine § 7-Zusatzerlaubnis für GSAP oder der Wechsel auf eine freie Animations-Bibliothek.</p>
+<p><strong>GPL-3.0</strong> wäre der Weg von Paperless-ngx und Audiobookshelf. Auch hier bräuchte GSAP die § 7-Zusatzerlaubnis. Wer Preposaurus nur als Dienst für andere betreibt, ohne es weiterzugeben, hat keine Pflicht, Änderungen offenzulegen.</p>
+<p><strong>MIT</strong> wäre die einfachere Wahl: maximal offen, kein Konflikt mit GSAP, aber geschlossene Hosting-Ableger wären erlaubt.</p>
+<p>Als alleiniger Rechteinhaber kann man später weiter frei lizenzieren. Sobald andere Code beitragen, braucht das die Zustimmung der Beitragenden, etwa per CLA (Contributor License Agreement, eine Vereinbarung, die das Umlizenzieren erlaubt). Bereits veröffentlichte Fassungen bleiben unter ihrer Lizenz. <strong>Entschieden (2026-11-22): AGPL-3.0-or-later.</strong> Das Repository ist öffentlich. Beiträge kommen ohne CLA unter derselben Lizenz, bestätigt per DCO (siehe <code>CONTRIBUTING.md</code>). Der Prototyp in <code>prototypes/</code> nutzt GSAP und ist deshalb von der AGPL ausgenommen; die App selbst animiert ohne GSAP.</p>
+</div>
+</section>
+
+<section id="einrichtung">
+<h2>Vorschau Einrichtung</h2>
+<p class="lead">Wie wird Preposaurus auf dem NAS eingerichtet, in Kurzform?</p>
+<p>Die volle Schritt-für-Schritt-Anleitung kommt erst, wenn das MVP freigegeben ist und Compose-Datei und Images feststehen. Sie ist als GitHub-Issue #1 („Einrichtungsanleitung: Preposaurus auf dem NAS mit Tailscale“) angelegt. Hier die Reihenfolge in Kurzform:</p>
+<ol>
+<li><strong>Voraussetzungen prüfen:</strong> NAS mit Docker bzw. Container Manager (Synology, QNAP, Unraid), Prozessor x86-64 oder ARM64, ein Tailscale-Konto.</li>
+<li><strong>Tailscale auf dem NAS</strong> installieren (Paket oder Container), MagicDNS und HTTPS-Zertifikate einschalten.</li>
+<li><strong>Ordner anlegen:</strong> <code>db</code>, <code>fotos</code>, <code>backups</code>.</li>
+<li><strong><code>.env</code> erstellen</strong> aus der Vorlage <code>.env.example</code>: Anthropic-API-Schlüssel, DB-Passwort, SMTP, VAPID-Schlüssel für Push, Geheimnis für Better Auth. Diese Datei niemals ins Repository hochladen.</li>
+<li><strong>Starten</strong> mit <code>docker compose up -d</code>. Migrationen und Seed laufen automatisch.</li>
+<li><strong>HTTPS einrichten</strong> mit <code>tailscale serve</code>, App auf iPhone und PC öffnen, auf dem iPhone „Zum Home-Bildschirm“.</li>
+<li><strong>Ersten Admin anlegen</strong>, dann Haushalt und Ziel einrichten.</li>
+<li><strong>Push und Mail testen.</strong></li>
+<li><strong>Backups einrichten:</strong> <code>pg_dump</code> und Fotos, NAS-Snapshots, Wiederherstellung einmal testen.</li>
+<li><strong>Updates:</strong> neues Image ziehen, Migrationen laufen beim Start. Dazu ein Abschnitt zur Fehlerbehebung, etwa „Kamera geht nicht → HTTPS prüfen“.</li>
+</ol>
+<p>Ersteinrichtung in der App (erster Admin, Haushalt, Ziel, Hinweis „Zum Home-Bildschirm“) und der Einladungsablauf sind im Konzept noch nicht als eigener Ablauf beschrieben.</p>
+</section>
+
+<section id="offen">
+<h2>Offene Punkte / zur Freigabe</h2>
+<p class="lead">Was muss entschieden oder bestätigt werden?</p>
+<h3>Offene Fragen aus dem Status-Dokument</h3>
+<ul class="checklist">
+<li>Offline: nur anzeigen oder auch eintragen (mit späterem Abgleich)?</li>
+<li>Lizenz: MIT, GPL-3.0 oder AGPL-3.0? Bei GPL oder AGPL zusätzlich „-only“ oder „-or-later“. Dazu: GSAP mit § 7-Zusatzerlaubnis behalten oder durch eine freie Bibliothek ersetzen?</li>
+<li>Lizenzen der übrigen Abhängigkeiten (Next.js, Drizzle, Better Auth, pg-boss, Serwist, Nodemailer) vor der Lizenzwahl prüfen.</li>
+<li>NAS: Welches Modell bzw. Hersteller (Synology, QNAP, Unraid; x86 oder ARM)? Gemeint ist x86-64 oder ARM64, 32-Bit-ARM scheidet aus. Davon hängt ab: Tailscale als Host-Paket oder als Sidecar-Container, Snapshots.</li>
+<li>Tech-Stack abnehmen (Next.js 16, PostgreSQL 18, Drizzle, Zod, Better Auth, Anthropic SDK, sharp, web-push, Nodemailer, pg-boss, Serwist).</li>
+</ul>
+<h3>Vorschläge dieser Seite</h3>
+<ul class="checklist">
+<li>Entwurf auf dem NAS: Fotos sofort hochladen, Zwischenstand in <code>erfassung_entwurf</code>, Abbruch löscht sofort, Aufräumen nach 7 Tagen. Lesart „gespeichert = im Vorrat gespeichert“. Oder Alternative B?</li>
+<li>Speichern erst, wenn jede Einheit ein Datum hat: erkannt und geprüft, manuell oder auf Wunsch geschätzt und markiert.</li>
+<li>Werte für <code>sicherheit</code> (hoch, mittel, niedrig), „niedrig“ führt zu „bitte prüfen“.</li>
+<li>Pflichtfelder der manuellen Erfassung. Ein gemeinsamer Speichervorgang für Foto und manuell.</li>
+<li>Echtes Löschen einer Fehlerfassung nur durch Admins, samt Fotos.</li>
+<li>Bestätigen in fester Reihenfolge (Fotos umhängen, dann Entwurf löschen), Verweis Foto→Entwurf mit <code>ON DELETE SET NULL</code>. Löschen immer erst DB, dann Datei. Verwaiste Dateien erst ab 24 Stunden Alter löschen.</li>
+<li>Upload scheitert: Foto bleibt im Gerät, „erneut versuchen“ oder manuell weiter.</li>
+<li>KI-Fehler: Zeitlimit, höchstens ein Wiederholversuch bei 429/5xx, begrenzte gleichzeitige Aufrufe, Fehlschläge in <code>ki_aufruf</code>.</li>
+<li>Schutz vor Doppelungen: Idempotenz-Schlüssel beim Speichern, Entnahme nur bei Status <code>vorrat</code>.</li>
+<li>Kategorie-Liste im KI-Schema je Haushalt zur Laufzeit. Bei „portion“ ohne Portionsgröße nachfragen oder „geschätzt“.</li>
+<li>Bedarf je Person und Standardzeitraum in <code>quelle_bedarf</code> bzw. <code>quelle_version</code>. Warengruppe mit festem Schlüssel, nur die Mengen versioniert.</li>
+<li>Felder <code>id</code>, <code>created_at</code>, <code>updated_at</code> in jeder Tabelle.</li>
+<li>Push aus oder ungültig: Wochenübersicht per Mail. Sind „E-Mail-Zusammenfassung“ und „Check-in-Mail“ dasselbe?</li>
+<li>Nachkaufen: Haken setzt sofort „erledigt“, Ziel-Lücke wird live neu berechnet.</li>
+<li>Namen der Server Actions, Route <code>/api/photos/[id]</code>, <code>/api/health</code> ohne Anmeldung.</li>
+<li>Modellwahl: <code>.env</code> gibt den Standard, Admin kann je Foto-Rolle übersteuern.</li>
+<li>Neue Felder an <code>einheit</code>: <code>mhd_genauigkeit</code>, <code>mhd_art</code>, <code>mhd_geschaetzt</code>.</li>
+<li>Neue Tabellen <code>foto</code>, <code>erfassung_entwurf</code>, <code>ki_aufruf</code>, dazu <code>behaelter</code> als eigene Stammdaten-Tabelle.</li>
+<li>Lagerort am Produkt (wie im Prototyp), nicht an der Einheit.</li>
+<li>Tabelle <code>einkaufsliste_eintrag</code> in <code>nachkauf_eintrag</code> umbenennen.</li>
+<li>Ordner <code>db</code>, <code>fotos</code>, <code>backups</code> als sichtbare Bind-Mounts im NAS-Freigabeordner.</li>
+<li>Updates mit festen Versionsnummern, Rückweg über Backup und alte Version.</li>
+<li>Backup-Plan: täglich <code>pg_dump</code> (Version 18) und versionierte Foto-Sicherung, 7 tägliche und 4 wöchentliche Stände, Snapshots nur zusätzlich, verschlüsselte Kopie an einem zweiten Ort, Test der Wiederherstellung.</li>
+<li>KI-Einwilligung: Admin schaltet für den Haushalt an, jeder Nutzer bestätigt den Hinweis einmal vor dem ersten Foto.</li>
+</ul>
+<h3>Weitere offene Punkte aus dem Konzept</h3>
+<ul class="checklist">
+<li>Zählt eine als „Noch gut“ geprüfte Einheit zu „versorgt“, und wie lange gilt die Prüfung?</li>
+<li>Darf ein Mitglied Produkte bearbeiten, Entscheidungen anderer rückgängig machen und neue Kategorien anlegen?</li>
+<li>Wo wird die Inventur-Erinnerung eingestellt?</li>
+<li>Gehört die Aufteilung des Nachkaufens auf Wochen bis zum Zieldatum dazu?</li>
+<li>Wasser als eigene Kategorie, getrennt von Getränken (die Rechnung braucht Wasser getrennt).</li>
+<li>Baby-Sonderbedarf: Anzeige und Rechnung.</li>
+<li>Bedarfswerte (Energie, Wasser, Mengen je Warengruppe), Makro-Bedarf und die Verteilung bei vegetarisch und vegan an Primärquellen prüfen.</li>
+<li>Rundung der Kennzahlen in der Anzeige.</li>
+<li>Passkeys im MVP oder später? Hostnamen im Tailnet vorher festlegen.</li>
+<li>Tailscale für weitere Haushaltsmitglieder: eigenes Konto im Tailnet oder Freigabe des NAS?</li>
+<li>Ersteinrichtung in der App (wie wird der erste Admin angelegt?) und Einladungsablauf als eigener Ablauf beschreiben.</li>
+<li>Auf echtem iPhone prüfen: Kamera in der Home-Bildschirm-App, Verhalten bei ausgeschaltetem Tailscale.</li>
+</ul>
+</section>
+</div>

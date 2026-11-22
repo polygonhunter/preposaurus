@@ -1,0 +1,253 @@
+<title>Muster</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+:root{
+--bg:#f4f3fa;--fg:#0f172a;--muted:#475569;--subtle:#5b6678;
+--line:rgb(15 23 42 / 0.12);--surface:rgb(255 255 255 / 0.58);--surface-strong:rgb(255 255 255 / 0.85);--surface-border:rgb(255 255 255 / 0.85);
+--shadow:rgb(70 60 140 / 0.3);--track:rgb(15 23 42 / 0.07);
+--accent:#5b5bd6;--accent-2:#a78bfa;--accent-text:#4338ca;--accent-soft:rgb(99 102 241 / 0.12);
+--ink:#0f172a;--on-ink:#ffffff;
+--ok:#10b981;--ok-text:#047857;--warn:#f59e0b;--warn-text:#854d0e;--urgent:#f97316;--urgent-text:#c2410c;--bad:#f43f5e;--bad-text:#be123c;
+--review:rgb(253 224 71 / 0.55);--water:rgb(56 189 248 / 0.38);
+--protein:#e11d74;--carbs:#5b5bd6;--fat:#d97706;
+--blob-1:#ffd6e0;--blob-2:#d7d4ff;--blob-3:#c9f2e3;--blob-4:#cfe8ff;
+--frame:#1e293b;--on-frame:#f8fafc;
+color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+--bg:#05080c;--fg:#e8eef4;--muted:#a7b4c1;--subtle:#82909d;
+--line:rgb(255 255 255 / 0.12);--surface:rgb(15 21 28 / 0.64);--surface-strong:rgb(26 34 43 / 0.8);--surface-border:rgb(255 255 255 / 0.08);
+--shadow:rgb(0 0 0 / 0.7);--track:rgb(255 255 255 / 0.07);
+--accent:#3ee6ff;--accent-2:#22b8d4;--accent-text:#6eeaff;--accent-soft:rgb(62 230 255 / 0.12);
+--ink:#3ee6ff;--on-ink:#03141a;
+--ok:#4ade80;--ok-text:#86efac;--warn:#facc15;--warn-text:#fde047;--urgent:#fb923c;--urgent-text:#fdba74;--bad:#f87171;--bad-text:#fca5a5;
+--review:rgb(253 224 71 / 0.12);--water:rgb(34 211 238 / 0.22);
+--protein:#f472b6;--carbs:#3ee6ff;--fat:#fbbf24;
+--blob-1:#0b3a48;--blob-2:#17195a;--blob-3:#05343a;--blob-4:#0d2449;
+--frame:#3b4756;--on-frame:#e8eef4;
+color-scheme:dark}}
+:root[data-theme="dark"]{
+--bg:#05080c;--fg:#e8eef4;--muted:#a7b4c1;--subtle:#82909d;
+--line:rgb(255 255 255 / 0.12);--surface:rgb(15 21 28 / 0.64);--surface-strong:rgb(26 34 43 / 0.8);--surface-border:rgb(255 255 255 / 0.08);
+--shadow:rgb(0 0 0 / 0.7);--track:rgb(255 255 255 / 0.07);
+--accent:#3ee6ff;--accent-2:#22b8d4;--accent-text:#6eeaff;--accent-soft:rgb(62 230 255 / 0.12);
+--ink:#3ee6ff;--on-ink:#03141a;
+--ok:#4ade80;--ok-text:#86efac;--warn:#facc15;--warn-text:#fde047;--urgent:#fb923c;--urgent-text:#fdba74;--bad:#f87171;--bad-text:#fca5a5;
+--review:rgb(253 224 71 / 0.12);--water:rgb(34 211 238 / 0.22);
+--protein:#f472b6;--carbs:#3ee6ff;--fat:#fbbf24;
+--blob-1:#0b3a48;--blob-2:#17195a;--blob-3:#05343a;--blob-4:#0d2449;
+--frame:#3b4756;--on-frame:#e8eef4;
+color-scheme:dark}
+
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%;overflow-wrap:break-word}
+h1,h2,h3{font-family:"Space Grotesk",Inter,system-ui,sans-serif;line-height:1.25;margin:1.6em 0 .5em}
+h1{font-size:1.9rem;margin-top:.4em}h2{font-size:1.4rem}h3{font-size:1.1rem}
+p,ul,ol{margin:0 0 1em}
+a{color:var(--accent-text)}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em}
+pre{white-space:pre-wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 1em}
+.num,td,.m-gauge b{font-variant-numeric:tabular-nums}
+.wrap{max-width:46rem;margin:0 auto;padding-block:24px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:radial-gradient(circle at 0 0,var(--blob-2),transparent 22rem),radial-gradient(circle at 100% 12rem,var(--blob-1),transparent 18rem)}
+.wrap>p,.wrap>ul,section>p,section>ul{max-width:65ch}
+section{scroll-margin-top:16px}
+.lead{color:var(--muted);font-size:1.05rem}
+
+.card{background:var(--surface);border:1px solid var(--surface-border);border-radius:24px;padding:16px 18px;margin:0 0 16px;box-shadow:0 14px 40px -18px var(--shadow);-webkit-backdrop-filter:blur(20px) saturate(1.5);backdrop-filter:blur(20px) saturate(1.5)}
+.card>:last-child{margin-bottom:0}
+.card h3{margin-top:0}
+.cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));margin-bottom:16px}
+.cards .card{margin:0}
+.toc{background:var(--surface);border:1px solid var(--surface-border);border-radius:24px;padding:12px 18px;margin:0 0 24px}
+.toc ul{list-style:none;padding:0;margin:0;columns:2 11rem;column-gap:16px}
+.toc a{display:block;padding:4px 0;text-decoration:none}
+
+.badge{display:inline-flex;align-items:center;gap:6px;padding:1px 9px;border-radius:999px;border:1px solid var(--line);background:var(--surface-strong);font-size:.78rem;font-weight:600;line-height:1.6;white-space:nowrap;vertical-align:.1em}
+.badge-vorschlag{background:var(--review);border-color:transparent}
+.badge-mvp{background:var(--accent-soft);color:var(--accent-text);border-color:transparent}
+.badge-spaeter{color:var(--muted)}
+.dot-ok,.dot-warn,.dot-urgent,.dot-bad{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none;background:var(--ok)}
+.dot-warn{background:var(--warn)}.dot-urgent{background:var(--urgent)}.dot-bad{background:var(--bad)}
+.note{border-left:4px solid var(--accent);background:var(--accent-soft);border-radius:4px 16px 16px 4px;padding:12px 16px;margin:0 0 1em;max-width:65ch}
+.note>:last-child{margin-bottom:0}
+
+.scroll-x{display:flex;gap:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;padding-bottom:8px;margin:0 0 1em;max-width:100%}
+.scroll-x>*{flex:none;scroll-snap-align:start}
+.scroll-x>table,.scroll-x>pre{flex:1 0 auto;min-width:100%;margin:0}
+.scroll-x>figure{width:min-content;margin:0}
+table{border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--muted);white-space:nowrap}
+figure{margin:0 0 1.2em}
+figcaption{color:var(--muted);font-size:.85rem;margin-top:8px}
+.checklist{list-style:none;padding:0}
+.checklist li{position:relative;padding-left:30px;margin-bottom:8px}
+.checklist li::before{content:"";position:absolute;left:0;top:.2em;width:18px;height:18px;border:2px solid var(--subtle);border-radius:5px}
+pre.mermaid{background:transparent;border-color:var(--line);white-space:pre;font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px}
+
+.dev{position:relative;display:flex;flex-direction:column;gap:6px;overflow:hidden;flex:none;border:6px solid var(--frame);background:var(--bg) radial-gradient(circle at 10% 0,var(--blob-2),transparent 60%) no-repeat;color:var(--fg);font-size:9px;line-height:1.35;padding:8px}
+.dev-iphone{width:200px;height:412px;border-radius:34px;padding-top:28px}
+.dev-iphone::before{content:"";position:absolute;top:6px;left:50%;width:58px;height:16px;margin-left:-29px;border-radius:999px;background:var(--frame)}
+.dev-duo-aussen{width:170px;height:300px;border-radius:26px;padding-top:20px}
+.dev-duo-innen{width:380px;height:360px;border-radius:22px}
+.dev-pc{width:560px;height:340px;border:1px solid var(--line);border-radius:10px;padding-top:30px;box-shadow:0 14px 40px -18px var(--shadow)}
+.dev-pc::before{content:"";position:absolute;inset:0 0 auto;height:22px;border-bottom:1px solid var(--line);background:radial-gradient(circle at 12px 11px,var(--bad) 3.5px,transparent 4px),radial-gradient(circle at 24px 11px,var(--warn) 3.5px,transparent 4px),radial-gradient(circle at 36px 11px,var(--ok) 3.5px,transparent 4px),var(--surface-strong)}
+.dev:has(>.m-rail){padding-left:58px}
+.m-fold{position:absolute;top:0;bottom:0;left:50%;border-left:1px dashed var(--subtle);pointer-events:none}
+.m-head{display:flex;align-items:center;justify-content:space-between;gap:6px;font:600 12px/1.2 "Space Grotesk",Inter,sans-serif}
+.m-head small{font:500 8px ui-monospace,monospace;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.m-head i{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--muted);flex:none}
+.m-grid{display:grid;grid-template-columns:repeat(var(--cols,2),minmax(0,1fr));gap:6px}
+.m-tile{background:var(--surface);border:1px solid var(--surface-border);border-radius:14px;padding:7px;box-shadow:0 8px 20px -14px var(--shadow);min-width:0}
+.m-tile-wide{grid-column:1/-1}
+.m-tile>small,.m-label{display:block;font:500 7px ui-monospace,monospace;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.m-tile b{font:600 15px/1.1 "Space Grotesk",Inter,sans-serif;font-variant-numeric:tabular-nums}
+.m-gauge{--v:50;position:relative;display:grid;place-items:center;width:64px;aspect-ratio:1;margin:auto;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--v)*1%),var(--track) 0);-webkit-mask:radial-gradient(farthest-side,transparent 72%,var(--fg) 73%);mask:radial-gradient(farthest-side,transparent 72%,var(--fg) 73%)}
+.m-gauge-box{position:relative;display:grid;place-items:center}
+.m-gauge-box b{position:absolute}
+.m-bar{--v:50;--c:var(--accent);height:5px;border-radius:999px;background:var(--track);margin:3px 0;overflow:hidden}
+.m-bar::after{content:"";display:block;height:100%;width:calc(var(--v)*1%);background:var(--c);border-radius:inherit}
+.m-chip{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);background:var(--surface-strong);font-size:8px;white-space:nowrap}
+.m-chip.on{background:var(--accent-soft);color:var(--accent-text);border-color:transparent}
+.m-chip.review{background:var(--review);border-color:transparent}
+.m-chip [class^="dot-"]{width:6px;height:6px}
+.m-row{display:flex;align-items:center;gap:6px;padding:5px 2px;border-bottom:1px solid var(--line);min-width:0}
+.m-row>span:first-of-type{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.m-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:5px 10px;border-radius:999px;border:1px solid var(--surface-border);background:var(--surface-strong);font-weight:600;font-size:9px}
+.m-btn.ink{background:var(--ink);color:var(--on-ink);border-color:transparent}
+.m-dock{position:absolute;left:8px;right:8px;bottom:8px;display:flex;justify-content:space-between;padding:3px;border-radius:16px;background:var(--surface-strong);border:1px solid var(--surface-border);box-shadow:0 10px 24px -12px var(--shadow);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.m-dock>span{flex:1;text-align:center;padding:5px 0 4px;border-radius:12px;font-size:7px;color:var(--muted)}
+.m-dock>span::before{content:"";display:block;width:10px;height:10px;margin:0 auto 2px;border:1.5px solid currentColor;border-radius:3px}
+.m-dock>.on{background:var(--accent-soft);color:var(--accent-text)}
+.m-rail{position:absolute;top:0;bottom:0;left:0;width:50px;display:flex;flex-direction:column;gap:4px;padding:30px 4px 8px;background:var(--surface-strong);border-right:1px solid var(--line)}
+.dev-duo-innen>.m-rail{padding-top:10px}
+.m-rail>span{padding:5px 2px;border-radius:9px;text-align:center;font-size:7px;color:var(--muted)}
+.m-rail>.on{background:var(--accent-soft);color:var(--accent-text)}
+.m-table{width:100%;border-collapse:collapse;font-size:8px}
+.m-table th,.m-table td{padding:3px 4px;border-bottom:1px solid var(--line);white-space:nowrap;font-size:8px}
+.m-cam{position:relative;display:grid;place-items:end center;aspect-ratio:3/4;border-radius:14px;padding:8px;color:var(--on-frame);background:linear-gradient(var(--accent),var(--accent)) 12% 12%/14px 2px,linear-gradient(var(--accent),var(--accent)) 12% 12%/2px 14px,linear-gradient(var(--accent),var(--accent)) 88% 12%/14px 2px,linear-gradient(var(--accent),var(--accent)) 88% 12%/2px 14px,linear-gradient(var(--accent),var(--accent)) 12% 88%/14px 2px,linear-gradient(var(--accent),var(--accent)) 12% 88%/2px 14px,linear-gradient(var(--accent),var(--accent)) 88% 88%/14px 2px,linear-gradient(var(--accent),var(--accent)) 88% 88%/2px 14px,var(--frame);background-repeat:no-repeat}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<h1>Muster der Bausteine</h1>
+<p class="lead">Diese Seite zeigt jeden Baustein einmal. Sie dient nur zur Prüfung in hell und dunkel und bei 375 px Breite.</p>
+
+<nav class="toc" aria-label="Inhalt"><ul>
+<li><a href="#text">Text und Etiketten</a></li>
+<li><a href="#tabelle">Tabelle</a></li>
+<li><a href="#karten">Karten</a></li>
+<li><a href="#mockups">Mockups</a></li>
+<li><a href="#diagramme">Diagramme</a></li>
+<li><a href="#offen">Offene Punkte</a></li>
+</ul></nav>
+
+<section id="text">
+<h2>Text und Etiketten</h2>
+<p>Ein normaler Absatz mit <code>Code</code> und einer Zahl <span class="num">1.234</span>. <span class="badge badge-vorschlag">Vorschlag</span> <span class="badge badge-mvp">MVP</span> <span class="badge badge-spaeter">später</span></p>
+<p><span class="badge"><i class="dot-ok"></i>gut</span> <span class="badge"><i class="dot-warn"></i>bald fällig</span> <span class="badge"><i class="dot-urgent"></i>dringend</span> <span class="badge"><i class="dot-bad"></i>abgelaufen</span></p>
+<div class="note"><p><strong>Hinweis:</strong> Ein ruhiger Kasten für Erklärungen und Beispiele.</p></div>
+</section>
+
+<section id="tabelle">
+<h2>Tabelle</h2>
+<div class="scroll-x"><table>
+<thead><tr><th>Schritt</th><th>Was</th><th>Wohin</th><th>Wann</th></tr></thead>
+<tbody><tr><td>Foto</td><td>Verpackung</td><td>Foto-Volume</td><td>nach der Aufnahme</td></tr>
+<tr><td>Bestätigen</td><td>Produkt und Einheiten</td><td>Datenbank</td><td>nach Klick auf Speichern</td></tr></tbody>
+</table></div>
+</section>
+
+<section id="karten">
+<h2>Karten</h2>
+<div class="cards">
+<div class="card"><h3>MIT</h3><p>Erlaubt fast alles. Verlangt nur den Lizenzhinweis.</p></div>
+<div class="card"><h3>GPL-3.0</h3><p>Weitergabe nur mit Quelltext unter gleicher Lizenz.</p></div>
+<div class="card"><h3>AGPL-3.0</h3><p>Wie GPL, gilt auch beim Betrieb als Dienst im Netz.</p></div>
+</div>
+</section>
+
+<section id="mockups">
+<h2>Mockups</h2>
+<div class="scroll-x">
+<figure aria-label="iPhone, Übersicht">
+<div class="dev dev-iphone">
+<div class="m-head"><span><small>Beispiel</small><br>Übersicht</span><i></i></div>
+<div class="m-grid" style="--cols:2">
+<div class="m-tile m-tile-wide"><small>Heute versorgt</small><div class="m-gauge-box"><div class="m-gauge" style="--v:62"></div><b>9 T</b></div></div>
+<div class="m-tile"><small>Wasser</small><b>18 l</b><div class="m-bar" style="--v:45;--c:var(--water)"></div></div>
+<div class="m-tile"><small>Ziel</small><b>9/14</b><div class="m-bar" style="--v:64"></div></div>
+<div class="m-tile m-tile-wide"><small>Bald fällig</small>
+<div class="m-row"><span>Reis 1 kg</span><span class="m-chip"><i class="dot-warn"></i>bald fällig</span></div>
+<div class="m-row"><span>Linsen</span><span class="m-chip"><i class="dot-ok"></i>gut</span></div></div>
+</div>
+<span><span class="m-btn ink">Foto aufnehmen</span> <span class="m-btn">Manuell</span></span>
+<div class="m-dock"><span class="on">Übersicht</span><span>Vorrat</span><span>Neu</span><span>Statistik</span><span>Nachkaufen</span></div>
+</div>
+<figcaption>iPhone mit Kacheln, Liste, Knöpfen und Dock.</figcaption>
+</figure>
+<figure aria-label="iPhone Duo zugeklappt, Kamera">
+<div class="dev dev-duo-aussen">
+<div class="m-head">Packung 7<i></i></div>
+<div class="m-cam">MHD ins Feld halten</div>
+<span><span class="m-chip on">12.03.2027</span> <span class="m-chip review">bitte nochmal</span></span>
+</div>
+<figcaption>Außenbildschirm mit Kamera-Sucher und Chips.</figcaption>
+</figure>
+<figure aria-label="iPhone Duo aufgeklappt">
+<div class="dev dev-duo-innen">
+<div class="m-rail"><span class="on">Übersicht</span><span>Vorrat</span><span>Neu</span></div>
+<div class="m-grid" style="--cols:2;gap:22px">
+<div><div class="m-head">Vorrat</div><div class="m-row"><span>Reis</span><span>3</span></div><div class="m-row"><span>Nudeln</span><span>5</span></div></div>
+<div><div class="m-head">Detail</div><div class="m-tile"><small>Einheiten</small><b>3</b></div></div>
+</div>
+<div class="m-fold"></div>
+</div>
+<figcaption>Innenbildschirm mit Leiste und Falz.</figcaption>
+</figure>
+<figure aria-label="PC-Browser, Vorrat als Tabelle">
+<div class="dev dev-pc">
+<div class="m-rail"><span class="on">Vorrat</span><span>Neu</span><span>Statistik</span></div>
+<div class="m-head">Vorrat <span class="m-btn ink">Neu</span></div>
+<table class="m-table"><thead><tr><th>Produkt</th><th>Einheiten</th><th>MHD</th><th>Zustand</th></tr></thead>
+<tbody><tr><td>Reis 1 kg</td><td>3</td><td>02/2027</td><td><span class="m-chip"><i class="dot-ok"></i>gut</span></td></tr>
+<tr><td>Tomaten, Dose</td><td>4</td><td>12/2026</td><td><span class="m-chip"><i class="dot-urgent"></i>dringend</span></td></tr>
+<tr><td>Zwieback</td><td>1</td><td>11/2026</td><td><span class="m-chip"><i class="dot-bad"></i>abgelaufen</span></td></tr></tbody></table>
+</div>
+<figcaption>Browserfenster mit Tabelle.</figcaption>
+</figure>
+</div>
+</section>
+
+<section id="diagramme">
+<h2>Diagramme</h2>
+<figure><div class="scroll-x"><pre class="mermaid">flowchart TD
+  A[Oberfläche] --> B[Anwendungslogik]
+  B --> C[Fachlogik]
+  B --> D[Datenzugriff]</pre></div><figcaption>flowchart TD</figcaption></figure>
+<figure><div class="scroll-x"><pre class="mermaid">sequenceDiagram
+  participant G as Gerät
+  participant A as App
+  participant K as Anthropic
+  G->>A: Foto
+  A->>K: Bild
+  K-->>A: Vorschlag
+  A-->>G: bitte prüfen</pre></div><figcaption>sequenceDiagram</figcaption></figure>
+<figure><div class="scroll-x"><pre class="mermaid">stateDiagram-v2
+  [*] --> vorrat
+  vorrat --> verbraucht
+  vorrat --> entsorgt
+  vorrat --> vorrat: Noch gut</pre></div><figcaption>stateDiagram-v2</figcaption></figure>
+<figure><div class="scroll-x"><pre class="mermaid">erDiagram
+  produkt ||--o{ einheit : hat
+  kategorie ||--o{ produkt : ordnet</pre></div><figcaption>erDiagram</figcaption></figure>
+</section>
+
+<section id="offen">
+<h2>Offene Punkte / zur Freigabe</h2>
+<ul class="checklist">
+<li>Rendern alle vier Mermaid-Typen in der Artifact-Ansicht?</li>
+<li>Folgen die Diagramme hell und dunkel?</li>
+</ul>
+</section>
+</div>
