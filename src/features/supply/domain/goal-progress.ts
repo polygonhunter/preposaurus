@@ -7,7 +7,7 @@ import {
   type SupplyInput,
   type SupplyUnit,
 } from './supply-days'
-import { isCountedOn } from './supply-rules'
+import { isFreshOn } from './supply-rules'
 
 interface Goal {
   days: number
@@ -35,19 +35,19 @@ interface GoalProgressInput<T extends SupplyUnit> extends Omit<SupplyInput, 'ref
 }
 
 /**
- * Einheiten mit Datum, die heute zählen, am Zieldatum aber nicht mehr. Einheiten ohne Datum
- * fehlen hier bewusst: Von ihnen weiß niemand, dass sie ablaufen.
+ * Einheiten im Vorrat, deren Datum heute noch hält, am Zieldatum aber nicht mehr. Fehlen bewusst:
+ * Einheiten ohne Datum (niemand weiß, dass sie ablaufen) und schon abgelaufene „Noch gut“-
+ * Packungen, auch wenn sie mit dem Schalter heute zählen (sie laufen nicht erst noch ab).
  */
 export function unitsExpiringBefore<T extends SupplyUnit>(
   units: readonly T[],
   period: { today: CalendarDay; targetDay: CalendarDay },
-  stillGoodCounts: boolean,
 ): T[] {
   return units.filter(
     (unit) =>
-      unit.bestBefore !== null &&
-      isCountedOn(unit, { day: period.today, kind: 'today' }, stillGoodCounts) &&
-      !isCountedOn(unit, { day: period.targetDay, kind: 'target' }, stillGoodCounts),
+      unit.status === 'stock' &&
+      isFreshOn(unit, period.today) &&
+      !isFreshOn(unit, period.targetDay),
   )
 }
 
@@ -68,11 +68,7 @@ export function calculateGoalProgress<T extends SupplyUnit>(
     atTarget: atTarget.value,
     goalDays: goal.days,
     isGoalReached: atTarget.value.days >= goal.days,
-    expiringBeforeTarget: unitsExpiringBefore(
-      input.units,
-      { today, targetDay: goal.targetDay },
-      input.stillGoodCounts,
-    ),
+    expiringBeforeTarget: unitsExpiringBefore(input.units, { today, targetDay: goal.targetDay }),
     withoutDate: input.units.filter((unit) => unit.status === 'stock' && unit.bestBefore === null),
   })
 }
