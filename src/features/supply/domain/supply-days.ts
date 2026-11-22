@@ -1,6 +1,6 @@
 import type { StockUnit } from '@/features/inventory/domain/unit'
 import { err, ok, type Result } from '@/shared/lib/result'
-import { estimatedKcalShare } from './approximation'
+import { estimatedKcalShare, isApproximate } from './approximation'
 import type { DailyNeed } from './daily-need'
 import { isCountedOn, roundDownDays, type ReferenceDay } from './supply-rules'
 
@@ -22,10 +22,10 @@ export interface SupplyDays {
   /** Engpass: der kleinere Wert aus Energie- und Wasser-Tagen */
   days: number
   bottleneck: Bottleneck
-  /** Mindestens eine gezählte Einheit hat geschätzte kcal oder ein geschätztes MHD */
-  containsEstimates: boolean
-  /** Anteil der kcal aus Richtwerten bzw. unbestätigten Schätzungen, Grundlage für „ca.“ */
+  /** Anteil der kcal aus Richtwerten bzw. KI-Schätzungen (0 bis 1) */
   estimatedKcalShare: number
+  /** „ca.“ an der Kernzahl. Ein geschätztes MHD zählt nicht, „ca.“ betrifft nur kcal */
+  isApproximate: boolean
   kcal: number
   waterMl: number
 }
@@ -42,9 +42,6 @@ export interface SupplyInput {
   stillGoodCounts?: boolean
 }
 
-const isEstimate = (unit: SupplyUnit) =>
-  unit.isKcalEstimated || unit.bestBefore?.isEstimated === true
-
 /** „Versorgt“ am Stichtag (heute oder Zieldatum). Abgelaufene Einheiten zählen nicht. */
 export function calculateSupplyDays(input: SupplyInput): Result<SupplyDays, SupplyError> {
   const { units, need, reference } = input
@@ -52,6 +49,7 @@ export function calculateSupplyDays(input: SupplyInput): Result<SupplyDays, Supp
   const counted = units.filter((unit) => isCountedOn(unit, reference, input.stillGoodCounts))
   const kcal = counted.reduce((sum, unit) => sum + unit.kcal, 0)
   const waterMl = counted.reduce((sum, unit) => sum + unit.waterMl, 0)
+  const share = estimatedKcalShare(counted)
   const energyDays = kcal / need.kcalPerDay
   const waterDays = waterMl / need.waterMlPerDay
   return ok({
@@ -59,8 +57,8 @@ export function calculateSupplyDays(input: SupplyInput): Result<SupplyDays, Supp
     waterDays: roundDownDays(waterDays),
     days: roundDownDays(Math.min(energyDays, waterDays)),
     bottleneck: waterDays <= energyDays ? 'water' : 'energy',
-    containsEstimates: counted.some(isEstimate),
-    estimatedKcalShare: estimatedKcalShare(counted),
+    estimatedKcalShare: share,
+    isApproximate: isApproximate(share),
     kcal,
     waterMl,
   })
