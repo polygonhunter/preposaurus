@@ -32,11 +32,10 @@ COPY --from=build /app/dist/cli ./scripts
 COPY --from=build /app/db/migrations ./db/migrations
 COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/preposaurus
 # Schreibbar sind nur der Next-Cache und der Fotoordner (dort liegt im Betrieb ein Bind-Mount).
-# Der Cache ist für jede Nutzer-ID schreibbar (1777 wie /tmp), weil Compose die App unter
-# PREPOSAURUS_UID startet (Synology meist 1026, Unraid 99), nicht nur als node (1000).
+# Compose legt über den Cache ein tmpfs für PREPOSAURUS_UID (Synology meist 1026, Unraid 99).
+# Ohne Compose läuft die App als node (1000), dem der Cache hier gehört.
 RUN mkdir -p .next/cache /data/fotos \
-  && chown node:node .next/cache /data/fotos \
-  && chmod 1777 .next/cache
+  && chown node:node .next/cache /data/fotos
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \

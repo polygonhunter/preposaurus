@@ -37,6 +37,11 @@ echo "/api/health: $(curl -fsS http://127.0.0.1:3000/api/health)"
 # Die CI startet web unter der Nutzer-ID des Runners (nicht 1000), wie ein NAS mit eigener ID.
 docker compose exec -T web sh -c 'touch .next/cache/probe && rm .next/cache/probe' ||
   fail ".next/cache ist für PREPOSAURUS_UID nicht schreibbar"
+docker compose exec -T web grep -q ' /app/.next/cache tmpfs ' /proc/mounts || fail ".next/cache ist kein tmpfs"
+[ "$(docker compose exec -T web stat -c '%a %u' .next/cache)" = "700 $(id -u)" ] ||
+  fail ".next/cache gehört nicht allein PREPOSAURUS_UID"
+[ "$(docker run --rm --entrypoint stat ghcr.io/polygonhunter/preposaurus:ci -c %a .next/cache)" = "755" ] ||
+  fail ".next/cache ist im Image für andere schreibbar"
 [ "$(psql_value 'select count(*) from kategorie')" -gt 0 ] || fail "Stammdaten fehlen"
 
 if docker compose exec -T web node scripts/admin.mjs passwort-zuruecksetzen niemand; then
