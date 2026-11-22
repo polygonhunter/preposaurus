@@ -173,6 +173,12 @@ export const SYSTEM_CATEGORIES = [
   { key: 'kaffee_tee', name: 'Kaffee, Tee und Kakao', pictogram: '☕', productGroup: 'sonstiges' },
   { key: 'babynahrung', name: 'Babynahrung', pictogram: '🍼', productGroup: 'sonstiges' },
   {
+    key: 'sonstige_lebensmittel',
+    name: 'Sonstige Lebensmittel',
+    pictogram: '📦',
+    productGroup: 'sonstiges',
+  },
+  {
     key: 'spezialnahrung',
     name: 'Notrationen und Spezialnahrung',
     pictogram: '🎒',
