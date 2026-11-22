@@ -4,6 +4,9 @@ name: Release
 # schiebt sie mit der Versionsnummer nach ghcr.io (UMSETZUNG M13-04). Ein "latest" gibt es nicht.
 # Jede Architektur baut nativ auf einem eigenen Runner, danach fasst ein Job beide zu einem
 # Multi-Arch-Image zusammen. Dazu kommt ein GitHub-Release mit den Dateien für die Installation.
+# Gebaut wird nur ein Tag auf einem Commit von main, für den CI und Docker grün sind: also erst
+# mergen, die Läufe auf main abwarten, dann taggen. Actions sind wegen packages: write per
+# Commit-SHA gepinnt, Dependabot hält sie aktuell.
 
 on:
   push:
@@ -20,7 +23,39 @@ env:
   REGISTRY: ghcr.io/polygonhunter
 
 jobs:
+  verify:
+    name: Tag liegt auf main, CI grün
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Commit liegt auf main
+        run: |
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main || {
+            echo "::error::Der Tag zeigt auf $GITHUB_SHA, der nicht auf main liegt."
+            exit 1
+          }
+      - name: CI und Docker sind für diesen Commit grün
+        run: |
+          for workflow in ci.yml docker.yml; do
+            conclusion=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow "$workflow" \
+              --commit "$GITHUB_SHA" --event push --status completed --limit 1 \
+              --json conclusion --jq '.[0].conclusion // "fehlt"')
+            if [ "$conclusion" != success ]; then
+              echo "::error::$workflow ist für $GITHUB_SHA nicht grün ($conclusion)."
+              exit 1
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ github.token }}
+
   build:
+    needs: verify
     name: ${{ matrix.image.name }} (${{ matrix.platform.arch }})
     runs-on: ${{ matrix.platform.runner }}
     timeout-minutes: 40
@@ -43,20 +78,20 @@ jobs:
             context: docker/backup
             file: docker/backup/Dockerfile
     steps:
-      - uses: actions/checkout@v7
-      - uses: docker/setup-buildx-action@v4
-      - uses: docker/login-action@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ env.REGISTRY }}/${{ matrix.image.name }}
       - id: build
         name: Bauen und nach Digest schieben
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: ${{ matrix.image.context }}
           file: ${{ matrix.image.file }}
@@ -73,7 +108,7 @@ jobs:
           touch "$RUNNER_TEMP/digests/${DIGEST#sha256:}"
         env:
           DIGEST: ${{ steps.build.outputs.digest }}
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: digests-${{ matrix.image.name }}-${{ matrix.platform.arch }}
           path: ${{ runner.temp }}/digests/*
@@ -92,19 +127,19 @@ jobs:
       matrix:
         image: [preposaurus, preposaurus-backup]
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: ${{ runner.temp }}/digests
           pattern: digests-${{ matrix.image }}-*
           merge-multiple: true
-      - uses: docker/setup-buildx-action@v4
-      - uses: docker/login-action@v4
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ env.REGISTRY }}/${{ matrix.image }}
           # Nur die Versionsnummer aus dem Tag (v1.2.3 → 1.2.3), bewusst kein latest
@@ -133,7 +168,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Archiv für die Installation packen
         run: docker/release/pack-install-files.sh "${GITHUB_REF_NAME#v}" "$RUNNER_TEMP"
       - name: Release anlegen
