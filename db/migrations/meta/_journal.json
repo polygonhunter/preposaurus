@@ -85,6 +85,13 @@
       "when": 1795354234936,
       "tag": "0011_benutzername",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1795354328982,
+      "tag": "0012_anmelde_sperre",
+      "breakpoints": true
     }
   ]
 }
