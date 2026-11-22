@@ -118,6 +118,7 @@ Regeln:
 - Migrationen sind eingecheckt und werden nach dem Merge nie mehr editiert. Eine Korrektur ist eine neue Migration.
 - Typen: Mengen als `numeric`, MHD als `date`, Zeitpunkte als `timestamptz`. Jede Tabelle hat `id`, `created_at`, `updated_at`. Fremdschlüssel bekommen ein explizites `onDelete`.
 - Spalten in `snake_case`. **Geprüft in M1-01:** drizzle-orm 0.45.4 und drizzle-kit 0.31.11 kennen `casing: 'snake_case'` weiterhin (in `drizzle()` und `defineConfig`). Wir brauchen die Option aber nicht: Tabellen und Spalten tragen deutsche Namen (UMSETZUNG Grundentscheidung 6), die Drizzle-Eigenschaften englische. Deshalb steht jeder Spaltenname ausdrücklich im Schema (`text('bezeichnung')`), und `casing` bleibt aus.
+- **Nutzer werden nie hart gelöscht**, nur deaktiviert (`aktiv = false`). So bleiben Historie (`entnommen_von`, `passwort_geaendert_von`) und Verweise erhalten. Ein Repository bietet dafür kein `delete`.
 - **Jede Abfrage ist auf `householdId` gefiltert**, und zwar im Repository statt in der UI (Schutz gegen IDOR [1]).
 - Repositories geben Domain-Typen bzw. DTOs zurück, nie die rohe Drizzle-Zeile an die UI.
 - Seeds sind versionierte TS-Dateien mit idempotentem Upsert. Empfehlungswerte haben Quelle, Stand und Link.
