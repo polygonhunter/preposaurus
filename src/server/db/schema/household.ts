@@ -13,6 +13,7 @@ import {
   text,
   unique,
   uuid,
+  type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
 import {
   ACTIVITY_LEVELS,
@@ -25,14 +26,17 @@ import {
   SEXES,
 } from '../../../shared/config/constants'
 import { id, isOneOf, timestamps } from './columns'
+import { sources } from './recommendation'
 
 export const households = pgTable(
   'haushalt',
   {
     id: id(),
     name: text('name').notNull(),
-    // Fremdschlüssel auf quelle folgt mit M1-04 (recommendation.ts).
-    activeSourceId: uuid('aktive_quelle_id'),
+    // Rückverweis auf recommendation.ts: Der Typ steht fest, sonst wäre die Typableitung zirkulär.
+    activeSourceId: uuid('aktive_quelle_id').references((): AnyPgColumn => sources.id, {
+      onDelete: 'set null',
+    }),
     calculationMode: text('rechenmodus', { enum: CALCULATION_MODES })
       .notNull()
       .default('offiziell'),
