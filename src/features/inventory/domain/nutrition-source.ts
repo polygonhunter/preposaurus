@@ -8,7 +8,7 @@ export interface NutritionValues {
 
 /**
  * Gespeicherte Herkunft der Nährwerte am Produkt (Spalte `naehrwerte_quelle`, #115, E-5):
- * `label` = `tabelle` bzw. `etikett` (Nährwerttabelle gelesen), `manual` = `manuell`,
+ * `label` = `tabelle` (Nährwerttabelle gelesen), `manual` = `manuell`,
  * `ai-estimate` = `ki_schaetzung`. Einen Richtwert gibt es hier bewusst nicht: Er wird beim Lesen
  * aus der Lebensmittelart ergänzt und nie ins Produkt kopiert. Leer (null) = keine eigenen Werte.
  */
