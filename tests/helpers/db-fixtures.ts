@@ -7,7 +7,7 @@ import { users } from '../../src/server/db/schema/account'
 import { categories } from '../../src/server/db/schema/catalog'
 import { households } from '../../src/server/db/schema/household'
 import { products } from '../../src/server/db/schema/inventory'
-import { buildHousehold, buildProduct, buildUser } from './factories'
+import { buildHousehold, buildProduct, buildUser } from '../../db/seeds/factories'
 
 export type Basics = Readonly<{
   householdId: string

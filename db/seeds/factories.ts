@@ -1,5 +1,6 @@
-// Test-Fabriken (UMSETZUNG M1-10): erzeugen einfügefertige Zeilen mit sinnvollen Standardwerten.
-// Dieselben Fabriken nutzt die Demo (db/seeds/demo.ts), damit Tests und Demo gleich aussehen.
+// Fabriken (UMSETZUNG M1-10): erzeugen einfügefertige Zeilen mit sinnvollen Standardwerten.
+// Die Demo (db/seeds/demo.ts) und die Tests nutzen dieselben Fabriken, damit beide gleich aussehen.
+// Sie liegen hier und nicht unter tests/helpers, damit kein Seed aus dem Testordner importiert.
 // Nur erfundene Personen und @example.org, keine echten Haushaltsdaten.
 import { randomUUID } from 'node:crypto'
 import type { users } from '../../src/server/db/schema/account'

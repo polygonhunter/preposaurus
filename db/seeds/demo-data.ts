@@ -1,6 +1,6 @@
 // Inhalt des Beispielhaushalts (nach prototypes/lib/mock-data.ts). Erfundene Personen, erfundene
 // Produkte. Die MHDs stehen als Ampelstufe da und werden relativ zum Tag des Seeds berechnet.
-import type { AMPEL_OFFSETS } from '../../tests/helpers/factories'
+import type { AMPEL_OFFSETS } from './factories'
 
 type AmpelStage = keyof typeof AMPEL_OFFSETS
 

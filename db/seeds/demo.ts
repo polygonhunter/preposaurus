@@ -20,7 +20,7 @@ import {
   buildUnit,
   buildUser,
   daysFrom,
-} from '../../tests/helpers/factories'
+} from './factories'
 import { DEMO_MEMBERS, DEMO_PRODUCTS, DEMO_USERS, type DemoProduct } from './demo-data'
 
 type Lookups = Readonly<{
