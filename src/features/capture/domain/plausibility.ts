@@ -1,10 +1,10 @@
 import type { BestBefore } from '@/features/inventory/domain/unit'
-import { daysBetween, type CalendarDay } from '@/shared/lib/dates'
+import { addMonths, daysBetween, type CalendarDay } from '@/shared/lib/dates'
 
 /** Sicherheit, die die KI zu ihrem Vorschlag angibt (Schema C). */
 export type Confidence = 'high' | 'medium' | 'low'
 
-type ReviewReason = 'in-past' | 'far-from-typical' | 'low-confidence'
+type ReviewReason = 'in-past' | 'far-from-typical' | 'too-far-ahead' | 'low-confidence'
 
 /** Ein MHD-Chip: nicht lesbar (gelb, kein Datum), passt, oder „bitte prüfen“ mit Gründen. */
 export type BestBeforeSuggestion =
@@ -18,6 +18,10 @@ export type BestBeforeSuggestion =
  * Kürzere Restlaufzeiten sind normal (ältere Ware) und werden nicht markiert.
  */
 const FAR_FROM_TYPICAL_FACTOR = 2
+
+/** Ein MHD mehr als so viele Jahre in der Zukunft ist immer „bitte prüfen“, auch ohne Kategoriewert. */
+const MAX_BEST_BEFORE_YEARS_AHEAD = 15
+const MONTHS_PER_YEAR = 12
 
 interface AssessInput {
   /** Erkanntes oder eingegebenes MHD, null wenn nicht lesbar */
@@ -38,6 +42,8 @@ function reviewReasons(input: AssessInput & { bestBefore: BestBefore }): ReviewR
   const reasons: ReviewReason[] = []
   if (daysLeft < 0) reasons.push('in-past')
   if (isFarFromTypical(daysLeft, input.typicalShelfLifeDays)) reasons.push('far-from-typical')
+  const latestPlausible = addMonths(input.today, MAX_BEST_BEFORE_YEARS_AHEAD * MONTHS_PER_YEAR)
+  if (input.bestBefore.date > latestPlausible) reasons.push('too-far-ahead')
   if (input.confidence === 'low') reasons.push('low-confidence')
   return reasons
 }

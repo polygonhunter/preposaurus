@@ -17,6 +17,8 @@ describe('parseBestBefore – gültige Eingaben', () => {
     ['30/09/2027', '2027-09-30', 'day'],
     ['30-09-2027', '2027-09-30', 'day'],
     ['30.09.27', '2027-09-30', 'day'],
+    ['01.01.24', '2024-01-01', 'day'],
+    ['31.12.41', '2041-12-31', 'day'],
     ['2027-09-30', '2027-09-30', 'day'],
     ['29.02.2028', '2028-02-29', 'day'],
     ['  30.09.2027  ', '2027-09-30', 'day'],
@@ -42,7 +44,7 @@ describe('parseBestBefore – gültige Eingaben', () => {
     ['2027', '2027-12-31', 'year'],
     ['MHD 2029', '2029-12-31', 'year'],
   ])('%s ergibt %s (%s)', (text, date, precision) => {
-    expect(parseBestBefore(text)).toEqual({
+    expect(parseBestBefore(text, today)).toEqual({
       ok: true,
       value: { date, precision, isEstimated: false },
     })
@@ -67,6 +69,12 @@ describe('parseBestBefore – kein geratenes Datum', () => {
     ['30.09.', 'incomplete'],
     ['9.9', 'incomplete'],
     ['09/27', 'ambiguous'],
+    ['30.09.99', 'ambiguous'],
+    ['30.09.00', 'ambiguous'],
+    ['31.12.23', 'ambiguous'],
+    ['01.01.42', 'ambiguous'],
+    ['30.09/2027', 'no-date'],
+    ['30-09.2027', 'no-date'],
     ['09.12', 'ambiguous'],
     ['31.02.2027', 'invalid-date'],
     ['29.02.2027', 'invalid-date'],
@@ -80,7 +88,7 @@ describe('parseBestBefore – kein geratenes Datum', () => {
     ['30.09.1999', 'year-out-of-range'],
     ['01/2100', 'year-out-of-range'],
   ])('%j ergibt den Fehler %s', (text, kind) => {
-    expect(parseBestBefore(text)).toEqual({ ok: false, error: { kind } })
+    expect(parseBestBefore(text, today)).toEqual({ ok: false, error: { kind } })
   })
 })
 
