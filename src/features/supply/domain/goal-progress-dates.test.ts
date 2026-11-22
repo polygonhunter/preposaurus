@@ -59,6 +59,37 @@ describe('Zieldatum in der Vergangenheit', () => {
   })
 })
 
+describe('Zieldatum ist heute', () => {
+  const need = { kcalPerDay: 2000, waterMlPerDay: 2000 }
+  const units = [
+    supplyUnit('haelt', '2028-01-31', { kcal: 6000, waterMl: 6000 }),
+    supplyUnit('heute-letzter-tag', '2026-11-22', { kcal: 2000, waterMl: 2000 }),
+    supplyUnit('ohne', null, { kcal: 2000, waterMl: 2000 }),
+  ]
+  const result = calculateGoalProgress({
+    stillGoodCounts: false,
+    units,
+    need,
+    today,
+    goal: { days: 4, targetDay: today },
+  })
+
+  it('ist ein gültiges Ziel und kein Hinweis auf ein vergangenes Datum', () => {
+    expect(result.ok && result.value.target.kind).toBe('valid')
+  })
+
+  it('zählt am Zieldatum wie heute, nur ohne „Datum fehlt“', () => {
+    const atGoal = reachable(result)
+    expect(result.ok && result.value.today.days).toBe(5)
+    expect(atGoal.atTarget.days).toBe(4)
+    expect(atGoal.isGoalReached).toBe(true)
+  })
+
+  it('meldet nichts als „läuft vor Zieldatum ab“', () => {
+    expect(reachable(result).expiringBeforeTarget).toEqual([])
+  })
+})
+
 describe('Gemischter Bestand mit „Datum fehlt“', () => {
   const need = { kcalPerDay: 2000, waterMlPerDay: 2000 }
   const units = [
