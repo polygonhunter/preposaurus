@@ -53,7 +53,7 @@ Alle Daten liegen in drei sichtbaren Ordnern neben der Compose-Datei:
 | `fotos` | die Fotos der Packungen |
 | `backups` | die nächtlichen Sicherungen |
 
-Dazu kommt `tailscale` mit dem Zustand des Tailscale-Containers.
+Dazu kommt `tailscale` mit dem Zustand des Tailscale-Containers. Er enthält den Geräteschlüssel im Tailnet und ist **vertraulich**: nicht teilen, nicht in eine öffentliche Freigabe legen.
 
 ## 2. Voraussetzungen
 
@@ -156,11 +156,23 @@ sudo chown "$(id -u):$(id -g)" fotos backups
 
 Den Ordner `db` verwaltet die Datenbank selbst, er braucht keine Anpassung.
 
+**Nur für dich lesbar machen:** Die Backups enthalten Passwort-Hashes, Sitzungen und Gesundheitsangaben, der Ordner `tailscale` den Geräteschlüssel. Auf einem NAS mit mehreren Nutzern oder einer Netzwerkfreigabe auf den Ordner sollen andere sie nicht lesen können:
+
+```bash
+chmod 700 backups tailscale
+```
+
+Der Backup-Container legt seine Dateien zusätzlich nur für den Besitzer lesbar an (`600` bzw. `700`).
+
 ## 5. Die Datei .env ausfüllen
 
 Die Datei `.env` enthält alle Einstellungen und Geheimnisse. **Sie gehört nie in ein Repository, in einen Chat oder in ein Ticket.** Bewahre eine Kopie getrennt von den Backups auf, z. B. im Passwort-Manager.
 
-Öffne sie mit einem Editor (per SSH z. B. `nano .env`, am NAS auch über den Datei-Browser).
+Mach sie zuerst nur für dich lesbar und öffne sie dann mit einem Editor (per SSH z. B. `nano .env`, am NAS auch über den Datei-Browser):
+
+```bash
+chmod 600 .env
+```
 
 ### 5.1 Geheimnisse erzeugen
 
