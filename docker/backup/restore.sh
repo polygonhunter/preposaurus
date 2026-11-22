@@ -3,9 +3,9 @@
 #   wiederherstellen <stand> [--ja]     Stand z. B. manuell/2026-11-22_010000
 #   pruefen <stand>                     Probe in eine Wegwerf-Datenbank, der Betrieb läuft weiter
 # Sicherheitsnetz: Zuerst entsteht ein Stand vor-wiederherstellung/… des aktuellen Zustands. Der
-# Stand wird in eine neue Datenbank eingespielt, erst danach ersetzt sie die alte. Scheitert das
-# Einspielen, bleibt alles, wie es war. Alte Stände rotieren erst ganz am Ende, damit das
-# Sicherheitsnetz nicht den gewählten Stand löscht (z. B. den ältesten unter vor-wiederherstellung).
+# Stand wird in eine neue Datenbank eingespielt, erst danach ersetzt sie die alte (über <db>_alt).
+# Scheitert das Einspielen, bleibt alles, wie es war. Alte Stände rotieren erst ganz am Ende, damit
+# das Sicherheitsnetz nicht den gewählten Stand löscht (z. B. den ältesten unter vor-wiederherstellung).
 
 resolve_stand() {
   for candidate in "$BACKUP_DIR/$1" $(for kind in $STAND_KINDS; do echo "$BACKUP_DIR/$kind/$1"; done); do
@@ -44,6 +44,16 @@ restore_into() {
   fi
 }
 
+# Beide Umbenennungen in einer Transaktion: Bei einem Abbruch gibt es die Betriebs-DB immer, nur
+# eine Kopie unter <db>_alt kann übrig bleiben. Die räumt der nächste Lauf vorher weg.
+swap_in_new_database() {
+  dropdb --maintenance-db=postgres --if-exists "${PGDATABASE}_alt"
+  psql --dbname=postgres -v ON_ERROR_STOP=1 --single-transaction \
+    -c "alter database \"$PGDATABASE\" rename to \"${PGDATABASE}_alt\"" \
+    -c "alter database \"${PGDATABASE}_neu\" rename to \"$PGDATABASE\"" > /dev/null
+  dropdb --maintenance-db=postgres "${PGDATABASE}_alt"
+}
+
 run_restore() {
   [ -n "${1:-}" ] || fail "Aufruf: wiederherstellen <stand> [--ja], Stände zeigt: liste"
   stand_dir=$(resolve_stand "$1") || fail "Den Stand $1 gibt es nicht. Stände zeigt: liste"
@@ -57,8 +67,7 @@ run_restore() {
   restore_into "${PGDATABASE}_neu" "$stand_dir/$DUMP_FILE" ||
     fail "Der Stand $1 lässt sich nicht einspielen. Nichts geändert."
   ensure_no_connections
-  dropdb --maintenance-db=postgres "$PGDATABASE"
-  psql --dbname=postgres -c "alter database \"${PGDATABASE}_neu\" rename to \"$PGDATABASE\"" > /dev/null
+  swap_in_new_database
   rsync -a --delete "$stand_dir/fotos/" "$PHOTO_DIR/"
   apply_retention
   log "Wiederhergestellt. Der Zustand davor liegt unter $safety_stand."
