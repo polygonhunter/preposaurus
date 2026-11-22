@@ -5,6 +5,8 @@
     "src/server/db/schema/*.ts!",
     "db/seeds/index.ts!",
     "src/server/storage/sharp-photo-processor.ts!",
+    "src/server/ai/anthropic-adapter.ts!",
+    "src/features/ai-settings/application/*.ts!",
     "src/features/auth/actions/*.ts!",
     "src/server/auth/guards.ts!"
   ],
@@ -12,7 +14,8 @@
     "src/**/*.{ts,tsx,css}!",
     "!src/features/*/domain/**!",
     "!src/shared/lib/{dates,quantities,slug,stock-unit}.ts!",
-    "!src/server/{ai,storage}/**!",
+    "!src/server/{ai,crypto,storage}/**!",
+    "!src/features/ai-settings/{application,data}/**!",
     "!src/features/capture/{application/**,schemas.ts}!",
     "!src/features/inventory/{application/**,data/**,schemas.ts}!",
     "!src/features/supply/application/**!",
