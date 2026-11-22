@@ -1,4 +1,6 @@
+import { redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
+import { requireUser } from '@/server/auth/guards'
 import { Sidebar } from '@/shared/ui/Sidebar'
 import { SkipLink } from '@/shared/ui/SkipLink'
 import { TabBar } from '@/shared/ui/TabBar'
@@ -8,9 +10,12 @@ type AppLayoutProps = Readonly<{ children: ReactNode }>
 const CONTENT_ID = 'inhalt'
 
 // App-Rahmen (DESIGN_SYSTEM §6): Tab-Leiste in kompakt und mittel, Seitenleiste ab breit.
-// TODO(#33): Hier die Sitzung prüfen (requireUser aus src/server/auth/guards.ts) und ohne
-// Anmeldung auf /anmelden leiten. Bis dahin ist der Rahmen ungeschützt.
-export default function AppLayout({ children }: AppLayoutProps) {
+// Zugriffsschutz (#33): src/proxy.ts leitet ohne Sitzungs-Cookie samt Rücksprung zur Anmeldung.
+// Hier prüft die DB, ob die Sitzung noch gilt (abgelaufen, abgemeldet, deaktiviert). Jede Seite,
+// Action und Route prüft ihre Daten trotzdem selbst (requireHouseholdUser), ein Layout allein schützt
+// keine Server Action.
+export default async function AppLayout({ children }: AppLayoutProps) {
+  if (!(await requireUser()).ok) redirect('/anmelden')
   return (
     <div className="min-h-dvh pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)] breit:flex">
       <SkipLink targetId={CONTENT_ID} />
