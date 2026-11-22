@@ -38,8 +38,8 @@ export interface SupplyInput {
   units: readonly SupplyUnit[]
   need: Pick<DailyNeed, 'kcalPerDay' | 'waterMlPerDay'>
   reference: ReferenceDay
-  /** Haushalts-Einstellung „Noch gut zählt mit“, Standard aus (#117) */
-  stillGoodCounts?: boolean
+  /** Haushalts-Einstellung „Noch gut zählt mit“ (#117) */
+  stillGoodCounts: boolean
 }
 
 /** „Versorgt“ am Stichtag (heute oder Zieldatum). Abgelaufene Einheiten zählen nicht. */

@@ -24,8 +24,8 @@ interface GroupProgressInput {
   targets: readonly HouseholdGroupTarget[]
   goalDays: number
   reference: ReferenceDay
-  /** Haushalts-Einstellung „Noch gut zählt mit“, Standard aus (#117) */
-  stillGoodCounts?: boolean
+  /** Haushalts-Einstellung „Noch gut zählt mit“ (#117) */
+  stillGoodCounts: boolean
 }
 
 const PERCENT = 100

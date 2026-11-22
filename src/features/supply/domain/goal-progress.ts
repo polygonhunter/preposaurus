@@ -41,13 +41,13 @@ interface GoalProgressInput<T extends SupplyUnit> extends Omit<SupplyInput, 'ref
 export function unitsExpiringBefore<T extends SupplyUnit>(
   units: readonly T[],
   period: { today: CalendarDay; targetDay: CalendarDay },
-  stillGoodCounts = false,
+  stillGoodCounts: boolean,
 ): T[] {
   return units.filter(
     (unit) =>
       unit.bestBefore !== null &&
       isCountedOn(unit, { day: period.today, kind: 'today' }, stillGoodCounts) &&
-      !isCountedOn(unit, { day: period.targetDay, kind: 'target' }),
+      !isCountedOn(unit, { day: period.targetDay, kind: 'target' }, stillGoodCounts),
   )
 }
 

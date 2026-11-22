@@ -9,18 +9,21 @@ const stillGood = supplyUnit('geprueft', '2026-10-31', { checkedAt: '2026-11-20'
 
 describe('isCountedOn', () => {
   it('zählt eine haltbare Einheit im Vorrat, auch mit MHD genau am Stichtag', () => {
-    expect(isCountedOn(supplyUnit('a', '2026-11-22'), today)).toBe(true)
-    expect(isCountedOn(supplyUnit('b', '2027-03-31'), target)).toBe(true)
+    expect(isCountedOn(supplyUnit('a', '2026-11-22'), today, false)).toBe(true)
+    expect(isCountedOn(supplyUnit('b', '2027-03-31'), target, false)).toBe(true)
   })
 
   it('zählt abgelaufene, verbrauchte und entsorgte Einheiten nicht', () => {
-    expect(isCountedOn(supplyUnit('a', '2026-11-21'), today)).toBe(false)
-    expect(isCountedOn(supplyUnit('b', '2028-01-31', { status: 'consumed' }), today)).toBe(false)
-    expect(isCountedOn(supplyUnit('c', '2028-01-31', { status: 'discarded' }), today)).toBe(false)
+    expect(isCountedOn(supplyUnit('a', '2026-11-21'), today, false)).toBe(false)
+    expect(isCountedOn(supplyUnit('b', '2028-01-31', { status: 'consumed' }), today, false)).toBe(
+      false,
+    )
+    expect(isCountedOn(supplyUnit('c', '2028-01-31', { status: 'discarded' }), today, false)).toBe(
+      false,
+    )
   })
 
-  it('zählt „Noch gut“ heute standardmäßig nicht', () => {
-    expect(isCountedOn(stillGood, today)).toBe(false)
+  it('zählt „Noch gut“ heute nicht, wenn der Schalter aus ist', () => {
     expect(isCountedOn(stillGood, today, false)).toBe(false)
   })
 
@@ -45,17 +48,17 @@ describe('isCountedOn ohne Datum', () => {
   const withoutDate = supplyUnit('ohne', null)
 
   it('zählt heute mit', () => {
-    expect(isCountedOn(withoutDate, today)).toBe(true)
+    expect(isCountedOn(withoutDate, today, false)).toBe(true)
   })
 
   it('zählt am Zieldatum nicht, auch wenn das Zieldatum heute ist', () => {
-    expect(isCountedOn(withoutDate, target)).toBe(false)
-    expect(isCountedOn(withoutDate, { day: today.day, kind: 'target' })).toBe(false)
+    expect(isCountedOn(withoutDate, target, false)).toBe(false)
+    expect(isCountedOn(withoutDate, { day: today.day, kind: 'target' }, false)).toBe(false)
   })
 
   it('zählt verbraucht oder entsorgt auch heute nicht', () => {
-    expect(isCountedOn(supplyUnit('a', null, { status: 'consumed' }), today)).toBe(false)
-    expect(isCountedOn(supplyUnit('b', null, { status: 'discarded' }), today)).toBe(false)
+    expect(isCountedOn(supplyUnit('a', null, { status: 'consumed' }), today, false)).toBe(false)
+    expect(isCountedOn(supplyUnit('b', null, { status: 'discarded' }), today, false)).toBe(false)
   })
 })
 

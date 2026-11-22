@@ -57,7 +57,7 @@ function unit(options: UnitOptions = {}): NodeUnit {
 }
 
 const totalsOf = (units: NodeUnit[], node: TreeNode, reference = today) => {
-  const result = calculateNodeTotals({ units, node, need, reference })
+  const result = calculateNodeTotals({ stillGoodCounts: false, units, node, need, reference })
   if (!result.ok) throw new Error('Rechnung fehlgeschlagen')
   return result.value
 }
@@ -144,6 +144,7 @@ describe('calculateNodeTotals', () => {
 
   it('meldet einen Fehler, wenn kein Bedarf da ist', () => {
     const result = calculateNodeTotals({
+      stillGoodCounts: false,
       units: [unit()],
       node: { level: 'group', key: 'getreide' },
       need: { kcalPerDay: 0, waterMlPerDay: 0 },
