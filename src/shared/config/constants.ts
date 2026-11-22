@@ -23,3 +23,11 @@ export const DEFAULT_AMPEL_ORANGE_DAYS = 28
 
 // Maßeinheit für Inhalt und Empfehlungsmengen. Wasser und Getränke in ml, sonst g.
 export const QUANTITY_UNITS = ['g', 'ml'] as const
+
+// Gespeicherter Zustand einer Einheit. „Gut“, „bald fällig“ und „abgelaufen“ werden berechnet.
+export const UNIT_STATUSES = ['vorrat', 'verbraucht', 'entsorgt'] as const
+
+// Wie genau das aufgedruckte Datum ist (z. B. „Ende 2027“ = jahr).
+export const BEST_BEFORE_PRECISIONS = ['tag', 'monat', 'jahr'] as const
+
+export const BEST_BEFORE_KINDS = ['mhd', 'verbrauchen_bis'] as const
