@@ -118,6 +118,7 @@ const policies = [
       to(serverModule('db')),
       // Fake-Adapter brauchen den Port, den sie nachbilden
       to(serverModule('storage')),
+      to(serverModule('notify')),
       to(anyShared),
     ],
   },
