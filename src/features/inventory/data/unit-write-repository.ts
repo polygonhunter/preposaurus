@@ -1,11 +1,13 @@
-// Schreib-Repository für Entnahme und Rückgängig (#46). Jedes Update ist bedingt: auf den
-// Haushalt (Produkt gehört zu haushalt_id, #133) und auf den Status. So ändert eine doppelte
-// Entnahme nur einmal, und eine fremde Packung bleibt unberührt.
+// Schreib-Repository für Entnahme, „Noch gut“ und Rückgängig (#46, #47). Jedes Update ist bedingt:
+// auf den Haushalt (Produkt gehört zu haushalt_id, #133) und auf den Status. So ändert eine
+// doppelte Entnahme nur einmal, und eine fremde Packung bleibt unberührt.
 import 'server-only'
 import { and, eq, inArray } from 'drizzle-orm'
 import type { Database } from '@/server/db/connection'
-import { products, units } from '@/server/db/schema/inventory'
+import { units } from '@/server/db/schema/inventory'
 import { DB_UNIT_STATUS } from './db-values'
+import { ownUnit } from './own-units'
+import { countOwnUnits, markStillGood, undoStillGood } from './still-good-write'
 
 interface TakeOutChange {
   unitId: string
@@ -15,12 +17,7 @@ interface TakeOutChange {
 }
 
 type TakenUnit = Readonly<{ unitId: string; userId: string }>
-
-const ownProductIds = (db: Database, householdId: string) =>
-  db.select({ id: products.id }).from(products).where(eq(products.householdId, householdId))
-
-const ownUnit = (db: Database, householdId: string, unitId: string) =>
-  and(eq(units.id, unitId), inArray(units.productId, ownProductIds(db, householdId)))
+type StillGoodChange = Readonly<{ unitIds: readonly string[]; checkedAt: string }>
 
 async function statusOf(db: Database, householdId: string, unitId: string) {
   const [row] = await db
@@ -40,11 +37,11 @@ async function takeOut(db: Database, householdId: string, change: TakeOutChange)
   return (await statusOf(db, householdId, change.unitId)) === null ? 'not-found' : 'not-in-stock'
 }
 
-// Nur die eigene Entnahme: verbraucht und vom selben Nutzer entnommen
-const ownConsumption = (db: Database, householdId: string, { unitId, userId }: TakenUnit) =>
+// Nur die eigene Entnahme: verbraucht oder entsorgt, und vom selben Nutzer entnommen
+const ownTakeOut = (db: Database, householdId: string, { unitId, userId }: TakenUnit) =>
   and(
     ownUnit(db, householdId, unitId),
-    eq(units.status, DB_UNIT_STATUS.consumed),
+    inArray(units.status, [DB_UNIT_STATUS.consumed, DB_UNIT_STATUS.discarded]),
     eq(units.takenBy, userId),
   )
 
@@ -52,7 +49,7 @@ async function returnToStock(db: Database, householdId: string, taken: TakenUnit
   const updated = await db
     .update(units)
     .set({ status: DB_UNIT_STATUS.stock, takenAt: null, takenBy: null })
-    .where(ownConsumption(db, householdId, taken))
+    .where(ownTakeOut(db, householdId, taken))
     .returning({ id: units.id })
   if (updated.length > 0) return 'updated' as const
   const status = await statusOf(db, householdId, taken.unitId)
@@ -63,5 +60,11 @@ export function createUnitWriteRepository(db: Database) {
   return {
     takeOut: (householdId: string, change: TakeOutChange) => takeOut(db, householdId, change),
     returnToStock: (householdId: string, taken: TakenUnit) => returnToStock(db, householdId, taken),
+    markStillGood: (householdId: string, change: StillGoodChange) =>
+      markStillGood(db, householdId, change),
+    undoStillGood: (householdId: string, change: StillGoodChange) =>
+      undoStillGood(db, householdId, change),
+    countOwnUnits: (householdId: string, unitIds: readonly string[]) =>
+      countOwnUnits(db, householdId, unitIds),
   }
 }

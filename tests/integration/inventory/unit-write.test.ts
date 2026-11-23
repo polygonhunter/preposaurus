@@ -1,9 +1,9 @@
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { consumeUnit } from '../../../src/features/inventory/application/consume-unit'
 import { returnToStock } from '../../../src/features/inventory/application/return-to-stock'
 import type { StockReader } from '../../../src/features/inventory/application/stock-reader'
 import { takeOne } from '../../../src/features/inventory/application/take-one'
+import { takeOutUnit } from '../../../src/features/inventory/application/take-out-unit'
 import type { UnitWriter } from '../../../src/features/inventory/application/unit-writer'
 import { createUnitWriteRepository } from '../../../src/features/inventory/data/unit-write-repository'
 import { users } from '../../../src/server/db/schema/account'
@@ -41,6 +41,9 @@ describe('Entnehmen und Rückgängig gegen die Datenbank (#46)', () => {
     await testDb.close()
   })
 
+  const consume = (unitId: string, outcome: 'consumed' | 'discarded' = 'consumed') =>
+    takeOutUnit(writer, { householdId, userId, unitId, outcome, now })
+
   async function unitOf(unitId: string) {
     const [row] = await testDb.db.select().from(units).where(eq(units.id, unitId))
     return row
@@ -73,10 +76,7 @@ describe('Entnehmen und Rückgängig gegen die Datenbank (#46)', () => {
     const unitId = await stockUnitOf(householdId)
     await returnToStock(writer, { householdId, userId, unitId })
 
-    const [first, second] = await Promise.all([
-      consumeUnit(writer, { householdId, userId, unitId, now }),
-      consumeUnit(writer, { householdId, userId, unitId, now }),
-    ])
+    const [first, second] = await Promise.all([consume(unitId), consume(unitId)])
 
     expect([first.ok, second.ok].sort()).toEqual([false, true])
     expect([first, second].find((result) => !result.ok)).toEqual({
@@ -87,7 +87,7 @@ describe('Entnehmen und Rückgängig gegen die Datenbank (#46)', () => {
 
   it('holt mit Rückgängig die Packung zurück und löscht Zeitpunkt und Nutzer', async () => {
     const unitId = await stockUnitOf(householdId)
-    await consumeUnit(writer, { householdId, userId, unitId, now })
+    await consume(unitId)
 
     expect((await returnToStock(writer, { householdId, userId, unitId })).ok).toBe(true)
     expect(await unitOf(unitId)).toMatchObject({ status: 'vorrat', takenAt: null, takenBy: null })
@@ -95,7 +95,7 @@ describe('Entnehmen und Rückgängig gegen die Datenbank (#46)', () => {
 
   it('holt mit Rückgängig keine Entnahme eines anderen Nutzers zurück', async () => {
     const unitId = await stockUnitOf(householdId)
-    await consumeUnit(writer, { householdId, userId, unitId, now })
+    await consume(unitId)
 
     const result = await returnToStock(writer, { householdId, userId: otherUserId, unitId })
 
@@ -104,10 +104,29 @@ describe('Entnehmen und Rückgängig gegen die Datenbank (#46)', () => {
     await returnToStock(writer, { householdId, userId, unitId })
   })
 
+  it('setzt bei „Entsorgt“ Status, Zeitpunkt und Nutzer, Rückgängig holt die Packung zurück', async () => {
+    const unitId = await stockUnitOf(householdId)
+    await returnToStock(writer, { householdId, userId, unitId })
+
+    expect((await consume(unitId, 'discarded')).ok).toBe(true)
+    expect(await unitOf(unitId)).toMatchObject({
+      status: 'entsorgt',
+      takenBy: userId,
+      takenAt: now,
+    })
+
+    expect(await returnToStock(writer, { householdId, userId: otherUserId, unitId })).toEqual({
+      ok: false,
+      error: { kind: 'not-found' },
+    })
+    expect((await returnToStock(writer, { householdId, userId, unitId })).ok).toBe(true)
+    expect(await unitOf(unitId)).toMatchObject({ status: 'vorrat', takenAt: null, takenBy: null })
+  })
+
   it('fasst eine Packung eines fremden Haushalts nicht an', async () => {
     const foreignUnit = await stockUnitOf(foreignId)
 
-    const consumed = await consumeUnit(writer, { householdId, userId, unitId: foreignUnit, now })
+    const consumed = await consume(foreignUnit)
     const returned = await returnToStock(writer, { householdId, userId, unitId: foreignUnit })
 
     expect(consumed).toEqual({ ok: false, error: { kind: 'not-found' } })

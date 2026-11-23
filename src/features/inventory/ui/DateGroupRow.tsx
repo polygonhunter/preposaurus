@@ -1,14 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/shared/ui/Button'
 import { Row } from '@/shared/ui/Row'
 import { Sheet } from '@/shared/ui/Sheet'
 import { StatusBadge } from '@/shared/ui/StatusBadge'
 import type { BestBeforeGroupDto } from '../schemas'
-import { useConsume } from './consume-context'
-import { groupLabel } from './detail-view'
-import { STATE_BADGE, expiryHint, formatPackages } from './stock-format'
+import { groupBadge, groupLabel, partlyCheckedNote, stillGoodCandidates } from './detail-view'
+import { expiryHint, formatPackages } from './stock-format'
+import { UnitSheetActions } from './UnitSheetActions'
 
 type DateGroupRowProps = Readonly<{
   // Name der Lebensmittelart für Blatt und UndoBar
@@ -18,22 +17,25 @@ type DateGroupRowProps = Readonly<{
   isNext: boolean
 }>
 
+const STILL_GOOD_NOTE =
+  '„Noch gut“ vermerkt die abgelaufenen Packungen dieser Zeile als geprüft. Sie bleiben im Vorrat.'
+
 // Datumszeile im Detail (UX-Konzept §8.4): „11/2027 · 5×“ mit Zustand. Ein Tipp öffnet das Blatt
-// mit „Verbraucht“, so lässt sich statt der vorgeschlagenen auch eine andere Packung nehmen.
+// mit Verbraucht, Entsorgt und bei abgelaufenem MHD „Noch gut“ (#47). So lässt sich statt der
+// vorgeschlagenen auch eine andere Packung nehmen.
 export function DateGroupRow({ name, group, isNext }: DateGroupRowProps) {
   const [isOpen, setOpen] = useState(false)
-  const { consume, isLocked } = useConsume()
   const label = groupLabel(group)
-  const state = group.kind === 'dated' ? group.state : 'no-date'
-  const badge = STATE_BADGE[state]
+  const badge = groupBadge(group)
+  const partly = partlyCheckedNote(group)
+  const stillGoodIds = stillGoodCandidates(group)
   const first = group.units[0]
-  const hint = expiryHint(state, first?.kind ?? 'best-before')
+  const hint = expiryHint(
+    group.kind === 'dated' ? group.state : 'no-date',
+    first?.kind ?? 'best-before',
+  )
   const close = () => {
     setOpen(false)
-  }
-  const take = () => {
-    if (first !== undefined) consume({ kind: 'unit', unitId: first.id }, { name, dateLabel: label })
-    close()
   }
   return (
     <Row
@@ -41,6 +43,7 @@ export function DateGroupRow({ name, group, isNext }: DateGroupRowProps) {
       subtitle={
         <span className="flex flex-wrap items-center gap-x-1.5">
           <StatusBadge tone={badge.tone} label={badge.label} />
+          {partly === null ? null : <span>· {partly}</span>}
           {isNext ? <span>· als Nächstes dran</span> : null}
         </span>
       }
@@ -56,18 +59,20 @@ export function DateGroupRow({ name, group, isNext }: DateGroupRowProps) {
           onClose={close}
           title={`${name} · ${label}`}
           actions={
-            <>
-              <Button onClick={take} disabled={isLocked || first === undefined}>
-                1 Packung verbraucht
-              </Button>
-              <Button variant="plain" onClick={close}>
-                Abbrechen
-              </Button>
-            </>
+            <UnitSheetActions
+              unitId={first?.id ?? null}
+              stillGoodIds={stillGoodIds}
+              name={name}
+              dateLabel={label}
+              onDone={close}
+            />
           }
         >
           <p>{`${formatPackages(group.units.length)} · ${badge.label}`}</p>
           {hint === null ? null : <p className="pt-2 text-callout text-fg2">{hint}</p>}
+          {stillGoodIds.length === 0 ? null : (
+            <p className="pt-2 text-callout text-fg2">{STILL_GOOD_NOTE}</p>
+          )}
         </Sheet>
       }
     />

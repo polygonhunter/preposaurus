@@ -82,10 +82,27 @@ export function stockLine(totals: NodeTotalsDto): string {
 /** Im Vorrat liegt etwas, auch wenn es heute nicht mehr zählt. */
 export const hasStock = (totals: NodeTotalsDto) => totals.packages + totals.uncountedPackages > 0
 
-/** Meldung in der UndoBar: „Nudeln: 1 Packung verbraucht (11/2027)“. */
-export function formatTakenMessage(name: string, dateLabel: string | null): string {
+const OUTCOME_WORD = { consumed: 'verbraucht', discarded: 'entsorgt' } as const
+
+/** Meldung in der UndoBar: „Nudeln: 1 Packung verbraucht (11/2027)“ bzw. „… entsorgt …“. */
+export function formatTakenMessage(
+  name: string,
+  dateLabel: string | null,
+  outcome: keyof typeof OUTCOME_WORD = 'consumed',
+): string {
   const date = dateLabel === null ? '' : ` (${dateLabel})`
-  return `${name}: 1 Packung verbraucht${date}`
+  return `${name}: 1 Packung ${OUTCOME_WORD[outcome]}${date}`
+}
+
+/** „noch gut (geprüft am 23.11.2026)“ für eine „Noch gut“ geprüfte Packung (#47). */
+export function stillGoodLabel(checkedAt: string): string {
+  const day = formatDayWithPrecision({ date: toCalendarDay(checkedAt), precision: 'day' })
+  return `noch gut (geprüft am ${day})`
+}
+
+/** Meldung in der UndoBar nach „Noch gut“: „Walnüsse: 1 Packung noch gut (geprüft am …)“. */
+export function formatStillGoodMessage(name: string, count: number, checkedAt: string): string {
+  return `${name}: ${formatPackages(count)} ${stillGoodLabel(checkedAt)}`
 }
 
 /** MHD wie aufgedruckt („30.09.2027“, „09/2027“, „2027“), geschätzt mit Vermerk. */

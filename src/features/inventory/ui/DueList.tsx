@@ -2,24 +2,16 @@ import { Chip } from '@/shared/ui/Chip'
 import { ChipRow } from '@/shared/ui/ChipRow'
 import { Group } from '@/shared/ui/Group'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
-import { Row } from '@/shared/ui/Row'
 import type { DueUnits } from '../schemas'
-import { ConsumeButton } from './ConsumeButton'
-import {
-  DUE_GROUP_TONE,
-  dueCounterLabel,
-  dueEntryLine,
-  dueEntryTitle,
-  dueGroupAnchor,
-  dueGroupTitle,
-} from './due-labels'
-import { BEST_BEFORE_HINT, formatDate } from './stock-format'
-import { targetPath } from './stock-paths'
+import { DueEntryRow } from './DueEntryRow'
+import { DUE_GROUP_TONE, dueCounterLabel, dueGroupAnchor, dueGroupTitle } from './due-labels'
+import { BEST_BEFORE_HINT } from './stock-format'
 
 type DueListProps = Readonly<{ due: DueUnits }>
 
 // Bald fällig (UX-Konzept §8.2, #125): Zähler als Sprungmarken, Gruppen nach Zeitraum, je Eintrag
-// „Verbraucht“. Leere Gruppen fallen weg. Der Hinweis zum MHD steht einmal unter „Abgelaufen“.
+// „Verbraucht“, unter „Abgelaufen“ dazu „Entsorgt“ und „Noch gut“ (#47). Leere Gruppen fallen
+// weg. Der Hinweis zum MHD steht einmal unter „Abgelaufen“.
 export function DueList({ due }: DueListProps) {
   return (
     <>
@@ -36,28 +28,13 @@ export function DueList({ due }: DueListProps) {
             {dueGroupTitle(group, due.thresholds)}
           </GroupHeader>
           <Group labelledBy={dueGroupAnchor(group)}>
-            {entries.map((entry) => {
-              const [firstUnit] = entry.unitIds
-              return (
-                <Row
-                  key={entry.unitIds.join(',')}
-                  title={dueEntryTitle(entry)}
-                  subtitle={dueEntryLine(entry)}
-                  action={{ href: targetPath(entry.target) }}
-                  accessory={
-                    firstUnit === undefined ? undefined : (
-                      <ConsumeButton
-                        unitId={firstUnit}
-                        name={entry.name}
-                        dateLabel={
-                          entry.bestBefore === null ? undefined : formatDate(entry.bestBefore)
-                        }
-                      />
-                    )
-                  }
-                />
-              )
-            })}
+            {entries.map((entry) => (
+              <DueEntryRow
+                key={entry.unitIds.join(',')}
+                entry={entry}
+                isExpired={group === 'expired'}
+              />
+            ))}
           </Group>
           {group === 'expired' ? (
             <p className="px-8 pt-2 text-footnote text-fg2 breit:px-10">{BEST_BEFORE_HINT}</p>

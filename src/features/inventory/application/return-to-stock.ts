@@ -1,4 +1,4 @@
-// Use-Case „Rückgängig“ nach Verbraucht (#46, UX-Konzept §7): Die Packung kommt zurück in den
+// Use-Case „Rückgängig“ nach Verbraucht oder Entsorgt (#46, #47, UX-Konzept §7): Die Packung kommt zurück in den
 // Vorrat, Zeitpunkt und Nutzer der Entnahme werden gelöscht. Rückgängig gilt nur für die eigene
 // Entnahme. Schon im Vorrat ist kein Fehler, denn dann ist das Ziel erreicht (z. B. doppelt getippt).
 import 'server-only'

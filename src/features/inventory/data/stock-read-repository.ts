@@ -11,6 +11,9 @@ import {
 } from './household-read-query'
 import { loadProducts } from './stock-products-query'
 import { countUnitsByStatus, loadUnits } from './stock-units-query'
+import { loadUnitHistory } from './unit-history-query'
+
+type HistoryQuery = Readonly<{ productIds: readonly string[]; limit: number }>
 
 export function createStockReadRepository(db: Database) {
   return {
@@ -23,5 +26,7 @@ export function createStockReadRepository(db: Database) {
     loadUnits: (householdId: string, query: UnitQuery) => loadUnits(db, householdId, query),
     countUnitsByStatus: (householdId: string, productIds: readonly string[]) =>
       countUnitsByStatus(db, householdId, productIds),
+    loadUnitHistory: (householdId: string, query: HistoryQuery) =>
+      loadUnitHistory(db, householdId, query),
   }
 }

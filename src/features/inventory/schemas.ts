@@ -44,6 +44,18 @@ export const consumeRequestSchema = z.discriminatedUnion('kind', [
 
 export const unitIdSchema = id
 
+// Mehr Packungen mit einem Datum hat ein Eintrag auf Bald fällig nicht (Erfassung: höchstens 99)
+const MAX_UNITS_PER_REQUEST = 99
+
+/** „Noch gut“ für alle Packungen eines Eintrags bzw. einer Datumszeile (#47). */
+export const stillGoodRequestSchema = z.array(id).min(1).max(MAX_UNITS_PER_REQUEST)
+
+/** Rückgängig nach „Noch gut“: die eben geprüften Packungen und der gesetzte Tag. */
+export const undoStillGoodSchema = z.object({
+  unitIds: stillGoodRequestSchema,
+  checkedAt: isoDay,
+})
+
 // ---------- Bausteine ----------
 
 const unitStateSchema = z.enum(['good', 'soon', 'urgent', 'expired', 'no-date'])
@@ -180,6 +192,14 @@ export const foodTypeDetailSchema = z.object({
   ),
 })
 
+/** Eintrag im Verlauf einer Lebensmittelart (#48). Bei „Noch gut“ ist die Person unbekannt. */
+export const historyEntrySchema = z.object({
+  kind: z.enum(['consumed', 'discarded', 'still-good']),
+  day: isoDay,
+  person: z.string().nullable(),
+  bestBefore: bestBeforeSchema.nullable(),
+})
+
 // ---------- 4 · Bald fällig ----------
 
 const dueGroupSchema = z.enum(['expired', 'this-week', 'this-month', 'next-three-months'])
@@ -232,6 +252,7 @@ export type FoodTypeLevel = z.infer<typeof foodTypeLevelSchema>
 export type FoodTypeDetail = z.infer<typeof foodTypeDetailSchema>
 export type NutritionDto = z.infer<typeof nutritionSchema>
 export type BestBeforeGroupDto = z.infer<typeof bestBeforeGroupSchema>
+export type HistoryEntry = z.infer<typeof historyEntrySchema>
 export type DueUnits = z.infer<typeof dueUnitsSchema>
 export type DueEntry = z.infer<typeof dueEntrySchema>
 export type StockSearch = z.infer<typeof stockSearchSchema>

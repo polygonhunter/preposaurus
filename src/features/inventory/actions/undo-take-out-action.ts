@@ -1,5 +1,6 @@
 'use server'
-// „Rückgängig“ in der UndoBar nach Verbraucht (#46, UX-Konzept §7, P7). Nur die eigene Entnahme.
+// „Rückgängig“ in der UndoBar nach Verbraucht oder Entsorgt (#46, #47, UX-Konzept §7, P7). Nur die
+// eigene Entnahme.
 import { refresh } from 'next/cache'
 import { requireHouseholdUser } from '@/server/auth/guards'
 import { returnToStock } from '../application/return-to-stock'
@@ -11,7 +12,7 @@ export type UndoActionResult = Readonly<{ ok: true }> | ActionFailure
 
 const GONE = 'Diese Packung gibt es nicht mehr.'
 
-export async function undoConsumeAction(unitId: unknown): Promise<UndoActionResult> {
+export async function undoTakeOutAction(unitId: unknown): Promise<UndoActionResult> {
   const parsed = unitIdSchema.safeParse(unitId)
   if (!parsed.success) return { ok: false, message: GONE }
   const user = await requireHouseholdUser()
