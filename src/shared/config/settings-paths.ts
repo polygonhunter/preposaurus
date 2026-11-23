@@ -9,6 +9,7 @@ export const RULES_PATH = '/einstellungen/regeln'
 export const USERS_PATH = '/einstellungen/nutzer'
 export const NEW_USER_PATH = '/einstellungen/nutzer/neu'
 export const SYSTEM_PATH = '/einstellungen/system'
+export const AI_SETTINGS_PATH = '/einstellungen/foto-erkennung'
 
 export const memberPath = (memberId: string) => `${MEMBERS_PATH}/${memberId}`
 
