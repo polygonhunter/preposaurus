@@ -2,7 +2,8 @@
 // Haushalt (#133). Produkt löschen nimmt per CASCADE seine Einheiten (auch verbrauchte und
 // entsorgte, also den Verlauf) und seine Fotozeilen mit. Die Fotos werden vorher gelesen, weil
 // ihre Dateien danach noch weg müssen. Zuletzt verschwinden nur Erfassungen, an denen keine
-// Packung mehr hängt (NOT EXISTS), so nimmt ihr CASCADE nie still einen Verlauf mit.
+// Packung mehr hängt (NOT EXISTS). Eine Erfassung mit Packungen weist die Datenbank ohnehin ab
+// (einheit.erfassung_id NO ACTION DEFERRABLE, Migration 0007), der Verlauf verschwindet nie still.
 import 'server-only'
 import { and, count, eq, inArray, notExists } from 'drizzle-orm'
 import type { Database } from '@/server/db/connection'
