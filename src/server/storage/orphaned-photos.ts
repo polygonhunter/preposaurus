@@ -5,6 +5,7 @@ import type { PhotoKey } from './photo-key'
 import type { PhotoStorage, StoredFileInfo } from './photo-storage'
 
 const HOUR_MS = 3_600_000
+/** @internal Nur für Tests exportiert, im Code nur in dieser Datei genutzt. */
 export const ORPHAN_MIN_AGE_MS = 24 * HOUR_MS
 
 interface OrphanSelection {
@@ -14,7 +15,10 @@ interface OrphanSelection {
   now: Date
 }
 
-/** Dateien ohne DB-Zeile, die mindestens 24 Stunden alt sind. */
+/**
+ * Dateien ohne DB-Zeile, die mindestens 24 Stunden alt sind.
+ * @internal Nur für Tests exportiert, im Code nur in dieser Datei genutzt.
+ */
 export function selectOrphanedFiles({ files, referencedKeys, now }: OrphanSelection): PhotoKey[] {
   const latestModified = now.getTime() - ORPHAN_MIN_AGE_MS
   return files

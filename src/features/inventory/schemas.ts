@@ -34,6 +34,7 @@ export const stockFilterSchema = z.object({
   storageLocationId: id.optional(),
 })
 
+/** @internal Nur Tests nutzen das Schema, die Seite liest die Sortierung über readDueSort. */
 export const dueSortSchema = z.enum(['date', 'location']).default('date')
 
 /** „Verbraucht“: eine bestimmte Packung oder die nächste nach MHD aus einer Zeile („−1“, #46). */
@@ -108,6 +109,7 @@ const coverageSchema = z.object({
 
 // ---------- 1 · Vorrat-Übersicht (Ebene 1) ----------
 
+/** @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen. */
 export const stockOverviewSchema = z.object({
   groups: z.array(
     z.object({
@@ -123,6 +125,7 @@ export const stockOverviewSchema = z.object({
 
 // ---------- 2 · Lebensmittelarten einer Warengruppe (Ebene 2) ----------
 
+/** @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen. */
 export const foodTypeLevelSchema = z.object({
   group: z.object({ key: z.string(), name: z.string(), totals: nodeTotalsSchema }),
   categories: z.array(
@@ -169,6 +172,7 @@ const bestBeforeGroupSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('no-date'), units: z.array(detailUnitSchema) }),
 ])
 
+/** @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen. */
 export const foodTypeDetailSchema = z.object({
   target: stockTargetSchema,
   name: z.string(),
@@ -192,7 +196,10 @@ export const foodTypeDetailSchema = z.object({
   ),
 })
 
-/** Eintrag im Verlauf einer Lebensmittelart (#48). Bei „Noch gut“ ist die Person unbekannt. */
+/**
+ * Eintrag im Verlauf einer Lebensmittelart (#48). Bei „Noch gut“ ist die Person unbekannt.
+ * @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen.
+ */
 export const historyEntrySchema = z.object({
   kind: z.enum(['consumed', 'discarded', 'still-good']),
   day: isoDay,
@@ -218,6 +225,7 @@ const dueEntrySchema = z.object({
   canConfirmStillGood: z.boolean(),
 })
 
+/** @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen. */
 export const dueUnitsSchema = z.object({
   thresholds: z.object({ soonDays: z.number().int(), urgentDays: z.number().int() }),
   counts: z.record(dueGroupSchema, z.number().int()),
@@ -226,6 +234,7 @@ export const dueUnitsSchema = z.object({
 
 // ---------- 5 · Filter und Suche (Treffermodus) ----------
 
+/** @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen. */
 export const stockSearchSchema = z.object({
   counts: z.record(z.enum(STOCK_STATUS_FILTERS), z.number().int()),
   groups: z.array(

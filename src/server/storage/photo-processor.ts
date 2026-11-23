@@ -75,7 +75,10 @@ function isHeic(data: Uint8Array): boolean {
   return brands.some((brand) => HEIC_BRANDS.has(brand)) && !brands.includes('avif')
 }
 
-/** Erkennt den Bildtyp an den ersten Bytes. Unbekanntes ergibt null. */
+/**
+ * Erkennt den Bildtyp an den ersten Bytes. Unbekanntes ergibt null.
+ * @internal Nur für Tests exportiert, im Code nur in dieser Datei genutzt.
+ */
 export function detectUploadType(data: Uint8Array): UploadType | null {
   if (startsWith(data, JPEG)) return 'jpeg'
   if (startsWith(data, PNG)) return 'png'
