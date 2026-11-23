@@ -82,6 +82,13 @@ const baseSchema = z.object({
   // der Empfehlung in ai-roles.ts (Entscheidung #59).
   ANTHROPIC_API_KEY: optionalText,
   PHOTO_STORAGE_DIR: z.string().min(1).default('./.data/fotos'),
+  // Adresse der App für Links in Mails, z. B. https://haushalt.beispiel.ts.net (M11-05). Ohne sie
+  // haben Mails keinen Link. Die App selbst braucht sie nicht, sie kennt ihre Adresse aus der Anfrage.
+  APP_URL: optionalText.pipe(
+    z
+      .url({ protocol: /^https?$/, error: 'APP_URL muss mit https:// oder http:// beginnen.' })
+      .optional(),
+  ),
   // Musterseite /muster auch im Produktionsbuild zeigen (nur für die E2E-Tests in der CI).
   SHOW_PATTERN_PAGE: z.stringbool().default(false),
   // Sitzungs-Cookie im Produktionsbuild ohne Secure (nur für die E2E-Tests der CI über

@@ -148,3 +148,23 @@ describe('loadEnv: SMTP', () => {
     expect(() => loadEnv({ ...smtp, SMTP_PORT: '70000' })).toThrow('SMTP_PORT')
   })
 })
+
+describe('loadEnv: APP_URL', () => {
+  it('ist optional, eine leere Zeile gilt als nicht gesetzt', () => {
+    expect(loadEnv(minimal).APP_URL).toBeUndefined()
+    expect(loadEnv({ ...minimal, APP_URL: '' }).APP_URL).toBeUndefined()
+  })
+
+  it('nimmt eine Adresse mit https oder http', () => {
+    const url = 'https://haushalt.beispiel.ts.net'
+    expect(loadEnv({ ...minimal, APP_URL: url }).APP_URL).toBe(url)
+    expect(loadEnv({ ...minimal, APP_URL: 'http://127.0.0.1:3000' }).APP_URL).toBe(
+      'http://127.0.0.1:3000',
+    )
+  })
+
+  it('lehnt andere Schemata und Text ohne Adresse ab', () => {
+    expect(() => loadEnv({ ...minimal, APP_URL: 'javascript:alert(1)' })).toThrow('APP_URL')
+    expect(() => loadEnv({ ...minimal, APP_URL: 'haushalt' })).toThrow('APP_URL')
+  })
+})

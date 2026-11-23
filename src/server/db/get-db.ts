@@ -21,3 +21,11 @@ export async function getDb(): Promise<Database> {
   const connection = await holder[DB_KEY]
   return connection.db
 }
+
+/** Schließt die Verbindung, z. B. beim Beenden des Workers. Danach baut getDb() neu auf. */
+export async function closeDb(): Promise<void> {
+  const holder = globalThis as DbHolder
+  const pending = holder[DB_KEY]
+  holder[DB_KEY] = undefined
+  if (pending !== undefined) await (await pending).close()
+}

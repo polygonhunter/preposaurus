@@ -64,6 +64,25 @@ export async function deleteDraftPhotos(db: Database, draftId: string): Promise<
   await db.delete(photos).where(isDraftPhotoOf(draftId))
 }
 
+interface PhotoRef {
+  householdId: string
+  photoId: string
+}
+
+/** Die eine Bedingung „dieses Foto, und es gehört diesem Haushalt“ (#133, #171). */
+const isPhotoOfHousehold = ({ householdId, photoId }: PhotoRef) =>
+  and(eq(photos.id, photoId), eq(photos.householdId, householdId))
+
+/** Das Foto gehört dem Haushalt, egal in welchem Status (z. B. für ki_aufruf). */
+export async function existsPhotoOfHousehold(db: Database, ref: PhotoRef): Promise<boolean> {
+  const [row] = await db
+    .select({ id: photos.id })
+    .from(photos)
+    .where(isPhotoOfHousehold(ref))
+    .limit(1)
+  return row !== undefined
+}
+
 export interface VisiblePhoto {
   id: string
   householdId: string
@@ -85,8 +104,7 @@ export async function findVisiblePhoto(
     .leftJoin(captureDrafts, eq(captureDrafts.id, photos.draftId))
     .where(
       and(
-        eq(photos.id, photoId),
-        eq(photos.householdId, viewer.householdId),
+        isPhotoOfHousehold({ householdId: viewer.householdId, photoId }),
         or(eq(photos.status, 'fest'), eq(captureDrafts.userId, viewer.userId)),
       ),
     )

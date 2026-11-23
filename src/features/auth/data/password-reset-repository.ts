@@ -1,5 +1,5 @@
-// Schreibt das Zurücksetzen eines Passworts per Kommandozeile (EINSTELLUNGEN_NUTZER §3.4) in einer
-// Transaktion: neuer Hash, vorläufig markiert, alle Sitzungen beendet, Anmeldesperren aufgehoben.
+// Schreibt das Zurücksetzen eines Passworts per Kommandozeile (EINSTELLUNGEN_NUTZER §3.4) oder durch
+// den Admin (#123) in einer Transaktion: neuer Hash, vorläufig markiert, alle Sitzungen beendet, Anmeldesperren aufgehoben.
 // Der Hash kommt fertig vom Use-Case, hier gibt es nie ein Passwort im Klartext.
 import 'server-only'
 import { and, eq, inArray, like, or, sql } from 'drizzle-orm'
@@ -16,8 +16,10 @@ type PasswordReset = Readonly<{
   now: Date
   /** Sperren, die genau so heißen (name:<benutzername>, global) */
   lockKeys: readonly string[]
-  /** Sperren, die so beginnen (ip:) */
-  lockKeyPrefix: string
+  /** Sperren, die so beginnen (ip:). Ohne: nur die genannten Sperren */
+  lockKeyPrefix?: string
+  /** Wer es gesetzt hat. null: per Kommandozeile */
+  changedBy: string | null
 }>
 
 export interface PasswordResetRepository {
@@ -41,10 +43,11 @@ async function storeCredential(tx: Database, userId: string, passwordHash: strin
   })
 }
 
-async function clearLocks(tx: Database, keys: readonly string[], prefix: string) {
+async function clearLocks(tx: Database, keys: readonly string[], prefix: string | undefined) {
+  const byName = inArray(signInLocks.key, [...keys])
   await tx
     .delete(signInLocks)
-    .where(or(inArray(signInLocks.key, [...keys]), like(signInLocks.key, `${prefix}%`)))
+    .where(prefix === undefined ? byName : or(byName, like(signInLocks.key, `${prefix}%`)))
 }
 
 export function createPasswordResetRepository(db: Database): PasswordResetRepository {
@@ -56,13 +59,13 @@ export function createPasswordResetRepository(db: Database): PasswordResetReposi
         .where(eq(sql`lower(${users.username})`, username.toLowerCase()))
       return row ?? null
     },
-    async resetPassword({ userId, passwordHash, now, lockKeys, lockKeyPrefix }) {
+    async resetPassword({ userId, passwordHash, now, lockKeys, lockKeyPrefix, changedBy }) {
       await db.transaction(async (tx) => {
         await storeCredential(tx, userId, passwordHash)
         await tx
           .update(users)
           // Leer bei passwort_geaendert_von heißt: per Kommandozeile gesetzt.
-          .set({ isPasswordTemporary: true, passwordChangedAt: now, passwordChangedBy: null })
+          .set({ isPasswordTemporary: true, passwordChangedAt: now, passwordChangedBy: changedBy })
           .where(eq(users.id, userId))
         await tx.delete(sessions).where(eq(sessions.userId, userId))
         await clearLocks(tx, lockKeys, lockKeyPrefix)

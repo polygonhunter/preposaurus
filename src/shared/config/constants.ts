@@ -32,6 +32,10 @@ export const MEMBER_CONDITIONS = ['schwanger', 'stillend'] as const
 // Quellen im Seed stehen (M1-09), kommt der Wert aus quelle_version.standard_tage.
 export const DEFAULT_GOAL_DAYS = 10
 
+// Zieldauer zur Auswahl (ZIEL-03, 02_HAUSHALT_ZIEL §3), daneben ein eigener Wert bis MAX_GOAL_DAYS
+export const GOAL_DAY_PRESETS = [3, 10, 14] as const
+export const MAX_GOAL_DAYS = 365
+
 // Name des Haushalts, solange niemand einen anderen einträgt (ONBOARDING §2.2)
 export const DEFAULT_HOUSEHOLD_NAME = 'Unser Haushalt'
 
@@ -75,6 +79,10 @@ export const RESTOCK_UNITS = ['g', 'ml', 'stueck'] as const
 
 // ERI-02 Wochenübersicht, ERI-03 Dringend, ERI-06 Check-in-Mail. Etappe und Inventur kommen später.
 export const NOTIFICATION_KINDS = ['wochenuebersicht', 'dringend', 'checkin_mail'] as const
+
+// Rhythmus der Check-in-Mail (ERI-06), steht in benachrichtigung_einstellung.zeitplan. Ohne Zeile,
+// mit aktiv = false oder einem anderen Wert ist sie aus.
+export const CHECK_IN_CADENCES = ['woechentlich', 'monatlich'] as const
 
 // Anbieter einer KI-Verbindung (Issue #108). Weitere (z. B. openai, lokal) brauchen nur einen
 // weiteren Wert, eine Migration und einen Adapter.
