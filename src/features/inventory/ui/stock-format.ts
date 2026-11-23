@@ -27,7 +27,7 @@ export function formatPackages(count: number): string {
 }
 
 /** Menge in kg bzw. l, beides nebeneinander, wenn es beides gibt. Ohne Menge null. */
-function formatAmounts({ g, ml }: NodeTotalsDto['amounts']): string | null {
+export function formatAmounts({ g, ml }: NodeTotalsDto['amounts']): string | null {
   const parts = [
     g > 0 ? formatQuantity({ value: g, unit: 'g' }) : null,
     ml > 0 ? formatQuantity({ value: ml, unit: 'ml' }) : null,
@@ -46,7 +46,7 @@ function formatDays(days: number): string {
 }
 
 /** Beitrag in Tagen: Wasser zählt in Wasser-Tagen, alles andere in Essen-Tagen. */
-function supplyDaysOf(totals: NodeTotalsDto): number | null {
+export function supplyDaysOf(totals: NodeTotalsDto): number | null {
   if (totals.amounts.ml > 0 && totals.kcal === 0) return totals.waterDays
   return totals.energyDays
 }
