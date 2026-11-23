@@ -21,7 +21,7 @@ export function GroupList({ groups }: GroupListProps) {
         {groups.map((group) => (
           <Row
             key={group.key}
-            title={group.name}
+            title={group.shortName}
             subtitle={hasStock(group.totals) ? stockLine(group.totals) : EMPTY_GROUP}
             trailing={groupCoverageText(group)}
             action={{ href: groupPath(group.key) }}

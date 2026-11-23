@@ -16,6 +16,14 @@ export function formatTargetDate(day: CalendarDay): string {
   return `${pad(dayOfMonth)}.${pad(month)}.${String(year)}`
 }
 
+/** Zeile in den Einstellungen: „10 Tage bis 01.03.2027“, ohne Datum nur die Dauer (UX §8.6) */
+export function formatGoalSummary(
+  goal: Readonly<{ days: number; targetDate: CalendarDay | null }>,
+): string {
+  const days = formatGoalDays(goal.days)
+  return goal.targetDate === null ? days : `${days} bis ${formatTargetDate(goal.targetDate)}`
+}
+
 export function goalFormValuesOf(goal: Readonly<{ days: number; targetDate: CalendarDay | null }>) {
   const preset = isPreset(goal.days)
   return {

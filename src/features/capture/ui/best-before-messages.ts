@@ -7,6 +7,7 @@ export const PARSE_MESSAGES: Record<BestBeforeParseError['kind'], string> = {
   'no-date': 'Das ist kein Datum. Bitte so eingeben: 30.09.2027, 09/2027 oder 2027.',
   incomplete: 'Bitte mit Jahr eingeben, z. B. 30.09.2027.',
   ambiguous: 'Bitte das Jahr vierstellig eingeben, z. B. 09/2027.',
+  'invalid-month': 'Diesen Monat gibt es nicht. Bitte prüft das Datum.',
   'invalid-date': 'Diesen Tag gibt es nicht. Bitte prüft das Datum.',
   'year-out-of-range': 'Bitte ein Jahr zwischen 2000 und 2099 eingeben.',
 }

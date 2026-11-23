@@ -5,7 +5,7 @@ export const BUTTON_VARIANTS = ['primary', 'tinted', 'plain', 'destructive'] as 
 export type ButtonVariant = (typeof BUTTON_VARIANTS)[number]
 
 const BASE =
-  'inline-flex items-center justify-center gap-1.5 whitespace-nowrap transition-opacity duration-150 ease-out active:opacity-60 disabled:cursor-not-allowed disabled:opacity-40'
+  'inline-flex items-center justify-center gap-1.5 whitespace-nowrap transition-opacity duration-150 ease-out active:opacity-60 disabled:cursor-not-allowed disabled:opacity-40 aria-disabled:cursor-not-allowed aria-disabled:opacity-40'
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: 'h-[50px] w-full rounded-button bg-accent px-4 text-headline text-on-accent',

@@ -15,7 +15,11 @@ export function SupplyBlock({ overview }: SupplyBlockProps) {
   if (supply === null) return <EmptyState {...noNeedState(overview.household)} />
   return (
     <>
-      <SupplyHero supply={supply} goalDays={goal?.days ?? null} />
+      <SupplyHero
+        supply={supply}
+        goalDays={goal?.days ?? null}
+        source={overview.household.source}
+      />
       {goal === null ? null : <GoalGroup goal={goal} nextStep={nextStep} />}
     </>
   )

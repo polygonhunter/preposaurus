@@ -3,7 +3,7 @@ import { getHousehold } from '@/features/household/application/get-household'
 import { householdServices } from '@/features/household/application/household-services'
 import { goalServices } from '@/features/supply/application/goal-services'
 import { getGoalSettings } from '@/features/supply/application/goal-settings'
-import { formatGoalDays } from '@/features/supply/ui/goal-format'
+import { formatGoalSummary } from '@/features/supply/ui/goal-format'
 import { SignOutButton } from '@/features/auth/ui/SignOutButton'
 import { ROLE_LABELS } from '@/features/auth/ui/user-format'
 import { AdminSettingsGroups } from '@/features/settings/ui/AdminSettingsGroups'
@@ -50,7 +50,7 @@ export default async function SettingsPage() {
         />
         <Row
           title="Ziel und Empfehlung"
-          trailing={formatGoalDays(goal.days)}
+          trailing={formatGoalSummary(goal)}
           action={{ href: GOAL_PATH }}
         />
         <Row

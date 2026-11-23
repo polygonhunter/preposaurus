@@ -41,7 +41,7 @@ export function ProductDetailsGroup({
         {heading}
       </GroupHeader>
       <Group labelledBy={headerId}>
-        <Row title="Packung" trailing={packaging} />
+        <Row title="Inhalt" trailing={packaging} />
         <Row title="Lagerort" trailing={product.storageLocation?.name ?? 'nicht angegeben'} />
         <Row
           title={`Nährwerte je 100 ${product.content.unit}`}

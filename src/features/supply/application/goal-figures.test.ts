@@ -34,7 +34,7 @@ const water = product({
   content: { value: 6000, unit: 'ml' },
   foodType: null,
   category: { id: 'kat-wasser', name: 'Wasser', pictogram: null },
-  group: { key: 'wasser', name: 'Wasser' },
+  group: { key: 'wasser', name: 'Wasser', shortName: 'Wasser' },
 })
 
 // Am Zieldatum 01.03.2027 zählen 2 × Nudeln 500 g (die vom 30.12. ist dann abgelaufen, „Datum
