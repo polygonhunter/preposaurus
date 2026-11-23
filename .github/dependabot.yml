@@ -40,9 +40,15 @@ updates:
       # Image (wie in #187), deshalb kommt sie gezielt als eigenes Issue.
       - dependency-name: node
         update-types: [version-update:semver-major]
+      # PostgreSQL-Hauptversion braucht einen Datenumzug, kommt gezielt (#250).
+      - dependency-name: postgres
+        update-types: [version-update:semver-major]
 
   # Feste Image-Versionen in compose.yaml und compose.tailscale.yaml
   - package-ecosystem: docker-compose
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: postgres
+        update-types: [version-update:semver-major]
