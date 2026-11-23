@@ -15,7 +15,7 @@ import type {
   NutritionAnswer,
   NutritionEstimateAnswer,
   PackagingAnswer,
-} from '@/features/capture/schemas'
+} from '@/features/capture/schemas/ai-answers'
 import type { RoleAnswers, RoleContexts } from './vision-recognizer'
 
 describe('Typen der KI-Antworten', () => {

@@ -3,7 +3,7 @@
 // `{ kind: 'existing', productId }`. Es bleibt ein Vorschlag, nichts wird zusammengelegt.
 import 'server-only'
 import { isSameProduct, type ProductIdentity } from '../domain/product-match'
-import type { ProductMatchQuery } from '../schemas'
+import type { ProductMatchQuery } from '../schemas/stock'
 import type { StockWriter } from './stock-writer'
 
 export interface ProductMatch {

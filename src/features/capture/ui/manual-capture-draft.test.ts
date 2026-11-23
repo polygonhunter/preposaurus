@@ -2,7 +2,7 @@
 // prüft auf dem Gerät, createStockSchema darin auch auf dem Server.
 import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
-import { manualCaptureSchema } from '../schemas'
+import { manualCaptureSchema } from '../schemas/manual-capture'
 import {
   captureErrorsOf,
   clearErrorsFor,

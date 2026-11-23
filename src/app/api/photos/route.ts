@@ -3,7 +3,7 @@
 import { requireCaptureActor } from '@/features/capture/application/capture-actor'
 import { loadCaptureDeps } from '@/features/capture/application/capture-deps'
 import { uploadPhoto, type UploadPhotoError } from '@/features/capture/application/upload-photo'
-import { photoUploadQuerySchema } from '@/features/capture/schemas'
+import { photoUploadQuerySchema } from '@/features/capture/schemas/photos'
 import { errorResponse, isCrossSiteRequest, noStoreJson } from '@/shared/lib/http'
 import { accessErrorResponse } from './access-error-response'
 

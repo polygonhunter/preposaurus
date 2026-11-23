@@ -7,7 +7,7 @@ import { createCaptureOptionsRepository } from '../data/capture-options-reposito
 import { createStockWriteRepository } from '../data/stock-write-repository'
 import type { CaptureOptions } from '../domain/capture-options'
 import type { StockDraft } from '../domain/stock-draft'
-import type { ProductMatchQuery } from '../schemas'
+import type { ProductMatchQuery } from '../schemas/stock'
 import { createStock, type CreatedStock, type CreateStockError } from './create-stock'
 import { findMatchingProducts, type ProductMatch } from './find-matching-products'
 import { getCaptureOptions } from './get-capture-options'

@@ -8,7 +8,7 @@ import type {
   NutritionAnswer,
   NutritionEstimateAnswer,
   PackagingAnswer,
-} from '@/features/capture/schemas'
+} from '@/features/capture/schemas/ai-answers'
 import type { Result } from '@/shared/lib/result'
 import type { StoredPhotoType } from '../storage/photo-storage'
 

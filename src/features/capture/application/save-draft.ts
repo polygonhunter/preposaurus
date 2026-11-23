@@ -4,7 +4,7 @@
 import 'server-only'
 import { err, ok, type Result } from '@/shared/lib/result'
 import { updateDraftData } from '../data/draft-repository'
-import type { CaptureDraftData } from '../schemas'
+import type { CaptureDraftData } from '../schemas/draft'
 import type { CaptureActor } from './capture-actor'
 import type { CaptureDeps } from './capture-deps'
 import { resolveOwnDraftId } from './own-draft'
