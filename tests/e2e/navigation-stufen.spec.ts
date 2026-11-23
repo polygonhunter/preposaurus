@@ -132,7 +132,7 @@ test.describe('Tastenkürzel', () => {
 })
 
 test.describe('Tastenkürzel abgeschaltet (#254)', () => {
-  test('aus heißt: „n“ tut nichts, keine Tasten und kein aria-keyshortcuts', async ({
+  test('aus heißt: „n“ und „/“ tun nichts, keine Tasten und kein aria-keyshortcuts', async ({
     page,
     isMobile,
   }) => {
@@ -151,12 +151,17 @@ test.describe('Tastenkürzel abgeschaltet (#254)', () => {
     await expect(search).not.toHaveAttribute('aria-keyshortcuts')
     await expect(page.locator('kbd')).toHaveCount(0)
 
+    // Außerhalb des Vorrats und je Taste einzeln: Im Vorrat führte „/“ dorthin zurück, wo der Test
+    // schon steht, und überdeckte so ein „n“. Ein Wechsel bräuchte einen Moment, deshalb erst danach
+    // prüfen, dass keiner kam.
+    await page.goto('/uebersicht')
+    await waitForHydration(page)
     await page.locator('body').press('n')
-    await page.locator('body').press('/')
-    // Ein Wechsel bräuchte einen Moment, deshalb erst danach prüfen, dass keiner kam
     await page.waitForTimeout(1000)
-    await expect(page).toHaveURL(/\/vorrat$/)
-    await expect(search).not.toBeFocused()
+    await expect(page).toHaveURL(/\/uebersicht$/)
+    await page.locator('body').press('/')
+    await page.waitForTimeout(1000)
+    await expect(page).toHaveURL(/\/uebersicht$/)
 
     await page.goto('/einstellungen/konto')
     await expect(page.getByRole('switch', { name: 'Tastenkürzel' })).not.toBeChecked()
