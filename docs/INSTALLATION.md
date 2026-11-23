@@ -43,6 +43,7 @@ Preposaurus läuft als kleine Gruppe von Containern (Programmpaketen) mit Docker
 Warum so streng?
 - Kamera, Home-Bildschirm-App und Benachrichtigungen gehen im Browser nur über HTTPS.
 - Die Anmeldung geht in Produktion **nur über HTTPS**. Das Sitzungs-Cookie ist als „Secure“ markiert, über reines `http://` verwirft der Browser es. Das ist gewollt.
+- Die App schickt strenge Sicherheits-Header (u. a. eine Content-Security-Policy und HSTS für ein Jahr). HSTS wirkt nur über HTTPS mit gültigem Zertifikat, also hinter Tailscale Serve: Der Browser ruft den `ts.net`-Namen danach nur noch per HTTPS auf. Über `http://127.0.0.1:3000` oder mit selbst signiertem Zertifikat ignoriert er den Header. Er gilt nur für genau diesen Namen, nicht für andere Geräte im Tailnet.
 - Der App-Port 3000 wird **nie ins Heimnetz freigegeben**. Die Anmeldebremse zählt Fehlversuche je Gerät. Bei direktem Zugriff könnte ein Gerät eine falsche Adresse mitschicken und so die Bremse umgehen. Tailscale Serve setzt die echte Adresse.
 
 Alle Daten liegen in drei sichtbaren Ordnern neben der Compose-Datei:

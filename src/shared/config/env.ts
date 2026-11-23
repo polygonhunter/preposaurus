@@ -155,6 +155,12 @@ export function isServiceWorkerEnabled(source: EnvSource = process.env): boolean
   return source['NODE_ENV'] === 'production'
 }
 
+// Dev-Server (next dev): Die CSP erlaubt dort eval und inline Styles (#198). Liest nur NODE_ENV,
+// weil der Proxy vor jeder Seite läuft und keine volle Umgebung braucht.
+export function isDevelopmentServer(source: EnvSource = process.env): boolean {
+  return source['NODE_ENV'] === 'development'
+}
+
 // Wirft bei ungültigen Werten: ohne gültige Umgebung soll der Server gar nicht erst starten.
 export function loadEnv(source: EnvSource = process.env): Env {
   const result = parseEnv(source)
