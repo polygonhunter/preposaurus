@@ -3,6 +3,7 @@
 // Feld, die Eingaben behält das Formular selbst. Nach dem Speichern geht es zur Liste.
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { adminAccessMessage } from '@/server/auth/admin-access-message'
 import { requireHouseholdAdmin } from '@/server/auth/guards'
 import { MEMBERS_PATH } from '@/shared/config/settings-paths'
 import { firstMessages, readFormText } from '@/shared/lib/form-data'
@@ -10,7 +11,7 @@ import { householdServices } from '../application/household-services'
 import { saveMember, type SaveMemberError } from '../application/save-member'
 import type { BirthProblem } from '../domain/birth'
 import { memberIdSchema, memberSchema, type MemberInput } from '../schemas'
-import { MEMBER_GONE, accessMessage } from './action-messages'
+import { MEMBER_GONE } from './action-messages'
 
 type MemberField = keyof MemberInput
 
@@ -67,7 +68,7 @@ export async function saveMemberAction(
 ): Promise<MemberFormState> {
   const values = readForm(formData)
   const admin = await requireHouseholdAdmin()
-  if (!admin.ok) return { errors: {}, message: accessMessage(admin.error), values }
+  if (!admin.ok) return { errors: {}, message: adminAccessMessage(admin.error), values }
   const memberId = readMemberId(formData)
   if (memberId === undefined) return { errors: {}, message: MEMBER_GONE, values }
   const parsed = memberSchema.safeParse(values)
