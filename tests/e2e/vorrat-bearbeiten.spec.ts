@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { E2E_MEMBER, signedOut, signInViaUi } from '../helpers/e2e-auth'
-import { expectAccessibleLayout } from '../helpers/page-checks'
+import { expectAccessibleLayout, expectFocusNotObscured } from '../helpers/page-checks'
 
 // Bearbeiten, Datum nachtragen, Packungen hinzufügen und Fehlerfassung löschen (#49, #50, #195).
 // Datenändernde Tests laufen nur im Projekt „desktop“, jeder mit einem eigenen Lebensmittel, das
@@ -60,6 +60,8 @@ test('Packungen hinzufügen, Datum nachtragen, bearbeiten und löschen', async (
   await captureWithoutDate(page, food)
   await openDetail(page, food)
   await expectAccessibleLayout(page)
+  // „1 entnehmen“ schwebt unten über dem Inhalt, ein fokussiertes Ziel bleibt darüber sichtbar
+  await expectFocusNotObscured(page.getByRole('button', { name: 'Fehlerfassung löschen …' }))
 
   // Packungen hinzufügen: Produkt vorgewählt, der Fokus steht gleich im MHD (#195, UX §8.4)
   await page.getByRole('link', { name: 'Packungen hinzufügen' }).click()

@@ -11,11 +11,15 @@ type TakeFifoBarProps = Readonly<{
 }>
 
 // „1 entnehmen · MHD“ fest unten im Detail (DESIGN_SYSTEM §7, UX-Konzept §8.4): nimmt die
-// Packung mit dem frühesten MHD. Liegt über der Tab-Leiste, die UndoBar darüber.
+// Packung mit dem frühesten MHD. Liegt über der Tab-Leiste, die UndoBar darüber. `data-bottom-bar`
+// hält per scroll-padding Fokus und Sprungziele über dem Knopf (globals.css, WCAG 2.4.11).
 export function TakeFifoBar({ name, unitId, dateLabel }: TakeFifoBarProps) {
   const { consume, isLocked } = useConsume()
   return (
-    <div className="sticky bottom-[calc(58px+env(safe-area-inset-bottom))] z-10 mt-6 px-4 pb-2 breit:bottom-4 breit:px-6">
+    <div
+      data-bottom-bar
+      className="sticky bottom-[calc(58px+env(safe-area-inset-bottom))] z-10 mt-6 px-4 pb-2 breit:bottom-4 breit:px-6"
+    >
       <Button
         disabled={isLocked}
         onClick={() => {

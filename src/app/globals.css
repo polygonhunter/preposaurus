@@ -120,6 +120,29 @@
   }
 }
 
+/* Feste Leisten unten (Tab-Leiste 58 px, im Detail darüber „1 entnehmen“ mit 50 px + 8 px) dürfen
+   kein angesprungenes Ziel verdecken (WCAG 2.4.11): Fokus, Anker und scrollIntoView halten Abstand.
+   Am Seitenende hält `main` den Abstand per padding-bottom. */
+@layer base {
+  html {
+    scroll-padding-bottom: calc(66px + env(safe-area-inset-bottom));
+  }
+
+  html:has([data-bottom-bar]) {
+    scroll-padding-bottom: calc(124px + env(safe-area-inset-bottom));
+  }
+
+  @media (width >= 900px) {
+    html {
+      scroll-padding-bottom: 0;
+    }
+
+    html:has([data-bottom-bar]) {
+      scroll-padding-bottom: 82px;
+    }
+  }
+}
+
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
