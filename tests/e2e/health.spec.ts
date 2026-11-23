@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../helpers/e2e-test'
 
 test('/api/health antwortet ohne Anmeldung nur mit dem Status', async ({ request }) => {
   const response = await request.get('/api/health')

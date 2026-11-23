@@ -229,7 +229,7 @@ Die Zähler liegen in der DB (`anmelde_sperre`, §6), damit ein Neustart sie nic
 |---|---|---|
 | Länge | mindestens **10**, höchstens 128 Zeichen | Länge schlägt Sonderzeichen. 10 ist am Handy tippbar und mit der Bremse aus §4.3 ausreichend |
 | Zusammensetzung | keine Pflicht für Ziffern oder Sonderzeichen, alle Zeichen und Leerzeichen erlaubt | Solche Pflichten führen zu „Passwort1!“ |
-| Sperrliste | Nicht erlaubt: Benutzername, Anzeigename, Haushaltsname, „preposaurus“ (auch als Bestandteil mit Anhängsel) und eine mitgelieferte Liste der rund 1.000 häufigsten Passwörter | Das „nicht naiv“ für das Heimnetz. Läuft ohne Internet, keine Abfrage bei fremden Diensten |
+| Sperrliste | Nicht erlaubt: Benutzername, Anzeigename, Haushaltsname, „preposaurus“ (auch als Bestandteil mit Anhängsel) und eine mitgelieferte Liste der rund 1.000 häufigsten Passwörter (umgesetzt in #174: selbst zusammengestellt, rund 2.100 Einträge in Vergleichsform) | Das „nicht naiv“ für das Heimnetz. Läuft ohne Internet, keine Abfrage bei fremden Diensten |
 | Ablauf | keiner | Erzwungene Wechsel machen Passwörter schlechter |
 | Gilt für | alle Wege: Einrichtung, Admin, eigenes Ändern, Kommandozeile | Ein Zod-Schema in `auth/domain`, überall wiederverwendet |
 | Hinweis im Formular | „Mindestens 10 Zeichen. Ein Satz oder ein paar Wörter sind gut. Bitte keins, das du woanders nutzt.“ | Ruhig, ohne Stärke-Balken |

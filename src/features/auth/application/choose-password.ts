@@ -11,17 +11,22 @@ import {
 
 const MAX_DRAWS = 5
 
-export function choosePassword(
-  chosen: string | null,
-  context: PasswordContext & Readonly<{ generate: () => string }>,
-): Result<string, PasswordProblem> {
-  if (chosen !== null) {
-    const problem = findPasswordProblem(chosen, context)
-    return problem === null ? ok(chosen) : err(problem)
-  }
+type GenerateContext = PasswordContext & Readonly<{ generate: () => string }>
+
+/** Erzeugtes Passwort, das die Regeln erfüllt (auch für die Kommandozeile, #174). */
+export function generateAllowedPassword(context: GenerateContext): string {
   for (let draw = 1; draw < MAX_DRAWS; draw += 1) {
     const generated = context.generate()
-    if (findPasswordProblem(generated, context) === null) return ok(generated)
+    if (findPasswordProblem(generated, context) === null) return generated
   }
-  return ok(context.generate())
+  return context.generate()
+}
+
+export function choosePassword(
+  chosen: string | null,
+  context: GenerateContext,
+): Result<string, PasswordProblem> {
+  if (chosen === null) return ok(generateAllowedPassword(context))
+  const problem = findPasswordProblem(chosen, context)
+  return problem === null ? ok(chosen) : err(problem)
 }
