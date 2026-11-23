@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from '../helpers/e2e-test'
 import { E2E_MEMBER, signedOut, signInViaUi } from '../helpers/e2e-auth'
 import { expectAccessibleLayout, expectFocusNotObscured } from '../helpers/page-checks'
 
