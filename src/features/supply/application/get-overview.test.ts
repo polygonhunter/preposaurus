@@ -72,7 +72,8 @@ function ports(options: { basis?: SupplyBasis; units?: ReturnType<typeof stockUn
       settings: SETTINGS,
       basis: options.basis ?? basis,
     }),
-    facts: createFakeHouseholdFacts({ householdId, goal, source, openRestockItems: 2 }),
+    facts: createFakeHouseholdFacts({ householdId, goal, source }),
+    countOpenRestockItems: (id: string) => Promise.resolve(id === householdId ? 2 : 0),
   }
 }
 

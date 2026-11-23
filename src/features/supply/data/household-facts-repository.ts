@@ -1,11 +1,10 @@
-// Lese-Repository für Ziel, aktive Quelle und Nachkaufen-Zähler der Übersicht (#67). Jede Abfrage
-// filtert auf haushalt_id (#133).
+// Lese-Repository für Ziel und aktive Quelle der Übersicht (#67). Jede Abfrage filtert auf
+// haushalt_id (#133). Offene Nachkaufen-Einträge zählt die Nachkaufen-Liste selbst (#202).
 import 'server-only'
-import { and, count, eq } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import type { Database } from '@/server/db/connection'
 import { households } from '@/server/db/schema/household'
 import { goals, sources, sourceVersions } from '@/server/db/schema/recommendation'
-import { restockItems } from '@/server/db/schema/restock'
 import { toCalendarDay } from '@/shared/lib/dates'
 
 async function loadGoal(db: Database, householdId: string) {
@@ -35,18 +34,9 @@ async function loadActiveSource(db: Database, householdId: string) {
   return row ?? null
 }
 
-async function countOpenRestockItems(db: Database, householdId: string) {
-  const [row] = await db
-    .select({ open: count() })
-    .from(restockItems)
-    .where(and(eq(restockItems.householdId, householdId), eq(restockItems.isDone, false)))
-  return row?.open ?? 0
-}
-
 export function createHouseholdFactsRepository(db: Database) {
   return {
     loadGoal: (householdId: string) => loadGoal(db, householdId),
     loadActiveSource: (householdId: string) => loadActiveSource(db, householdId),
-    countOpenRestockItems: (householdId: string) => countOpenRestockItems(db, householdId),
   }
 }

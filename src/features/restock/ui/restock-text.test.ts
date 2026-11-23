@@ -3,9 +3,10 @@ import type { RestockListDto } from '../schemas'
 import {
   emptyListText,
   formatGapAmount,
-  gapDaysText,
+  gapSubtitle,
   NO_GOAL_TEXT,
   openCountText,
+  suggestionReasonText,
 } from './restock-text'
 
 // Frei gewählte Testdaten.
@@ -13,6 +14,7 @@ const emptyList: RestockListDto = {
   isGoalCalculable: true,
   gaps: [],
   replace: [],
+  suggestions: [],
   own: [],
   done: [],
   openCount: 0,
@@ -35,15 +37,17 @@ describe('formatGapAmount', () => {
 })
 
 describe('Texte der Seite', () => {
-  it('nennt Tage am Ziel und offene Einträge', () => {
+  it('nennt Tage am Ziel mit Beispielen und offene Einträge', () => {
     const gap = {
-      groupKey: 'wasser',
-      name: 'Wasser',
-      missing: { value: 1, unit: 'ml' as const },
+      groupKey: 'getreide',
+      name: 'Getreide',
+      missing: { value: 1, unit: 'g' as const },
       days: 6,
       goalDays: 10,
+      examples: ['Nudeln', 'Reis'],
     }
-    expect(gapDaysText(gap)).toBe('6 von 10 Tagen')
+    expect(gapSubtitle(gap)).toBe('6 von 10 Tagen · z. B. Nudeln, Reis')
+    expect(gapSubtitle({ ...gap, examples: [] })).toBe('6 von 10 Tagen')
     expect(openCountText({ ...emptyList, openCount: 3 })).toBe('3 offen')
     expect(openCountText(emptyList)).toBe('0 offen')
   })
@@ -52,5 +56,23 @@ describe('Texte der Seite', () => {
     expect(emptyListText(emptyList)).toBe('Nichts offen. Euer Ziel ist erreicht.')
     expect(emptyListText({ ...emptyList, isGoalCalculable: false })).toBe(NO_GOAL_TEXT)
     expect(emptyListText({ ...emptyList, openCount: 1 })).toBeNull()
+  })
+})
+
+describe('suggestionReasonText', () => {
+  const suggestion = { rowKey: 'food-type:milch', productId: 'p', label: 'H-Milch' }
+
+  it('sagt, wie viele Packungen vor dem Ziel ablaufen', () => {
+    const expires = (count: number) => ({
+      ...suggestion,
+      reason: { kind: 'expires' as const, count, firstDay: '2026-12-01' },
+    })
+    expect(suggestionReasonText(expires(1))).toBe('Läuft vor dem Ziel ab')
+    expect(suggestionReasonText(expires(3))).toBe('3 Packungen laufen vor dem Ziel ab')
+  })
+
+  it('nennt den Tag, an dem das Letzte aufgebraucht wurde', () => {
+    const consumed = { ...suggestion, reason: { kind: 'consumed' as const, lastDay: '2026-11-20' } }
+    expect(suggestionReasonText(consumed)).toBe('Am 20.11.2026 aufgebraucht')
   })
 })

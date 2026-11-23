@@ -1,14 +1,17 @@
 'use client'
-// Gemeinsamer Zugang zu Abhaken und Entfernen für alle Zeilen der Seite. Die UndoBar gibt es nur
-// einmal (RestockProvider), egal welche Zeile abgehakt hat.
+// Gemeinsamer Zugang zu Abhaken, Entfernen und „Auf die Liste“ für alle Zeilen der Seite. Die
+// UndoBar gibt es nur einmal (RestockProvider), egal welche Zeile gehandelt hat.
 import { createContext, useContext } from 'react'
-import type { RestockItemDto } from '../schemas'
+import type { RestockItemDto, RestockSuggestionDto } from '../schemas'
 
 export type RestockEntry = Pick<RestockItemDto, 'id' | 'label'>
+
+export type SuggestionEntry = Pick<RestockSuggestionDto, 'productId' | 'label'>
 
 export interface RestockContextValue {
   setDone: (entry: RestockEntry, isDone: boolean) => void
   remove: (entry: RestockEntry) => void
+  addSuggestion: (suggestion: SuggestionEntry) => void
   /** Läuft gerade eine Änderung oder fehlt die Verbindung */
   isLocked: boolean
 }

@@ -1,6 +1,7 @@
-// Texte der Seite Nachkaufen (#73, UX-Konzept §8.6). Rein, damit es Tests gibt.
+// Texte der Seite Nachkaufen (#73, #200, #202, UX-Konzept §8.6). Rein, damit es Tests gibt.
+import { formatDayWithPrecision, toCalendarDay } from '@/shared/lib/dates'
 import { formatGermanNumber } from '@/shared/lib/quantities'
-import type { RestockGapDto, RestockListDto } from '../schemas'
+import type { RestockGapDto, RestockListDto, RestockSuggestionDto } from '../schemas'
 
 const GRAMS_PER_KG = 1000
 const ML_PER_LITRE = 1000
@@ -18,8 +19,25 @@ export function formatGapAmount({ value, unit }: RestockGapDto['missing']): stri
 }
 
 /** „6 von 10 Tagen“ am Stichtag des Ziels */
-export const gapDaysText = ({ days, goalDays }: RestockGapDto) =>
+const gapDaysText = ({ days, goalDays }: RestockGapDto) =>
   `${formatGermanNumber(days)} von ${String(goalDays)} Tagen`
+
+/** Zweitzeile einer Lücke: „6 von 10 Tagen · z. B. Nudeln, Reis“ */
+export function gapSubtitle(gap: RestockGapDto): string {
+  const days = gapDaysText(gap)
+  return gap.examples.length === 0 ? days : `${days} · z. B. ${gap.examples.join(', ')}`
+}
+
+/** Warum ein Vorschlag unter „Ersetzen“ steht (A14). */
+export function suggestionReasonText({ reason }: RestockSuggestionDto): string {
+  if (reason.kind === 'consumed') {
+    const day = formatDayWithPrecision({ date: toCalendarDay(reason.lastDay), precision: 'day' })
+    return `Am ${day} aufgebraucht`
+  }
+  return reason.count === 1
+    ? 'Läuft vor dem Ziel ab'
+    : `${String(reason.count)} Packungen laufen vor dem Ziel ab`
+}
 
 /** Untertitel der Seite: „3 offen“, auch „0 offen“ */
 export const openCountText = ({ openCount }: RestockListDto) =>

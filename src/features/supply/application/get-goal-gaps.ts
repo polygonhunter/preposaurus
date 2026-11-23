@@ -3,11 +3,17 @@
 import 'server-only'
 import type { StockReader } from '@/features/inventory/application/stock-reader'
 import { WATER_GROUP_KEY } from '@/features/inventory/application/stock-model'
+import type { CalendarDay } from '@/shared/lib/dates'
 import type { ContentQuantity } from '@/shared/lib/quantities'
 import { calculateGoalGap } from '../domain/goal-gap'
 import type { GroupProgress } from '../domain/group-progress'
 import type { HouseholdFactsReader } from './household-facts-reader'
-import { loadStockSnapshot, progressAtTarget, type HouseholdDay } from './stock-snapshot'
+import {
+  loadStockSnapshot,
+  progressAtTarget,
+  validTargetDay,
+  type HouseholdDay,
+} from './stock-snapshot'
 
 export interface GoalGapPorts {
   stock: StockReader
@@ -28,6 +34,8 @@ export interface GoalGaps {
   isCalculable: boolean
   /** Wasser zuerst (UX-Konzept §8.6), sonst in der Reihenfolge der Warengruppen */
   gaps: GroupGap[]
+  /** Stichtag der Lücken, wenn es ein gültiges Zieldatum gibt; „Ersetzen“ rechnet damit (A14) */
+  targetDay: CalendarDay | null
 }
 
 const waterFirst = (a: GroupGap, b: GroupGap) =>
@@ -53,5 +61,6 @@ export async function getGoalGaps(ports: GoalGapPorts, input: HouseholdDay): Pro
   return {
     isCalculable: progress.length > 0,
     gaps: toGroupGaps(progress, names).sort(waterFirst),
+    targetDay: validTargetDay(goal, input.today),
   }
 }

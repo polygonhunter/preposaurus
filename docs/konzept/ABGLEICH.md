@@ -119,7 +119,7 @@ Lesart: Jede Zeile ist ein UI-Element. **Lücke** nennt, was fehlt: `D` Datenfel
 | UI-Element | Datenfeld bzw. Auswertung | Action / Abfrage | Einstellung | Lücke |
 |---|---|---|---|---|
 | „Fehlt bis zum Ziel“ mit Beispielen | A13, Arten des Haushalts je Warengruppe | `getRestockList` | Ziel | – |
-| „Ersetzen“ | A14 | `getRestockList` | – | Fachlogik `replacementCandidates` fehlt (neues M2-Issue) |
+| „Ersetzen“ | A14 | `getRestockList` | – | umgesetzt mit #200 (`replacementCandidates`, live in `getRestockList`) |
 | Eigene Einträge | `nachkauf_eintrag` | `addRestockItemAction` | – | – |
 | Abhaken, Ausblenden, „Erledigt“ | `status`, `erledigt_am`, `quelle = ziel` | `setRestockStatusAction` | – | Schema §4 B4. Fristen E-15 |
 | „Gekauft und erfassen“ | `lebensmittelart_id` | Link `?art=` | – | – |

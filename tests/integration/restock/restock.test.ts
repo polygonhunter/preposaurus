@@ -73,7 +73,7 @@ describe('Nachkaufen-Liste gegen die Datenbank', () => {
     expect(list.isGoalCalculable).toBe(true)
     expect(list.own.map(({ label }) => label)).toEqual(['Mineralwasser'])
     expect(list.gaps.length).toBeGreaterThan(0)
-    expect(list.openCount).toBe(list.gaps.length + 1)
+    expect(list.openCount).toBe(list.gaps.length + list.suggestions.length + 1)
   })
 
   it('zeigt dem fremden Haushalt keinen Eintrag des Beispielhaushalts', async () => {
