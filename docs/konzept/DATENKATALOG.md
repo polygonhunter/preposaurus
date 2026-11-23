@@ -242,11 +242,11 @@ Begründung: Ohne diese Tabelle braucht es entweder `nutzer_einstellung` (vom Ei
 |---|---|---|---|---|---|---|
 | `quelle` **[Ä]** | ziel · nachkauf · manuell | text | P | Sys | Abschnitte „Fehlt bis zum Ziel“, „Ersetzen“, „Eigene“. `ziel` wird nur gespeichert, wenn eine Lücke abgehakt oder ausgeblendet wird | MVP |
 | `warengruppe_id` | Ziel-Lücke | uuid | o | A | NK-01, A13 | MVP |
-| `produkt_id` **[Ä]** → `lebensmittelart_id` **[L]** | „Spaghetti nachkaufen“ | uuid | o | M/A | NK-02, NK-05 („Gekauft und erfassen“ füllt die Art vor), UX §5 | MVP |
+| `produkt_id` **[Ä]** → `lebensmittelart_id` **[L]** | „Spaghetti nachkaufen“ | uuid | o | M/A | NK-02, NK-05 („Gekauft und erfassen“ füllt die Art vor), UX §5. **#201:** `produkt_id` bleibt, die Art kommt per Join über das Produkt (05_STATUS, Festlegungen #201) | MVP |
 | `bezeichnung` **[Ä]** | Freitext | text | P → o | M | NK-03. CHECK: mindestens Warengruppe, Art oder Bezeichnung | MVP |
 | `menge`, `mass_einheit` | g/ml/stueck | numeric, text | o | A/M | Liste, Ziel-Lücke als Momentaufnahme beim Abhaken | MVP |
-| `erledigt` **[Ä]** → `status` | offen · erledigt · ausgeblendet | text | P | M | Abhaken (NK-04), Ausblenden (UX 8.6), Abschnitt „Erledigt“ | MVP |
-| `erledigt_am` **[L]** | wann abgehakt | timestamptz | o | Sys | „Erledigt“ sortieren, Aufräumen nach 14 Tagen (Vorschlag), R: ausgeblendete Ziel-Lücke gilt bis zur nächsten Änderung der Lücke | MVP |
+| `erledigt` → `status` | offen · erledigt · ausgeblendet | text | P | M | Abhaken (NK-04), Ausblenden (UX 8.6, nur Lücken), Abschnitte „Erledigt“ und „Ausgeblendet“. Umgesetzt mit Migration 0008 (#201) | MVP |
+| `erledigt_am` | seit wann erledigt bzw. ausgeblendet | timestamptz | o | Sys | „Erledigt“ sortieren und 14 Tage zeigen. R (#201): eine abgehakte bzw. ausgeblendete Ziel-Lücke bleibt verdeckt, bis sie um mehr als 10 % wächst, höchstens 14 bzw. 30 Tage | MVP |
 
 ### 2.11 Erinnerung und Push
 
@@ -641,7 +641,7 @@ Damit es später nur eine Ergänzung ist:
 | 3 | **MHD-Schätzung:** 05 und #116 erlauben „Von der KI schätzen lassen“, #110 verbietet die übliche Haltbarkeit als MHD, und für das Schätzen gibt es keine KI-Rolle. Was ist gemeint? | Ohne aufgedrucktes Datum weiß auch die KI nur die übliche Haltbarkeit. Vorschlag: Schätzung = heute + übliche Haltbarkeit der Lebensmittelart, ausdrücklich gewählt, als „geschätzt“ markiert, ohne KI-Aufruf. #110 entsprechend lesen: „nie **automatisch** als MHD“ |
 | 4 | **Mitglieder-Details** (Geburtsdatum, Geschlecht, Aktivität, Gewicht, schwanger/stillend) und **Allergien** im MVP-Schema? Einstellungen-Strang sagt „Felder bleiben“. | Nicht anlegen. Es sind Gesundheitsdaten ohne Verwendung im MVP. ZIEL-02 bzw. NK-06 bringen sie mit einer Migration zurück |
 | 5 | **„Noch gut“ mit Schalter an:** Wie lange zählt eine geprüfte Packung heute mit? | Ohne Ablauf im MVP, aber nur für „heute“. Erklär-Blatt nennt die Zahl geprüfter Packungen. Später ggf. Konstante (30 Tage, UX-Frage 10) |
-| 6 | **Nachkaufen:** Abgehakte und ausgeblendete Ziel-Lücken werden gespeichert. Wann verschwindet „Erledigt“, wann kommt eine ausgeblendete Lücke zurück? | „Erledigt“ 14 Tage sichtbar. Ausgeblendete Lücke kommt zurück, wenn sie sich um mehr als 10 % ändert oder nach 30 Tagen |
+| 6 | **Nachkaufen:** Abgehakte und ausgeblendete Ziel-Lücken werden gespeichert. Wann verschwindet „Erledigt“, wann kommt eine ausgeblendete Lücke zurück? | „Erledigt“ 14 Tage sichtbar. Ausgeblendete Lücke kommt zurück, wenn sie sich um mehr als 10 % ändert oder nach 30 Tagen. **Entschieden mit #201:** zurück, wenn sie um mehr als 10 % **wächst** (kleiner werden heißt: es wurde erfasst), sonst nach 30 Tagen; abgehakte nach 14 Tagen. Zurückholen jederzeit unter „Ausgeblendet“ |
 | 7 | **FIFO bei „Datum fehlt“:** zuerst oder zuletzt entnehmen? | Zuletzt, nach allen datierten Packungen. Der Filter „Unvollständig“ erinnert ans Nachtragen |
 | 8 | **Ernährungsform-Daten:** Zielmengen je Form als fertige Zeilen (`quelle_wert` je Form, heute im Schema) oder als Verschiebungsregeln (heute in der Fachlogik)? | Fertige Zeilen je Form. Geprüfte Quelle, keine Rechnung zur Laufzeit. `diet-shifts` nur noch als Werkzeug zum Erzeugen der Seed-Zeilen |
 | 9 | **Darf ein Mitglied beim Erfassen eine neue Lebensmittelart anlegen?** (Gegenstück zu Einstellungen-Frage 9 für Lagerorte) | Ja, mit Pflicht-Kategorie. Umbenennen, Ausblenden und Richtwerte bleiben beim Admin |

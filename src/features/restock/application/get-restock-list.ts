@@ -1,6 +1,7 @@
-// Use-Case Nachkaufen-Liste (#72, NK-01 bis NK-04, #200, #202): gespeicherte Einträge plus live
-// gerechnete Lücken bis zum Ziel (mit Beispielen) und Vorschläge unter „Ersetzen“ (A14). Lücken
-// und Vorschläge werden nie gespeichert und verschwinden von selbst.
+// Use-Case Nachkaufen-Liste (#72, NK-01 bis NK-04, #200, #201, #202): gespeicherte Einträge plus
+// live gerechnete Lücken bis zum Ziel (mit Beispielen) und Vorschläge unter „Ersetzen“ (A14).
+// Lücken und Vorschläge werden nie gespeichert und verschwinden von selbst; abgehakte und
+// ausgeblendete Lücken verdecken sie, bis sich die Lage ändert.
 import 'server-only'
 import type { GoalGaps } from '@/features/supply/application/get-goal-gaps'
 import type { HouseholdDay } from '@/features/supply/application/stock-snapshot'
@@ -10,8 +11,14 @@ import {
   replacementCandidates,
   type ReplacementCandidate,
 } from '../domain/replacement-candidates'
-import { buildRestockList, captureTargetOf, type RestockItem } from '../domain/restock-list'
-import type { RestockItemDto, RestockListDto, RestockSuggestionDto } from '../schemas'
+import type { HiddenGap } from '../domain/goal-entries'
+import {
+  buildRestockList,
+  captureTargetOf,
+  type RestockGap,
+  type RestockItem,
+} from '../domain/restock-list'
+import type { HiddenGapDto, RestockItemDto, RestockListDto, RestockSuggestionDto } from '../schemas'
 import type { RestockRepository } from './restock-repository'
 
 export interface RestockListPorts {
@@ -23,8 +30,21 @@ const toItemDto = (item: RestockItem): RestockItemDto => ({
   id: item.id,
   label: item.label,
   source: item.source,
-  isDone: item.isDone,
+  isDone: item.status === 'erledigt',
   captureTarget: captureTargetOf(item),
+  amount: item.amount,
+})
+
+const toHiddenGapDto = ({
+  entryId,
+  groupKey,
+  name,
+  missing,
+}: HiddenGap<RestockGap>): HiddenGapDto => ({
+  entryId,
+  groupKey,
+  name,
+  missing,
 })
 
 const toSuggestionDto = ({
@@ -51,10 +71,18 @@ export async function getRestockList(
   input: HouseholdDay,
 ): Promise<RestockListDto> {
   const { items, goalGaps, candidates, foodTypes } = await loadParts(ports, input)
-  const list = buildRestockList({ items, gaps: goalGaps.gaps, foodTypes, candidates })
+  const list = buildRestockList({
+    items,
+    gaps: goalGaps.gaps,
+    foodTypes,
+    candidates,
+    today: input.today,
+  })
   return {
     isGoalCalculable: goalGaps.isCalculable,
     gaps: list.gaps,
+    hiddenGaps: list.hiddenGaps.map(toHiddenGapDto),
+    belowGoalCount: list.belowGoalCount,
     replace: list.replace.map(toItemDto),
     suggestions: list.suggestions.map(toSuggestionDto),
     own: list.own.map(toItemDto),

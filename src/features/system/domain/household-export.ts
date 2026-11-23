@@ -103,7 +103,9 @@ export type ExportRestockItem = Readonly<{
   amount: number | null
   unit: string | null
   source: string
-  isDone: boolean
+  /** offen · erledigt · ausgeblendet (#201) */
+  status: string
+  doneAt: Date | null
   productId: string | null
 }>
 

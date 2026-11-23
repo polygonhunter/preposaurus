@@ -57,6 +57,13 @@
       "when": 1795437052317,
       "tag": "0007_einheit_erfassung_aufschiebbar",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795467930899,
+      "tag": "0008_nachkaufen_status_ziel",
+      "breakpoints": true
     }
   ]
 }

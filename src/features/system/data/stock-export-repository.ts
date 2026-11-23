@@ -132,7 +132,8 @@ export async function readExportRestock(
       amount: restockItems.amount,
       unit: restockItems.unit,
       source: restockItems.source,
-      isDone: restockItems.isDone,
+      status: restockItems.status,
+      doneAt: restockItems.doneAt,
       productId: restockItems.productId,
     })
     .from(restockItems)
