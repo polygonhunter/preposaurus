@@ -26,7 +26,10 @@ export interface StockCategory extends NamedRef {
 
 export interface StockGroup {
   key: string
+  /** Amtlicher Name aus den Empfehlungen */
   name: string
+  /** Kurzer Anzeigename für Titel und Navigation (#177) */
+  shortName: string
 }
 
 export interface StockProduct extends NamedRef {

@@ -10,6 +10,7 @@ import {
   groupCoverageText,
   groupSubtitle,
   isEmptyStock,
+  officialNameEyebrow,
   shelfLifeHint,
   stillGoodLabel,
   stockLine,
@@ -153,5 +154,15 @@ describe('Datum und Hinweise', () => {
     expect(shelfLifeHint(null)).toBeNull()
     expect(shelfLifeHint(1)).toContain('etwa 1 Monat haltbar')
     expect(shelfLifeHint(24)).toContain('Es zählt das Datum auf der Packung')
+  })
+})
+
+describe('officialNameEyebrow', () => {
+  it('zeigt den amtlichen Namen nur, wenn der Kurzname abweicht', () => {
+    const name = 'Getreide, Getreideprodukte, Brot und Kartoffeln'
+    expect(officialNameEyebrow({ name, shortName: 'Getreide und Kartoffeln' })).toEqual({
+      eyebrow: name,
+    })
+    expect(officialNameEyebrow({ name: 'Wasser', shortName: 'Wasser' })).toEqual({})
   })
 })
