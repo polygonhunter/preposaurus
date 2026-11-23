@@ -22,7 +22,7 @@ type DateGroupRowProps = Readonly<{
 // mit „Verbraucht“, so lässt sich statt der vorgeschlagenen auch eine andere Packung nehmen.
 export function DateGroupRow({ name, group, isNext }: DateGroupRowProps) {
   const [isOpen, setOpen] = useState(false)
-  const { consume, isPending } = useConsume()
+  const { consume, isLocked } = useConsume()
   const label = groupLabel(group)
   const state = group.kind === 'dated' ? group.state : 'no-date'
   const badge = STATE_BADGE[state]
@@ -57,7 +57,7 @@ export function DateGroupRow({ name, group, isNext }: DateGroupRowProps) {
           title={`${name} · ${label}`}
           actions={
             <>
-              <Button onClick={take} disabled={isPending || first === undefined}>
+              <Button onClick={take} disabled={isLocked || first === undefined}>
                 1 Packung verbraucht
               </Button>
               <Button variant="plain" onClick={close}>

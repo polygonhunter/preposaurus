@@ -33,6 +33,8 @@ export default defineConfig({
   forbidOnly: isCi,
   retries: isCi ? 1 : 0,
   reporter: isCi ? [['github'], ['html', { open: 'never' }]] : 'list',
+  // Der Service Worker läuft nur im Produktionsbuild (tests/e2e/pwa.spec.ts).
+  metadata: { productionServer: isCi },
   use: {
     baseURL: `http://localhost:${String(PORT)}`,
     locale: 'de-DE',
