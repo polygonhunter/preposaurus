@@ -81,15 +81,18 @@ describe('summarize', () => {
     expect(haiku?.costUsd).toBeCloseTo(0.0003, 8)
   })
 
-  it('zählt Zweitversuche, leere Felder und Fehler; ohne Tokens bleiben die Kosten unbekannt', () => {
+  it('zählt Zweitversuche, leere Felder und Fehler; ein Aufruf ohne Tokens fehlt nur in den Kosten', () => {
     expect(standard).toMatchObject({
       secondAttempts: 1,
       emptyFields: 1,
       failedPhotos: 1,
       hits: 0,
       inventedDates: [],
-      costUsd: null,
+      callsWithoutUsage: 1,
+      pricedPhotos: 1,
     })
+    // Haiku (0,0001 + 0,00005) und Sonnet (0,002 + 0,001) für das erste Foto, der Zeitlimit-Aufruf fehlt
+    expect(standard?.costUsd).toBeCloseTo(0.00315, 8)
     expect(standard?.perField['datum']).toEqual({ hits: 0, total: 2, empty: 1 })
   })
 })
@@ -107,7 +110,9 @@ describe('Bericht', () => {
     expect(markdown).toContain('## MHD (2 Fotos)')
     expect(markdown).toContain('| claude-haiku-5-5 | 50\u00a0% | 1/2 | 0 | 0 | 1 | 0/2 | 1,5 s |')
     expect(markdown).toContain('| Standard | 0\u00a0% | 0/2 | 1 | 1 | 0 | 1/2 |')
-    expect(markdown).toContain('unbekannt')
+    expect(markdown).toContain('0,0032 $ (ohne 1 Aufruf(e) ohne Tokens) | 0,0032 $ |')
+    const unknownModel = RUNS.map((run) => ({ ...run, calls: [call('claude-neu-1')] }))
+    expect(renderMarkdown(meta, summarize(unknownModel), unknownModel)).toContain('unbekannt')
   })
 
   it('führt jedes erfundene MHD mit Foto-Namen auf', () => {

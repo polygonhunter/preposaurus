@@ -38,9 +38,20 @@ function overviewRow(summary: VariantSummary): string[] {
     isBestBefore ? formatRatio(summary.secondAttempts, summary.photos) : '–',
     formatSeconds(summary.photos === 0 ? 0 : summary.durationMs / summary.photos),
     `${formatCount(summary.inputTokens)} / ${formatCount(summary.outputTokens)}`,
-    formatUsd(summary.costUsd),
-    formatUsd(summary.costUsd === null ? null : summary.costUsd / summary.photos),
+    costCell(summary),
+    formatUsd(
+      summary.costUsd === null || summary.pricedPhotos === 0
+        ? null
+        : summary.costUsd / summary.pricedPhotos,
+    ),
   ]
+}
+
+/** Gescheiterte Aufrufe melden keine Tokens: Sie fehlen in der Summe, der Bericht sagt es. */
+function costCell(summary: VariantSummary): string {
+  const missing = summary.callsWithoutUsage
+  const note = missing > 0 ? ` (ohne ${formatCount(missing)} Aufruf(e) ohne Tokens)` : ''
+  return `${formatUsd(summary.costUsd)}${note}`
 }
 
 const OVERVIEW_HEADER = [
@@ -127,7 +138,7 @@ function header(meta: ReportMeta): string {
       `- Ordner: \`${meta.folder}\``,
       `- Toleranz für Inhalt und Nährwerte: ${tolerance}`,
       '- Treffer: richtig gelesen oder richtig „nichts lesbar“. Leer: lesbar, aber nicht erkannt.',
-      '- Erfundenes MHD: ein Datum, das so nicht aufgedruckt ist (keins lesbar, anderes Datum oder genauer als aufgedruckt).',
+      '- Erfundenes MHD: ein Datum, das so nicht aufgedruckt ist (keins lesbar, anderes Datum, genauer oder ungenauer als aufgedruckt).',
       '- Kosten: Schätzung aus den Token-Zahlen und den Grundpreisen in `src/server/ai/model-prices.ts`.',
     ].join('\n'),
   ].join('\n\n')

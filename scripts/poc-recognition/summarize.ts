@@ -37,13 +37,17 @@ export interface VariantSummary {
   durationMs: number
   inputTokens: number
   outputTokens: number
-  /** null, wenn für ein Modell kein Preis bekannt ist oder Tokens fehlen */
+  /** Nur Aufrufe mit Token-Angabe. null, wenn für ein Modell kein Preis bekannt ist */
   costUsd: number | null
+  /** Gescheiterte Aufrufe ohne Token-Angabe: fehlen in den Kosten, statt sie ganz zu verdecken */
+  callsWithoutUsage: number
+  /** Fotos, deren Aufrufe alle Tokens melden: Grundlage für die Kosten je Foto */
+  pricedPhotos: number
 }
 
 const isHit = (outcome: FieldOutcome) => HIT_OUTCOMES.includes(outcome)
 
-/** Ein Datum, wo keins lesbar ist, ein anderes Datum oder ein Tag, wo nur Monat oder Jahr steht. */
+/** Ein Datum, wo keins lesbar ist, ein anderes Datum oder eine andere Genauigkeit als aufgedruckt. */
 const INVENTED: readonly FieldOutcome[] = ['erfunden', 'falsch']
 
 function inventedDates(runs: readonly PhotoRun[]): InventedDate[] {
@@ -65,9 +69,13 @@ function tallyFields(runs: readonly PhotoRun[]): Record<string, FieldTally> {
   return perField
 }
 
-function sumCost(runs: readonly PhotoRun[]): number | null {
+type Call = PhotoRun['calls'][number]
+
+const hasUsage = (call: Call) => call.inputTokens !== null && call.outputTokens !== null
+
+function sumCost(calls: readonly Call[]): number | null {
   let total = 0
-  for (const call of runs.flatMap((run) => run.calls)) {
+  for (const call of calls.filter(hasUsage)) {
     const cost = estimateCostUsd(call.model, call)
     if (cost === null) return null
     total += cost
@@ -83,7 +91,9 @@ function usageOf(runs: readonly PhotoRun[]) {
     durationMs: sum(calls.map((call) => call.durationMs)),
     inputTokens: sum(calls.map((call) => call.inputTokens ?? 0)),
     outputTokens: sum(calls.map((call) => call.outputTokens ?? 0)),
-    costUsd: sumCost(runs),
+    costUsd: sumCost(calls),
+    callsWithoutUsage: calls.filter((call) => !hasUsage(call)).length,
+    pricedPhotos: runs.filter((run) => run.calls.every(hasUsage)).length,
   }
 }
 

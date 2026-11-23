@@ -90,7 +90,7 @@ Das Skript schreibt `poc/berichte/bericht-<Zeitpunkt>.md` (zum Lesen) und `.json
 Je Rolle:
 - **Übersicht je Variante:** Trefferquote (Anteil richtiger Felder), Fotos ganz richtig, leere Felder, Fehler (Zeitlimit, Anbieter, Antwort außerhalb des Schemas), beim MHD erfundene MHDs und Zweitversuche, Ø Dauer je Foto, Tokens, Kosten gesamt und je Foto.
 - **Treffer je Feld:** z. B. `lebensmittelart 12/15 (2 leer)`.
-- **Erfundene MHDs** mit Foto-Namen: Kennzahl Nr. 1. Erfunden heißt: Die KI nennt ein Datum, das so nicht aufgedruckt ist, also bei unlesbarem Aufdruck, ein anderes Datum oder genauer als aufgedruckt (Tag statt nur Monat).
+- **Erfundene MHDs** mit Foto-Namen: Kennzahl Nr. 1. Erfunden heißt: Die KI nennt ein Datum, das so nicht aufgedruckt ist, also bei unlesbarem Aufdruck, ein anderes Datum, genauer als aufgedruckt (Tag statt nur Monat) oder ungenauer (nur Monat statt Tag: Die App zeigt dann das Monatsende, also ein späteres Datum als aufgedruckt).
 - **Abweichungen:** jedes falsche, leere, erfundene oder gescheiterte Feld mit Erwartung und Antwort.
 
 Begriffe: **Treffer** = richtig gelesen oder richtig „nichts lesbar“. **Leer** = lesbar, aber nicht erkannt (harmlos: Der Nutzer trägt es selbst ein). **Falsch** = anderer Wert. **Erfunden** = Wert, obwohl nichts lesbar ist.

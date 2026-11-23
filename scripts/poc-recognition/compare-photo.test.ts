@@ -46,6 +46,12 @@ describe('comparePhoto · MHD', () => {
     expect(outcomesOf(mhdPhoto('2029-11'), bestBefore('2029-11-30'))).toEqual(['falsch'])
   })
 
+  it('wertet nur den Monat, wo ein Tag aufgedruckt ist, als falsch (die App zeigte das Monatsende)', () => {
+    expect(outcomesOf(mhdPhoto('2028-03-14'), bestBefore('2028-03-31', 'month'))).toEqual([
+      'falsch',
+    ])
+  })
+
   it('wertet ein Datum bei unlesbarem Aufdruck als erfunden', () => {
     expect(outcomesOf(mhdPhoto(null), bestBefore('2027-05-01'))).toEqual(['erfunden'])
   })
