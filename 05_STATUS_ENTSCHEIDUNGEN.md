@@ -423,6 +423,16 @@ Beim Datenmodell getroffen, Details in den Kopfkommentaren von `src/server/db/sc
 - **Verbindungsprüfung (Review #220):** Nur die jüngste Nachfrage an `/api/health` zählt. Nach dem Ereignis „online“ fragt `useIsOnline` bei einem Fehlschlag nach 0,5 s und 1,5 s noch einmal nach, bevor die App wieder sperrt (der Browser meldet „online“ oft, bevor das Netz trägt).
 - **E2E** nutzen jetzt die echte Quelle aus dem Seed (die Einrichtung setzt sie); die erfundene `demo-source.ts` bleibt für Integrationstests und `db:seed:demo`.
 
+## Festlegungen aus M9-03 und M9-04 „Lagerorte und Ampel-Schwellen“ (#77, #78, 2026-11-23, vorläufig)
+- **Keine Migration.** `lagerort` hat schon `ausgeblendet` und `sortierung`, `haushalt_einstellung` die Ampel-Spalten mit CHECK.
+- **Neues Feature `catalog`** (Stammdaten des Vorrats) mit Seiten `/einstellungen/lagerorte` (Liste) und `/einstellungen/lagerorte/[id]` (Bearbeiten, nur Admin, für Mitglieder 404). In den Einstellungen steht „Lagerorte“ in der Gruppe Haushalt mit der Zahl der sichtbaren Orte.
+- **Lagerorte:** Anlegen direkt unter der Liste (ein Feld, „Hinzufügen“), neue Orte kommen ans Ende. Namen höchstens 40 Zeichen und je Haushalt eindeutig, **ohne Groß- und Kleinschreibung** (die DB prüft nur die genaue Schreibweise); ausgeblendete zählen mit, die Meldung sagt dann, dass der Ort ausgeblendet ist.
+- **Sortieren** mit zwei Knöpfen je Zeile („… nach oben/unten“) statt Ziehen, weil das mit Tastatur und Screenreader geht. Gespeichert wird die Liste neu durchnummeriert, nur innerhalb der sichtbaren bzw. der ausgeblendeten Orte. Die Reihenfolge gilt beim Erfassen und im Filter (beide sortierten schon nach `sortierung`).
+- **Löschregel:** Gelöscht wird nur ein Ort, an dem **kein Produkt** des Haushalts liegt, auch kein verbrauchtes. Sonst verlöre der Verlauf still seinen Ort (`produkt.lagerort_id` ist `SET NULL`). Geprüft und gelöscht wird in einer Anweisung (`NOT EXISTS`), der Knopf steht nur bei unbenutzten Orten. Ausblenden geht immer: Der Ort steht dann beim Erfassen und im Filter nicht mehr zur Wahl, bleibt aber am Produkt stehen.
+- **Mitglieder** sehen die Lagerorte nur lesend (ohne Links und Knöpfe). Frage 9 aus EINSTELLUNGEN_NUTZER (Mitglied legt beim Erfassen einen Lagerort an) ist hier nicht umgesetzt; beim Erfassen gibt es weiter nur die Auswahl.
+- **Ampel-Schwellen** auf „Vorrat und Regeln“ als zwei Zahlenfelder (Gelb, Orange in Tagen vor dem MHD) mit Erklärung. Prüfung zweistufig: Formular-Schema ganze Tage 1 bis 365 (`household/schemas.ts`), danach die Fachlogik `validateAmpelThresholds` (Orange mindestens 7 Tage wegen „Diese Woche“, nie größer als Gelb) über den Use-Case `saveAmpelThresholds` (inventory), dahinter der DB-CHECK. Die Obergrenze 365 ist neu und steht nur im Formular. Vorrat, Übersicht und Bald fällig lesen die Schwellen je Aufruf, die Überschriften auf Bald fällig folgen schon den Werten. Mitglieder sehen die Werte als Zeilen.
+- Die Formulare auf „Vorrat und Regeln“ heißen nach ihrem Gruppenkopf (`aria-labelledby`), weil die Seite jetzt zwei „Speichern“ hat.
+
 ## Offene Fragen an den Maintainer (endgültige Entscheidung steht noch aus)
 1. **Offline**: nur anzeigen oder auch eintragen (mit späterem Abgleich)?
 2. ~~**Lizenz**~~ entschieden 2026-11-22: AGPL-3.0-or-later (siehe oben). Der Prototyp mit GSAP ist ausgenommen, siehe `prototypes/README.md`

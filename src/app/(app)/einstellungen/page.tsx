@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { catalogServices } from '@/features/catalog/application/catalog-services'
+import { listStorageLocations } from '@/features/catalog/application/storage-locations'
 import { getHousehold } from '@/features/household/application/get-household'
 import { householdServices } from '@/features/household/application/household-services'
 import { goalServices } from '@/features/supply/application/goal-services'
@@ -9,7 +11,13 @@ import { ROLE_LABELS } from '@/features/auth/ui/user-format'
 import { AdminSettingsGroups } from '@/features/settings/ui/AdminSettingsGroups'
 import { SystemSettingsGroup } from '@/features/settings/ui/SystemSettingsGroup'
 import { requirePageHousehold } from '@/server/auth/household'
-import { ACCOUNT_PATH, GOAL_PATH, MEMBERS_PATH, RULES_PATH } from '@/shared/config/settings-paths'
+import {
+  ACCOUNT_PATH,
+  GOAL_PATH,
+  MEMBERS_PATH,
+  RULES_PATH,
+  STORAGE_LOCATIONS_PATH,
+} from '@/shared/config/settings-paths'
 import { Group } from '@/shared/ui/Group'
 import { GroupFooter } from '@/shared/ui/GroupFooter'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
@@ -20,15 +28,19 @@ export const metadata: Metadata = { title: 'Einstellungen · Preposaurus' }
 
 const personCount = (count: number) => (count === 1 ? '1 Person' : `${String(count)} Personen`)
 
+const locationCount = (count: number) => (count === 1 ? '1 Ort' : `${String(count)} Orte`)
+
 // Einstellungen (#37): Mein Konto · Haushalt · Nutzerverwaltung · Daten & System. Mitglieder sehen
 // den Haushalt nur lesend und die Nutzerverwaltung gar nicht (die Seiten prüfen die Rolle selbst).
 // Daten & System mit Lizenz und Quelltext sehen alle (AGPL, #217).
 export default async function SettingsPage() {
   const { householdId, username, isAdmin } = await requirePageHousehold()
-  const [household, goal] = await Promise.all([
+  const [household, goal, locations] = await Promise.all([
     getHousehold(await householdServices(), householdId),
     getGoalSettings(await goalServices(), householdId),
+    listStorageLocations(await catalogServices(), householdId),
   ])
+  const visibleLocations = locations.filter((location) => !location.isHidden)
   return (
     <>
       <PageHeader title="Einstellungen" back={{ href: '/uebersicht', label: 'Übersicht' }} />
@@ -52,6 +64,11 @@ export default async function SettingsPage() {
           title="Ziel und Empfehlung"
           trailing={formatGoalDays(goal.days)}
           action={{ href: GOAL_PATH }}
+        />
+        <Row
+          title="Lagerorte"
+          trailing={locationCount(visibleLocations.length)}
+          action={{ href: STORAGE_LOCATIONS_PATH }}
         />
         <Row
           title="Vorrat und Regeln"

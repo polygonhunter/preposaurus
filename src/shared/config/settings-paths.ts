@@ -6,6 +6,7 @@ export const MEMBERS_PATH = '/einstellungen/mitglieder'
 export const NEW_MEMBER_PATH = '/einstellungen/mitglieder/neu'
 export const GOAL_PATH = '/einstellungen/ziel'
 export const RULES_PATH = '/einstellungen/regeln'
+export const STORAGE_LOCATIONS_PATH = '/einstellungen/lagerorte'
 export const USERS_PATH = '/einstellungen/nutzer'
 export const NEW_USER_PATH = '/einstellungen/nutzer/neu'
 export const SYSTEM_PATH = '/einstellungen/system'
@@ -14,3 +15,5 @@ export const AI_SETTINGS_PATH = '/einstellungen/foto-erkennung'
 export const memberPath = (memberId: string) => `${MEMBERS_PATH}/${memberId}`
 
 export const userPath = (userId: string) => `${USERS_PATH}/${userId}`
+
+export const storageLocationPath = (locationId: string) => `${STORAGE_LOCATIONS_PATH}/${locationId}`
