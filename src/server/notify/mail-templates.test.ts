@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { escapeHtml, renderMail } from './mail-layout'
-import { checkInMail, listNames, weeklySummaryMail } from './mail-templates'
+import { checkInMail, weeklySummaryMail } from './mail-templates'
 
 const appUrl = 'https://vorrat.example.org/uebersicht'
 
@@ -37,14 +37,11 @@ describe('checkInMail', () => {
     const mail = checkInMail({ expired: [], dueSoon: [], appUrl: null })
     expect(mail.text).toContain('Gerade ist nichts fällig.')
   })
-})
 
-describe('listNames', () => {
   it('nennt bis zu fünf Namen, jeden einmal, und fasst den Rest zusammen', () => {
-    expect(listNames([])).toBe('')
-    expect(listNames(['Reis'])).toBe('Reis')
-    expect(listNames(['Reis', 'Reis', 'Mehl'])).toBe('Reis und Mehl')
-    expect(listNames(['a', 'b', 'c', 'd', 'e', 'f', 'g'])).toBe('a, b, c, d, e und 2 weitere')
+    const dueSoon = ['a', 'b', 'b', 'c', 'd', 'e', 'f', 'g']
+    const mail = checkInMail({ expired: [], dueSoon, appUrl: null })
+    expect(mail.text).toContain('Bald fällig: a, b, c, d, e und 2 weitere.')
   })
 })
 
