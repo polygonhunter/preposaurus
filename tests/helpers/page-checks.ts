@@ -67,10 +67,11 @@ export async function expectNothingOnVerticalFold(page: Page): Promise<void> {
         window.scrollBy(0, rect.top + rect.height / 2 - window.innerHeight / 2)
         const box = element.getBoundingClientRect()
         const y = box.top + box.height / 2
-        // Nur echt im Streifen prüfen: Auf seinem Rand endet eine Spalte, die in einer
-        // waagrecht rollenden Reihe angeschnittene Chips zeigt (halbe Pixel runden sonst hinein)
+        // Nur echt im Streifen prüfen: Auf seinem Rand endet eine Spalte, deren waagrecht rollende
+        // Chip-Reihe einen angeschnittenen Chip einen halben Pixel hineinragen lässt
         const left = Math.max(box.left + 1, middle - 11)
         const right = Math.min(box.right - 1, middle + 11)
+        if (left > right) return false
         return isHitIn(element, left, y) || isHitIn(element, right, y)
       })
       .map((element) => element.textContent.trim())
