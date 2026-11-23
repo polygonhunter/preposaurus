@@ -15,9 +15,9 @@ export interface ReminderDelivery {
   addressCount: number
 }
 
-const MINUTE_PRECISION = 5
+const HOURS_AND_MINUTES_LENGTH = 'HH:MM'.length
 
 /** „10:00:00“ aus der Spalte `time` als „10:00“, so wie das Uhrzeit-Feld ihn erwartet. */
 export function toMinutePrecision(time: string): string {
-  return time.slice(0, MINUTE_PRECISION)
+  return time.slice(0, HOURS_AND_MINUTES_LENGTH)
 }

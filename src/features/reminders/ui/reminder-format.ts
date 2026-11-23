@@ -41,8 +41,7 @@ export function formatMailDelivery(delivery: ReminderDelivery): string {
 
 /** Erklärung unter „So kommen sie an“, je nachdem, ob Mails gehen können */
 export function describeDelivery(delivery: ReminderDelivery): string {
-  const push =
-    'Push auf euren Geräten kommt in einem späteren Update. Bis dahin bleibt „Dringend“ still.'
+  const push = 'Push auf euren Geräten kommt in einem späteren Update.'
   if (!delivery.isMailConfigured) {
     return `${push} Auf diesem Server ist noch kein Mailversand eingerichtet, das richtet ein Admin ein.`
   }
