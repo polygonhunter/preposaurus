@@ -61,12 +61,12 @@ test('Person anlegen, bearbeiten und entfernen', async ({ page }, info) => {
   await expect(row).toContainText('Baby · 02/2026')
   await expect(row).toContainText('Laktose')
 
+  // Bleibt ein Baby: Babys zählen nicht im Bedarf, die Übersicht-Tests laufen parallel weiter
   await row.click()
-  await page.getByText('Erwachsene:r', { exact: true }).click()
-  await page.getByLabel('Geburtsjahr').fill('1990')
+  await page.getByLabel('Geburtsmonat').fill('3')
   await page.getByText('Vegan', { exact: true }).click()
   await saveButton(page).click()
-  await expect(row).toContainText('Erwachsene:r · 1990 · vegan')
+  await expect(row).toContainText('Baby · 03/2026 · vegan')
 
   await row.click()
   await page.getByRole('button', { name: 'Person entfernen' }).click()
@@ -97,6 +97,9 @@ test('ein Zieldatum in der Vergangenheit wird nicht gespeichert', async ({ page 
 test('Zieldauer und Zieldatum ändern', async ({ page }, info) => {
   onlyOnDesktop(info.project.name)
   await page.goto('/einstellungen/ziel')
+  // Der Beispielvorrat setzt ein Zieldatum, auf das sich die Übersicht-Tests verlassen
+  const dateField = page.getByLabel('Bis wann? (freiwillig)')
+  const originalDate = await dateField.inputValue()
 
   await page.getByText('Eigener Wert').click()
   const custom = page.getByLabel('Eigene Dauer in Tagen')
@@ -105,15 +108,15 @@ test('Zieldauer und Zieldatum ändern', async ({ page }, info) => {
   await expect(custom).toHaveAccessibleDescription(/Bitte eine Zahl von 1 bis 365 eintragen\./)
 
   await custom.fill('21')
-  await page.getByLabel('Bis wann? (freiwillig)').fill('2099-12-31')
+  await dateField.fill('2099-12-31')
   await saveButton(page).click()
   await expect(page.getByText('Gespeichert.')).toBeVisible()
   await page.reload()
   await expect(page.getByLabel('Eigene Dauer in Tagen')).toHaveValue('21')
-  await expect(page.getByLabel('Bis wann? (freiwillig)')).toHaveValue('2099-12-31')
+  await expect(dateField).toHaveValue('2099-12-31')
 
   await page.getByText('10 Tage', { exact: true }).click()
-  await page.getByLabel('Bis wann? (freiwillig)').fill('')
+  await dateField.fill(originalDate)
   await saveButton(page).click()
   await expect(page.getByText('Gespeichert.')).toBeVisible()
 })
