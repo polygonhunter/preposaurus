@@ -35,12 +35,14 @@ const goalSchema = z.object({
   outlook: outlookSchema.nullable(),
 })
 
-/** Fehlmenge des Engpasses bis zum Ziel (A4): ml Wasser bzw. kcal. */
-const nextStepSchema = z.object({
+const shortfallSchema = z.object({
   resource: z.enum(['energy', 'water']),
+  /** ml Wasser bzw. kcal */
   missing: z.number().positive(),
-  reachesDays: days,
 })
+
+/** Fehlmenge des Engpasses bis zum Ziel (A4), dazu die des anderen Werts, wenn auch er fehlt. */
+const nextStepSchema = shortfallSchema.extend({ alsoMissing: shortfallSchema.nullable() })
 
 const dueGroupSchema = z.enum(['expired', 'this-week', 'this-month', 'next-three-months'])
 

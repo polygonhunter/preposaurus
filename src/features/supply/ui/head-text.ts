@@ -82,7 +82,9 @@ export function goalLine(goal: OverviewGoal): Line {
   }
 }
 
-function amountText({ resource, missing }: OverviewNextStep): string {
+type Shortfall = Pick<OverviewNextStep, 'resource' | 'missing'>
+
+function amountText({ resource, missing }: Shortfall): string {
   if (resource === 'water') {
     return `${formatGermanNumber(Math.ceil(missing / ML_PER_LITER))} l Wasser`
   }
@@ -91,13 +93,13 @@ function amountText({ resource, missing }: OverviewNextStep): string {
 
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 
-/** Der eine nächste Schritt: „20 l Wasser bringen euch auf 9 Tage.“ */
-export function nextStepSentence(step: OverviewNextStep, supply: OverviewSupply, goalDays: number) {
+/**
+ * Der eine nächste Schritt: „20 l Wasser bringen euch ans Ziel.“ Fehlt auch beim anderen Wert
+ * etwas, stehen beide Mengen im Satz, Engpass zuerst. Eine Menge, die nur bis zum nächsten Engpass
+ * trägt („47 l Wasser bringen euch auf 2 Tage“), verwirrte.
+ */
+export function nextStepSentence(step: OverviewNextStep): string {
   const amount = amountText(step)
-  const reaches = wholeDays(step.reachesDays)
-  if (step.reachesDays >= goalDays) return `${capitalize(amount)} bringen euch ans Ziel.`
-  if (reaches > wholeDays(supply.days)) {
-    return `${capitalize(amount)} bringen euch auf ${formatDays(reaches)}.`
-  }
-  return `Bis zum Ziel fehlen noch ${amount}.`
+  if (step.alsoMissing === null) return `${capitalize(amount)} bringen euch ans Ziel.`
+  return `Bis zum Ziel fehlen noch ${amount} und ${amountText(step.alsoMissing)}.`
 }

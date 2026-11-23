@@ -1,19 +1,22 @@
 import type { DailyNeed } from './daily-need'
 import type { SupplyDays } from './supply-days'
-import { roundDownDays } from './supply-rules'
 
 // Nächster Schritt der Übersicht (UX-Konzept A4, §8.1 Zeile 4): Was bringt euch am schnellsten
-// weiter? Die Fehlmenge des Engpasses bis zum Ziel, als ml Wasser bzw. kcal.
+// weiter? Die Fehlmenge des Engpasses bis zum Ziel, als ml Wasser bzw. kcal. Liegt auch der andere
+// Wert unter dem Ziel, kommt seine Fehlmenge dazu: Sonst brächte z. B. viel Wasser nur wenige Tage,
+// weil danach das Essen begrenzt.
 
 type Resource = SupplyDays['bottleneck']
 
-export interface NextStep {
-  /** Engpass, den der Schritt schließt */
+interface Shortfall {
   resource: Resource
   /** Fehlmenge bis zum Ziel: ml bei Wasser, kcal bei Essen */
   missing: number
-  /** Tage danach: Ziel oder der andere Wert, wenn der vorher begrenzt (abgerundet) */
-  reachesDays: number
+}
+
+export interface NextStep extends Shortfall {
+  /** Fehlmenge des anderen Werts bis zum Ziel, null wenn er das Ziel heute schon erreicht */
+  alsoMissing: Shortfall | null
 }
 
 interface NextStepInput {
@@ -30,18 +33,20 @@ const daysOf = (resource: Resource, today: NextStepInput['today']) =>
 
 const otherOf = (resource: Resource): Resource => (resource === 'water' ? 'energy' : 'water')
 
-/**
- * Fehlmenge des Engpasses bis zum Ziel: (Zieltage − Ist-Tage) × Tagesbedarf. Ohne Lücke (Ziel heute
- * erreicht) oder ohne Bedarf gibt es keinen Schritt: null.
- */
-export function calculateNextStep({ today, goalDays, need }: NextStepInput): NextStep | null {
-  const { bottleneck } = today
-  const shortfallDays = goalDays - daysOf(bottleneck, today)
-  const perDay = perDayOf(bottleneck, need)
+/** (Zieltage − Ist-Tage) × Tagesbedarf, null ohne Lücke oder ohne Bedarf. */
+function shortfallOf(resource: Resource, input: NextStepInput): Shortfall | null {
+  const shortfallDays = input.goalDays - daysOf(resource, input.today)
+  const perDay = perDayOf(resource, input.need)
   if (shortfallDays <= 0 || perDay <= 0) return null
-  return {
-    resource: bottleneck,
-    missing: shortfallDays * perDay,
-    reachesDays: roundDownDays(Math.min(goalDays, daysOf(otherOf(bottleneck), today))),
-  }
+  return { resource, missing: shortfallDays * perDay }
+}
+
+/**
+ * Fehlmenge des Engpasses bis zum Ziel, dazu die des anderen Werts, wenn auch er darunter liegt.
+ * Ohne Lücke (Ziel heute erreicht) oder ohne Bedarf gibt es keinen Schritt: null.
+ */
+export function calculateNextStep(input: NextStepInput): NextStep | null {
+  const main = shortfallOf(input.today.bottleneck, input)
+  if (main === null) return null
+  return { ...main, alsoMissing: shortfallOf(otherOf(input.today.bottleneck), input) }
 }

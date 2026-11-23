@@ -1,6 +1,8 @@
 // Erfundene Empfehlungsquelle für den Beispielhaushalt (Entwicklung, Integrationstests, E2E der
 // Übersicht). Keine geprüften Werte: Die echte Quelle samt Stand und Link kommt mit M1-09. Ohne
 // aktive Quelle gäbe es keinen Bedarf und damit keine Tage auf der Übersicht.
+// Nie im Betrieb: Aufrufer sind nur Tests, `npm run db:seed:demo` (von Hand, nicht im Container)
+// und die E2E-Route `/api/e2e/beispielvorrat`, die env.ts im Produktionsbuild außerhalb der CI sperrt.
 import { eq } from 'drizzle-orm'
 import type { Database } from '../../src/server/db/connection'
 import { households } from '../../src/server/db/schema/household'

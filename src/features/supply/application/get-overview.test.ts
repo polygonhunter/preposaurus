@@ -108,7 +108,7 @@ describe('getOverview', () => {
 
     expect(nextStep?.resource).toBe('energy')
     expect(nextStep?.missing).toBeCloseTo((10 - 4.4) * 2000)
-    expect(nextStep?.reachesDays).toBe(9)
+    expect(nextStep?.alsoMissing?.resource).toBe('water')
   })
 
   it('zeigt die drei dringendsten fälligen Einträge und zählt alle Packungen', async () => {

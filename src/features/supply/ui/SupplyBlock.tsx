@@ -19,7 +19,7 @@ export function SupplyBlock({ overview }: SupplyBlockProps) {
   return (
     <>
       <SupplyHero supply={supply} goalDays={goal?.days ?? null} />
-      {goal === null ? null : <GoalGroup goal={goal} supply={supply} nextStep={nextStep} />}
+      {goal === null ? null : <GoalGroup goal={goal} nextStep={nextStep} />}
     </>
   )
 }

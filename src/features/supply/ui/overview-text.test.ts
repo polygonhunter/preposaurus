@@ -77,18 +77,14 @@ describe('Kopf der Übersicht', () => {
   })
 
   it('formuliert den nächsten Schritt in Litern bzw. kcal', () => {
-    const water = { resource: 'water', missing: 19_200, reachesDays: 9.4 } as const
-    expect(nextStepSentence(water, supply, 10)).toBe('20 l Wasser bringen euch auf 9 Tage.')
-    expect(nextStepSentence({ ...water, reachesDays: 10 }, supply, 10)).toBe(
-      '20 l Wasser bringen euch ans Ziel.',
+    const water = { resource: 'water', missing: 19_200, alsoMissing: null } as const
+    expect(nextStepSentence(water)).toBe('20 l Wasser bringen euch ans Ziel.')
+    const food = { resource: 'energy', missing: 3360 } as const
+    expect(nextStepSentence({ ...water, missing: 46_800, alsoMissing: food })).toBe(
+      'Bis zum Ziel fehlen noch 47 l Wasser und etwa 3.400 kcal Essen.',
     )
-    expect(nextStepSentence({ ...water, reachesDays: 6.3 }, supply, 10)).toBe(
-      'Bis zum Ziel fehlen noch 20 l Wasser.',
-    )
-    const energy = { resource: 'energy', missing: 22_340, reachesDays: 10 } as const
-    expect(nextStepSentence(energy, supply, 10)).toBe(
-      'Etwa 22.400 kcal Essen bringen euch ans Ziel.',
-    )
+    const energy = { resource: 'energy', missing: 22_340, alsoMissing: null } as const
+    expect(nextStepSentence(energy)).toBe('Etwa 22.400 kcal Essen bringen euch ans Ziel.')
   })
 })
 
