@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
-import { countsAsIncomplete, findIncomplete, nutritionGapOf } from './incomplete'
+import {
+  incompleteReasonCounts,
+  incompleteReasonsOf,
+  nutritionGapOf,
+  type NutritionGap,
+} from './incomplete'
 import {
   isEstimateUnconfirmed,
   type ProductNutrition,
@@ -81,48 +86,53 @@ describe('nutritionGapOf', () => {
   })
 })
 
-describe('countsAsIncomplete', () => {
-  it('zählt fehlende kcal und unbestätigte Schätzungen, nicht den Richtwert (#213)', () => {
-    expect(countsAsIncomplete('missing')).toBe(true)
-    expect(countsAsIncomplete('unconfirmed')).toBe(true)
-    expect(countsAsIncomplete('no-label')).toBe(false)
-    expect(countsAsIncomplete(null)).toBe(false)
+const check = (withDate: boolean, gap: NutritionGap | null, status: UnitStatus = 'stock') => ({
+  ...unit('x', withDate, status),
+  nutritionGap: gap,
+})
+
+describe('incompleteReasonsOf', () => {
+  it('nennt fehlende kcal, fehlendes Datum und unbestätigte Schätzung, nach Gewicht', () => {
+    expect(incompleteReasonsOf(check(false, 'missing'))).toEqual([
+      'nutrition-missing',
+      'date-missing',
+    ])
+    expect(incompleteReasonsOf(check(false, 'unconfirmed'))).toEqual([
+      'date-missing',
+      'estimate-unconfirmed',
+    ])
+    expect(incompleteReasonsOf(check(true, 'unconfirmed'))).toEqual(['estimate-unconfirmed'])
+  })
+
+  it('zählt den Richtwert nicht als Lücke (#213)', () => {
+    expect(incompleteReasonsOf(check(true, 'no-label'))).toEqual([])
+    expect(incompleteReasonsOf(check(true, null))).toEqual([])
+  })
+
+  it('prüft nur Packungen im Vorrat', () => {
+    expect(incompleteReasonsOf(check(false, 'missing', 'consumed'))).toEqual([])
+    expect(incompleteReasonsOf(check(false, null, 'discarded'))).toEqual([])
   })
 })
 
-describe('findIncomplete', () => {
-  it('sammelt Packungen ohne Datum und Produkte mit Lücken in Eingabereihenfolge', () => {
+describe('incompleteReasonCounts', () => {
+  it('zählt je Grund die Packungen, nach Gewicht; eine Packung kann mehrere Gründe haben', () => {
     const units = [
-      unit('a', false),
-      unit('b', true),
-      unit('c', false),
-      unit('d', false, 'consumed'),
+      check(false, 'unconfirmed'),
+      check(true, 'unconfirmed'),
+      check(false, 'missing'),
+      check(false, null, 'consumed'),
     ]
-    const products = [
-      { id: 'etikett', nutrition: nutrition('label'), foodTypeReference: REFERENCE },
-      { id: 'schaetzung', nutrition: nutrition('ai-estimate'), foodTypeReference: null },
-      {
-        id: 'richtwert',
-        nutrition: { values: none, source: null, confirmedAt: null },
-        foodTypeReference: REFERENCE,
-      },
-      { id: 'ohne-kcal', nutrition: nutrition('manual', { kcal: null }), foodTypeReference: null },
-    ]
-    const result = findIncomplete({ units, products })
 
-    expect(result.units.map((entry) => entry.id)).toEqual(['a', 'c'])
-    expect(result.products.map(({ product, gap }) => [product.id, gap])).toEqual([
-      ['schaetzung', 'unconfirmed'],
-      ['ohne-kcal', 'missing'],
+    expect(incompleteReasonCounts(units)).toEqual([
+      { reason: 'nutrition-missing', packages: 1 },
+      { reason: 'date-missing', packages: 2 },
+      { reason: 'estimate-unconfirmed', packages: 2 },
     ])
   })
 
-  it('liefert leere Listen bei vollständigem oder leerem Vorrat', () => {
-    expect(findIncomplete({ units: [], products: [] })).toEqual({ units: [], products: [] })
-    const complete = findIncomplete({
-      units: [unit('a', true)],
-      products: [{ nutrition: nutrition('label'), foodTypeReference: null }],
-    })
-    expect(complete).toEqual({ units: [], products: [] })
+  it('liefert nichts bei vollständigem oder leerem Vorrat', () => {
+    expect(incompleteReasonCounts([])).toEqual([])
+    expect(incompleteReasonCounts([check(true, null), check(true, 'no-label')])).toEqual([])
   })
 })
