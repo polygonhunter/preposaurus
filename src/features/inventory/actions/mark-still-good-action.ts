@@ -1,12 +1,12 @@
 'use server'
-// „Noch gut“ und sein Rückgängig (#47, ROT-05): setzt bzw. löscht `geprueft_am` der Packungen
-// eines Eintrags. Die Packungen bleiben im Vorrat. Rückgängig statt Rückfrage (UX-Konzept P7).
+// „Noch gut“ (#47, ROT-05): setzt `geprueft_am` der Packungen eines Eintrags bzw. einer
+// Datumszeile. Die Packungen bleiben im Vorrat. Rückgängig statt Rückfrage (UX-Konzept P7): Die
+// Oberfläche zeigt nach Erfolg die UndoBar mit `undoStillGoodAction`.
 import { refresh } from 'next/cache'
 import { requireHouseholdUser } from '@/server/auth/guards'
-import { markStillGood, undoStillGood, type StillGoodError } from '../application/mark-still-good'
+import { markStillGood, type StillGoodError } from '../application/mark-still-good'
 import { stockServices } from '../application/stock-services'
-import { stillGoodRequestSchema, undoStillGoodSchema } from '../schemas'
-import { toCalendarDay } from '@/shared/lib/dates'
+import { stillGoodRequestSchema } from '../schemas'
 import { ACCESS_MESSAGE, GONE_RELOADED, type ActionFailure } from './action-messages'
 
 export type StillGoodActionResult =
@@ -36,19 +36,4 @@ export async function markStillGoodAction(unitIds: unknown): Promise<StillGoodAc
   return result.ok
     ? { ok: true, ...result.value }
     : { ok: false, message: messageFor(result.error) }
-}
-
-/** Nimmt „Noch gut“ für die eben geprüften Packungen zurück; ist es schon weg, ist nichts zu tun. */
-export async function undoStillGoodAction(input: unknown): Promise<void> {
-  const parsed = undoStillGoodSchema.safeParse(input)
-  if (!parsed.success) return
-  const user = await requireHouseholdUser()
-  if (!user.ok) return
-  const { writer } = await stockServices()
-  await undoStillGood(writer, {
-    householdId: user.value.householdId,
-    unitIds: parsed.data.unitIds,
-    checkedAt: toCalendarDay(parsed.data.checkedAt),
-  })
-  refresh()
 }

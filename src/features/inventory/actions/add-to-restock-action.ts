@@ -1,6 +1,6 @@
 'use server'
-// „Nachkaufen“ in der Rückgängig-Zeile nach „−1“ oder „Verbraucht“ (#74, UX D15): ein Tipp, kein
-// Dialog. „Rückgängig“ nimmt einen so angelegten Eintrag wieder von der Liste (DATENKATALOG §5).
+// „Nachkaufen“ in der Rückgängig-Zeile nach „−1“, „Verbraucht“ oder „Entsorgt“ (#74, #47, UX D15):
+// ein Tipp, kein Dialog. „Rückgängig“ nimmt einen so angelegten Eintrag wieder von der Liste (DATENKATALOG §5).
 // Die Actions liegen beim Vorrat, weil dessen Oberfläche sie aufruft und Features untereinander
 // nur `application/` nutzen dürfen; die Logik steckt in den Use-Cases der Nachkaufen-Liste.
 import { addConsumedUnit } from '@/features/restock/application/add-consumed-unit'
