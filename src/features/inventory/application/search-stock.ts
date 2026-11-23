@@ -4,11 +4,10 @@
 // (berechnet, nie gespeichert) die Fachlogik.
 import 'server-only'
 import type { CalendarDay } from '@/shared/lib/dates'
-import { countsAsIncomplete, nutritionGapOf } from '../domain/incomplete'
+import { incompleteReasonCounts } from '../domain/incomplete'
 import {
   countByStatusFilter,
   matchesStatusFilter,
-  type FilterableUnit,
   type StockStatusFilter,
 } from '../domain/stock-filter'
 import type { StockProduct } from '../domain/stock-entry'
@@ -17,7 +16,7 @@ import type { StockFilter } from '../schemas/requests'
 import type { StockSearch } from '../schemas/stock'
 import { loadReadContext, type ReadContext } from './read-context'
 import type { StockReader } from './stock-reader'
-import { joinUnits, rowKeyOf, type JoinedUnit } from './stock-model'
+import { joinUnits, rowKeyOf, toFilterableUnit, type JoinedUnit } from './stock-model'
 import { buildRows, groupByKey } from './stock-rows'
 
 interface SearchInput {
@@ -31,13 +30,6 @@ const TAKEN_OUT: Partial<Record<StockStatusFilter, UnitStatus>> = {
   discarded: 'discarded',
 }
 
-const toFilterable = ({ unit, product }: JoinedUnit): FilterableUnit => ({
-  ...unit,
-  hasNutritionGap: countsAsIncomplete(
-    nutritionGapOf(product.nutrition, product.foodType?.reference ?? null),
-  ),
-})
-
 /** Packungen, die zum Zustand passen. Verbraucht und Entsorgt werden eigens nachgeladen. */
 async function matchingUnits(
   reader: StockReader,
@@ -47,7 +39,7 @@ async function matchingUnits(
   const takenOut = TAKEN_OUT[input.filter.status]
   if (takenOut === undefined) {
     return input.stock.filter((entry) =>
-      matchesStatusFilter(toFilterable(entry), input.filter.status, context),
+      matchesStatusFilter(toFilterableUnit(entry), input.filter.status, context),
     )
   }
   const productIds = input.products.map((product) => product.id)
@@ -62,7 +54,7 @@ async function countsFor(
 ): Promise<Record<StockStatusFilter, number>> {
   const productIds = input.products.map((product) => product.id)
   const taken = await reader.countUnitsByStatus(input.householdId, productIds)
-  const counts = countByStatusFilter(input.stock.map(toFilterable), context)
+  const counts = countByStatusFilter(input.stock.map(toFilterableUnit), context)
   return { ...counts, consumed: taken.consumed, discarded: taken.discarded }
 }
 
@@ -75,6 +67,7 @@ function groupsOf(
   },
 ): StockSearch['groups'] {
   const matchingByRow = groupByKey(data.matching, ({ product }) => rowKeyOf(product))
+  const stockByRow = groupByKey(data.stock, ({ product }) => rowKeyOf(product))
   const rows = buildRows({
     context,
     products: data.products,
@@ -91,6 +84,7 @@ function groupsOf(
         rows: groupRows.map(({ key, row }) => ({
           ...row,
           matchingPackages: matchingByRow.get(key)?.length ?? 0,
+          incomplete: incompleteReasonCounts((stockByRow.get(key) ?? []).map(toFilterableUnit)),
         })),
       },
     ]
