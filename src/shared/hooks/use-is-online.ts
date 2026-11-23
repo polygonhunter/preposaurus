@@ -9,6 +9,7 @@ const RETRY_INTERVAL_MS = 10_000
 
 let isOnline = true
 let retryTimer: ReturnType<typeof setInterval> | undefined
+let latestProbeId = 0
 const listeners = new Set<() => void>()
 
 function syncRetry(): void {
@@ -31,15 +32,23 @@ function setOnline(next: boolean): void {
   for (const listener of listeners) listener()
 }
 
-async function probe(): Promise<void> {
+async function isHealthReachable(): Promise<boolean> {
   try {
     const response = await fetch(HEALTH_URL, { cache: 'no-store' })
     // Eine Antwort, die vor dem Wegfall des Netzes losging, zählt nicht mehr.
-    setOnline(response.ok && navigator.onLine)
+    return response.ok && navigator.onLine
   } catch {
     // Kein Netz oder NAS nicht erreichbar: genau das soll der Hinweis zeigen.
-    setOnline(false)
+    return false
   }
+}
+
+async function probe(): Promise<void> {
+  const probeId = ++latestProbeId
+  const reachable = await isHealthReachable()
+  // Nur die jüngste Nachfrage zählt: Ein Fehlschlag von vor dem Wiederverbinden sperrte sonst die
+  // App, bis die nächste Nachfrage durch ist.
+  if (probeId === latestProbeId) setOnline(reachable)
 }
 
 const goOffline = () => {

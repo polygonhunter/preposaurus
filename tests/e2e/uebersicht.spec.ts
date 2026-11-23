@@ -2,8 +2,9 @@ import { expect, test, type Page } from '@playwright/test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Übersicht (#67 bis #70) mit dem Beispielvorrat (tests/e2e/beispielvorrat.setup.ts): 3 Personen,
-// Quelle BBK/BLE aus dem Seed (#20), Ziel 10 Tage in 40 Tagen. Die MHDs stehen relativ zum Tag des Seeds, und
-// vorrat-entnehmen.spec.ts entnimmt parallel. Deshalb prüfen die Tests Aufbau, keine Zählerstände.
+// Quelle BBK/BLE aus dem Seed (#20), Ziel 10 Tage in 40 Tagen. Die MHDs stehen relativ zum Tag des
+// Seeds, und vorrat-entnehmen.spec.ts entnimmt parallel. Deshalb prüfen die Tests Aufbau, keine
+// Zählerstände.
 // Die leere Übersicht prüft einrichtung.setup.ts direkt nach der Einrichtung.
 
 const dueSection = (page: Page) => page.getByRole('region', { name: 'Bald fällig' })

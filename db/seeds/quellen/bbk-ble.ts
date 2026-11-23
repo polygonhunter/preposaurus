@@ -1,7 +1,10 @@
 // Empfehlungsquelle BBK/BLE (UMSETZUNG M1-09, #20). Werte aus dem Prüfblatt
 // docs/quellen/EMPFEHLUNGSWERTE.md (Abruf aller Quellen 2026-11-22), §1.2 Mengen und §2.2 Bedarf.
 // NOCH NICHT VOM MAINTAINER GEPRÜFT (U3 offen): isVerified bleibt false, die App zeigt bei dieser
-// Quelle „Werte noch nicht geprüft“. Nach der Freigabe nur hier isVerified auf true setzen.
+// Quelle „Werte noch nicht geprüft“. Nach der Freigabe nur hier isVerified auf true setzen: Der
+// Seed (Dienst „migrate“) stellt die bestehende Fassung per Upsert um. Ändert die Freigabe Werte,
+// bleibt der Stand gleich und der Upsert überschreibt die ungeprüfte Fassung. Eine spätere neue
+// Fassung braucht einen neuen Stand; wie Haushalte dann wechseln, klärt #222.
 //
 // Fundstellen:
 // - BBK, Ratgeber „Vorsorgen für Krisen und Katastrophen“, Stand 11/2025, 2. Auflage: 10 Tage,

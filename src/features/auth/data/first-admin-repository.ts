@@ -1,7 +1,7 @@
 // Ersteinrichtung (#34, ONBOARDING §2.3): erster Admin, Haushalt mit Standardquelle, Einstellungen
-// und Ziel in einer Transaktion. Die Tabellensperre auf nutzer hält einen zweiten, gleichzeitigen Aufruf an, bis der
-// erste fertig ist. Danach sieht er den neuen Nutzer und legt nichts an. SHARE ROW EXCLUSIVE sperrt
-// sich selbst und jedes INSERT, also auch Wege am Use-Case vorbei.
+// und Ziel in einer Transaktion. Die Tabellensperre auf nutzer hält einen zweiten, gleichzeitigen
+// Aufruf an, bis der erste fertig ist. Danach sieht er den neuen Nutzer und legt nichts an.
+// SHARE ROW EXCLUSIVE sperrt sich selbst und jedes INSERT, also auch Wege am Use-Case vorbei.
 // Der Nutzer entsteht am Username-Plugin vorbei, weil Better Auth keine fremde Transaktion kennt.
 // Spalten und technische E-Mail wie bei Better Auth (05_STATUS „Konto“), der Hash kommt fertig.
 import 'server-only'

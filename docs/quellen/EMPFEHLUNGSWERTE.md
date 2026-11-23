@@ -1,6 +1,6 @@
 # Prüfblatt Empfehlungswerte (M1-08)
 
-Prüfblatt für den Maintainer (U3). Erst nach Freigabe kommen die Werte als Seed in die Datenbank (M1-09).
+Prüfblatt für den Maintainer (U3). Die Werte stehen als Seed in `db/seeds/quellen/bbk-ble.ts` (M1-09, #20), bis zur Freigabe mit `geprueft = false` und dem Hinweis „Werte noch nicht geprüft“ in der App.
 **Abrufdatum aller Quellen: 2026-11-22.** Issue: #19, dazu #128 (Startliste der Lebensmittelarten).
 
 **Kennzeichnung**

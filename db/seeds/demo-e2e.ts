@@ -3,9 +3,9 @@
 // laufenden Server Personen, Lagerorte und Vorrat in den neuen Haushalt. Ein zweiter Prozess darf
 // die PGlite-Datei nicht öffnen, solange der Server läuft, deshalb geht es nicht per Skript.
 // Die Empfehlungsquelle BBK/BLE bekommt der Haushalt schon bei der Einrichtung aus dem Seed (#20).
-// Dazu ein Zieldatum, damit die Übersicht die Zielzeile zeigt (#67 bis #70), und ein Login mit der Rolle Mitglied (Sam), damit die Tests die Sicht eines
-// Mitglieds prüfen können (#37). Das Passwort ist erfunden und gilt nur in der Wegwerf-Datenbank
-// der Tests.
+// Dazu ein Zieldatum, damit die Übersicht die Zielzeile zeigt (#67 bis #70), und ein Login mit der
+// Rolle Mitglied (Sam), damit die Tests die Sicht eines Mitglieds prüfen können (#37). Das Passwort
+// ist erfunden und gilt nur in der Wegwerf-Datenbank der Tests.
 import { and, eq, isNull } from 'drizzle-orm'
 import type { Database } from '../../src/server/db/connection'
 import { getDb } from '../../src/server/db/get-db'
