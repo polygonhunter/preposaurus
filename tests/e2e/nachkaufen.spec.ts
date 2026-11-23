@@ -34,7 +34,7 @@ test('zeigt die Lücken bis zum Ziel und die eigenen Einträge', async ({ page }
   await expect(gaps.getByRole('listitem').first()).toContainText('z. B. Sprudelwasser')
   await expect(
     list(page, 'Ersetzen')
-      .getByRole('button', { name: /^Auf die Liste: / })
+      .getByRole('button', { name: /^Auf die Liste\s+für / })
       .first(),
   ).toBeVisible()
   await expect(
@@ -111,9 +111,11 @@ test('setzt nach „−1“ mit einem Tipp auf die Liste, Rückgängig nimmt es 
 
 test('setzt einen Vorschlag auf die Liste, Entfernen hat Rückgängig', async ({ page }, info) => {
   onlyDesktop(info.project.name)
+  // Viele Schritte nacheinander, jeder lädt die Liste neu
+  test.slow()
   await page.goto('/nachkaufen')
   const replace = list(page, 'Ersetzen')
-  const suggestion = replace.getByRole('button', { name: 'Auf die Liste: Haferflocken' })
+  const suggestion = replace.getByRole('button', { name: /^Auf die Liste\s+für Haferflocken$/ })
   const entry = replace.getByRole('checkbox', { name: 'Haferflocken' })
 
   await suggestion.click()
@@ -121,7 +123,6 @@ test('setzt einen Vorschlag auf die Liste, Entfernen hat Rückgängig', async ({
   await expect(listed).toBeVisible()
   await expect(entry).not.toBeChecked()
   await expect(suggestion).toHaveCount(0)
-  await expectAccessibleLayout(page)
 
   await listed.getByRole('button', { name: 'Rückgängig' }).click()
   await expect(entry).toHaveCount(0)
@@ -139,6 +140,7 @@ test('setzt einen Vorschlag auf die Liste, Entfernen hat Rückgängig', async ({
 
   await removeEntry(page, 'Haferflocken')
   await expect(suggestion).toBeVisible()
+  await expectAccessibleLayout(page)
 })
 
 test.describe('zwei Nutzer im selben Haushalt', () => {
@@ -148,6 +150,8 @@ test.describe('zwei Nutzer im selben Haushalt', () => {
     baseURL,
   }, info) => {
     onlyDesktop(info.project.name)
+    // Zwei Sitzungen nacheinander, dazu eine Anmeldung über die Oberfläche
+    test.slow()
     await page.goto('/nachkaufen')
     await page.getByLabel('Eintrag ergänzen').fill('Zwieback')
     await page.getByRole('button', { name: 'Hinzufügen' }).click()

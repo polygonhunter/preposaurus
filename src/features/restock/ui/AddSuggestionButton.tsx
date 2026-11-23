@@ -17,7 +17,7 @@ export function AddSuggestionButton({ suggestion }: AddSuggestionButtonProps) {
         addSuggestion(suggestion)
       }}
     >
-      Auf die Liste<span className="sr-only">: {suggestion.label}</span>
+      Auf die Liste<span className="sr-only"> für {suggestion.label}</span>
     </Button>
   )
 }
