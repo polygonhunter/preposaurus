@@ -36,7 +36,7 @@ Preposaurus läuft als kleine Gruppe von Containern (Programmpaketen) mit Docker
 | `web` | die App selbst |
 | `backup` | sichert jede Nacht Datenbank und Fotos |
 | `tailscale` | bringt die App verschlüsselt (HTTPS) in dein privates Tailscale-Netz |
-| `worker` | erledigt Aufgaben nach Zeitplan im Hintergrund (nächtliches Aufräumen, später Erinnerungen und Mails) |
+| `worker` | erledigt Aufgaben nach Zeitplan im Hintergrund: Wochenübersicht, „Bald verbrauchen“, Check-in-Mail, nächtliches Aufräumen |
 
 **Erreichbar ist die App nur über Tailscale**, nicht aus dem offenen Internet und nicht direkt im Heimnetz. Tailscale ist ein privates, verschlüsseltes Netz zwischen deinen eigenen Geräten (dem „Tailnet“). Die App bekommt darin eine Adresse wie `https://haushalt.dein-tailnet.ts.net`.
 
@@ -204,8 +204,14 @@ docker run --rm alpine:3.22 sh -c "apk add -q openssl && openssl rand -base64 32
 | `TZ` | nein | Zeitzone für die Sicherung, Standard `Europe/Berlin` |
 | `LOG_LEVEL` | nein | Wie viel die App ins Log schreibt: `debug`, `info` (Standard), `warn` oder `error` |
 | `ANTHROPIC_API_KEY` | nein | Schlüssel für die Foto-Erkennung. Normalerweise trägt ihn der Admin **in der App** ein (dort verschlüsselt gespeichert). Steht er hier, hat er Vorrang. Ohne Schlüssel geht alles von Hand |
+| `SMTP_HOST` | nein | Mailserver für die Wochenübersicht (wenn kein Gerät Push hat) und die Check-in-Mail. Leer: keine Mails, alles andere läuft weiter |
+| `SMTP_PORT` | nein | Port des Mailservers, Standard `587` (STARTTLS). Bei `465` gilt TLS von Anfang an |
+| `SMTP_SECURE` | nein | `true` oder `false` erzwingt TLS von Anfang an bzw. schaltet es ab. Leer: nach Port |
+| `SMTP_USER`, `SMTP_PASSWORD` | nein | Anmeldung am Mailserver. Beide setzen oder beide leer lassen (z. B. Relay im eigenen Netz) |
+| `SMTP_FROM` | mit `SMTP_HOST` | Absender, z. B. `Preposaurus <vorrat@example.org>` |
+| `APP_URL` | nein | Adresse der App, z. B. `https://haushalt.dein-tailnet.ts.net`. Nur für den Link „Vorrat öffnen“ in Mails. Leer: Mails ohne Link |
 
-Mail (SMTP) und Push-Benachrichtigungen kommen mit einer späteren Version. Beides wird optional sein.
+Mails sind optional. Sie gehen nur an Nutzer mit einer echten E-Mail-Adresse; die Anmeldung braucht keine. Das Feld für die eigene Adresse kommt mit dem Profil in einer späteren Version, bis dahin geht keine Mail hinaus. Push-Benachrichtigungen folgen ebenfalls später.
 
 Erwartet: `docker compose config --quiet` gibt nichts aus. Fehlt ein Pflichtwert, nennt die Meldung die Variable, z. B. `APP_SECRET fehlt in .env`.
 

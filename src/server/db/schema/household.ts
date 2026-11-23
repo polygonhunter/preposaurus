@@ -79,6 +79,10 @@ export const householdSettings = pgTable(
       .notNull()
       .default(DEFAULT_WEEKLY_SUMMARY_TIME),
     urgentEnabled: boolean('dringend_aktiv').notNull().default(true),
+    // Merker des Workers „zuletzt gesendet“ (SCHNITTSTELLEN Nr. 27): je Art höchstens eine
+    // Nachricht am Tag, „Dringend“ meldet nur Neues seit dem letzten Versand. Leer: noch nie.
+    weeklySummarySentAt: timestampTz('wochenuebersicht_gesendet_am'),
+    urgentSentAt: timestampTz('dringend_gesendet_am'),
     setupCompletedAt: timestampTz('einrichtung_abgeschlossen_am'),
     // Zuletzt erledigter Schritt der Ersteinrichtung, damit sie nach einem Abbruch dort weitergeht
     // (ONBOARDING §2.3). Bewusst ohne Obergrenze, damit ein weiterer Schritt keine Migration braucht.

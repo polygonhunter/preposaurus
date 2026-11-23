@@ -1,8 +1,11 @@
 // Einstieg des Worker-Containers (UMSETZUNG M11-01): `preposaurus worker` im Image, lokal
 // `npm run worker`. Derselbe Code wie der Webserver, nur ein anderer Einstieg.
-import { jobDatabaseFor, startJobQueue } from '@/server/jobs/job-queue'
-import { loadEnv } from '@/shared/config/env'
-import { createLogger, type Logger } from '@/shared/lib/logger'
+import { noPush } from '@/features/reminders/application/reminder-push'
+import { closeDb } from '@/server/db/get-db'
+import { jobDatabaseFor, startJobQueue, type JobDatabase } from '@/server/jobs/job-queue'
+import { createMailSender } from '@/server/notify/create-mail-sender'
+import { loadEnv, type Env } from '@/shared/config/env'
+import { createLogger } from '@/shared/lib/logger'
 import { createJobs } from './jobs'
 import { stopOnSignal } from './shutdown'
 
@@ -14,25 +17,30 @@ function fail(message: string, context?: Record<string, unknown>): void {
   process.exitCode = 1
 }
 
-async function startWorker(databaseUrl: string, log: Logger): Promise<void> {
-  const database = jobDatabaseFor(databaseUrl)
-  if (!database.ok) {
-    fail('Der Worker braucht PostgreSQL (DATABASE_URL mit postgres://).')
-    return
-  }
-  const jobs = createJobs()
-  const queue = await startJobQueue({ database: database.value, jobs, logger: log })
-  log.info('Worker gestartet', { jobs: jobs.map((job) => job.name) })
+async function startWorker(database: JobDatabase, settings: Env): Promise<void> {
+  const mail = createMailSender(settings)
+  // Push kommt mit M11-03 (#86). Bis dahin geht die Wochenübersicht nur als Mail.
+  const jobs = createJobs({ mail, push: noPush, appUrl: settings.APP_URL ?? null })
+  const queue = await startJobQueue({ database, jobs, logger })
+  logger.info('Worker gestartet', { jobs: jobs.map((job) => job.name), mail: mail.isConfigured })
   stopOnSignal(process, {
-    stop: queue.stop,
-    logger: log,
+    stop: async () => {
+      await queue.stop()
+      await closeDb()
+    },
+    logger,
     onFailure: () => {
       process.exitCode = 1
     },
   })
 }
 
-// Scheitert der Start (z. B. Datenbank nicht erreichbar), startet Compose den Dienst neu.
-await startWorker(env.DATABASE_URL, logger).catch((error: unknown) => {
-  fail('Worker konnte nicht starten', { error })
-})
+const database = jobDatabaseFor(env.DATABASE_URL)
+if (database.ok) {
+  // Scheitert der Start (z. B. Datenbank nicht erreichbar), startet Compose den Dienst neu.
+  await startWorker(database.value, env).catch((error: unknown) => {
+    fail('Worker konnte nicht starten', { error })
+  })
+} else {
+  fail('Der Worker braucht PostgreSQL (DATABASE_URL mit postgres://).')
+}
