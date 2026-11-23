@@ -52,3 +52,11 @@ export interface ProductCandidate extends ProductIdentity {
   containerName: string | null
   storageLocationName: string | null
 }
+
+/** Fotos eines Entwurfs werden beim Speichern fest und gehören dann zum Produkt (#66). */
+export interface DraftAdoption {
+  householdId: string
+  userId: string
+  draftId: string
+  productId: string
+}

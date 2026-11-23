@@ -3,6 +3,7 @@ import { getCaptureOptions, type CaptureOptionsReader } from './get-capture-opti
 
 const noodles = {
   id: 'nudeln',
+  key: 'nudeln',
   name: 'Nudeln',
   categoryName: 'Nudeln, Reis und Getreide',
   productGroupName: 'Getreide',
@@ -12,7 +13,7 @@ const noodles = {
 function fakeReader(change: Partial<CaptureOptionsReader> = {}): CaptureOptionsReader {
   return {
     loadFoodTypes: () => Promise.resolve([noodles]),
-    loadContainers: () => Promise.resolve([{ id: 'dose', name: 'Dose' }]),
+    loadContainers: () => Promise.resolve([{ id: 'dose', key: 'dose', name: 'Dose' }]),
     loadStorageLocations: () => Promise.resolve([{ id: 'keller', name: 'Keller' }]),
     loadLastUsed: () =>
       Promise.resolve({ storageLocationId: 'keller', foodTypeIds: ['nudeln', 'weg'] }),
@@ -27,7 +28,7 @@ describe('getCaptureOptions', () => {
 
     expect(options).toEqual({
       foodTypes: [noodles],
-      containers: [{ id: 'dose', name: 'Dose' }],
+      containers: [{ id: 'dose', key: 'dose', name: 'Dose' }],
       storageLocations: [{ id: 'keller', name: 'Keller' }],
       lastStorageLocationId: 'keller',
       recentFoodTypeIds: ['nudeln'],

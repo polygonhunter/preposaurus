@@ -14,15 +14,18 @@ const MISSING_DATE_LABEL = 'Datum fehlt'
 
 const MISSING_DATE_KEY = 'fehlt'
 
-/** Gleiches Datum mit gleicher Genauigkeit ist derselbe Eintrag. */
+/** Gleiches Datum mit gleicher Genauigkeit ist derselbe Eintrag, eine Schätzung bleibt getrennt. */
 export function dateEntryKey({ bestBefore }: Pick<DateEntry, 'bestBefore'>): string {
   if (bestBefore === null) return MISSING_DATE_KEY
-  return `${bestBefore.date}:${bestBefore.precision}`
+  const estimated = bestBefore.isEstimated ? ':geschaetzt' : ''
+  return `${bestBefore.date}:${bestBefore.precision}${estimated}`
 }
 
-/** „30.09.2027“, „09/2027“, „2027“ oder „Datum fehlt“ */
+/** „30.09.2027“, „09/2027“, „2027“ oder „Datum fehlt“. Eine Schätzung (#124) sagt es dazu. */
 export function dateEntryLabel({ bestBefore }: Pick<DateEntry, 'bestBefore'>): string {
-  return bestBefore === null ? MISSING_DATE_LABEL : formatDayWithPrecision(bestBefore)
+  if (bestBefore === null) return MISSING_DATE_LABEL
+  const label = formatDayWithPrecision(bestBefore)
+  return bestBefore.isEstimated ? `${label} (geschätzt)` : label
 }
 
 /** Früheste Daten zuerst, „Datum fehlt“ zuletzt. */

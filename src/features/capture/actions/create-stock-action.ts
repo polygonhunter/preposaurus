@@ -39,9 +39,9 @@ function accessMessage(error: AccessError): string {
 }
 
 const REFERENCE_MESSAGES = {
-  'food-type': 'Diese Lebensmittelart gibt es nicht mehr. Bitte wähle sie neu aus.',
-  'storage-location': 'Diesen Lagerort gibt es nicht mehr. Bitte wähle ihn neu aus.',
-  container: 'Diesen Behälter gibt es nicht mehr. Bitte wähle ihn neu aus.',
+  'food-type': 'Diese Lebensmittelart gibt es nicht mehr. Bitte wählt sie neu aus.',
+  'storage-location': 'Diesen Lagerort gibt es nicht mehr. Bitte wählt ihn neu aus.',
+  container: 'Diesen Behälter gibt es nicht mehr. Bitte wählt ihn neu aus.',
   product: 'Dieses Produkt gibt es nicht mehr. Bitte lege es neu an.',
 } as const
 
@@ -61,7 +61,7 @@ export async function createStockAction(input: unknown): Promise<CreateStockStat
   if (!user.ok) return failure(accessMessage(user.error))
   const parsed = createStockSchema.safeParse(input)
   if (!parsed.success) {
-    return failure('Bitte prüfe die Angaben.', z.flattenError(parsed.error).fieldErrors)
+    return failure('Bitte prüft die Angaben.', z.flattenError(parsed.error).fieldErrors)
   }
   const result = await createStockForUser(
     { householdId: user.value.householdId, userId: user.value.id },

@@ -27,6 +27,7 @@ function draft(overrides: Partial<StockDraft> = {}): StockDraft {
   return {
     captureId: 'erfassung-1',
     method: 'photo',
+    draftId: null,
     product: {
       kind: 'new',
       foodTypeId: noodles.id,
@@ -143,7 +144,7 @@ describe('createStock', () => {
       const result = await save({ ...base, product })
 
       expect(result).toEqual({ ok: false, error: { kind: 'not-found', reference: ref } })
-      expect(writer.state).toEqual({ captures: [], products: [], units: [] })
+      expect(writer.state).toEqual({ captures: [], products: [], units: [], adoptedDrafts: [] })
     },
   )
 
@@ -165,7 +166,7 @@ describe('createStock', () => {
 
     await expect(save(draft())).rejects.toThrow()
 
-    expect(writer.state).toEqual({ captures: [], products: [], units: [] })
+    expect(writer.state).toEqual({ captures: [], products: [], units: [], adoptedDrafts: [] })
   })
 
   it('setzt die Bestätigung einer KI-Schätzung der Nährwerte auf jetzt', async () => {
@@ -187,5 +188,26 @@ describe('createStock', () => {
       source: 'ai-estimate',
       confirmedAt: now,
     })
+  })
+
+  it('übernimmt beim Foto-Weg die Fotos des Entwurfs zum neuen Produkt (#66)', async () => {
+    const { writer, save } = setup()
+
+    const result = await save(draft({ draftId: 'entwurf-1' }))
+
+    const productId = result.ok ? result.value.productId : ''
+    expect(writer.state.adoptedDrafts).toEqual([
+      { householdId, userId, draftId: 'entwurf-1', productId },
+    ])
+  })
+
+  it('fasst ohne Entwurf keinen an und übernimmt beim doppelten Speichern nichts erneut', async () => {
+    const { writer, save } = setup()
+
+    await save(draft())
+    await save(draft({ captureId: 'erfassung-2', draftId: 'entwurf-1' }))
+    await save(draft({ captureId: 'erfassung-2', draftId: 'entwurf-1' }))
+
+    expect(writer.state.adoptedDrafts.map((adoption) => adoption.draftId)).toEqual(['entwurf-1'])
   })
 })
