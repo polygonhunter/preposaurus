@@ -25,11 +25,17 @@ async function scrollToEnd(page: Page): Promise<void> {
   })
 }
 
+// Länger als die kurze Lücke beim Streaming, kürzer als ein hängender Test
+const TITLE_TIMEOUT_MS = 5000
+
 // Next streamt die Metadaten: Nach einer Navigation (z. B. Suche per next/form) steht der neue Inhalt
 // schon da, der `<title>` folgt erst einen Augenblick später. In dieser Lücke meldet axe
 // „document-title“ (#263). Deshalb erst warten, bis die Seite wieder einen Titel hat.
 async function waitForTitle(page: Page): Promise<void> {
-  await expect(page).toHaveTitle(/\S/)
+  await expect(page, 'Die Seite hat keinen <title>, axe würde „document-title“ melden').toHaveTitle(
+    /\S/,
+    { timeout: TITLE_TIMEOUT_MS },
+  )
 }
 
 async function expectNoAxeViolations(page: Page): Promise<void> {
