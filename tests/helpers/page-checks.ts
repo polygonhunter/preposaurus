@@ -25,7 +25,15 @@ async function scrollToEnd(page: Page): Promise<void> {
   })
 }
 
+// Next streamt die Metadaten: Nach einer Navigation (z. B. Suche per next/form) steht der neue Inhalt
+// schon da, der `<title>` folgt erst einen Augenblick später. In dieser Lücke meldet axe
+// „document-title“ (#263). Deshalb erst warten, bis die Seite wieder einen Titel hat.
+async function waitForTitle(page: Page): Promise<void> {
+  await expect(page).toHaveTitle(/\S/)
+}
+
 async function expectNoAxeViolations(page: Page): Promise<void> {
+  await waitForTitle(page)
   await scrollToEnd(page)
   await waitForSettledAnimations(page)
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze()
