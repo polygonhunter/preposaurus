@@ -2,8 +2,10 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
+import { cx } from '@/shared/lib/class-names'
 import { Button } from '@/shared/ui/Button'
 import { LiveMessage } from '@/shared/ui/LiveMessage'
+import { FOLD_SPLIT_COLUMNS } from '@/shared/ui/split-columns'
 import type { CaptureOptions } from '../domain/capture-options'
 import type { CapturePrefill } from '../domain/capture-prefill'
 import { CaptureSaved } from './CaptureSaved'
@@ -35,6 +37,14 @@ const isNutritionField = (field: CaptureField) =>
 /** Vorbelegt geht es beim Inhalt weiter, mit vorgewähltem Produkt gleich beim MHD (F2). */
 const firstPrefilledField = (prefill: CapturePrefill) =>
   prefill.product === null ? ('content' as const) : ('units' as const)
+
+// Ab „breit“ zwei Spalten mit der Grenze in der Fenstermitte (Falz beim Duo quer), ab „weit“ zwei
+// gleich breite Spalten (ManualCaptureFields ordnet die Felder zu).
+const FORM_COLUMNS = cx(
+  'pb-6',
+  FOLD_SPLIT_COLUMNS,
+  'breit:items-start weit:max-w-[1080px] weit:grid-cols-2',
+)
 
 const firstMessage = (errors: CaptureErrors) => Object.values(errors).find(Boolean) ?? null
 
@@ -88,7 +98,7 @@ export function ManualCapture({ options, prefill }: ManualCaptureProps) {
       ref={formRef}
       noValidate
       aria-label="Produkt erfassen"
-      className="pb-6 breit:max-w-2xl"
+      className={FORM_COLUMNS}
       onSubmit={(event) => {
         event.preventDefault()
         capture.submit()
@@ -100,16 +110,17 @@ export function ManualCapture({ options, prefill }: ManualCaptureProps) {
         view={view}
         nutritionOpen={{ isOpen: isNutritionOpen, onToggle: setNutritionOpen }}
         onFocus={focusField}
-      />
-      <LiveMessage message={firstMessage(capture.errors)} />
-      <div className="mx-4 flex flex-col gap-3 pt-8 breit:mx-6">
-        {capture.errors.form ? (
-          <p className="px-4 text-footnote text-red">{capture.errors.form}</p>
-        ) : null}
-        <Button type="submit" pendingLabel={capture.isSaving ? 'Speichert …' : undefined}>
-          Speichern
-        </Button>
-      </div>
+      >
+        <LiveMessage message={firstMessage(capture.errors)} />
+        <div className="mx-4 flex flex-col gap-3 pt-8 breit:mx-6">
+          {capture.errors.form ? (
+            <p className="px-4 text-footnote text-red">{capture.errors.form}</p>
+          ) : null}
+          <Button type="submit" pendingLabel={capture.isSaving ? 'Speichert …' : undefined}>
+            Speichern
+          </Button>
+        </div>
+      </ManualCaptureFields>
     </form>
   )
 }

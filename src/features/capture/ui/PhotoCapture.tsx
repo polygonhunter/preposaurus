@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import type { CaptureOptions } from '../domain/capture-options'
 import { initialPhotoCapture, type PhotoCaptureState } from './photo-capture-state'
 import { PhotoCaptureFlow } from './PhotoCaptureFlow'
@@ -11,11 +11,13 @@ type PhotoCaptureProps = Readonly<{
   initial: PhotoCaptureState
   /** Satz, warum die Erkennung aus ist, sonst null (#210) */
   recognitionOff: string | null
+  /** Titel und Umschalter, ab „breit“ rechts neben der Kamera */
+  header: ReactNode
 }>
 
 // Foto-Erfassung (#61 bis #66): Kamera, Prüfen, Speichern. „Noch eins“ und „Verwerfen“ beginnen
 // mit einem frischen Stand, die Vorbelegung kommt dann neu vom Server.
-export function PhotoCapture({ options, initial, recognitionOff }: PhotoCaptureProps) {
+export function PhotoCapture({ options, initial, recognitionOff, header }: PhotoCaptureProps) {
   const router = useRouter()
   const [run, setRun] = useState({ generation: 0, initial })
   return (
@@ -24,6 +26,7 @@ export function PhotoCapture({ options, initial, recognitionOff }: PhotoCaptureP
       options={options}
       initial={run.initial}
       recognitionOff={recognitionOff}
+      header={header}
       onRestart={() => {
         setRun((previous) => ({
           generation: previous.generation + 1,
