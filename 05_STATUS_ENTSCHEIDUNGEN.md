@@ -382,6 +382,7 @@ Beim Datenmodell getroffen, Details in den Kopfkommentaren von `src/server/db/sc
 - **Eigene Fehlerseiten (#215):** `src/app/not-found.tsx` („Diese Seite gibt es nicht.“, „Zur Übersicht“), `error.tsx` und `global-error.tsx` („Das hat gerade nicht geklappt. Bitte noch einmal versuchen.“, „Neu laden“ per `retry()`), schmale Spalte `StandalonePage` wie Anmelden.
 - **Lizenz und Quellen für alle (#217):** Gruppe „Daten & System“ und `/einstellungen/system` sehen alle Angemeldeten (AGPL). Nutzerverwaltung bleibt Admin; künftige Admin-Teile (Export) prüfen die Rolle auf ihrer Seite.
 - **Filter „Unvollständig“ (#213):** zählt nur Packungen ohne Datum, Produkte ohne kcal (auch ohne Richtwert) und unbestätigte KI-Schätzungen (`countsAsIncomplete`). Fehlen nur die freiwilligen eigenen Nährwerte und der Richtwert springt ein, gilt die Packung als vollständig (UX-Konzept §4: „Nährwerte: Richtwert“, „ca.“). Grund je Zeile und Zähler an den Chips sind noch offen (#221).
+- **Verbindungsprüfung (Review #220):** Nur die jüngste Nachfrage an `/api/health` zählt. Nach dem Ereignis „online“ fragt `useIsOnline` bei einem Fehlschlag nach 0,5 s und 1,5 s noch einmal nach, bevor die App wieder sperrt (der Browser meldet „online“ oft, bevor das Netz trägt).
 - **E2E** nutzen jetzt die echte Quelle aus dem Seed (die Einrichtung setzt sie); die erfundene `demo-source.ts` bleibt für Integrationstests und `db:seed:demo`.
 
 ## Offene Fragen an den Maintainer (endgültige Entscheidung steht noch aus)
