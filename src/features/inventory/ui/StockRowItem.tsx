@@ -25,6 +25,7 @@ export function StockRowItem({ row, note, isSelected = false }: StockRowItemProp
     next === null ? null : `${row.state === 'expired' ? 'nächstes MHD ' : ''}${formatDate(next)}`
   return (
     <Row
+      focusKey={`${row.target.kind}-${row.target.id}`}
       title={row.name}
       subtitle={
         <>

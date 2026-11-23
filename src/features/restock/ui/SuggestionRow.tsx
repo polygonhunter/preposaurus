@@ -10,6 +10,7 @@ type SuggestionRowProps = Readonly<{ suggestion: RestockSuggestionDto }>
 export function SuggestionRow({ suggestion }: SuggestionRowProps) {
   return (
     <Row
+      focusKey={`suggestion-${suggestion.rowKey}`}
       title={suggestion.label}
       subtitle={suggestionReasonText(suggestion)}
       accessory={

@@ -17,6 +17,12 @@ const list = (page: Page, name: string) => page.getByRole('list', { name })
 
 const undoBar = (page: Page, text: string) => page.getByRole('status').filter({ hasText: text })
 
+const undoButton = (page: Page, text: string) =>
+  undoBar(page, text).getByRole('button', { name: 'Rückgängig' })
+
+// Der Fokus ist nach einer Handlung per Tastatur noch auf der Seite, nicht auf body (#269)
+const focusIn = (page: Page, name: string) => list(page, name).locator(':focus')
+
 async function removeEntry(page: Page, label: string) {
   await page.getByRole('button', { name: `${label} entfernen` }).click()
   await expect(page.getByRole('checkbox', { name: label })).toHaveCount(0)
@@ -126,25 +132,31 @@ test('setzt einen Vorschlag auf die Liste, Entfernen hat Rückgängig', async ({
   const suggestion = replace.getByRole('button', { name: /^Auf die Liste\s+für Haferflocken$/ })
   const entry = replace.getByRole('checkbox', { name: 'Haferflocken' })
 
-  await suggestion.click()
-  const listed = undoBar(page, 'Haferflocken steht jetzt auf der Liste.')
-  await expect(listed).toBeVisible()
+  const remove = page.getByRole('button', { name: 'Haferflocken entfernen' })
+
+  // Per Tastatur: Der Fokus bleibt in der Liste und kehrt mit „Rückgängig“ zurück (#269)
+  await suggestion.press('Enter')
+  const listed = 'Haferflocken steht jetzt auf der Liste.'
+  await expect(undoBar(page, listed)).toBeVisible()
   await expect(entry).not.toBeChecked()
   await expect(suggestion).toHaveCount(0)
+  await expect(focusIn(page, 'Ersetzen')).toHaveCount(1)
 
-  await listed.getByRole('button', { name: 'Rückgängig' }).click()
+  await undoButton(page, listed).press('Enter')
   await expect(entry).toHaveCount(0)
-  await expect(suggestion).toBeVisible()
+  await expect(suggestion).toBeFocused()
 
-  await suggestion.click()
+  await suggestion.press('Enter')
   await expect(entry).toBeVisible()
-  await page.getByRole('button', { name: 'Haferflocken entfernen' }).click()
-  const removed = undoBar(page, 'Haferflocken entfernt.')
-  await expect(removed).toBeVisible()
+  await remove.press('Enter')
+  const removed = 'Haferflocken entfernt.'
+  await expect(undoBar(page, removed)).toBeVisible()
   await expect(entry).toHaveCount(0)
+  await expect(focusIn(page, 'Ersetzen')).toHaveCount(1)
 
-  await removed.getByRole('button', { name: 'Rückgängig' }).click()
+  await undoButton(page, removed).press('Enter')
   await expect(entry).toBeVisible()
+  await expect(remove).toBeFocused()
 
   await removeEntry(page, 'Haferflocken')
   await expect(suggestion).toBeVisible()
@@ -184,19 +196,26 @@ test('blendet eine Lücke aus und holt sie zurück, hakt sie ab und öffnet sie 
   await page.goto('/nachkaufen')
   const subtitle = await page.getByText(/unter dem Ziel$/).textContent()
   const name = await lastGapName(page)
-  const gap = list(page, 'Fehlt bis zum Ziel').getByRole('checkbox', { name })
+  const gaps = list(page, 'Fehlt bis zum Ziel')
+  const gap = gaps.getByRole('checkbox', { name })
+  // Die Lücke davor bekommt den Fokus, wenn die letzte geht (keine nächste Zeile, #269)
+  const before = gaps.getByRole('checkbox', {
+    name: (await gaps.getByRole('checkbox').nth(-2).getAttribute('aria-label')) ?? '',
+  })
   const hide = page.getByRole('button', { name: new RegExp(`^Ausblenden\\s+${name}$`) })
   const show = page.getByRole('button', { name: new RegExp(`^Wieder zeigen\\s+${name}$`) })
 
-  await hide.click()
+  await hide.press('Enter')
   const hidden = undoBar(page, `${name} ausgeblendet.`)
   await expect(hidden).toBeVisible()
   await expect(gap).toHaveCount(0)
+  await expect(before).toBeFocused()
   await expect(list(page, 'Ausgeblendet').getByRole('listitem')).toContainText(name)
   // Unter dem Ziel bleibt die Warengruppe trotzdem, wie auf der Übersicht
   await expect(page.getByText(/unter dem Ziel$/)).toHaveText(subtitle ?? '')
-  await hidden.getByRole('button', { name: 'Rückgängig' }).click()
+  await hidden.getByRole('button', { name: 'Rückgängig' }).press('Enter')
   await expect(gap).toBeVisible()
+  await expect(hide).toBeFocused()
 
   await hide.click()
   await expect(show).toBeVisible()
@@ -206,18 +225,22 @@ test('blendet eine Lücke aus und holt sie zurück, hakt sie ab und öffnet sie 
   await page.emulateMedia({ colorScheme: 'dark' })
   await expectAccessibleLayout(page)
   await page.emulateMedia({ colorScheme: 'light' })
-  await show.click()
+  // Mit der letzten ausgeblendeten Lücke geht der Abschnitt: Fokus auf die Überschrift davor
+  await show.press('Enter')
   await expect(gap).toBeVisible()
   await expect(show).toHaveCount(0)
+  await expect(page.getByRole('heading', { level: 2 }).and(page.locator(':focus'))).toHaveCount(1)
 
-  await gap.click()
+  await gap.press('Space')
   const checked = undoBar(page, `${name} abgehakt.`)
   const done = list(page, 'Erledigt').getByRole('checkbox', { name })
   await expect(done).toBeChecked()
   await expect(gap).toHaveCount(0)
-  await checked.getByRole('button', { name: 'Rückgängig' }).click()
+  await expect(before).toBeFocused()
+  await checked.getByRole('button', { name: 'Rückgängig' }).press('Enter')
   await expect(gap).toBeVisible()
   await expect(done).toHaveCount(0)
+  await expect(gap).toBeFocused()
 
   await gap.click()
   await expect(done).toBeChecked()

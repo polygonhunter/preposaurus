@@ -564,6 +564,12 @@ Beim Datenmodell getroffen, Details in den Kopfkommentaren von `src/server/db/sc
 - **Zugänglichkeit:** Der Zähler steht im Text des Links und damit im Namen („Unvollständig 2“), Ziffern mit `tabular-nums`. Keine eigene Farbe für die Zahl, damit der Kontrast auf dem aktiven Chip stimmt.
 - **Stufen:** Liste, Treffermodus und Tabelle teilen die Chip-Reihe; der Treffermodus ist in jeder Stufe dieselbe Liste. E2E `vorrat-unvollstaendig.spec.ts` prüft Namen, Grund und axe hell/dunkel in allen Projekten.
 
+## Festlegungen aus #269 „Fokus nach Entfernen, Rückgängig und Wieder zeigen“ (2026-11-24, vorläufig)
+- **Eine Regel für die ganze App** (`src/shared/hooks/use-focus-rescue.ts`, Ziele in `focus-targets.ts`): Verschwindet der fokussierte Knopf, geht der Fokus der Reihe nach auf denselben Knopf, falls die Zeile neu geladen in derselben Liste wieder da ist, sonst auf die nächste Zeile, die vorherige, die Überschrift der Liste, die nächstgelegene andere Listenüberschrift, zuletzt die Seitenüberschrift (WAI-ARIA APG: Fokus nie auf body). Überschriften bekommen dafür `tabindex="-1"`, nur per Skript erreichbar.
+- **Rückgängig-Zeile:** Erscheint sie, bleibt der Fokus, wo er ist (`role="status"` sagt sie an). Verschwindet sie mit dem Fokus (Rückgängig, Schließen, nach fünf Sekunden), geht er zurück auf den Knopf der letzten Handlung bzw. in dessen wiederhergestellte Zeile. Während eine Action läuft, wartet der Hook, bis die Liste neu geladen ist.
+- **Markup:** Zeilen tragen einen stabilen Schlüssel (`Row focusKey` → `data-focus-row`), Listen `aria-labelledby`, Leisten `data-focus-return`. Eingesetzt auf Nachkaufen, im Vorrat samt Bald fällig und Detail (ConsumeProvider) und in Erfassen bei „Noch zu klären“ (Foto-Weg).
+- **Nachkaufen sperrt nur per `aria-disabled`** wie der Vorrat (#218): Haken, Entfernen, „Auf die Liste“, Ausblenden und Wieder zeigen behalten beim Speichern den Fokus; ein zweiter Tipp während einer Action wird abgefangen, ohne Verbindung sagt ein Tipp warum.
+
 ## Offene Fragen an den Maintainer (endgültige Entscheidung steht noch aus)
 1. **Offline**: nur anzeigen oder auch eintragen (mit späterem Abgleich)?
 2. ~~**Lizenz**~~ entschieden 2026-11-22: AGPL-3.0-or-later (siehe oben). Der Prototyp mit GSAP ist ausgenommen, siehe `prototypes/README.md`

@@ -44,6 +44,7 @@ export function DateGroupRow({ name, group, isNext, isAdmin, leaveHref }: DateGr
   }
   return (
     <Row
+      focusKey={label}
       title={label}
       subtitle={
         <span className="flex flex-wrap items-center gap-x-1.5">

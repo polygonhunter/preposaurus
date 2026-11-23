@@ -35,7 +35,7 @@ function title(shot: DateShot): string {
 export function OpenShotItem({ shot, number, handlers }: OpenShotItemProps) {
   const tone = shot.issue === 'pending' ? 'neutral' : 'yellow'
   return (
-    <li className="flex flex-col gap-2 px-4 py-3">
+    <li data-focus-row={shot.localId} className="flex flex-col gap-2 px-4 py-3">
       <span className="text-body">Packung {number}</span>
       <StatusBadge tone={tone} label={title(shot)} />
       <OpenShotActions issue={shot.issue} handlers={handlers} />

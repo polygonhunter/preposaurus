@@ -13,7 +13,7 @@ export function GapCheckButton({ gap }: GapCheckButtonProps) {
     <CheckCircle
       label={gap.name}
       isChecked={false}
-      disabled={isLocked}
+      isLocked={isLocked}
       onToggle={() => {
         setGapStatus(gap, 'erledigt')
       }}

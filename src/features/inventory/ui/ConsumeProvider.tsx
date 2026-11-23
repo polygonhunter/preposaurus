@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition, type ReactNode } from 'react'
+import { useFocusRescue } from '@/shared/hooks/use-focus-rescue'
 import { useIsOnline } from '@/shared/hooks/use-is-online'
 import { NoticeBar } from '@/shared/ui/NoticeBar'
 import { OFFLINE_WRITE_MESSAGE } from '@/shared/ui/OfflineWriteGuard'
@@ -37,12 +38,14 @@ type ConsumeProviderProps = Readonly<{ children: ReactNode }>
 
 // Erfolg zeigt fünf Sekunden „Rückgängig“, keine Rückfrage vorher (UX-Konzept §7, P7), dazu das
 // Angebot „Nachkaufen“ (UX D15, #74). Ein Fehler steht unten an derselben Stelle, die Seite lädt
-// dabei neu, die Zeile springt also zurück.
+// dabei neu, die Zeile springt also zurück. Verschwindet ein fokussierter Knopf (Zeile weg,
+// Rückgängig-Zeile zu), führt useFocusRescue den Fokus weiter (#269).
 export function ConsumeProvider({ children }: ConsumeProviderProps) {
   const [notice, setNotice] = useState<Notice | null>(null)
   const [isPending, startTransition] = useTransition()
   // Ohne Verbindung sind die Knöpfe gesperrt, der Hinweis oben auf der Seite sagt warum.
   const isOnline = useIsOnline()
+  const focusRef = useFocusRescue<HTMLDivElement>(isPending)
 
   const run = (task: () => Promise<Notice | null>) => {
     startTransition(async () => {
@@ -97,19 +100,23 @@ export function ConsumeProvider({ children }: ConsumeProviderProps) {
 
   return (
     <ConsumeContext value={value}>
-      {children}
-      {notice === null || notice.kind === 'error' ? null : (
-        <UndoBar
-          key={noticeKey(notice)}
-          message={notice.message}
-          onUndo={() => {
-            undo(notice)
-          }}
-          onDismiss={dismiss}
-          {...restockOffer(notice, putOnRestockList)}
-        />
-      )}
-      {notice?.kind === 'error' ? <NoticeBar message={notice.message} onDismiss={dismiss} /> : null}
+      <div ref={focusRef} className="contents">
+        {children}
+        {notice === null || notice.kind === 'error' ? null : (
+          <UndoBar
+            key={noticeKey(notice)}
+            message={notice.message}
+            onUndo={() => {
+              undo(notice)
+            }}
+            onDismiss={dismiss}
+            {...restockOffer(notice, putOnRestockList)}
+          />
+        )}
+        {notice?.kind === 'error' ? (
+          <NoticeBar message={notice.message} onDismiss={dismiss} />
+        ) : null}
+      </div>
     </ConsumeContext>
   )
 }

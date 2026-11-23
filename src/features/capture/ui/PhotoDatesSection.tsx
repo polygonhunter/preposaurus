@@ -1,3 +1,4 @@
+import { useFocusRescue } from '@/shared/hooks/use-focus-rescue'
 import { Button } from '@/shared/ui/Button'
 import { BestBeforeEntries } from './BestBeforeEntries'
 import { OpenShotList } from './OpenShotList'
@@ -13,9 +14,12 @@ type PhotoDatesSectionProps = Readonly<{
 
 // MHD je Packung (#64, #65): ein Chip je Datum mit Anzahl, offene Fotos zum Entscheiden, Eintippen
 // und „Datum fehlt“ wie im Formular. Eine KI-Schätzung gibt es nur auf Wahl und als „geschätzt“.
+// Ist ein offenes Foto entschieden, verschwindet es samt Knopf; useFocusRescue führt den Fokus zum
+// nächsten offenen Foto oder zur Liste der Daten (#269).
 export function PhotoDatesSection({ state, editor, error, estimateNote }: PhotoDatesSectionProps) {
+  const focusRef = useFocusRescue<HTMLDivElement>(false)
   return (
-    <>
+    <div ref={focusRef} className="contents">
       <OpenShotList state={state} editor={editor} />
       <BestBeforeEntries
         entries={state.units}
@@ -41,6 +45,6 @@ export function PhotoDatesSection({ state, editor, error, estimateNote }: PhotoD
           </p>
         )}
       </div>
-    </>
+    </div>
   )
 }

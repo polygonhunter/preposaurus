@@ -16,6 +16,8 @@ type UndoBarProps = Readonly<{
   secondary?: BarAction
 }>
 
+// Erscheint die Zeile, bleibt der Fokus, wo er ist (role="status" sagt sie an). Verschwindet sie mit
+// dem Fokus, führt useFocusRescue zur Stelle der letzten Handlung zurück (data-focus-return, #269).
 export function UndoBar({ message, onUndo, onDismiss, secondary }: UndoBarProps) {
   // Eine neu erzeugte onDismiss-Funktion je Render startet die fünf Sekunden nicht neu, eine neue Meldung schon.
   const dismiss = useEffectEvent(onDismiss)
@@ -30,6 +32,7 @@ export function UndoBar({ message, onUndo, onDismiss, secondary }: UndoBarProps)
 
   return (
     <div
+      data-focus-return
       role="status"
       className="fixed inset-x-2 bottom-[calc(58px+env(safe-area-inset-bottom))] z-20 mx-auto flex max-w-[624px] items-center gap-3 rounded-group bg-fg py-1 pr-1 pl-4 text-callout text-bg breit:bottom-4"
     >

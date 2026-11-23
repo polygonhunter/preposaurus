@@ -23,6 +23,7 @@ export function GapSection({ list }: GapSectionProps) {
         {list.gaps.map((gap) => (
           <Row
             key={gap.groupKey}
+            focusKey={`gap-${gap.groupKey}`}
             icon={<GapCheckButton gap={gap} />}
             title={gap.name}
             subtitle={gapSubtitle(gap)}

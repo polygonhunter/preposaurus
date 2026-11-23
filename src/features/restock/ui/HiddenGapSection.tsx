@@ -21,6 +21,7 @@ export function HiddenGapSection({ list }: HiddenGapSectionProps) {
         {list.hiddenGaps.map((gap) => (
           <Row
             key={gap.entryId}
+            focusKey={`hidden-${gap.entryId}`}
             title={gap.name}
             subtitle={`Fehlen ${formatGapAmount(gap.missing)}`}
             accessory={
