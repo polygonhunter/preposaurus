@@ -5,7 +5,8 @@
 // und das Ziel bleibt beim Standard (10 Tage, kein Datum). So laufen alle anderen Tests unverändert.
 // Läuft lokal noch ein Server mit schon eingerichteter DB (reuseExistingServer), meldet sich der
 // Test stattdessen an.
-import { expect, test as setup, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test as setup } from '../helpers/e2e-test'
 import { ADMIN_STORAGE_STATE, E2E_ADMIN, submitSignIn } from '../helpers/e2e-auth'
 import { expectSetupStep } from '../helpers/setup-steps'
 import { expectAccessibleLayout } from '../helpers/page-checks'

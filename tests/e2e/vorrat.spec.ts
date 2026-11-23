@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../helpers/e2e-test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Vorrat lesen mit dem Beispielvorrat (beispielvorrat.setup.ts, db/seeds/demo-data.ts). Diese Tests

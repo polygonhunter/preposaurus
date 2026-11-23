@@ -10,6 +10,7 @@ import { setupFromRequest } from '../application/setup-request'
 import { signInFromRequest } from '../application/sign-in-request'
 import { findPasswordProblem, type PasswordProblem } from '../domain/password-rules'
 import { setupSchema, type SetupInput } from '../schemas'
+import { COMMON_PASSWORD } from './user-action-messages'
 import { DEFAULT_HOUSEHOLD_NAME } from '@/shared/config/constants'
 import { SETUP_MEMBERS_PATH } from '@/shared/config/setup-paths'
 import { firstMessages, readFormText } from '@/shared/lib/form-data'
@@ -21,6 +22,7 @@ export type SetupState = Readonly<{ errors: Partial<Record<SetupField, string>> 
 
 const PASSWORD_PROBLEM_MESSAGES: Record<PasswordProblem, string> = {
   'contains-app-name': 'Bitte ein Passwort ohne „Preposaurus“.',
+  'common-password': COMMON_PASSWORD,
   'contains-username': 'Bitte ein Passwort ohne den Benutzernamen.',
   'contains-display-name': 'Bitte ein Passwort ohne deinen Namen.',
   'contains-household-name': `Bitte ein Passwort ohne „${DEFAULT_HOUSEHOLD_NAME}“.`,
