@@ -20,14 +20,14 @@ const CONTENT_MESSAGES: Record<ContentParseError['kind'], string> = {
     'Stück zählt als Anzahl der Packungen. Bitte hier den Inhalt in g oder ml angeben.',
 }
 
-const contentText = z.string().transform((text, context) => {
+export const contentText = z.string().transform((text, context) => {
   const parsed = parseContentQuantity(text)
   if (parsed.ok) return parsed.value
   context.addIssue({ code: 'custom', message: CONTENT_MESSAGES[parsed.error.kind] })
   return z.NEVER
 })
 
-const per100Text = z.string().transform((text, context) => {
+export const per100Text = z.string().transform((text, context) => {
   if (text.trim() === '') return null
   const value = parseGermanNumber(text)
   if (value !== null && value >= 0 && value <= MAX_PER_100) return value

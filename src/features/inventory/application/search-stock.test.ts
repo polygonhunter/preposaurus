@@ -21,7 +21,7 @@ const ravioli = product({
   name: 'Ravioli',
   foodType: null,
   category: { id: 'kat-fertig', name: 'Fertiggerichte', pictogram: '🥫' },
-  group: { key: 'sonstiges', name: 'Sonstiges' },
+  group: { key: 'sonstiges', name: 'Sonstiges', shortName: 'Sonstiges' },
   container: can,
   nutrition: {
     values: { kcal: 90, protein: 3, carbs: 12, fat: 3 },

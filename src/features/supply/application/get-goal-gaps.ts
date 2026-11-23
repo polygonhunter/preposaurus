@@ -49,7 +49,7 @@ export async function getGoalGaps(ports: GoalGapPorts, input: HouseholdDay): Pro
     ports.facts.loadGoal(input.householdId),
   ])
   const progress = progressAtTarget(context, units, goal)
-  const names = new Map(groups.map((group) => [group.key, group.name]))
+  const names = new Map(groups.map((group) => [group.key, group.shortName]))
   return {
     isCalculable: progress.length > 0,
     gaps: toGroupGaps(progress, names).sort(waterFirst),

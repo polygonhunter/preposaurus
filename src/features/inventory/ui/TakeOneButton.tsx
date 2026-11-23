@@ -13,7 +13,7 @@ export function TakeOneButton({ target, name }: TakeOneButtonProps) {
     <Button
       variant="tinted"
       aria-label={`1 Packung ${name} entnehmen`}
-      disabled={isLocked}
+      aria-disabled={isLocked}
       onClick={() => {
         consume({ kind: 'target', target }, { name })
       }}

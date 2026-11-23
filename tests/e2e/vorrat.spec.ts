@@ -4,7 +4,9 @@ import { expectAccessibleLayout } from '../helpers/page-checks'
 // Vorrat lesen mit dem Beispielvorrat (beispielvorrat.setup.ts, db/seeds/demo-data.ts). Diese Tests
 // ändern nichts, Entnehmen steht in vorrat-entnehmen.spec.ts.
 
-const GRAIN = 'Getreide, Getreideprodukte, Brot und Kartoffeln'
+// Kurzname für Titel und Navigation, der amtliche Name steht darüber (#177)
+const GRAIN = 'Getreide und Kartoffeln'
+const GRAIN_OFFICIAL = 'Getreide, Getreideprodukte, Brot und Kartoffeln'
 
 test('Drilldown: Warengruppe, Lebensmittelarten nach Kategorie, Detail', async ({ page }) => {
   await page.goto('/vorrat')
@@ -16,6 +18,7 @@ test('Drilldown: Warengruppe, Lebensmittelarten nach Kategorie, Detail', async (
 
   await expect(page).toHaveURL(/\/vorrat\/getreide$/)
   await expect(page.getByRole('heading', { level: 1, name: GRAIN })).toBeVisible()
+  await expect(page.getByRole('main').getByText(GRAIN_OFFICIAL, { exact: true })).toBeVisible()
   await expect(page.getByRole('group', { name: 'Zu Kategorie springen' })).toBeVisible()
   await expect(
     page.getByRole('heading', { level: 2, name: 'Müsli, Flocken und Cerealien' }),
@@ -27,6 +30,10 @@ test('Drilldown: Warengruppe, Lebensmittelarten nach Kategorie, Detail', async (
   await expect(page).toHaveURL(/\/vorrat\/art\/[0-9a-f-]+$/)
   await expect(page.getByRole('heading', { level: 1, name: 'Haferflocken' })).toBeVisible()
   await expect(page.getByRole('navigation', { name: 'Pfad' })).toContainText(GRAIN)
+  await expect(page.getByRole('link', { name: GRAIN, exact: true }).first()).toHaveAttribute(
+    'href',
+    '/vorrat/getreide',
+  )
   await expect(page.getByRole('heading', { name: 'Haltbarkeit' })).toBeVisible()
   // Eine Packung ohne Datum steht zuletzt, „1 entnehmen“ nimmt die mit Datum
   await expect(page.getByRole('button', { name: /Datum fehlt/ })).toBeVisible()

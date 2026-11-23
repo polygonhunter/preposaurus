@@ -32,8 +32,15 @@ async function listItems(db: Database, householdId: string): Promise<RestockItem
       isDone: restockItems.isDone,
       createdAt: restockItems.createdAt,
       changedAt: restockItems.updatedAt,
+      productId: restockItems.productId,
+      foodTypeId: products.foodTypeId,
     })
     .from(restockItems)
+    // Nur Produkte des eigenen Haushalts (#133), auch wenn der Eintrag schon dazugehört
+    .leftJoin(
+      products,
+      and(eq(products.id, restockItems.productId), eq(products.householdId, householdId)),
+    )
     .where(eq(restockItems.householdId, householdId))
   return rows
 }

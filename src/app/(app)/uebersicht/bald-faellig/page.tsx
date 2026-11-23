@@ -6,12 +6,15 @@ import { DueSortSwitch } from '@/features/inventory/ui/DueSortSwitch'
 import { STOCK_PATH, readDueSort } from '@/features/inventory/ui/stock-paths'
 import { requirePageHousehold } from '@/server/auth/household'
 import { EmptyState } from '@/shared/ui/EmptyState'
+import { OfflineNotice } from '@/shared/ui/OfflineNotice'
 import { PageHeader } from '@/shared/ui/PageHeader'
 
 const BACK = { href: '/uebersicht', label: 'Übersicht' }
 
-// Bald fällig (UX-Konzept §8.2, #125): eigene Adresse als Ziel für Push und Mail.
+// Bald fällig (UX-Konzept §8.2, #125): eigene Adresse als Ziel für Push und Mail. Ohne
+// Verbindung zeigt der Service Worker den zuletzt geladenen Stand (#216).
 export default async function DuePage({ searchParams }: PageProps<'/uebersicht/bald-faellig'>) {
+  const offlineNotice = <OfflineNotice loadedAt={new Date().toISOString()} />
   const { householdId } = await requirePageHousehold()
   const sort = readDueSort(await searchParams)
   const { reader, today } = await stockServices()
@@ -20,6 +23,7 @@ export default async function DuePage({ searchParams }: PageProps<'/uebersicht/b
     return (
       <>
         <PageHeader title="Bald fällig" back={BACK} />
+        {offlineNotice}
         <EmptyState
           text={`Nichts fällig in den nächsten ${String(due.thresholds.soonDays)} Tagen.`}
           action={{ href: STOCK_PATH, label: 'Zum Vorrat' }}
@@ -30,6 +34,7 @@ export default async function DuePage({ searchParams }: PageProps<'/uebersicht/b
   return (
     <ConsumeProvider>
       <PageHeader title="Bald fällig" back={BACK} />
+      {offlineNotice}
       <DueSortSwitch sort={sort} />
       <DueList due={due} />
     </ConsumeProvider>

@@ -10,6 +10,7 @@ import {
   endOfYear,
   formatDayWithPrecision,
   formatDaysLeft,
+  normalizeToPrecision,
   parseCalendarDay,
   toCalendarDay,
   todayInBerlin,
@@ -151,6 +152,14 @@ describe('endOfMonth und endOfYear', () => {
 
   it('liefert den 31.12. des Jahres', () => {
     expect(endOfYear(day('2027-01-01'))).toBe('2027-12-31')
+  })
+})
+
+describe('normalizeToPrecision', () => {
+  it('setzt Monats- und Jahresende, ein Tag bleibt', () => {
+    expect(normalizeToPrecision(day('2027-09-01'), 'month')).toBe('2027-09-30')
+    expect(normalizeToPrecision(day('2027-09-01'), 'year')).toBe('2027-12-31')
+    expect(normalizeToPrecision(day('2027-09-14'), 'day')).toBe('2027-09-14')
   })
 })
 
