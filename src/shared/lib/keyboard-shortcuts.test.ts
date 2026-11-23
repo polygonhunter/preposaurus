@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { shortcutFor } from './keyboard-shortcuts'
+import { areShortcutsEnabled, SHORTCUTS_OFF, shortcutFor } from './keyboard-shortcuts'
 
 const plain = {
   altKey: false,
@@ -47,5 +47,17 @@ describe('shortcutFor', () => {
   it('ignoriert andere Tasten', () => {
     expect(shortcutFor({ ...plain, key: 'm' }, body)).toBeNull()
     expect(shortcutFor({ ...plain, key: 'Enter' }, body)).toBeNull()
+  })
+})
+
+describe('areShortcutsEnabled', () => {
+  it('ist ohne Cookie an', () => {
+    expect(areShortcutsEnabled(undefined)).toBe(true)
+  })
+
+  it('ist nur mit „aus“ ab, ein unbekannter Wert lässt sie an', () => {
+    expect(areShortcutsEnabled(SHORTCUTS_OFF)).toBe(false)
+    expect(areShortcutsEnabled('an')).toBe(true)
+    expect(areShortcutsEnabled('quatsch')).toBe(true)
   })
 })

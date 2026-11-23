@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { readShortcutsEnabled } from '@/features/auth/application/shortcut-preference'
 import { getOwnProfile } from '@/features/auth/application/manage-profile'
 import { profileServices } from '@/features/auth/application/profile-services'
 import type { ProfileView } from '@/features/auth/domain/profile'
 import { ChangePasswordForm } from '@/features/auth/ui/ChangePasswordForm'
 import { CheckInForm } from '@/features/auth/ui/CheckInForm'
 import { ProfileForm } from '@/features/auth/ui/ProfileForm'
+import { ShortcutsForm } from '@/features/auth/ui/ShortcutsForm'
 import { formatSignInTime } from '@/features/auth/ui/user-format'
 import { requirePageHousehold } from '@/server/auth/household'
 import { SETTINGS_PATH } from '@/shared/config/settings-paths'
@@ -36,13 +38,14 @@ function checkInNote(profile: ProfileView): string | null {
   return null
 }
 
-// Mein Konto (#75, #89): Anzeigename, Adresse für Erinnerungen, Passwort und Check-in-Mail. Jeder
-// sieht und ändert nur sich selbst.
+// Mein Konto (#75, #89, #254): Anzeigename, Adresse für Erinnerungen, Passwort, Check-in-Mail und
+// Tastenkürzel. Jeder sieht und ändert nur sich selbst.
 export default async function AccountPage() {
   const { userId } = await requirePageHousehold()
   const profile = await getOwnProfile(await profileServices(), userId)
   if (profile === null) notFound()
   const note = checkInNote(profile)
+  const areShortcutsOn = await readShortcutsEnabled()
   return (
     <>
       <PageHeader title="Mein Konto" back={{ href: SETTINGS_PATH, label: 'Einstellungen' }} />
@@ -67,6 +70,8 @@ export default async function AccountPage() {
           <GroupFooter>{note}</GroupFooter>
         </>
       )}
+      <GroupHeader id="darstellung">Darstellung</GroupHeader>
+      <ShortcutsForm isOn={areShortcutsOn} />
     </>
   )
 }
