@@ -374,7 +374,7 @@ docker compose run --rm backup wiederherstellen taeglich/2026-11-22_030000
 docker compose up -d                                                     # App wieder starten
 ```
 
-Der Container fragt vor dem Ersetzen nach und erwartet die Eingabe `ja`. Läuft die App noch, bricht er ohne Änderung ab: `Die App ist noch verbunden. Bitte zuerst: docker compose stop web worker`.
+Der Container fragt vor dem Ersetzen nach und erwartet die Eingabe `ja`. Läuft die App noch, wartet er bis zu 10 Sekunden, bis sich ihre Verbindungen schließen, und bricht sonst ohne Änderung ab: `Die App ist noch verbunden: … Bitte zuerst: docker compose stop web worker`. Die Meldung nennt die noch verbundenen Programme mit Anzahl.
 
 So bleibt es sicher:
 - **Zuerst sichert er den jetzigen Zustand** nach `vor-wiederherstellung/…`. Hast du den falschen Stand gewählt, spielst du einfach diesen zurück.

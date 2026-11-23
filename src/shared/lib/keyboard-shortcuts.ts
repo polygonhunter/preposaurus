@@ -9,6 +9,15 @@ export const SHORTCUT_KEYS: Readonly<Record<ShortcutAction, string>> = {
   capture: 'n',
 }
 
+// WCAG 2.1.4 (#254): Ein-Zeichen-Kürzel lassen sich abschalten. Die Wahl gilt je Browser und steht in
+// einem Cookie, damit schon der Server ohne Kürzel rendert (kein `kbd`, kein `aria-keyshortcuts`).
+export const SHORTCUTS_COOKIE = 'preposaurus-kuerzel'
+export const SHORTCUTS_OFF = 'aus'
+
+/** Kürzel sind an, solange das Cookie nicht ausdrücklich „aus“ sagt. */
+export const areShortcutsEnabled = (cookieValue: string | undefined): boolean =>
+  cookieValue !== SHORTCUTS_OFF
+
 type KeyInput = Readonly<{
   key: string
   altKey: boolean

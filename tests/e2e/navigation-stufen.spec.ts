@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
+import { pressUntil, waitForHydration } from '../helpers/hydration'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Rahmen je Stufe (DESIGN_SYSTEM §6, #90, #91, #94): Tab-Leiste in kompakt und mittel, ab „breit“
@@ -73,8 +74,7 @@ test.describe('Tastenkürzel', () => {
     test.skip(isMobile, 'Tastenkürzel gibt es nur mit Tastatur')
     await page.goto('/uebersicht')
 
-    await page.keyboard.press('/')
-    await expect(page).toHaveURL(/\/vorrat$/)
+    await pressUntil(page, '/', (timeout) => expect(page).toHaveURL(/\/vorrat$/, { timeout }))
     const search = page.getByRole('searchbox', { name: 'Vorrat durchsuchen' })
     await expect(search).toBeFocused()
 
@@ -92,6 +92,7 @@ test.describe('Tastenkürzel', () => {
     test.skip(isMobile, 'Tastenkürzel gibt es nur mit Tastatur')
     await page.goto('/neu/manuell')
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+    await waitForHydration(page)
 
     await page.locator('body').press('/')
     await page.locator('body').press('n')
@@ -104,11 +105,10 @@ test.describe('Tastenkürzel', () => {
   test('„/“ fokussiert im Vorrat direkt das Suchfeld', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Tastenkürzel gibt es nur mit Tastatur')
     await page.goto('/vorrat')
-    await expect(page.getByRole('heading', { level: 1, name: 'Vorrat' })).toBeVisible()
+    const search = page.getByRole('searchbox', { name: 'Vorrat durchsuchen' })
 
-    await page.keyboard.press('/')
+    await pressUntil(page, '/', (timeout) => expect(search).toBeFocused({ timeout }))
 
-    await expect(page.getByRole('searchbox', { name: 'Vorrat durchsuchen' })).toBeFocused()
     await expect(page).toHaveURL(/\/vorrat$/)
   })
 
@@ -128,6 +128,43 @@ test.describe('Tastenkürzel', () => {
       'aria-keyshortcuts',
       '/',
     )
+  })
+})
+
+test.describe('Tastenkürzel abgeschaltet (#254)', () => {
+  test('aus heißt: „n“ und „/“ tun nichts, keine Tasten und kein aria-keyshortcuts', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, 'Tastenkürzel gibt es nur mit Tastatur')
+    // Die Wahl steht im Cookie dieses Browser-Kontexts, andere Tests sehen sie nicht
+    await page.goto('/einstellungen/konto')
+    const toggle = page.getByRole('switch', { name: 'Tastenkürzel' })
+    await expect(toggle).toBeChecked()
+    await page.locator('label', { hasText: 'Tastenkürzel' }).click()
+    await expect(toggle).not.toBeChecked()
+    await page.getByRole('button', { name: 'Speichern' }).last().click()
+    await expect(page.getByText('Gespeichert.')).toBeVisible()
+
+    await page.goto('/vorrat')
+    const search = page.getByRole('searchbox', { name: 'Vorrat durchsuchen' })
+    await expect(search).not.toHaveAttribute('aria-keyshortcuts')
+    await expect(page.locator('kbd')).toHaveCount(0)
+
+    // Außerhalb des Vorrats und je Taste einzeln: Im Vorrat führte „/“ dorthin zurück, wo der Test
+    // schon steht, und überdeckte so ein „n“. Ein Wechsel bräuchte einen Moment, deshalb erst danach
+    // prüfen, dass keiner kam.
+    await page.goto('/uebersicht')
+    await waitForHydration(page)
+    await page.locator('body').press('n')
+    await page.waitForTimeout(1000)
+    await expect(page).toHaveURL(/\/uebersicht$/)
+    await page.locator('body').press('/')
+    await page.waitForTimeout(1000)
+    await expect(page).toHaveURL(/\/uebersicht$/)
+
+    await page.goto('/einstellungen/konto')
+    await expect(page.getByRole('switch', { name: 'Tastenkürzel' })).not.toBeChecked()
   })
 })
 

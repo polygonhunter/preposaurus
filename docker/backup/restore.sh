@@ -28,11 +28,36 @@ confirm_restore() {
   [ "$answer" = "ja" ] || fail "Abgebrochen, nichts geändert."
 }
 
+# Nach "docker compose stop web worker" schließen App-Pool und pg-boss ihre Verbindungen nicht immer
+# sofort (#247). So lange wird darauf gewartet, bevor das Zurückspielen abbricht.
+CONNECTION_WAIT_SECONDS=10
+
+# Verbindungen anderer Prozesse zur Betriebs-DB als "name (anzahl), …", leer, wenn keine offen ist.
+# Der Name der Datenbank geht als psql-Variable hinein, nicht in den SQL-Text.
+open_connections() {
+  psql --dbname=postgres -tA -v ON_ERROR_STOP=1 -v db="$PGDATABASE" <<'SQL'
+select coalesce(string_agg(name || ' (' || connections || ')', ', ' order by name), '')
+from (
+  select coalesce(nullif(application_name, ''), 'ohne Namen') as name, count(*) as connections
+  from pg_stat_activity
+  where datname = :'db' and pid <> pg_backend_pid()
+  group by 1
+) as apps
+SQL
+}
+
 # Läuft die App noch, würde sie mitten im Einspielen schreiben.
 ensure_no_connections() {
-  open=$(psql --dbname=postgres -tAc \
-    "select count(*) from pg_stat_activity where datname = '$PGDATABASE' and pid <> pg_backend_pid()")
-  [ "$open" = "0" ] || fail "Die App ist noch verbunden. Bitte zuerst: docker compose stop web worker"
+  waited=0
+  remaining=$(open_connections)
+  while [ -n "$remaining" ] && [ "$waited" -lt "$CONNECTION_WAIT_SECONDS" ]; do
+    [ "$waited" -gt 0 ] || log "Warte bis zu $CONNECTION_WAIT_SECONDS s, bis sich die Verbindungen schließen: $remaining"
+    sleep 1
+    waited=$((waited + 1))
+    remaining=$(open_connections)
+  done
+  [ -z "$remaining" ] ||
+    fail "Die App ist noch verbunden: $remaining. Bitte zuerst: docker compose stop web worker"
 }
 
 # Spielt einen Dump in eine frische Datenbank. Scheitert es, ist die Datenbank wieder weg.
