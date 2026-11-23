@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
-import { dueSortSchema } from '../schemas'
 import {
   createFakeStockReader,
   product,
@@ -84,8 +83,7 @@ describe('getDueUnits', () => {
   })
 
   it('sortiert auf Wunsch nach Lagerort', async () => {
-    const sort = dueSortSchema.parse('location')
-    const due = await getDueUnits(reader, { householdId, today, sort })
+    const due = await getDueUnits(reader, { householdId, today, sort: 'location' })
     const thisWeek = due.groups.find((group) => group.group === 'this-week')
 
     expect(thisWeek?.entries.map((entry) => entry.storageLocations[0])).toEqual(['Keller', 'Küche'])

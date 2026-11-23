@@ -20,6 +20,7 @@ export interface ContentQuantity extends Quantity {
   unit: ContentUnit
 }
 
+/** @internal Nur für Tests exportiert, im Code nur in dieser Datei genutzt. */
 export type QuantityParseError =
   | { kind: 'empty' }
   | { kind: 'invalid-number' }
@@ -72,6 +73,7 @@ function toQuantity(value: number, unitText: string): Result<Quantity, QuantityP
 /**
  * Liest Mengen wie `500 g`, `1,5 l`, `1 kg` oder `6 Stück` und rechnet in g, ml oder Stück.
  * Für den Inhalt einer Packung gilt `parseContentQuantity`, Stück nur beim Nachkaufen.
+ * @internal Nur für Tests exportiert, im Code nur in dieser Datei genutzt.
  */
 export function parseQuantity(text: string): Result<Quantity, QuantityParseError> {
   const cleaned = text.trim().toLowerCase()
