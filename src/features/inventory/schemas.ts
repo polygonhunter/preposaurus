@@ -36,9 +36,6 @@ export const stockFilterSchema = z.object({
   storageLocationId: id.optional(),
 })
 
-/** @internal Nur Tests nutzen das Schema, die Seite liest die Sortierung über readDueSort. */
-export const dueSortSchema = z.enum(['date', 'location']).default('date')
-
 /** „Verbraucht“: eine bestimmte Packung oder die nächste nach MHD aus einer Zeile („−1“, #46). */
 export const consumeRequestSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('unit'), unitId: id }),
@@ -219,7 +216,10 @@ export const historyEntrySchema = z.object({
   bestBefore: bestBeforeSchema.nullable(),
 })
 
-/** Datumszeile für „Datum ändern“ (#49): alle Packungen eines Produkts mit diesem Datum. */
+/**
+ * Datumszeile für „Datum ändern“ (#49): alle Packungen eines Produkts mit diesem Datum.
+ * @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen.
+ */
 export const unitDateGroupSchema = z.object({
   target: stockTargetSchema,
   name: z.string(),
@@ -273,7 +273,8 @@ export type StockTarget = z.infer<typeof stockTargetSchema>
 export type DeleteEntryRequest = z.infer<typeof deleteEntrySchema>
 export type UnitDateGroup = z.infer<typeof unitDateGroupSchema>
 export type StockFilter = z.infer<typeof stockFilterSchema>
-export type DueSort = z.infer<typeof dueSortSchema>
+/** Sortierung von „Bald fällig“. Die Seite liest sie über readDueSort aus der Adresse. */
+export type DueSort = 'date' | 'location'
 export type ConsumeRequest = z.infer<typeof consumeRequestSchema>
 export type BestBeforeDto = z.infer<typeof bestBeforeSchema>
 export type UnitStateDto = z.infer<typeof unitStateSchema>
