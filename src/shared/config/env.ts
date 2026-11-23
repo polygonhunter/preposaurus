@@ -158,6 +158,25 @@ export function isDevelopmentServer(source: EnvSource = process.env): boolean {
   return source['NODE_ENV'] === 'development'
 }
 
+// Das PoC-Messskript (#103) braucht weder DB noch APP_SECRET. AI_PROVIDER ohne Standard, damit
+// ein Trockenlauf nur auf ausdrücklichen Wunsch (AI_PROVIDER=fake) entsteht, nie aus Versehen.
+const recognitionPocEnvSchema = z.object({
+  AI_PROVIDER: z.preprocess(emptyAsUnset, z.enum(['anthropic', 'fake']).optional()),
+  ANTHROPIC_API_KEY: optionalText,
+})
+
+/** @internal Nur das PoC-Messskript. */
+export type RecognitionPocEnv = z.infer<typeof recognitionPocEnvSchema>
+
+/** @internal Nur das PoC-Messskript (scripts/poc-recognition.ts), nicht Teil der App. */
+export function loadRecognitionPocEnv(
+  source: EnvSource = process.env,
+): Result<RecognitionPocEnv, string> {
+  const parsed = recognitionPocEnvSchema.safeParse(source)
+  if (parsed.success) return ok(parsed.data)
+  return err(`Ungültige Umgebungsvariablen:\n${z.prettifyError(parsed.error)}`)
+}
+
 // Wirft bei ungültigen Werten: ohne gültige Umgebung soll der Server gar nicht erst starten.
 export function loadEnv(source: EnvSource = process.env): Env {
   const result = parseEnv(source)
