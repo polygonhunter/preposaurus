@@ -11,6 +11,8 @@ import {
   addProductOnce,
   findConsumedProduct,
   findProduct,
+  hasOpenItemFor,
+  lockHousehold,
   type ProductItem,
 } from './restock-product-queries'
 
@@ -76,14 +78,23 @@ async function removeItem(db: Database, householdId: string, id: string) {
 }
 
 // Ein Produkt übernimmt nur, wer es im eigenen Haushalt hat; sonst bleibt der Eintrag ohne Produkt,
-// wie nach dem Löschen eines Produkts (on delete set null).
+// wie nach dem Löschen eines Produkts (on delete set null). Hat jemand das Produkt in den fünf
+// Sekunden schon wieder auf die Liste gesetzt, bleibt es bei einem offenen Eintrag (dieselbe Sperre
+// wie bei addProductOnce). Eine vergebene ID, auch eine fremde, bleibt unberührt.
 async function restoreItem(db: Database, householdId: string, item: StoredItem) {
-  const product =
-    item.productId === null ? null : await findProduct(db, householdId, item.productId)
-  await db
-    .insert(restockItems)
-    .values({ householdId, ...item, productId: product?.productId ?? null })
-    .onConflictDoNothing({ target: restockItems.id })
+  await db.transaction(async (tx) => {
+    await lockHousehold(tx, householdId)
+    const product =
+      item.productId === null ? null : await findProduct(tx, householdId, item.productId)
+    const productId = product?.productId ?? null
+    const isDuplicate =
+      productId !== null && !item.isDone && (await hasOpenItemFor(tx, householdId, productId))
+    if (isDuplicate) return
+    await tx
+      .insert(restockItems)
+      .values({ householdId, ...item, productId })
+      .onConflictDoNothing({ target: restockItems.id })
+  })
 }
 
 export function createRestockRepository(db: Database) {

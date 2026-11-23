@@ -65,7 +65,7 @@ describe('getRestockList', () => {
       },
     ])
     expect(list.done).toHaveLength(1)
-    expect(list.openCount).toBe(3)
+    expect(list.openItemCount).toBe(1)
   })
 
   it('zeigt nur Einträge des eigenen Haushalts', async () => {
@@ -81,7 +81,7 @@ describe('getRestockList', () => {
     const list = await getRestockList(setup, { householdId, today })
 
     expect(list.gaps).toEqual([])
-    expect(list.openCount).toBe(2)
+    expect(list.openItemCount).toBe(1)
     expect(setup.repository.items).toHaveLength(3)
   })
 

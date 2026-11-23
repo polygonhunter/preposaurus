@@ -39,14 +39,33 @@ export function suggestionReasonText({ reason }: RestockSuggestionDto): string {
     : `${String(reason.count)} Packungen laufen vor dem Ziel ab`
 }
 
-/** Untertitel der Seite: „3 offen“, auch „0 offen“ */
-export const openCountText = ({ openCount }: RestockListDto) =>
-  `${formatGermanNumber(openCount)} offen`
+const countWithNoun = (count: number, one: string, many: string) =>
+  `${formatGermanNumber(count)} ${count === 1 ? one : many}`
+
+/**
+ * Untertitel der Seite, z. B. „3 Einträge offen · 2 Vorschläge · 1 Warengruppe unter dem Ziel“.
+ * Die Einträge stehen immer da (auch „0 Einträge offen“) und sind dieselbe Zahl wie auf der
+ * Übersicht und in der Wochenübersicht; Vorschläge und Lücken werden eigens genannt (#202).
+ */
+export function openCountText({ openItemCount, suggestions, gaps }: RestockListDto): string {
+  return [
+    `${countWithNoun(openItemCount, 'Eintrag', 'Einträge')} offen`,
+    suggestions.length > 0 ? countWithNoun(suggestions.length, 'Vorschlag', 'Vorschläge') : null,
+    gaps.length > 0
+      ? `${countWithNoun(gaps.length, 'Warengruppe', 'Warengruppen')} unter dem Ziel`
+      : null,
+  ]
+    .filter((part) => part !== null)
+    .join(' · ')
+}
+
+const hasAnythingOpen = ({ openItemCount, suggestions, gaps }: RestockListDto) =>
+  openItemCount + suggestions.length + gaps.length > 0
 
 export const NO_GOAL_TEXT = 'Setzt ein Ziel, dann rechnet die App die Lücken aus.'
 
 /** Leerzustand in einem Satz, null, wenn noch etwas offen ist. */
 export function emptyListText(list: RestockListDto): string | null {
-  if (list.openCount > 0) return null
+  if (hasAnythingOpen(list)) return null
   return list.isGoalCalculable ? 'Nichts offen. Euer Ziel ist erreicht.' : NO_GOAL_TEXT
 }

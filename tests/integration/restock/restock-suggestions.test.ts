@@ -148,6 +148,47 @@ describe('Ersetzen und Rückgängig gegen die Datenbank', () => {
     expect(removed).toMatchObject({ ok: true, value: { productId: null } })
   })
 
+  it('überschreibt beim Wiederanlegen keinen Eintrag eines fremden Haushalts', async () => {
+    // Erledigt, damit die Zählung des fremden Haushalts unten bei null bleibt
+    await repository.addItem(foreignId, { label: 'Fremd', source: 'manuell', productId: null })
+    const [added] = await repository.listItems(foreignId)
+    if (added === undefined) throw new Error('fremder Eintrag fehlt')
+    await repository.setDone(foreignId, { id: added.id, isDone: true })
+    const before = await repository.listItems(foreignId)
+
+    await restoreRestockItem(repository, {
+      householdId,
+      item: {
+        id: added.id,
+        label: 'Übernommen',
+        source: 'manuell',
+        productId: null,
+        isDone: false,
+        createdAt: added.createdAt,
+      },
+    })
+
+    expect(await repository.listItems(foreignId)).toEqual(before)
+    expect((await repository.listItems(householdId)).map(({ id }) => id)).not.toContain(added.id)
+  })
+
+  it('legt keinen zweiten offenen Eintrag an, wenn das Produkt inzwischen wieder da steht', async () => {
+    const productId = await productIdOf(householdId, 'H-Milch')
+    const added = await addSuggestedProduct(repository, { householdId, productId })
+    if (!added.ok || added.value.addedItemId === null) throw new Error('nicht angelegt')
+    const removed = await removeRestockItem(repository, {
+      householdId,
+      id: added.value.addedItemId,
+    })
+    if (!removed.ok) throw new Error('nicht entfernt')
+    await addSuggestedProduct(repository, { householdId, productId })
+
+    await restoreRestockItem(repository, { householdId, item: removed.value })
+
+    const open = (await load()).replace.filter(({ label }) => label === 'H-Milch')
+    expect(open).toHaveLength(1)
+  })
+
   it('zählt offene Einträge je Haushalt mit der einen Zählung', async () => {
     const list = await load()
 

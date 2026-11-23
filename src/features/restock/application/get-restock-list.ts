@@ -58,6 +58,6 @@ export async function getRestockList(
     suggestions: list.suggestions.map(toSuggestionDto),
     own: list.own.map(toItemDto),
     done: list.done.map(toItemDto),
-    openCount: list.openCount,
+    openItemCount: list.openItemCount,
   }
 }

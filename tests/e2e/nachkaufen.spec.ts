@@ -26,7 +26,12 @@ test('zeigt die Lücken bis zum Ziel und die eigenen Einträge', async ({ page }
   await page.goto('/nachkaufen')
 
   await expect(page.getByRole('heading', { level: 1, name: 'Nachkaufen' })).toBeVisible()
-  await expect(page.getByText(/^\d+ offen$/)).toBeVisible()
+  // Offene Einträge wie auf der Übersicht, Vorschläge und Lücken eigens genannt (#202)
+  await expect(
+    page.getByText(
+      /^\d+ (Eintrag|Einträge) offen( · \d+ (Vorschlag|Vorschläge))? · \d+ Warengruppen? unter dem Ziel$/,
+    ),
+  ).toBeVisible()
   const gaps = list(page, 'Fehlt bis zum Ziel')
   // Wasser zuerst, in ganzen Litern
   await expect(gaps.getByRole('listitem').first()).toHaveText(/^Wasser.*von 10 Tagen.*\d+ l$/)
@@ -56,11 +61,10 @@ test('ergänzt, hakt ab mit Rückgängig und „Jetzt erfassen“, entfernt', as
 
   await entry.click()
   const bar = undoBar(page, 'Knäckebrot abgehakt.')
-  await expect(bar).toBeVisible()
   const done = list(page, 'Erledigt').getByRole('checkbox', { name: 'Knäckebrot' })
   await expect(done).toBeChecked()
-  await expectAccessibleLayout(page)
-
+  // Die Zeile schließt nach fünf Sekunden: erst „Rückgängig“, axe danach mit offener Zeile, wenn
+  // nichts mehr auf sie wartet (sonst kann ein langsamer axe-Lauf sie überdauern)
   await bar.getByRole('button', { name: 'Rückgängig' }).click()
   await expect(entry).not.toBeChecked()
 
@@ -73,6 +77,8 @@ test('ergänzt, hakt ab mit Rückgängig und „Jetzt erfassen“, entfernt', as
   await page.goto('/nachkaufen')
   await expect(done).toBeChecked()
   await removeEntry(page, 'Knäckebrot')
+  await expect(undoBar(page, 'Knäckebrot entfernt.')).toBeVisible()
+  await expectAccessibleLayout(page)
 })
 
 test('zeigt einen Fehler am Feld, wenn der Eintrag leer ist', async ({ page }) => {

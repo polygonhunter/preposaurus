@@ -62,14 +62,14 @@ describe('buildRestockList', () => {
     expect(list.gaps[0]?.examples).toEqual(['Stilles Wasser'])
   })
 
-  it('zählt Lücken, Vorschläge und offene Einträge, aber keine erledigten', () => {
+  it('zählt nur offene, gespeicherte Einträge, keine erledigten, Lücken oder Vorschläge', () => {
     const list = build({
       items: [item({ id: 'a' }), item({ id: 'b', isDone: true })],
       gaps: [waterGap],
       candidates: [lentils],
     })
 
-    expect(list.openCount).toBe(3)
+    expect(list.openItemCount).toBe(1)
   })
 
   it('lässt einen Vorschlag weg, dessen Produkt oder Name schon offen auf der Liste steht', () => {
@@ -81,7 +81,7 @@ describe('buildRestockList', () => {
 
     expect(byProduct.suggestions).toEqual([])
     expect(byName.suggestions).toEqual([])
-    expect(byName.openCount).toBe(1)
+    expect(byName.openItemCount).toBe(1)
   })
 
   it('zeigt den Vorschlag wieder, wenn der Eintrag erledigt ist', () => {
@@ -114,7 +114,7 @@ describe('buildRestockList', () => {
       suggestions: [],
       own: [],
       done: [],
-      openCount: 0,
+      openItemCount: 0,
     })
   })
 })

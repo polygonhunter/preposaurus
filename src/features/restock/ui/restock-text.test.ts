@@ -17,7 +17,7 @@ const emptyList: RestockListDto = {
   suggestions: [],
   own: [],
   done: [],
-  openCount: 0,
+  openItemCount: 0,
 }
 
 describe('formatGapAmount', () => {
@@ -48,14 +48,39 @@ describe('Texte der Seite', () => {
     }
     expect(gapSubtitle(gap)).toBe('6 von 10 Tagen · z. B. Nudeln, Reis')
     expect(gapSubtitle({ ...gap, examples: [] })).toBe('6 von 10 Tagen')
-    expect(openCountText({ ...emptyList, openCount: 3 })).toBe('3 offen')
-    expect(openCountText(emptyList)).toBe('0 offen')
+  })
+
+  it('nennt offene Einträge, Vorschläge und Lücken getrennt', () => {
+    const suggestion = {
+      rowKey: 'food-type:linsen',
+      productId: 'b1a0c7e2-0000-4000-8000-000000000009',
+      label: 'Linsen',
+      reason: { kind: 'consumed' as const, lastDay: '2026-11-20' },
+    }
+    const gap = {
+      groupKey: 'wasser',
+      name: 'Wasser',
+      missing: { value: 1, unit: 'ml' as const },
+      days: 6,
+      goalDays: 10,
+      examples: [],
+    }
+    expect(openCountText(emptyList)).toBe('0 Einträge offen')
+    expect(openCountText({ ...emptyList, openItemCount: 1 })).toBe('1 Eintrag offen')
+    expect(
+      openCountText({
+        ...emptyList,
+        openItemCount: 3,
+        suggestions: [suggestion, { ...suggestion, rowKey: 'food-type:reis' }],
+        gaps: [gap],
+      }),
+    ).toBe('3 Einträge offen · 2 Vorschläge · 1 Warengruppe unter dem Ziel')
   })
 
   it('sagt im Leerzustand einen Satz, je nachdem, ob es ein Ziel gibt', () => {
     expect(emptyListText(emptyList)).toBe('Nichts offen. Euer Ziel ist erreicht.')
     expect(emptyListText({ ...emptyList, isGoalCalculable: false })).toBe(NO_GOAL_TEXT)
-    expect(emptyListText({ ...emptyList, openCount: 1 })).toBeNull()
+    expect(emptyListText({ ...emptyList, openItemCount: 1 })).toBeNull()
   })
 })
 

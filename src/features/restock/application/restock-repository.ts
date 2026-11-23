@@ -40,7 +40,8 @@ export interface RestockRepository {
   removeItem: (householdId: string, id: string) => Promise<StoredRestockItem | null>
   /**
    * Legt einen eben entfernten Eintrag wieder an. Ein Produkt eines anderen Haushalts (oder ein
-   * inzwischen gelöschtes) wird nicht übernommen. Gibt es die ID schon, bleibt alles, wie es ist.
+   * inzwischen gelöschtes) wird nicht übernommen. Gibt es die ID schon (auch in einem anderen
+   * Haushalt) oder steht dasselbe Produkt inzwischen wieder offen da, bleibt alles, wie es ist.
    */
   restoreItem: (householdId: string, item: StoredRestockItem) => Promise<void>
   /**

@@ -90,10 +90,16 @@ function itemChanges(items: StoredItem[], data: FakeRestockData) {
       const isOwnProduct = data.products?.some(
         (entry) => entry.householdId === householdId && entry.productId === item.productId,
       )
-      if (find(householdId, item.id) === undefined) {
-        const productId = isOwnProduct === true ? item.productId : null
-        items.push(storedItem({ ...item, householdId, productId }))
-      }
+      const productId = isOwnProduct === true ? item.productId : null
+      const isTaken = items.some((entry) => entry.id === item.id)
+      const isDuplicate =
+        productId !== null &&
+        !item.isDone &&
+        items.some(
+          (entry) =>
+            entry.householdId === householdId && entry.productId === productId && !entry.isDone,
+        )
+      if (!isTaken && !isDuplicate) items.push(storedItem({ ...item, householdId, productId }))
       return Promise.resolve()
     },
   }

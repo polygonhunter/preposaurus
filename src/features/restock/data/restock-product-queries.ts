@@ -50,7 +50,7 @@ export async function findConsumedProduct(db: Database, householdId: string, uni
   return toProductItem(row)
 }
 
-async function hasOpenItemFor(db: Database, householdId: string, productId: string) {
+export async function hasOpenItemFor(db: Database, householdId: string, productId: string) {
   const [row] = await db
     .select({ id: restockItems.id })
     .from(restockItems)
@@ -70,13 +70,17 @@ async function hasOpenItemFor(db: Database, householdId: string, productId: stri
  * bis zum Ende der Transaktion gesperrt, damit zwei schnelle Tipps auf „Nachkaufen“ nicht beide
  * „noch nicht da“ lesen und zwei Einträge anlegen. Ohne Migration, auf PGlite und PostgreSQL gleich.
  */
+export async function lockHousehold(db: Database, householdId: string) {
+  await db
+    .select({ id: households.id })
+    .from(households)
+    .where(eq(households.id, householdId))
+    .for('update')
+}
+
 export async function addProductOnce(db: Database, householdId: string, item: ProductItem) {
   return db.transaction(async (tx) => {
-    await tx
-      .select({ id: households.id })
-      .from(households)
-      .where(eq(households.id, householdId))
-      .for('update')
+    await lockHousehold(tx, householdId)
     if (await hasOpenItemFor(tx, householdId, item.productId)) return null
     const [added] = await tx
       .insert(restockItems)

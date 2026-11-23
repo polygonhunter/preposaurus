@@ -42,8 +42,11 @@ export interface RestockList {
   own: RestockItem[]
   /** Erledigt, zuletzt abgehakt zuerst */
   done: RestockItem[]
-  /** Lücken, Vorschläge und offene Einträge zusammen („3 offen“) */
-  openCount: number
+  /**
+   * Offene, gespeicherte Einträge: dieselbe Zahl wie auf der Übersicht und in der Wochenübersicht
+   * (`countOpenItems`). Lücken und Vorschläge nennt die Seite eigens.
+   */
+  openItemCount: number
 }
 
 interface RestockListInput {
@@ -83,6 +86,6 @@ export function buildRestockList({
     suggestions,
     own: open.filter((item) => item.source === 'manuell'),
     done: items.filter((item) => item.isDone).sort(byLatestChange),
-    openCount: gaps.length + suggestions.length + open.length,
+    openItemCount: open.length,
   }
 }

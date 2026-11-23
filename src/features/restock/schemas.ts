@@ -78,7 +78,8 @@ export const restockListSchema = z.object({
   suggestions: z.array(suggestionSchema),
   own: z.array(itemSchema),
   done: z.array(itemSchema),
-  openCount: z.number().int().nonnegative(),
+  /** Offene, gespeicherte Einträge, wie auf der Übersicht und in der Wochenübersicht */
+  openItemCount: z.number().int().nonnegative(),
 })
 
 export type RestockListDto = z.infer<typeof restockListSchema>
