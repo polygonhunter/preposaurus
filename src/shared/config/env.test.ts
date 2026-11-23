@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { isPatternPageEnabled, loadEnv, isCookieSecure } from './env'
+import { isPatternPageEnabled, loadEnv, isCookieSecure, isServiceWorkerEnabled } from './env'
 
 const SECRET = 'x'.repeat(32)
 const minimal = { DATABASE_URL: 'pglite://./.data/dev', APP_SECRET: SECRET }
@@ -166,5 +166,13 @@ describe('loadEnv: APP_URL', () => {
   it('lehnt andere Schemata und Text ohne Adresse ab', () => {
     expect(() => loadEnv({ ...minimal, APP_URL: 'javascript:alert(1)' })).toThrow('APP_URL')
     expect(() => loadEnv({ ...minimal, APP_URL: 'haushalt' })).toThrow('APP_URL')
+  })
+})
+
+describe('isServiceWorkerEnabled', () => {
+  it('schaltet den Service Worker nur im Produktionsbuild ein', () => {
+    expect(isServiceWorkerEnabled({ NODE_ENV: 'production' })).toBe(true)
+    expect(isServiceWorkerEnabled({ NODE_ENV: 'development' })).toBe(false)
+    expect(isServiceWorkerEnabled({})).toBe(false)
   })
 })

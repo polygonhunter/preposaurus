@@ -12,6 +12,7 @@
     "src/server/auth/guards.ts!",
     "scripts/admin.ts!",
     "src/worker/main.ts!",
+    "src/shared/sw/service-worker.ts!",
     "tests/e2e/*.setup.ts"
   ],
   "project": [
