@@ -19,27 +19,47 @@ async function withAdminPool(url: string, statement: string): Promise<void> {
   }
 }
 
-async function createPostgresTestDb(baseUrl: string): Promise<TestDb> {
+/** Server der CI (Job test-pg), sonst undefined: Dann laufen die Tests gegen PGlite. */
+export function testPostgresUrl(): string | undefined {
+  // Werkzeug, nicht App: Welcher Server getestet wird, entscheidet allein die CI.
+  // eslint-disable-next-line no-restricted-properties -- Testumgebung wählt den Treiber, die App liest weiter nur env.ts
+  const baseUrl = process.env['DATABASE_URL']
+  return baseUrl !== undefined && POSTGRES_URL.test(baseUrl) ? baseUrl : undefined
+}
+
+interface ScratchDatabase {
+  url: string
+  drop: () => Promise<void>
+}
+
+/** Leere Wegwerf-Datenbank auf dem PostgreSQL-Server der CI. */
+export async function createScratchDatabase(baseUrl: string): Promise<ScratchDatabase> {
   const name = `test_${randomUUID().replaceAll('-', '')}`
   await withAdminPool(baseUrl, `CREATE DATABASE ${name}`)
   const url = new URL(baseUrl)
   url.pathname = `/${name}`
-  const connection = await connectDatabase(url.toString())
+  return {
+    url: url.toString(),
+    drop: () => withAdminPool(baseUrl, `DROP DATABASE ${name} WITH (FORCE)`),
+  }
+}
+
+async function createPostgresTestDb(baseUrl: string): Promise<TestDb> {
+  const scratch = await createScratchDatabase(baseUrl)
+  const connection = await connectDatabase(scratch.url)
   return {
     ...connection,
     close: async () => {
       await connection.close()
-      await withAdminPool(baseUrl, `DROP DATABASE ${name} WITH (FORCE)`)
+      await scratch.drop()
     },
   }
 }
 
 /** Leere Datenbank ohne Migrationen, z. B. um eine einzelne Migration auf alten Daten zu prüfen. */
 export async function createEmptyTestDb(): Promise<TestDb> {
-  // Werkzeug, nicht App: Welcher Server getestet wird, entscheidet allein die CI.
-  // eslint-disable-next-line no-restricted-properties -- Testumgebung wählt den Treiber, die App liest weiter nur env.ts
-  const baseUrl = process.env['DATABASE_URL']
-  if (baseUrl !== undefined && POSTGRES_URL.test(baseUrl)) return createPostgresTestDb(baseUrl)
+  const baseUrl = testPostgresUrl()
+  if (baseUrl !== undefined) return createPostgresTestDb(baseUrl)
   return connectDatabase('pglite://memory')
 }
 

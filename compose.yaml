@@ -78,11 +78,12 @@ services:
       migrate:
         condition: service_completed_successfully
 
-  # Erinnerungen, Mails und Aufräumen. Kommt mit M11-01, bis dahin startet er nicht mit.
+  # Erinnerungen, Mails und Aufräumen (Warteschlange pg-boss in derselben Datenbank, Schema pgboss).
+  # Zeitpläne in Europe/Berlin. Beim Stoppen wartet er bis zu 20 Sekunden auf laufende Jobs.
   worker:
     <<: *app
     command: worker
-    profiles: [worker]
+    stop_grace_period: 30s
     healthcheck:
       disable: true
     depends_on:
@@ -96,7 +97,7 @@ services:
   #   sofort sichern:    docker compose run --rm backup jetzt  (vor einem Update: jetzt vor-update)
   #   Stände zeigen:     docker compose run --rm backup liste
   #   Probe einspielen:  docker compose run --rm backup pruefen <stand>
-  #   zurückspielen:     docker compose stop web && docker compose run --rm backup wiederherstellen <stand>
+  #   zurückspielen:     docker compose stop web worker && docker compose run --rm backup wiederherstellen <stand>
   #                      danach docker compose up -d
   backup:
     image: ghcr.io/polygonhunter/preposaurus-backup:${PREPOSAURUS_VERSION:?PREPOSAURUS_VERSION fehlt in .env}
