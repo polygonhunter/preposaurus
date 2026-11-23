@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { SHORTCUT_KEYS, shortcutFor } from '@/shared/lib/keyboard-shortcuts'
+import { isActivePath } from '@/shared/lib/paths'
 import { CAPTURE_NAV, SEARCH_HREF } from './nav-items'
 
 // Das Suchfeld trägt sein Kürzel in aria-keyshortcuts (SearchField), so findet es sich ohne ID.
@@ -35,17 +36,20 @@ function focusSearchWhenShown(): void {
 
 const hasOpenDialog = () => document.querySelector('dialog[open]') !== null
 
+// Erfassen läuft im Vollbild (UX_KONZEPT §6): Dort führte ein Kürzel aus Kamera oder Formular heraus
+const isCapturing = () => isActivePath(window.location.pathname, CAPTURE_NAV.href)
+
 const targetOf = (event: KeyboardEvent) =>
   event.target instanceof HTMLElement ? event.target : null
 
 // Globale Tastenkürzel (DESIGN_SYSTEM §6): „/“ Suche im Vorrat, „n“ Erfassen. Nicht in
-// Eingabefeldern und nicht, solange ein Blatt offen ist. Sichtbar sind sie ab „weit“ als `kbd`.
+// Eingabefeldern, nicht bei offenem Blatt und nicht im Erfassen. Ab „weit“ sichtbar als `kbd`.
 export function KeyboardShortcuts() {
   const router = useRouter()
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       const action = shortcutFor(event, targetOf(event))
-      if (action === null || hasOpenDialog()) return
+      if (action === null || hasOpenDialog() || isCapturing()) return
       event.preventDefault()
       if (action === 'capture') {
         router.push(CAPTURE_NAV.href)

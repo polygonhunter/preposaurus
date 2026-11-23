@@ -88,6 +88,19 @@ test.describe('Tastenkürzel', () => {
     await expect(page).toHaveURL(/\/neu(\/foto|\/manuell)?$/)
   })
 
+  test('im Erfassen führt kein Kürzel aus dem Formular', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Tastenkürzel gibt es nur mit Tastatur')
+    await page.goto('/neu/manuell')
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+
+    await page.locator('body').press('/')
+    await page.locator('body').press('n')
+    // Ein Wechsel bräuchte einen Moment, deshalb erst danach prüfen, dass keiner kam
+    await page.waitForTimeout(1000)
+
+    await expect(page).toHaveURL(/\/neu\/manuell$/)
+  })
+
   test('„/“ fokussiert im Vorrat direkt das Suchfeld', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Tastenkürzel gibt es nur mit Tastatur')
     await page.goto('/vorrat')
