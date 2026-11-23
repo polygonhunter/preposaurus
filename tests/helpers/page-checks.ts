@@ -15,9 +15,10 @@ async function waitForSettledAnimations(page: Page): Promise<void> {
   })
 }
 
-// Feste bzw. klebende Leisten (Tab-Leiste, „1 entnehmen“ im Detail) liegen weiter oben über dem
-// Inhalt. axe zählt die halb verdeckte Zeile darunter als zu kleines Ziel (target-size), je nachdem,
-// welche Zeile gerade dort steht. Am Seitenende stehen die Leisten an ihrem Platz (#49).
+// Beim Scrollen schwebt „1 entnehmen“ bewusst über dem Inhalt (DESIGN_SYSTEM §7). axe misst nur den
+// Augenblick und zählt die Zeile, die gerade halb darunter liegt, als zu kleines Ziel (target-size).
+// Am Seitenende muss alles frei liegen, das prüft axe dort. Dass ein fokussiertes Ziel nie unter
+// einer Leiste verschwindet, prüft expectFocusNotObscured (#49).
 async function scrollToEnd(page: Page): Promise<void> {
   await page.evaluate(() => {
     window.scrollTo(0, document.documentElement.scrollHeight)
