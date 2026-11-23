@@ -22,6 +22,14 @@ Danke für dein Interesse! Preposaurus ist ein Hobbyprojekt in früher Entwicklu
 - Kurze Branches (`feat/…`, `fix/…`), ein Pull Request je Thema, Issue verlinken. Gemergt wird per Squash.
 - Bei Änderungen an der Oberfläche bitte Bildschirmfotos anhängen.
 
+## Release (Maintainer)
+
+1. Version in `package.json` anheben (`npm version 0.2.0 --no-git-tag-version`, das passt auch `package-lock.json` an) und per Pull Request mergen.
+2. Die Läufe CI und Docker auf `main` abwarten.
+3. Den Merge-Commit auf `main` mit `v` plus genau dieser Version taggen und pushen, z. B. `git tag v0.2.0 && git push origin v0.2.0` (Vorab-Versionen wie `0.2.0-rc.1` gehen genauso).
+
+Der Release-Workflow bricht ab, wenn der Tag nicht auf `main` liegt, nicht zur Version in `package.json` passt oder CI und Docker für den Commit nicht grün sind.
+
 ## Lizenz deiner Beiträge (DCO)
 
 Es gibt **kein CLA**. Beiträge stehen unter derselben Lizenz wie das Projekt, **AGPL-3.0-or-later** („inbound = outbound“). Ein späterer Lizenzwechsel bräuchte deshalb die Zustimmung aller Beitragenden.

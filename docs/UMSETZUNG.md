@@ -34,7 +34,7 @@ Summe: **102 Pakete.** M14 kann jederzeit nach M6-05 starten, sobald der Maintai
 
 1. **App im Repo-Root**, nicht in `app/`. Gründe: `CODE_PRINZIPIEN` §2 nennt die Pfade `src/…`, `db/…`, `tests/e2e` schon so. Ein Ordner `app/` würde mit Next kollidieren (`app/src/app`). Dockerfile, CI, lefthook und knip brauchen dann keine Unterpfade. `prototypes/` bleibt als eigenes, unverändertes Projekt liegen und ist aus tsconfig, ESLint, knip, Vitest und dem Docker-Kontext ausgeschlossen.
 2. **npm statt pnpm** (pnpm ist nicht installiert). `package-lock.json` ist eingecheckt, die CI nutzt `npm ci`.
-3. **Node:** Ziel im Container ist Node 24 LTS (`research/26`, FAKTEN F14). Lokal läuft Node 26. `engines: ">=24"`, die CI testet auf Node 24.
+3. **Node:** Ziel im Container war Node 24 LTS (`research/26`, FAKTEN F14). Seit #187 laufen Image, CI und lokale Entwicklung auf Node 26 LTS, `engines: ">=26"`.
 4. **Versionen festhalten:** TypeScript 6.0.x (nicht 7), ESLint 9.x (nicht 10), bis die in CP §9 genannten Peers nachziehen. Alle übrigen Pakete in der beim Aufsetzen aktuellen Version, exakt gepinnt.
 5. **Datenbank ohne Docker:** Den Treiber kennt nur `src/server/db/client.ts`.
    - `DATABASE_URL=postgres://…` nutzt node-postgres (NAS, CI, optional lokal).
@@ -80,7 +80,7 @@ Summe: **102 Pakete.** M14 kann jederzeit nach M6-05 starten, sobald der Maintai
 ├─ db/migrations/ · db/seeds/ (index.ts, stammdaten, quellen, demo)
 ├─ tests/e2e/ · tests/helpers/ (Test-DB, Fakes, Fabriken)
 ├─ docker/ (Dockerfile, backup/, tailscale/serve.json) · compose.yaml · compose.tailscale.yaml
-├─ poc/ (Skript, Fotos nicht im Repo) · scripts/ (Lizenzprüfung)
+├─ poc/ (Fotos, Erwartungen, Berichte, git-ignoriert) · scripts/ (Lizenzprüfung, PoC-Messskript #103)
 ├─ docs/ (UMSETZUNG, CODE_PRINZIPIEN, EINRICHTUNG, konzept/, quellen/) · research/ · prototypes/
 └─ 00_…05_*.md · CLAUDE.md · README.md
 ```
@@ -417,7 +417,7 @@ Alle Pakete: Quelle D „Geräte und Umbruchpunkte“, „iPhone Duo“, „PC-B
 ### M13 · Betrieb: Docker, Backups, Deployment, Anleitung (Issue #1)
 
 - **M13-01 · Dockerfile und Startbefehle** (M) — Quelle: T#docker · Ordner: `docker/Dockerfile`, `.dockerignore`, `src/app/api/health`
-  - Fertig, wenn: Mehrstufiges Image auf Node 24 (slim), läuft als Nicht-Root. Ein Image, drei Befehle: `web`, `worker`, `migrate` (Migrationen plus Seeds, dann Ende). `/api/health` antwortet ohne Anmeldung und ohne Daten. sharp läuft auf amd64 und arm64.
+  - Fertig, wenn: Mehrstufiges Image auf Node 24 (slim, seit #187 Node 26), läuft als Nicht-Root. Ein Image, drei Befehle: `web`, `worker`, `migrate` (Migrationen plus Seeds, dann Ende). `/api/health` antwortet ohne Anmeldung und ohne Daten. sharp läuft auf amd64 und arm64.
   - Tests: CI baut das Image für amd64 und startet es gegen `postgres:18` · Braucht: M3-01 für `web` und `migrate`. Der Befehl `worker` kommt mit M11-01 dazu
 - **M13-02 · Compose-Dateien** (M) — Quelle: T#docker, T#tailscale, FAKTEN F5, F14 · Ordner: `compose.yaml`, `compose.tailscale.yaml`, `docker/tailscale/serve.json`
   - Fertig, wenn: Dienste `db` (PostgreSQL 18, Volume auf `/var/lib/postgresql`, Healthcheck), `migrate`, `web`, `worker`, `backup`. Reihenfolge db → migrate → web und worker. Ordner `db`, `fotos`, `backups` als Bind-Mounts. Port 3000 nur an 127.0.0.1. Die Überlagerung hängt `web` an den Tailscale-Sidecar mit Serve, Funnel bleibt aus. Images mit fester Versionsnummer.
@@ -437,7 +437,7 @@ Alle Pakete: Quelle D „Geräte und Umbruchpunkte“, „iPhone Duo“, „PC-B
 
 ### M14 · PoC Foto-Erkennung
 
-- **M14-01 · Messskript** (M) — Quelle: `01` PoC, `05` Nächste Schritte 2 · Ordner: `poc/`
+- **M14-01 · Messskript** (M) — Quelle: `01` PoC, `05` Nächste Schritte 2 · Ordner: `scripts/poc-recognition/`, Daten in `poc/` (Anleitung `docs/POC_ERKENNUNG.md`)
   - Fertig, wenn: `npm run poc:recognition` liest Fotos je Rolle aus `poc/fotos/` (nicht im Repository) samt einer Datei mit den erwarteten Werten, schickt jedes Foto über den Adapter aus M6-05 an beide Modelle und schreibt je Modell und Rolle: Treffer je Feld, Zahl der `null`, **erfundene MHDs**, Dauer, Kosten.
   - Tests: Unit für die Auswertung mit Fake-KI · Braucht: M6-05
 - **M14-02 · Fotos und Erwartungswerte** (S) — **[USER]** U5, U6

@@ -19,8 +19,13 @@ KEEP_BEFORE_RESTORE=${KEEP_BEFORE_RESTORE:-5}
 # ISO-Wochentag des wöchentlichen Stands, 7 = Sonntag
 WEEKLY_DAY=${WEEKLY_DAY:-7}
 DUMP_FILE=datenbank.dump
-# Ergebnis des letzten Laufs ("ok …" oder "fehler …"), liest der Healthcheck
-STATUS_FILE="$BACKUP_DIR/.letzter-lauf"
+# Status für Healthcheck und App (#147), eigener Ordner, den der Container web nur lesend sieht.
+# Die Dateien enthalten nur Zeitpunkt und Art, deshalb lesbar für alle (644), anders als die Stände.
+#   letzter-lauf      Ergebnis des letzten Laufs: "ok <zeit> <art>/<stand>" oder "fehler <zeit> <art>"
+#   letzte-sicherung  nur nach Erfolg: "<zeit> <art>/<stand>"
+STATUS_DIR="$BACKUP_DIR/status"
+STATUS_FILE="$STATUS_DIR/letzter-lauf"
+LAST_BACKUP_FILE="$STATUS_DIR/letzte-sicherung"
 LOCK_FILE="$BACKUP_DIR/.sperre"
 
 log() {
@@ -42,8 +47,23 @@ newest_in() {
   ls -1 "$1" | grep -E '^[0-9]{4}-' | sort -r | head -n 1
 }
 
+# Schreibt erst in eine neue Datei und ersetzt dann, damit die App nie eine halbe Zeile liest.
+write_status_line() {
+  printf '%s\n' "$2" > "$1.neu"
+  chmod 644 "$1.neu"
+  [ -z "${BACKUP_OWNER:-}" ] || chown "$BACKUP_OWNER" "$1.neu"
+  mv "$1.neu" "$1"
+}
+
 write_status() {
-  echo "$1 $(date -Iseconds) $2" > "$STATUS_FILE"
+  mkdir -p "$STATUS_DIR"
+  chmod 755 "$STATUS_DIR"
+  [ -z "${BACKUP_OWNER:-}" ] || chown "$BACKUP_OWNER" "$STATUS_DIR"
+  now=$(date -Iseconds)
+  write_status_line "$STATUS_FILE" "$1 $now $2"
+  [ "$1" != ok ] || write_status_line "$LAST_BACKUP_FILE" "$now $2"
+  # Bis Version 0.1 lag der Status in backups/.letzter-lauf
+  rm -f "$BACKUP_DIR/.letzter-lauf"
 }
 
 # Nie zwei Läufe gleichzeitig: Sichern, Probe und Wiederherstellen schließen sich aus.

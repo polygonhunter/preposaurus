@@ -15,7 +15,10 @@ const AUTH_TAG_BYTES = 16
 const HKDF_SALT = 'preposaurus/ki-schluessel'
 const HINT_LENGTH = 4
 
-/** Aktuelle Version des Verfahrens. Neue Chiffrate entstehen immer mit dieser Version. */
+/**
+ * Aktuelle Version des Verfahrens. Neue Chiffrate entstehen immer mit dieser Version.
+ * @internal Nur für Tests exportiert, im Code nur in dieser Datei genutzt.
+ */
 export const CURRENT_SECRET_VERSION = 1
 
 export interface EncryptedSecret {

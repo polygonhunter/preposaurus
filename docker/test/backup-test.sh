@@ -67,7 +67,11 @@ backup backup pruefen "$stand" | tee probe.log
 grep -q 'Probe in Ordnung' probe.log || fail "Die Probe hat den Stand nicht eingespielt"
 
 docker compose exec -T backup backup gesund || fail "Healthcheck nach erfolgreicher Sicherung krank"
-docker compose exec -T backup sh -c 'echo "fehler test" > /backups/.letzter-lauf'
+# Status für die App (#147): lesbar für alle, letzte Sicherung mit Art und Stand
+[ "$(stat -c '%a' backups/status/letzte-sicherung)" = "644" ] || fail "Status nicht für die App lesbar"
+grep -Eq '^[0-9]{4}-[0-9]{2}-[0-9]{2}T.* [a-z-]+/[0-9]{4}-' backups/status/letzte-sicherung ||
+  fail "letzte-sicherung hat nicht die Form <zeit> <art>/<stand>"
+docker compose exec -T backup sh -c 'echo "fehler test" > /backups/status/letzter-lauf'
 docker compose exec -T backup backup gesund && fail "Healthcheck muss einen Fehlschlag melden"
 
 # Nach der Sicherung: neue Zeile, gelöschtes und neues Foto. Alles das soll verschwinden.
