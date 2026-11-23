@@ -48,6 +48,35 @@ export async function expectAccessibleLayout(page: Page): Promise<void> {
   await expectNoHorizontalScroll(page)
 }
 
+// Duo quer (Stufe „breit“ unter „weit“): Kein Link, Knopf und kein Feld im Inhalt reicht in einen
+// 24-px-Streifen um die senkrechte Fenstermitte (Falz, UX_KONZEPT §6). Gezählt wird nur, was dort
+// wirklich antippbar ist: Chips, die in einer waagrecht rollenden Reihe verdeckt sind, zählen nicht.
+export async function expectNothingOnVerticalFold(page: Page): Promise<void> {
+  const crossing = await page.evaluate(() => {
+    const middle = window.innerWidth / 2
+    const targets = [...document.querySelectorAll<HTMLElement>('main a, main button, main input')]
+    const isHitIn = (element: HTMLElement, x: number, y: number) => {
+      const hit = document.elementFromPoint(x, y)
+      return hit !== null && element.contains(hit)
+    }
+    return targets
+      .filter((element) => {
+        const rect = element.getBoundingClientRect()
+        if (rect.width === 0 || rect.left >= middle + 12 || rect.right <= middle - 12) return false
+        // Nur die Seite rollen, nicht die Chip-Reihe (sonst käme Verdecktes ins Bild)
+        window.scrollBy(0, rect.top + rect.height / 2 - window.innerHeight / 2)
+        const box = element.getBoundingClientRect()
+        const y = box.top + box.height / 2
+        const left = Math.max(box.left + 1, middle - 12)
+        const right = Math.min(box.right - 1, middle + 12)
+        return isHitIn(element, left, y) || isHitIn(element, right, y)
+      })
+      .map((element) => element.textContent.trim())
+  })
+
+  expect(crossing).toEqual([])
+}
+
 // Bekommt ein Ziel den Fokus, scrollt der Browser es ins Bild. Feste Leisten unten (Tab-Leiste,
 // „1 entnehmen“) dürfen es dabei nicht verdecken (WCAG 2.4.11, scroll-padding in globals.css).
 // Geprüft wird vom Seitenanfang aus, wo die Leisten über dem Inhalt schweben.

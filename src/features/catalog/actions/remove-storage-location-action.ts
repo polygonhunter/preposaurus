@@ -1,10 +1,11 @@
 'use server'
 // Lagerort löschen (#77), nur der Admin und nur, wenn kein Produkt dort liegt. Danach geht es zur
 // Liste zurück.
+import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { adminAccessMessage } from '@/server/auth/admin-access-message'
 import { requireHouseholdAdmin } from '@/server/auth/guards'
-import { STORAGE_LOCATIONS_PATH } from '@/shared/config/settings-paths'
+import { SETTINGS_PATH, STORAGE_LOCATIONS_PATH } from '@/shared/config/settings-paths'
 import { catalogServices } from '../application/catalog-services'
 import { removeStorageLocation } from '../application/storage-locations'
 import type { RemoveState } from './catalog-form-state'
@@ -25,5 +26,7 @@ export async function removeStorageLocationAction(
   })
   if (!result.ok)
     return { message: result.error.kind === 'in-use' ? LOCATION_IN_USE : LOCATION_GONE }
+  // Die Liste der Einstellungen daneben (ab „breit“) zählt die Lagerorte
+  revalidatePath(SETTINGS_PATH, 'layout')
   redirect(STORAGE_LOCATIONS_PATH)
 }

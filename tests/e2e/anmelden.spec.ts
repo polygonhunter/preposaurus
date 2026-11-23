@@ -48,7 +48,8 @@ test('abmelden beendet die Sitzung, geschützte Seiten führen wieder zur Anmeld
 }) => {
   await signInViaUi(page)
   await page.goto('/einstellungen')
-  await expect(page.getByText(E2E_ADMIN.username)).toBeVisible()
+  // Der Wert steht je Stufe rechts oder unter dem Titel, sichtbar ist genau einer
+  await expect(page.getByText(E2E_ADMIN.username).filter({ visible: true })).toBeVisible()
 
   await page.getByRole('button', { name: 'Abmelden' }).click()
 

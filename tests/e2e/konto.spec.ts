@@ -55,7 +55,9 @@ test('Profil, Adresse für Erinnerungen und Passwort ändern', async ({ page, br
   await own.goto('/einstellungen')
   await own.getByRole('link', { name: /Profil, Passwort und Mails/ }).click()
   await expect(own.getByRole('heading', { level: 1, name: 'Mein Konto' })).toBeVisible()
-  await expect(own.getByText(usernameFor(info), { exact: true })).toBeVisible()
+  await expect(
+    own.getByRole('list', { name: 'Anmeldung' }).getByText(usernameFor(info), { exact: true }),
+  ).toBeVisible()
   await expect(own.getByText(/Magst du ein eigenes Passwort setzen\?/)).toBeVisible()
   await expectAccessibleLayout(own)
 

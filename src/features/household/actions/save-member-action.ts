@@ -2,11 +2,12 @@
 // Mitglied anlegen oder ändern (#38). Nur der Admin, geprüft bei jedem Aufruf. Fehler stehen am
 // Feld, die Eingaben behält das Formular selbst. Nach dem Speichern geht es zur Liste, aus der
 // Einrichtung (#40) zurück zu deren Schritt „Mitglieder“.
+import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { adminAccessMessage } from '@/server/auth/admin-access-message'
 import { requireHouseholdAdmin } from '@/server/auth/guards'
-import { MEMBERS_PATH } from '@/shared/config/settings-paths'
+import { MEMBERS_PATH, SETTINGS_PATH } from '@/shared/config/settings-paths'
 import { SETUP_MEMBERS_PATH } from '@/shared/config/setup-paths'
 import { firstMessages, readFormText } from '@/shared/lib/form-data'
 import { householdServices } from '../application/household-services'
@@ -100,5 +101,7 @@ export async function saveMemberAction(
     input: parsed.data,
   })
   if (!result.ok) return errorState(result.error, values)
+  // Die Liste der Einstellungen daneben (ab „breit“) zählt die Personen
+  revalidatePath(SETTINGS_PATH, 'layout')
   redirect(readReturnPath(formData))
 }

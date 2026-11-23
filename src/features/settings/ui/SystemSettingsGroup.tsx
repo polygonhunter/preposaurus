@@ -1,7 +1,7 @@
 import { AI_SETTINGS_PATH, SYSTEM_PATH } from '@/shared/config/settings-paths'
 import { Group } from '@/shared/ui/Group'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
-import { Row } from '@/shared/ui/Row'
+import { NavRow } from '@/shared/ui/NavRow'
 
 type SystemSettingsGroupProps = Readonly<{ isAdmin: boolean }>
 
@@ -11,12 +11,12 @@ type SystemSettingsGroupProps = Readonly<{ isAdmin: boolean }>
 export function SystemSettingsGroup({ isAdmin }: SystemSettingsGroupProps) {
   return (
     <>
-      <GroupHeader id="daten-system">Daten & System</GroupHeader>
-      <Group labelledBy="daten-system">
-        {isAdmin ? <Row title="Foto-Erkennung" action={{ href: AI_SETTINGS_PATH }} /> : null}
-        <Row
+      <GroupHeader id="bereiche-daten-system">Daten & System</GroupHeader>
+      <Group labelledBy="bereiche-daten-system">
+        {isAdmin ? <NavRow title="Foto-Erkennung" href={AI_SETTINGS_PATH} /> : null}
+        <NavRow
           title={isAdmin ? 'Sicherung, Export und Lizenz' : 'Lizenz und Quellen'}
-          action={{ href: SYSTEM_PATH }}
+          href={SYSTEM_PATH}
         />
       </Group>
     </>

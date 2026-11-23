@@ -1,10 +1,13 @@
 'use client'
+import type { ReactNode } from 'react'
+import { useIsBreit } from '@/shared/hooks/use-is-breit'
 import { discardDraftAction } from '../actions/discard-draft-action'
 import type { CaptureOptions } from '../domain/capture-options'
 import { CameraView } from './CameraView'
 import { CaptureSaved } from './CaptureSaved'
 import { deriveView } from './manual-capture-view'
 import type { PhotoCaptureState } from './photo-capture-state'
+import { PhotoCaptureLayout } from './PhotoCaptureLayout'
 import { PhotoReview } from './PhotoReview'
 import { PhotoSaveBar } from './PhotoSaveBar'
 import { saveBlocker } from './photo-shots'
@@ -17,6 +20,8 @@ type PhotoCaptureFlowProps = Readonly<{
   recognitionOff: string | null
   /** „Noch eins“ und „Verwerfen“: frischer Stand */
   onRestart: () => void
+  /** Titel und Umschalter, ab „breit“ rechts neben der Kamera */
+  header: ReactNode
 }>
 
 /** name-Attribut der Felder, damit der Fokus beim Speichern zum ersten Fehler springt */
@@ -35,9 +40,11 @@ function focusField(field: string) {
   if (name !== undefined) document.getElementsByName(name)[0]?.focus()
 }
 
-// Ein Durchlauf der Foto-Erfassung: Kamera, Prüfen, Speichern, danach die Bestätigung.
+// Ein Durchlauf der Foto-Erfassung: Kamera, Prüfen, Speichern, danach die Bestätigung. Kompakt
+// verdeckt die Kamera alles, ab „breit“ wächst der Vorschlag rechts neben ihr (PhotoCaptureLayout).
 export function PhotoCaptureFlow(props: PhotoCaptureFlowProps) {
   const { options, initial, recognitionOff, onRestart } = props
+  const isBreit = useIsBreit()
   const saving = useSavePhotoCapture(focusField)
   const { state, editor, matches, estimates } = usePhotoCapture({
     options,
@@ -47,53 +54,59 @@ export function PhotoCaptureFlow(props: PhotoCaptureFlowProps) {
   })
   const draft = { ...state, captureId: '', isKcalEstimate: state.nutritionSource === 'ai-estimate' }
   const view = deriveView(options, draft)
+  const isCameraShown = state.isCameraOpen && saving.saved === null
+  const isReviewShown = !state.isCameraOpen || isBreit
 
-  if (saving.saved !== null) {
-    return (
-      <CaptureSaved
-        unitCount={saving.saved.unitCount}
-        productName={view.productName}
-        isFirst={options.isStockEmpty}
-        onAnother={onRestart}
-      />
-    )
-  }
-  if (state.isCameraOpen) {
-    return (
-      <CameraView
-        step={state.step}
-        onPhoto={editor.takePhoto}
-        onClose={editor.closeCamera}
-        onSkipTable={editor.skipTable}
-        notice={recognitionOff}
-        dates={{ units: state.units, shots: state.shots }}
-      />
-    )
-  }
   return (
-    <form
-      noValidate
-      aria-label="Foto-Erfassung prüfen"
-      className="pb-6 breit:max-w-2xl"
-      onSubmit={(event) => {
-        event.preventDefault()
-        void saving.submit(state)
-      }}
+    <PhotoCaptureLayout
+      header={props.header}
+      camera={
+        isCameraShown ? (
+          <CameraView
+            step={state.step}
+            onPhoto={editor.takePhoto}
+            onClose={editor.closeCamera}
+            onSkipTable={editor.skipTable}
+            notice={recognitionOff}
+            dates={{ units: state.units, shots: state.shots }}
+          />
+        ) : null
+      }
     >
-      <PhotoReview
-        {...{ options, state, view, editor, matches, estimates }}
-        errors={saving.errors}
-      />
-      <PhotoSaveBar
-        errors={saving.errors}
-        blocker={saveBlocker(state)}
-        isBlockerShown={saving.isBlockerShown}
-        isSaving={saving.isSaving}
-        onDiscard={async () => {
-          if (state.draftId !== null) await discardDraftAction({ entwurfId: state.draftId })
-          onRestart()
-        }}
-      />
-    </form>
+      {saving.saved === null ? null : (
+        <CaptureSaved
+          unitCount={saving.saved.unitCount}
+          productName={view.productName}
+          isFirst={options.isStockEmpty}
+          onAnother={onRestart}
+        />
+      )}
+      {saving.saved === null && isReviewShown ? (
+        <form
+          noValidate
+          aria-label="Foto-Erfassung prüfen"
+          className="pb-6 breit:max-w-2xl"
+          onSubmit={(event) => {
+            event.preventDefault()
+            void saving.submit(state)
+          }}
+        >
+          <PhotoReview
+            {...{ options, state, view, editor, matches, estimates }}
+            errors={saving.errors}
+          />
+          <PhotoSaveBar
+            errors={saving.errors}
+            blocker={saveBlocker(state)}
+            isBlockerShown={saving.isBlockerShown}
+            isSaving={saving.isSaving}
+            onDiscard={async () => {
+              if (state.draftId !== null) await discardDraftAction({ entwurfId: state.draftId })
+              onRestart()
+            }}
+          />
+        </form>
+      ) : null}
+    </PhotoCaptureLayout>
   )
 }

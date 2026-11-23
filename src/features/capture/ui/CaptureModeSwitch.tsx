@@ -10,9 +10,14 @@ const MODES = [
 
 // Umschalter Foto · Manuell (UX §8.5), immer sichtbar. Optik wie die Segment-Steuerung, aber als
 // Links, weil jeder Weg eine eigene Adresse hat. Ein offener Foto-Entwurf bleibt dabei erhalten.
+// Ab „breit“ endet er vor der Fenstermitte (Falz beim Duo quer): 252 px = Seitenleiste, halber
+// Abstand und Rand.
 export function CaptureModeSwitch({ current }: CaptureModeSwitchProps) {
   return (
-    <nav aria-label="Weg der Erfassung" className="mx-4 pt-3 breit:mx-6 breit:max-w-xs">
+    <nav
+      aria-label="Weg der Erfassung"
+      className="mx-4 pt-3 breit:mx-6 breit:max-w-[min(20rem,calc(50vw-252px))]"
+    >
       <ul className="flex rounded-segment bg-fill p-0.5">
         {MODES.map((mode) => {
           const isCurrent = mode.key === current
