@@ -8,6 +8,7 @@ import { getUnitDateGroup } from './get-unit-date-group'
 
 const householdId = 'haushalt-a'
 const UNKNOWN = '00000000-0000-4000-8000-000000000000'
+const FOOD_TYPE_ID = '44444444-4444-4444-8444-444444444444'
 
 function setup() {
   const units = [
@@ -20,7 +21,9 @@ function setup() {
   ].map((entry) => ({ ...entry, id: crypto.randomUUID() }))
   const editor = createFakeUnitDateEditor({
     householdId,
-    products: [{ id: 'linsen', name: 'Linsen 500 g', foodType: { id: 'art', name: 'Linsen' } }],
+    products: [
+      { id: 'linsen', name: 'Linsen 500 g', foodType: { id: FOOD_TYPE_ID, name: 'Linsen' } },
+    ],
     units,
   })
   return { units, editor }
@@ -100,7 +103,7 @@ describe('getUnitDateGroup', () => {
 
     expect(result.ok && unitDateGroupSchema.parse(result.value)).toEqual(result.ok && result.value)
     expect(result.ok && result.value).toMatchObject({
-      target: { kind: 'food-type', id: 'art' },
+      target: { kind: 'food-type', id: FOOD_TYPE_ID },
       name: 'Linsen',
       productName: 'Linsen 500 g',
       unitIds: [idOf(units, 0), idOf(units, 1)],
