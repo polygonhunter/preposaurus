@@ -1,6 +1,8 @@
 // Warengruppen mit festem Schlüssel (technik.html „Empfehlung und Ziel“). Die Mengen je Gruppe
 // stehen nicht hier, sondern versioniert je Quelle in quelle_wert (M1-09).
 // Wasser ist eine eigene Gruppe, getrennt von Getränken (vorläufig, UMSETZUNG 7.3 / U11).
+// Die Namen sind die amtlichen aus den Empfehlungen. Kurze Anzeigenamen für Titel und Navigation
+// stehen in src/shared/config/product-groups.ts (#177).
 export const PRODUCT_GROUPS = [
   { key: 'getreide', name: 'Getreide, Getreideprodukte, Brot und Kartoffeln' },
   { key: 'gemuese_huelsenfruechte', name: 'Gemüse und Hülsenfrüchte' },

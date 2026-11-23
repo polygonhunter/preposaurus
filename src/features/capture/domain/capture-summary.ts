@@ -36,7 +36,9 @@ function totalKcal(content: ContentQuantity, kcal: KcalBasis, count: number): st
 function totalsOf({ content, kcal }: SummaryInput, count: number): string[] {
   if (content === null) return []
   const amount = formatQuantity({ value: content.value * count, unit: content.unit })
-  return kcal === null ? [amount] : [amount, totalKcal(content, kcal, count)]
+  // Wasser und andere Dinge ohne Brennwert: „18 l“ statt „18 l · ca. 0 kcal“ (#218)
+  const hasKcal = kcal !== null && kcal.per100 > 0
+  return hasKcal ? [amount, totalKcal(content, kcal, count)] : [amount]
 }
 
 export function summarizeCapture(input: SummaryInput): CaptureSummary {

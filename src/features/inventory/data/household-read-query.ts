@@ -16,6 +16,7 @@ import { containers, storageLocations } from '@/server/db/schema/catalog'
 import { householdSettings, households, members } from '@/server/db/schema/household'
 import { goals, productGroups, sourceNeeds, sourceValues } from '@/server/db/schema/recommendation'
 import { toDiet, toMemberType } from './db-values'
+import { productGroupShortName } from '@/shared/config/product-groups'
 
 const DEFAULT_SETTINGS: ReadSettings = {
   thresholds: { soonDays: DEFAULT_AMPEL_YELLOW_DAYS, urgentDays: DEFAULT_AMPEL_ORANGE_DAYS },
@@ -113,10 +114,11 @@ export async function loadSupplyBasis(db: Database, householdId: string): Promis
 
 /** Warengruppen sind System-Stammdaten ohne Haushalt, deshalb ohne Haushaltsfilter. */
 export async function loadGroups(db: Database): Promise<StockGroup[]> {
-  return db
+  const rows = await db
     .select({ key: productGroups.key, name: productGroups.name })
     .from(productGroups)
     .orderBy(asc(productGroups.sortOrder))
+  return rows.map(({ key, name }) => ({ key, name, shortName: productGroupShortName(key, name) }))
 }
 
 /** Auswahl im Filter-Blatt: alle Behälter, die eigenen, nicht ausgeblendeten Lagerorte. */

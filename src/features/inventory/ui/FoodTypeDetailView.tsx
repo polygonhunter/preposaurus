@@ -1,4 +1,5 @@
 import { EmptyState } from '@/shared/ui/EmptyState'
+import { OfflineNotice } from '@/shared/ui/OfflineNotice'
 import { PageHeader } from '@/shared/ui/PageHeader'
 import { StatTiles } from '@/shared/ui/StatTiles'
 import type { FoodTypeDetail, HistoryEntry } from '../schemas'
@@ -19,7 +20,7 @@ type FoodTypeDetailViewProps = Readonly<{
 
 // Detail einer Lebensmittelart (UX-Konzept §8.4, #45): Pfadzeile, Large Title, Kennwerte,
 // Säulen je MHD, Abschnitte je Produkt mit Zeilen je Datum, Verlauf (#48), unten fest
-// „1 entnehmen · MHD“.
+// „1 entnehmen · MHD“. Ohne Verbindung zeigt der Service Worker den letzten Stand (#216).
 export function FoodTypeDetailView({ detail, history }: FoodTypeDetailViewProps) {
   const fifoGroup = fifoGroupOf(detail.products, detail.fifoUnitId)
   const columns = shelfLifeColumns(detail.products)
@@ -29,9 +30,10 @@ export function FoodTypeDetailView({ detail, history }: FoodTypeDetailViewProps)
     <ConsumeProvider>
       <PageHeader
         title={detail.name}
-        back={{ href: groupPath(detail.path.group.key), label: 'Zurück' }}
+        back={{ href: groupPath(detail.path.group.key), label: detail.path.group.shortName }}
         eyebrow={<PathLine path={detail.path} />}
       />
+      <OfflineNotice loadedAt={new Date().toISOString()} />
       <div className="pt-3">
         <StatTiles tiles={detailTiles(detail)} />
         {uncounted === null ? null : (
