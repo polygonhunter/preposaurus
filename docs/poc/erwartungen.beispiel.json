@@ -1,0 +1,47 @@
+{
+  "toleranz": { "relativ": 0.05, "absolut": 0.5 },
+  "fotos": [
+    {
+      "datei": "verpackung/nudeln-500g.jpg",
+      "rolle": "verpackung",
+      "erwartet": {
+        "lebensmittelart": "nudeln",
+        "behaelter": "packung",
+        "inhalt": { "wert": 500, "einheit": "g" }
+      }
+    },
+    {
+      "datei": "verpackung/thunfisch-dose-schraeg.jpg",
+      "rolle": "verpackung",
+      "notiz": "schräg fotografiert, Füllmenge verdeckt",
+      "erwartet": { "behaelter": "dose", "inhalt": null }
+    },
+    {
+      "datei": "naehrwerte/haferflocken.jpg",
+      "rolle": "naehrwerte",
+      "erwartet": { "kcal": 372, "eiweiss_g": 13.5, "kohlenhydrate_g": 58.7, "fett_g": 7 }
+    },
+    {
+      "datei": "mhd/reis-tag.jpg",
+      "rolle": "mhd",
+      "erwartet": { "datum": "2028-03-14", "art": "mhd" }
+    },
+    {
+      "datei": "mhd/bohnen-nur-monat.jpg",
+      "rolle": "mhd",
+      "notiz": "nur Monat und Jahr aufgedruckt",
+      "erwartet": { "datum": "2029-11" }
+    },
+    {
+      "datei": "mhd/milch-zu-verbrauchen-bis.jpg",
+      "rolle": "mhd",
+      "erwartet": { "datum": "2027-01-09", "art": "verbrauchen_bis" }
+    },
+    {
+      "datei": "mhd/dose-gepraegt-unlesbar.jpg",
+      "rolle": "mhd",
+      "notiz": "geprägt, auch mit bloßem Auge nicht lesbar",
+      "erwartet": { "datum": null }
+    }
+  ]
+}

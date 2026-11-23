@@ -80,7 +80,7 @@ Summe: **102 Pakete.** M14 kann jederzeit nach M6-05 starten, sobald der Maintai
 ├─ db/migrations/ · db/seeds/ (index.ts, stammdaten, quellen, demo)
 ├─ tests/e2e/ · tests/helpers/ (Test-DB, Fakes, Fabriken)
 ├─ docker/ (Dockerfile, backup/, tailscale/serve.json) · compose.yaml · compose.tailscale.yaml
-├─ poc/ (Skript, Fotos nicht im Repo) · scripts/ (Lizenzprüfung)
+├─ poc/ (Fotos, Erwartungen, Berichte, git-ignoriert) · scripts/ (Lizenzprüfung, PoC-Messskript #103)
 ├─ docs/ (UMSETZUNG, CODE_PRINZIPIEN, EINRICHTUNG, konzept/, quellen/) · research/ · prototypes/
 └─ 00_…05_*.md · CLAUDE.md · README.md
 ```
@@ -437,7 +437,7 @@ Alle Pakete: Quelle D „Geräte und Umbruchpunkte“, „iPhone Duo“, „PC-B
 
 ### M14 · PoC Foto-Erkennung
 
-- **M14-01 · Messskript** (M) — Quelle: `01` PoC, `05` Nächste Schritte 2 · Ordner: `poc/`
+- **M14-01 · Messskript** (M) — Quelle: `01` PoC, `05` Nächste Schritte 2 · Ordner: `scripts/poc-recognition/`, Daten in `poc/` (Anleitung `docs/POC_ERKENNUNG.md`)
   - Fertig, wenn: `npm run poc:recognition` liest Fotos je Rolle aus `poc/fotos/` (nicht im Repository) samt einer Datei mit den erwarteten Werten, schickt jedes Foto über den Adapter aus M6-05 an beide Modelle und schreibt je Modell und Rolle: Treffer je Feld, Zahl der `null`, **erfundene MHDs**, Dauer, Kosten.
   - Tests: Unit für die Auswertung mit Fake-KI · Braucht: M6-05
 - **M14-02 · Fotos und Erwartungswerte** (S) — **[USER]** U5, U6
