@@ -144,7 +144,9 @@ test('neues Produkt mit zwei Daten und „Datum fehlt“, doppeltes Speichern le
   await expect(page.getByRole('button', { name: `Zu Nudeln ${amount} hinzufügen` })).toHaveCount(1)
   // Verlässt man den Inhalt, wählt die App das eine passende Produkt vor (#207).
   await content(page).blur()
-  await expect(page.getByText(`Wird zu Nudeln ${amount} hinzugefügt`)).toBeVisible()
+  await expect(
+    page.getByText(`Wird zu Nudeln ${amount} hinzugefügt`, { exact: true }),
+  ).toBeVisible()
   await expect(page.getByRole('button', { name: `Zu Nudeln ${amount} hinzufügen` })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Packung', exact: true })).toHaveAttribute(
     'aria-pressed',
@@ -209,7 +211,7 @@ test('Nachschub eines bekannten Produkts braucht höchstens 5 Tipps (F2, #207, #
   await tap(resultFor(page, name))
 
   // Genau ein Produkt dieser Art: vorgewählt, Inhalt und Behälter übernommen, Fokus im MHD
-  await expect(page.getByText(`Wird zu ${name} 500 g hinzugefügt`)).toBeVisible()
+  await expect(page.getByText(`Wird zu ${name} 500 g hinzugefügt`, { exact: true })).toBeVisible()
   await expect(content(page)).toHaveValue('500 g')
   await expect(bestBefore(page)).toBeFocused()
   await page.keyboard.type('05/2028')
@@ -230,7 +232,7 @@ test('Nachschub eines bekannten Produkts braucht höchstens 5 Tipps (F2, #207, #
   await page.getByRole('button', { name: 'Noch eins erfassen' }).click()
   await search(page).fill(name.toLowerCase())
   await resultFor(page, name).click()
-  await expect(page.getByText(`Wird zu ${name} 500 g hinzugefügt`)).toBeVisible()
+  await expect(page.getByText(`Wird zu ${name} 500 g hinzugefügt`, { exact: true })).toBeVisible()
   // „Neu anlegen“ wählt ab und bleibt abgewählt
   await page.getByRole('button', { name: 'Neu anlegen' }).click()
   await content(page).focus()
@@ -242,6 +244,8 @@ test('Die Suche findet Alltagswörter und zeigt auf Wunsch alle Treffer (#212)',
   page,
 }) => {
   await page.goto('/neu/manuell')
+  // Erst nach dem Hydrieren tippen, sonst bleibt die Eingabe ohne Suche stehen
+  await expect(search(page)).toBeFocused()
 
   await search(page).fill('Spaghetti')
   await expect(page.getByRole('button', { name: /^Nudeln\s*Getreide/ })).toBeVisible()

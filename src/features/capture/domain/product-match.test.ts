@@ -83,16 +83,26 @@ describe('findProductMatches', () => {
 })
 
 describe('soleMatch', () => {
+  const none = { declinedIds: [], chosenContainerId: null }
+  const product = (id: string, containerId: string | null = 'packung') => ({ id, containerId })
+
   it('wählt genau ein passendes Produkt vor', () => {
-    expect(soleMatch([{ id: 'a' }], [])).toEqual({ id: 'a' })
+    expect(soleMatch([product('a')], none)).toEqual(product('a'))
   })
 
   it('wählt nichts bei keinem oder mehreren Produkten', () => {
-    expect(soleMatch([], [])).toBeNull()
-    expect(soleMatch([{ id: 'a' }, { id: 'b' }], [])).toBeNull()
+    expect(soleMatch([], none)).toBeNull()
+    expect(soleMatch([product('a'), product('b')], none)).toBeNull()
   })
 
   it('wählt ein abgewähltes Produkt nicht erneut', () => {
-    expect(soleMatch([{ id: 'a' }], ['a'])).toBeNull()
+    expect(soleMatch([product('a')], { ...none, declinedIds: ['a'] })).toBeNull()
+  })
+
+  it('überschreibt keinen gewählten Behälter (Produkt ohne Behälter nur angeboten)', () => {
+    expect(soleMatch([product('a', null)], { ...none, chosenContainerId: 'glas' })).toBeNull()
+    expect(soleMatch([product('a')], { ...none, chosenContainerId: 'packung' })).toEqual(
+      product('a'),
+    )
   })
 })

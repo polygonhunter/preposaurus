@@ -47,15 +47,24 @@ export function findProductMatches<T extends ProductIdentity>(
   return fitting
 }
 
+interface SoleMatchContext {
+  /** Mit „Neu anlegen“ abgewählte Produkte: Sie werden nicht erneut vorgewählt. */
+  declinedIds: readonly string[]
+  /** Behälter im Formular, null wenn keiner gewählt ist */
+  chosenContainerId: string | null
+}
+
 /**
  * Das eine passende Produkt, das die App vorwählt, sonst null. Es bleibt sichtbar und lässt sich mit
- * „Neu anlegen“ abwählen. Ein abgewähltes Produkt wird nicht erneut vorgewählt.
+ * „Neu anlegen“ abwählen. Die Vorwahl überschreibt keine Wahl: Hat das Produkt keinen oder einen
+ * anderen Behälter als den gewählten, wird es nur angeboten, nicht vorgewählt.
  */
-export function soleMatch<T extends { id: string }>(
+export function soleMatch<T extends { id: string; containerId: string | null }>(
   matches: readonly T[],
-  declinedIds: readonly string[],
+  { declinedIds, chosenContainerId }: SoleMatchContext,
 ): T | null {
   const [only, ...others] = matches
   if (only === undefined || others.length > 0) return null
+  if (chosenContainerId !== null && only.containerId !== chosenContainerId) return null
   return declinedIds.includes(only.id) ? null : only
 }

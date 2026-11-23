@@ -47,7 +47,10 @@ export function useRestock<F extends RestockFields>(
   /** Nach einem Ereignis genau ein passendes Produkt vorwählen. true, wenn eines gewählt ist. */
   function pickSoleMatch(fields: F): boolean {
     if (fields.foodTypeId === null || fields.existingProductId !== null) return false
-    const sole = soleMatch(matchesFor(fields), declinedIds)
+    const sole = soleMatch(matchesFor(fields), {
+      declinedIds,
+      chosenContainerId: fields.containerId,
+    })
     if (sole !== null) apply(fields, fieldsOfProduct(sole))
     return sole !== null
   }
