@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
@@ -10,7 +10,7 @@ const onlyOnDesktop = (projectName: string) => {
   test.skip(projectName !== 'desktop', 'Ändert den ganzen Haushalt, läuft nur auf Desktop')
 }
 
-const saveButton = (page: Page) => page.getByRole('button', { name: 'Speichern' })
+const saveButton = (scope: Page | Locator) => scope.getByRole('button', { name: 'Speichern' })
 
 test('zeigt dem Admin alle vier Gruppen', async ({ page }) => {
   await page.goto('/einstellungen')
@@ -135,16 +135,18 @@ test('Ernährung des Haushalts und „Noch gut zählt mit“ umstellen', async (
 
   // Der Schalter ist eine versteckte Checkbox, getippt wird auf seine Beschriftung
   const label = page.getByText('„Noch gut“ zählt mit', { exact: true })
+  // Die Seite hat auch die Ampel mit eigenem „Speichern“ (#78)
+  const stillGood = page.getByRole('form', { name: 'Abgelaufen, aber noch gut' })
   await label.click()
   await expect(toggle).toBeChecked()
-  await saveButton(page).click()
-  await expect(page.getByText('Gespeichert.')).toBeVisible()
+  await saveButton(stillGood).click()
+  await expect(stillGood.getByText('Gespeichert.')).toBeVisible()
   await page.reload()
   await expect(toggle).toBeChecked()
   await label.click()
   await expect(toggle).not.toBeChecked()
-  await saveButton(page).click()
-  await expect(page.getByText('Gespeichert.')).toBeVisible()
+  await saveButton(stillGood).click()
+  await expect(stillGood.getByText('Gespeichert.')).toBeVisible()
 
   await page.goto('/einstellungen/mitglieder')
   await page.getByText('Vegetarisch', { exact: true }).click()

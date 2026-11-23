@@ -43,6 +43,13 @@
       "when": 1795402454680,
       "tag": "0005_nutzer_erinnerung_email",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795420813374,
+      "tag": "0006_stammdaten_je_haushalt",
+      "breakpoints": true
     }
   ]
 }

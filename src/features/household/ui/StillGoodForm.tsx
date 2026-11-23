@@ -7,14 +7,18 @@ import { SETTING_IDLE } from '../actions/action-messages'
 import { saveStillGoodAction } from '../actions/save-still-good-action'
 import { SaveStatus } from '@/shared/ui/SaveStatus'
 
-type StillGoodFormProps = Readonly<{ isOn: boolean }>
+type StillGoodFormProps = Readonly<{
+  isOn: boolean
+  // id des Gruppenkopfs: Das Formular heißt so, die Seite hat mehrere „Speichern“
+  labelledBy: string
+}>
 
 // Schalter „Noch gut zählt mit“ (ROT-05, #117), Standard aus. Er wirkt nur auf „Heute versorgt“,
 // fürs Zieldatum zählt eine abgelaufene Packung nie.
-export function StillGoodForm({ isOn }: StillGoodFormProps) {
+export function StillGoodForm({ isOn, labelledBy }: StillGoodFormProps) {
   const [state, formAction, isPending] = useActionState(saveStillGoodAction, SETTING_IDLE)
   return (
-    <form action={formAction} className="flex flex-col gap-3">
+    <form action={formAction} aria-labelledby={labelledBy} className="flex flex-col gap-3">
       <div className="mx-4 rounded-group bg-surface px-4 breit:mx-6 breit:border breit:border-line">
         <Toggle label="„Noch gut“ zählt mit" name="noch-gut" value="an" defaultChecked={isOn} />
       </div>

@@ -35,7 +35,39 @@ test('sieht den Haushalt nur lesend und keine Nutzerverwaltung', async ({ page }
 
   await page.goto('/einstellungen/regeln')
   await expect(page.getByRole('switch')).toHaveCount(0)
+  await expect(page.getByRole('textbox')).toHaveCount(0)
+  await expect(page.getByRole('list', { name: 'Ampel' })).toContainText('ab 28 Tage')
   await expect(page.getByText('Das ändert ein Admin.')).toBeVisible()
+  await expectAccessibleLayout(page)
+})
+
+test('sieht die Lagerorte nur lesend (#77)', async ({ page }) => {
+  await page.goto('/einstellungen')
+  await page.getByRole('link', { name: /Lagerorte/ }).click()
+
+  await expect(page.getByRole('list', { name: 'Zur Wahl beim Erfassen' })).toContainText('Keller')
+  await expect(page.getByRole('link', { name: /Keller/ })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /nach oben|Hinzufügen/ })).toHaveCount(0)
+  await expect(page.getByText(/Das ändert ein Admin\./)).toBeVisible()
+  await expectAccessibleLayout(page)
+})
+
+test('sieht Kategorien und Lebensmittelarten nur lesend (#76, #126)', async ({ page }) => {
+  await page.goto('/einstellungen')
+  await page.getByRole('link', { name: /Kategorien und Lebensmittelarten/ }).click()
+
+  await expect(page.getByRole('heading', { level: 1, name: 'Kategorien' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Neue Kategorie' })).toHaveCount(0)
+  await expectAccessibleLayout(page)
+
+  await page
+    .getByRole('link', { name: /^Nudeln, Reis/ })
+    .first()
+    .click()
+  await expect(page.getByRole('list', { name: 'Lebensmittelarten' })).toContainText('Nudeln')
+  await expect(page.getByRole('button', { name: /Ausblenden|Speichern|Anlegen/ })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Neue Lebensmittelart' })).toHaveCount(0)
+  await expectAccessibleLayout(page)
 })
 
 test('sieht Lizenz und Quelltext (AGPL, #217)', async ({ page }) => {
@@ -53,6 +85,10 @@ test('Admin-Seiten antworten auch per Direktaufruf mit „nicht gefunden“', as
     '/einstellungen/nutzer',
     '/einstellungen/nutzer/neu',
     '/einstellungen/mitglieder/neu',
+    // Bearbeiten eines Lagerorts gibt es nur für den Admin, die ID spielt keine Rolle
+    '/einstellungen/lagerorte/00000000-0000-4000-8000-000000000000',
+    '/einstellungen/kategorien/neu',
+    '/einstellungen/lebensmittelarten/neu',
   ]) {
     const response = await page.goto(path)
 
