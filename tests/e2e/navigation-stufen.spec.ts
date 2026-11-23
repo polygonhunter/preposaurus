@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
+import { pressUntil, waitForHydration } from '../helpers/hydration'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Rahmen je Stufe (DESIGN_SYSTEM §6, #90, #91, #94): Tab-Leiste in kompakt und mittel, ab „breit“
@@ -73,8 +74,7 @@ test.describe('Tastenkürzel', () => {
     test.skip(isMobile, 'Tastenkürzel gibt es nur mit Tastatur')
     await page.goto('/uebersicht')
 
-    await page.keyboard.press('/')
-    await expect(page).toHaveURL(/\/vorrat$/)
+    await pressUntil(page, '/', (timeout) => expect(page).toHaveURL(/\/vorrat$/, { timeout }))
     const search = page.getByRole('searchbox', { name: 'Vorrat durchsuchen' })
     await expect(search).toBeFocused()
 
@@ -92,6 +92,7 @@ test.describe('Tastenkürzel', () => {
     test.skip(isMobile, 'Tastenkürzel gibt es nur mit Tastatur')
     await page.goto('/neu/manuell')
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+    await waitForHydration(page)
 
     await page.locator('body').press('/')
     await page.locator('body').press('n')
@@ -104,11 +105,10 @@ test.describe('Tastenkürzel', () => {
   test('„/“ fokussiert im Vorrat direkt das Suchfeld', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Tastenkürzel gibt es nur mit Tastatur')
     await page.goto('/vorrat')
-    await expect(page.getByRole('heading', { level: 1, name: 'Vorrat' })).toBeVisible()
+    const search = page.getByRole('searchbox', { name: 'Vorrat durchsuchen' })
 
-    await page.keyboard.press('/')
+    await pressUntil(page, '/', (timeout) => expect(search).toBeFocused({ timeout }))
 
-    await expect(page.getByRole('searchbox', { name: 'Vorrat durchsuchen' })).toBeFocused()
     await expect(page).toHaveURL(/\/vorrat$/)
   })
 
