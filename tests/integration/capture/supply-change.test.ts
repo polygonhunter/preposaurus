@@ -57,6 +57,7 @@ describe('Tage vor und nach dem Speichern', () => {
       writer: createStockWriteRepository(testDb.db),
       now: () => new Date('2026-11-22T10:00:00Z'),
       readSupplyDays: (id: string) => getSupplyDaysNow(reader, { householdId: id, today }),
+      logWarning: () => undefined,
     }
     return createStockWithSupply(deps, { householdId, userId, draft })
   }

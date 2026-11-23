@@ -38,12 +38,13 @@ function setup(...figures: (SupplyDaysFigures | null)[]) {
   const writer = createFakeStockWriter({ foodTypes: { [householdId]: [noodles] } })
   const readSupplyDays = vi.fn<(id: string) => Promise<SupplyDaysFigures | null>>()
   for (const entry of figures) readSupplyDays.mockResolvedValueOnce(entry)
+  const logWarning = vi.fn()
   const save = () =>
     createStockWithSupply(
-      { writer, now: () => now, readSupplyDays },
+      { writer, now: () => now, readSupplyDays, logWarning },
       { householdId, userId, draft },
     )
-  return { save, readSupplyDays }
+  return { save, readSupplyDays, writer, logWarning }
 }
 
 describe('createStockWithSupply', () => {
@@ -95,11 +96,25 @@ describe('createStockWithSupply', () => {
     const readSupplyDays = vi.fn(() => Promise.resolve({ energyDays: 1, waterDays: 1 }))
 
     const result = await createStockWithSupply(
-      { writer, now: () => now, readSupplyDays },
+      { writer, now: () => now, readSupplyDays, logWarning: vi.fn() },
       { householdId, userId, draft },
     )
 
     expect(result).toEqual({ ok: false, error: { kind: 'not-found', reference: 'food-type' } })
     expect(readSupplyDays).toHaveBeenCalledTimes(1)
+  })
+
+  it.each([
+    ['vor', [new Error('DB weg')]],
+    ['nach', [{ energyDays: 1, waterDays: 1 }, new Error('DB weg')]],
+  ])('speichert, auch wenn das Lesen der Tage %s dem Speichern scheitert', async (_, steps) => {
+    const { save, readSupplyDays, logWarning } = setup()
+    for (const step of steps) {
+      if (step instanceof Error) readSupplyDays.mockRejectedValueOnce(step)
+      else readSupplyDays.mockResolvedValueOnce(step)
+    }
+
+    expect(await save()).toMatchObject({ ok: true, value: { unitCount: 6, supplyChange: null } })
+    expect(logWarning).toHaveBeenCalledOnce()
   })
 })

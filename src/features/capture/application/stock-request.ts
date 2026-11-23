@@ -3,6 +3,8 @@
 import 'server-only'
 import { loadSupplyDaysNow } from '@/features/supply/application/supply-days-now'
 import { getDb } from '@/server/db/get-db'
+import { loadEnv } from '@/shared/config/env'
+import { createLogger } from '@/shared/lib/logger'
 import type { Result } from '@/shared/lib/result'
 import { createCaptureOptionsRepository } from '../data/capture-options-repository'
 import { createStockWriteRepository } from '../data/stock-write-repository'
@@ -22,7 +24,13 @@ export async function createStockForUser(
   draft: StockDraft,
 ): Promise<Result<CreatedStockWithSupply, CreateStockError>> {
   const writer = createStockWriteRepository(await getDb())
-  const deps = { writer, now: () => new Date(), readSupplyDays: loadSupplyDaysNow }
+  const logger = createLogger({ level: loadEnv().LOG_LEVEL })
+  const deps = {
+    writer,
+    now: () => new Date(),
+    readSupplyDays: loadSupplyDaysNow,
+    logWarning: logger.warn,
+  }
   return createStockWithSupply(deps, { ...user, draft })
 }
 
