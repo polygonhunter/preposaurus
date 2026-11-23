@@ -1,13 +1,21 @@
 import type { ComponentProps } from 'react'
 import { Icon } from './Icon'
+import { Kbd } from './Kbd'
 
 type SearchFieldProps = Omit<ComponentProps<'input'>, 'type' | 'className'> &
   Readonly<{
     // Unsichtbares Label für Screenreader; sichtbar ist nur der Platzhalter
     label: string
+    // Tastenkürzel, das in dieses Feld springt (KeyboardShortcuts), ab „weit“ als `kbd` sichtbar
+    shortcut?: string
   }>
 
-export function SearchField({ label, placeholder = 'Suchen', ...rest }: SearchFieldProps) {
+export function SearchField({
+  label,
+  placeholder = 'Suchen',
+  shortcut,
+  ...rest
+}: SearchFieldProps) {
   return (
     <label className="flex min-h-11 items-center">
       <span className="sr-only">{label}</span>
@@ -17,8 +25,10 @@ export function SearchField({ label, placeholder = 'Suchen', ...rest }: SearchFi
           {...rest}
           type="search"
           placeholder={placeholder}
+          aria-keyshortcuts={shortcut}
           className="h-full min-w-0 flex-1 bg-transparent text-body text-fg outline-none placeholder:text-fg2"
         />
+        {shortcut === undefined ? null : <Kbd>{shortcut}</Kbd>}
       </span>
     </label>
   )

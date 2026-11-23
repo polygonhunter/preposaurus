@@ -89,7 +89,7 @@ Alle Text-Kombinationen erfüllen WCAG AA (4,5 : 1). Der helle Akzent ist dafür
 
 - **Kompakt (< 640 px):** Tab-Leiste unten auf `surface` mit Haarlinie, Höhe 50 px plus Safe Area. Fünf Ziele: Übersicht · Vorrat · **Erfassen** (runder Akzent-Knopf 46 px in der Mitte, Beschriftung nur für Screenreader) · Nachkaufen · Statistik. Zahnrad oben rechts auf der Übersicht führt zu den Einstellungen.
 - **Mittel (≥ 640 px, ≥ 700 px hoch):** wie kompakt, Inhalt max. 640 px breit zentriert.
-- **Breit (≥ 900 px):** Seitenleiste 216 px links auf `bg` mit denselben Zielen, Zähler rechts (z. B. „Bald fällig 5“), darunter Einstellungen. Inhalt auf `surface`. Vorrat als Liste und Detail nebeneinander.
+- **Breit (≥ 900 px):** Seitenleiste 216 px links auf `bg` mit denselben Zielen, Zähler rechts (z. B. „Bald fällig 5“), darunter Einstellungen. „Erfassen“ steht als Akzent-Knopf oben, „Bald fällig“ eingerückt unter Übersicht (#90). Inhalt auf `surface`. Vorrat als Liste und Detail nebeneinander.
 - **Weit (≥ 1280 px):** Vorrat als Tabelle mit Gruppenzeilen (Warengruppe als Zwischenzeile), Spalten Packungen · Menge · kcal · Tage · nächstes MHD, ausgewählte Zeile in Akzent, Detail rechts. Tastenkürzel als `kbd` sichtbar (`/` Suche, `n` Erfassen).
 
 ## 7. Seitenmuster
