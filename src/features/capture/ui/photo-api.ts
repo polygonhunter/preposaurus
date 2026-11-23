@@ -20,7 +20,7 @@ export type RecognitionOutcome =
 
 const UPLOAD_FAILED = 'Das Foto ließ sich nicht hochladen.'
 const OFFLINE =
-  'Die Erkennung ist gerade nicht erreichbar. Du kannst die Angaben von Hand eintragen.'
+  'Die Erkennung ist gerade nicht erreichbar. Ihr könnt die Angaben von Hand eintragen.'
 
 async function messageOf(response: Response, fallback: string): Promise<string> {
   try {

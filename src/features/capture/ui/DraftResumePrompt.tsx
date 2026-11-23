@@ -58,7 +58,7 @@ export function DraftResumePrompt({ draftId, ageLabel, photoCount }: DraftResume
     >
       <p>
         Eine Erfassung {ageLabel} ist noch offen
-        {photoCount > 0 ? ` (${photos(photoCount)})` : ''}. Möchtest du sie fortsetzen oder
+        {photoCount > 0 ? ` (${photos(photoCount)})` : ''}. Möchtet ihr sie fortsetzen oder
         verwerfen?
       </p>
       {message === null ? null : <p className="pt-2 text-footnote text-red">{message}</p>}

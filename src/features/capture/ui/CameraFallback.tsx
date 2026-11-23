@@ -9,9 +9,9 @@ type CameraFallbackProps = Readonly<{
 const MESSAGES: Record<CameraFallbackProps['status'], string> = {
   starting: 'Kamera startet …',
   denied:
-    'Kein Zugriff auf die Kamera. Du kannst ihn in den Einstellungen des Geräts erlauben. Bis dahin geht alles von Hand, oder du wählst ein Foto über den Auslöser.',
+    'Kein Zugriff auf die Kamera. Ihr könnt ihn in den Einstellungen des Geräts erlauben. Bis dahin geht alles von Hand, oder ihr wählt ein Foto über den Auslöser.',
   unavailable:
-    'Hier gibt es keine Live-Kamera. Der Auslöser öffnet die Kamera-App oder die Dateiauswahl, oder du trägst alles von Hand ein.',
+    'Hier gibt es keine Live-Kamera. Der Auslöser öffnet die Kamera-App oder die Dateiauswahl, oder ihr tragt alles von Hand ein.',
 }
 
 // Ohne Live-Bild (UX §8.5 „Kamera nicht erlaubt“): ruhiger Satz, „Von Hand eintragen“ als

@@ -42,11 +42,11 @@ const SAVE_BLOCKERS: readonly [(state: PhotoCaptureState) => boolean, string][] 
   [(state) => state.shots.length > 0, 'Ein MHD-Foto braucht noch eine Entscheidung.'],
   [
     (state) => state.isPerPortion,
-    'Die Nährwerte gelten je Portion. Bitte gib die Portionsgröße an.',
+    'Die Nährwerte gelten je Portion. Bitte gebt die Portionsgröße an.',
   ],
   [
     (state) => state.nutritionSource === 'ai-estimate' && !state.isEstimateConfirmed,
-    'Bitte bestätige die geschätzten Nährwerte oder verwirf sie.',
+    'Bitte bestätigt die geschätzten Nährwerte oder verwerft sie.',
   ],
 ]
 

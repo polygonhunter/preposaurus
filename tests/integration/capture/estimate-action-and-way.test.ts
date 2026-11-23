@@ -112,7 +112,7 @@ describe('Schätzung auf Wahl und Weg der Erfassung', () => {
 
     expect(await estimate(fotoId, 'naehrwerte')).toEqual({
       ok: false,
-      message: 'Die Foto-Erkennung ist ausgeschaltet. Du kannst die Angaben von Hand eintragen.',
+      message: 'Die Foto-Erkennung ist ausgeschaltet. Ihr könnt die Angaben von Hand eintragen.',
     })
   })
 

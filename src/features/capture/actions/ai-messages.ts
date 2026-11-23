@@ -4,7 +4,7 @@
 import type { DraftPhotoError } from '../application/prepare-draft-photo'
 import type { RecognizeError } from '../application/recognize-photo'
 
-const BY_HAND = 'Du kannst die Angaben von Hand eintragen.'
+const BY_HAND = 'Ihr könnt die Angaben von Hand eintragen.'
 
 type UnavailableReason = Extract<DraftPhotoError, { kind: 'ai-unavailable' }>['reason']
 type FailureKind = Extract<RecognizeError, { kind: 'ai-failed' }>['failure']

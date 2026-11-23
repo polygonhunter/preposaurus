@@ -46,12 +46,12 @@ test('Fehler stehen am Feld, der Fokus springt zum ersten', async ({ page }) => 
   await page.goto('/neu/manuell')
   await page.getByRole('button', { name: 'Speichern' }).click()
 
-  await expect(search(page)).toHaveAccessibleDescription('Bitte wähle eine Lebensmittelart.')
+  await expect(search(page)).toHaveAccessibleDescription('Bitte wählt eine Lebensmittelart.')
   await expect(search(page)).toBeFocused()
   await expect(content(page)).toHaveAccessibleDescription(
-    /Bitte gib den Inhalt einer Packung an, z\. B\. 500 g\./,
+    /Bitte gebt den Inhalt einer Packung an, z\. B\. 500 g\./,
   )
-  await expect(bestBefore(page)).toHaveAccessibleDescription(/Bitte gib ein MHD ein oder wähle/)
+  await expect(bestBefore(page)).toHaveAccessibleDescription(/Bitte gebt ein MHD ein oder wählt/)
   await expectAccessibleLayout(page)
 
   // Eingetippt, aber nicht hinzugefügt: Die Meldung sagt, was fehlt.

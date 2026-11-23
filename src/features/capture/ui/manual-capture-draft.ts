@@ -63,7 +63,7 @@ export function captureErrorsOf(error: z.ZodError): CaptureErrors {
   const errors: CaptureErrors = {}
   for (const issue of error.issues) {
     const field = fieldOf(issue.path)
-    errors[field] ??= field === 'form' ? 'Bitte prüfe die Angaben.' : issue.message
+    errors[field] ??= field === 'form' ? 'Bitte prüft die Angaben.' : issue.message
   }
   return errors
 }

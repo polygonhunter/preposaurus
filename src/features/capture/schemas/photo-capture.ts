@@ -39,7 +39,7 @@ const photoCaptureFormSchema = manualCaptureFormSchema.extend({
   isEstimateConfirmed: z.boolean(),
   units: z
     .array(photoUnitSchema)
-    .min(1, 'Bitte fotografiere ein MHD, gib eines ein oder wähle „Datum fehlt“.')
+    .min(1, 'Bitte fotografiert ein MHD, gebt eines ein oder wählt „Datum fehlt“.')
     .max(MAX_DATES_PER_CAPTURE, `Höchstens ${String(MAX_DATES_PER_CAPTURE)} Daten je Erfassung.`),
 })
 
