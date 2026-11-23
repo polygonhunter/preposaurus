@@ -171,7 +171,8 @@ test('Nach dem Speichern sagt ein Satz, wie lange das Essen jetzt reicht (#231)'
   await addDate(page, '09/2028')
   await page.getByRole('button', { name: 'Speichern' }).click()
 
-  await expect(page.getByText('2 Packungen Nudeln hinzugefügt.')).toBeVisible()
+  // Das Speichern rechnet „Heute versorgt“ vorher und nachher, unter Last dauert das länger
+  await expect(page.getByText('2 Packungen Nudeln hinzugefügt.')).toBeVisible({ timeout: 15_000 })
   await expect(
     page.getByText(/^Euer Essen reicht jetzt (für [\d,]+ Tage|[\d,]+ statt [\d,]+ Tage)\.$/),
   ).toBeVisible()
