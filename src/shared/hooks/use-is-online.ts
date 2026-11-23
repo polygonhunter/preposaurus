@@ -6,6 +6,9 @@ import { useSyncExternalStore } from 'react'
 
 const HEALTH_URL = '/api/health'
 const RETRY_INTERVAL_MS = 10_000
+// Der Browser meldet „online“ oft, bevor das Netz wirklich trägt; die erste Nachfrage scheitert dann.
+// Zwei kurze Nachfragen danach, bevor die App wieder sperrt, statt 10 s bis zum nächsten Intervall.
+const ONLINE_RECHECK_DELAYS_MS = [500, 1_500] as const
 
 let isOnline = true
 let retryTimer: ReturnType<typeof setInterval> | undefined
@@ -43,22 +46,33 @@ async function isHealthReachable(): Promise<boolean> {
   }
 }
 
-async function probe(): Promise<void> {
+const wait = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms)
+  })
+
+async function probe(recheckDelaysMs: readonly number[] = []): Promise<void> {
   const probeId = ++latestProbeId
-  const reachable = await isHealthReachable()
+  let reachable = await isHealthReachable()
+  for (const delayMs of recheckDelaysMs) {
+    if (reachable || probeId !== latestProbeId) break
+    await wait(delayMs)
+    reachable = await isHealthReachable()
+  }
   // Nur die jüngste Nachfrage zählt: Ein Fehlschlag von vor dem Wiederverbinden sperrte sonst die
   // App, bis die nächste Nachfrage durch ist.
   if (probeId === latestProbeId) setOnline(reachable)
 }
 
 const goOffline = () => {
+  latestProbeId += 1
   setOnline(false)
 }
 // WLAN zurück heißt nicht NAS erreichbar (Tailscale aus): gleich freigeben, aber nachfragen. Ist
-// das NAS nicht da, sperrt die Antwort wieder.
+// das NAS auch nach den kurzen Nachfragen nicht da, sperrt die Antwort wieder.
 const goOnline = () => {
   setOnline(true)
-  void probe()
+  void probe(ONLINE_RECHECK_DELAYS_MS)
 }
 const recheckWhenVisible = () => {
   if (document.visibilityState === 'visible') void probe()
