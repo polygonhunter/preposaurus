@@ -4,7 +4,7 @@
 import { requireCaptureActor } from '../application/capture-actor'
 import { loadCaptureDeps } from '../application/capture-deps'
 import { saveDraft } from '../application/save-draft'
-import { saveDraftInputSchema } from '../schemas'
+import { saveDraftInputSchema } from '../schemas/draft'
 import { accessMessage, DRAFT_GONE, failure, type DraftActionState } from './action-messages'
 
 export type SaveDraftState = DraftActionState<{ draftId: string }>

@@ -1,10 +1,10 @@
 'use client'
 
-type ActionErrorBarProps = Readonly<{ message: string; onDismiss: () => void }>
+type NoticeBarProps = Readonly<{ message: string; onDismiss: () => void }>
 
-// Meldung, wenn eine Handlung nicht geklappt hat (UX-Konzept §7: „Nichts geht still verloren“).
-// Sie steht dort, wo sonst die UndoBar steht, und bleibt, bis man sie schließt.
-export function ActionErrorBar({ message, onDismiss }: ActionErrorBarProps) {
+// Meldung, wenn etwas nicht geklappt hat oder ohne Verbindung nicht geht (UX-Konzept §7: „Nichts
+// geht still verloren“). Sie steht dort, wo sonst die UndoBar steht, und bleibt, bis man sie schließt.
+export function NoticeBar({ message, onDismiss }: NoticeBarProps) {
   return (
     <div
       role="alert"

@@ -6,7 +6,7 @@ import { createLogger } from '@/shared/lib/logger'
 import { requireCaptureActor } from '../application/capture-actor'
 import { loadCaptureDeps } from '../application/capture-deps'
 import { discardDraft, type DiscardedDraft } from '../application/discard-draft'
-import { discardDraftInputSchema } from '../schemas'
+import { discardDraftInputSchema } from '../schemas/draft'
 import { accessMessage, DRAFT_GONE, failure, type DraftActionState } from './action-messages'
 
 export type DiscardDraftState = DraftActionState<{ removedPhotos: number }>

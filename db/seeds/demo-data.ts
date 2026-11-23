@@ -28,6 +28,13 @@ export const DEMO_USERS = [
   { name: 'Sam', username: 'sam', role: 'mitglied', member: 'Sam' },
 ] as const
 
+// Login mit der Rolle Mitglied für die E2E-Tests (demo-e2e.ts). Erfunden, nur für die Wegwerf-DB.
+export const E2E_MEMBER_LOGIN = {
+  name: 'Sam',
+  username: 'sam',
+  password: 'Regal Wolke Linse Hafer',
+} as const
+
 const product = (
   name: string,
   details: Omit<DemoProduct, 'name' | 'location' | 'contentUnit'> &

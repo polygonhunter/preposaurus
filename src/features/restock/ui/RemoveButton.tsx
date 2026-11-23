@@ -7,12 +7,12 @@ type RemoveButtonProps = Readonly<{ entry: RestockEntry }>
 
 // Eintrag entfernen: Piktogramm X, Name für Screenreader mit dem Eintrag.
 export function RemoveButton({ entry }: RemoveButtonProps) {
-  const { remove, isPending } = useRestock()
+  const { remove, isLocked } = useRestock()
   return (
     <button
       type="button"
       aria-label={`${entry.label} entfernen`}
-      disabled={isPending}
+      disabled={isLocked}
       onClick={() => {
         remove(entry)
       }}

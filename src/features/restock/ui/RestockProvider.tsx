@@ -2,7 +2,9 @@
 
 import { useRouter } from 'next/navigation'
 import { useState, useTransition, type ReactNode } from 'react'
-import { ActionErrorBar } from '@/shared/ui/ActionErrorBar'
+import { useIsOnline } from '@/shared/hooks/use-is-online'
+import { NoticeBar } from '@/shared/ui/NoticeBar'
+import { OFFLINE_WRITE_MESSAGE } from '@/shared/ui/OfflineWriteGuard'
 import { UndoBar } from '@/shared/ui/UndoBar'
 import { removeRestockItemAction } from '../actions/remove-restock-item-action'
 import { setRestockItemDoneAction } from '../actions/set-restock-item-done-action'
@@ -20,8 +22,16 @@ export function RestockProvider({ children }: RestockProviderProps) {
   const router = useRouter()
   const [notice, setNotice] = useState<Notice | null>(null)
   const [isPending, startTransition] = useTransition()
+  // Ohne Verbindung sind Haken und Entfernen gesperrt (wie „−1“ im Vorrat, M10)
+  const isOnline = useIsOnline()
+  const isLocked = isPending || !isOnline
 
   const setDone = (entry: RestockEntry, isDone: boolean) => {
+    // „Rückgängig“ steht fünf Sekunden da, die Verbindung kann in der Zeit wegfallen
+    if (!isOnline) {
+      setNotice({ kind: 'error', message: OFFLINE_WRITE_MESSAGE })
+      return
+    }
     setNotice(null)
     startTransition(async () => {
       const result = await setRestockItemDoneAction({ id: entry.id, isDone })
@@ -43,7 +53,7 @@ export function RestockProvider({ children }: RestockProviderProps) {
   }
 
   return (
-    <RestockContext value={{ setDone, remove, isPending }}>
+    <RestockContext value={{ setDone, remove, isLocked }}>
       {children}
       {notice?.kind === 'checked' ? (
         <UndoBar
@@ -61,9 +71,7 @@ export function RestockProvider({ children }: RestockProviderProps) {
           }}
         />
       ) : null}
-      {notice?.kind === 'error' ? (
-        <ActionErrorBar message={notice.message} onDismiss={dismiss} />
-      ) : null}
+      {notice?.kind === 'error' ? <NoticeBar message={notice.message} onDismiss={dismiss} /> : null}
     </RestockContext>
   )
 }

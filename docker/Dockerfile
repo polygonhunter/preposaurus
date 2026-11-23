@@ -28,6 +28,8 @@ ENV NODE_ENV=production \
 # Der Code gehört root und ist für den laufenden Nutzer nur lesbar.
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
+# Icons und der beim Build erzeugte Service Worker (public/sw.js, M10-01)
+COPY --from=build /app/public ./public
 COPY --from=build /app/dist/cli ./scripts
 COPY --from=build /app/db/migrations ./db/migrations
 COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/preposaurus

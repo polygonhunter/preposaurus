@@ -146,6 +146,12 @@ export function isCookieSecure(
   return env.NODE_ENV === 'production' && !(env.E2E_INSECURE_COOKIES && env.CI)
 }
 
+// Service Worker nur im Produktionsbuild (UMSETZUNG M10-01): Im Dev-Modus hielte sein Cache alte
+// Dateien fest. Liest nur NODE_ENV, damit auch statisch gerenderte Seiten ohne volle Umgebung bauen.
+export function isServiceWorkerEnabled(source: EnvSource = process.env): boolean {
+  return source['NODE_ENV'] === 'production'
+}
+
 // Wirft bei ungültigen Werten: ohne gültige Umgebung soll der Server gar nicht erst starten.
 export function loadEnv(source: EnvSource = process.env): Env {
   const result = parseEnv(source)

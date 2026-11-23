@@ -4,7 +4,7 @@ import 'server-only'
 import type { PhotoRole } from '@/shared/config/constants'
 import { findDraft } from '../data/draft-repository'
 import { listDraftPhotos } from '../data/photo-repository'
-import { captureDraftDataSchema, type CaptureDraftData } from '../schemas'
+import { captureDraftDataSchema, type CaptureDraftData } from '../schemas/draft'
 import type { CaptureActor } from './capture-actor'
 import type { CaptureDeps } from './capture-deps'
 

@@ -9,14 +9,14 @@ type CheckButtonProps = Readonly<{ entry: RestockEntry; isDone: boolean }>
 // Abhaken (NK-04): runder Haken wie in einer Erinnerungsliste. Als Checkbox angesagt, damit der
 // Zustand ohne Farbe hörbar ist; die Trefferfläche ist 44 × 44 px.
 export function CheckButton({ entry, isDone }: CheckButtonProps) {
-  const { setDone, isPending } = useRestock()
+  const { setDone, isLocked } = useRestock()
   return (
     <button
       type="button"
       role="checkbox"
       aria-checked={isDone}
       aria-label={entry.label}
-      disabled={isPending}
+      disabled={isLocked}
       onClick={() => {
         setDone(entry, !isDone)
       }}

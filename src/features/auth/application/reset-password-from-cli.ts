@@ -41,6 +41,7 @@ export async function resetPasswordFromCli(
     now: deps.now(),
     lockKeys: [nameLockKey(username), GLOBAL_LOCK_KEY],
     lockKeyPrefix: IP_LOCK_PREFIX,
+    changedBy: null,
   })
   return ok({ username, password, isActive: user.isActive })
 }

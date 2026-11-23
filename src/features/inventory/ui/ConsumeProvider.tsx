@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useTransition, type ReactNode } from 'react'
-import { ActionErrorBar } from '@/shared/ui/ActionErrorBar'
+import { useIsOnline } from '@/shared/hooks/use-is-online'
+import { NoticeBar } from '@/shared/ui/NoticeBar'
+import { OFFLINE_WRITE_MESSAGE } from '@/shared/ui/OfflineWriteGuard'
 import { UndoBar } from '@/shared/ui/UndoBar'
 import { addToRestockAction, takeBackFromRestockAction } from '../actions/add-to-restock-action'
 import { consumeAction } from '../actions/consume-action'
@@ -25,6 +27,19 @@ type Notice = UndoNotice | Readonly<{ kind: 'error'; message: string }>
 const dateOf = (bestBefore: BestBeforeDto | null) =>
   bestBefore === null ? null : formatDate(bestBefore)
 
+// Zweites Angebot der Rückgängig-Zeile, solange das Produkt nicht auf die Liste gesetzt ist
+const restockOffer = (notice: UndoNotice, putOn: (notice: UndoNotice) => void) =>
+  notice.isListed
+    ? {}
+    : {
+        secondary: {
+          label: 'Nachkaufen',
+          onClick: () => {
+            putOn(notice)
+          },
+        },
+      }
+
 type ConsumeProviderProps = Readonly<{ children: ReactNode }>
 
 // Erfolg zeigt fünf Sekunden „Rückgängig“, keine Rückfrage vorher (UX-Konzept §7, P7), dazu das
@@ -33,6 +48,16 @@ type ConsumeProviderProps = Readonly<{ children: ReactNode }>
 export function ConsumeProvider({ children }: ConsumeProviderProps) {
   const [notice, setNotice] = useState<Notice | null>(null)
   const [isPending, startTransition] = useTransition()
+  // Ohne Verbindung sind die Knöpfe gesperrt, der Hinweis oben auf der Seite sagt warum.
+  const isOnline = useIsOnline()
+  const isLocked = isPending || !isOnline
+
+  // Die Rückgängig-Zeile steht fünf Sekunden da, die Verbindung kann in der Zeit wegfallen.
+  const isOfflineNow = () => {
+    if (isOnline) return false
+    setNotice({ kind: 'error', message: OFFLINE_WRITE_MESSAGE })
+    return true
+  }
 
   const consume = (request: ConsumeRequest, { name, dateLabel }: TakenLabel) => {
     startTransition(async () => {
@@ -52,6 +77,7 @@ export function ConsumeProvider({ children }: ConsumeProviderProps) {
   }
 
   const undo = ({ unitId, addedRestockItemId }: UndoNotice) => {
+    if (isOfflineNow()) return
     setNotice(null)
     startTransition(async () => {
       const result = await undoConsumeAction(unitId)
@@ -62,6 +88,7 @@ export function ConsumeProvider({ children }: ConsumeProviderProps) {
 
   // Das Angebot verschwindet sofort, damit ein zweiter schneller Tipp nichts mehr auslöst
   const putOnRestockList = (current: UndoNotice) => {
+    if (isOfflineNow()) return
     setNotice({ ...current, isListed: true })
     startTransition(async () => {
       const result = await addToRestockAction(current.unitId)
@@ -83,7 +110,7 @@ export function ConsumeProvider({ children }: ConsumeProviderProps) {
   }
 
   return (
-    <ConsumeContext value={{ consume, isPending }}>
+    <ConsumeContext value={{ consume, isLocked }}>
       {children}
       {notice?.kind === 'undo' ? (
         <UndoBar
@@ -93,21 +120,10 @@ export function ConsumeProvider({ children }: ConsumeProviderProps) {
             undo(notice)
           }}
           onDismiss={dismiss}
-          {...(notice.isListed
-            ? {}
-            : {
-                secondary: {
-                  label: 'Nachkaufen',
-                  onClick: () => {
-                    putOnRestockList(notice)
-                  },
-                },
-              })}
+          {...restockOffer(notice, putOnRestockList)}
         />
       ) : null}
-      {notice?.kind === 'error' ? (
-        <ActionErrorBar message={notice.message} onDismiss={dismiss} />
-      ) : null}
+      {notice?.kind === 'error' ? <NoticeBar message={notice.message} onDismiss={dismiss} /> : null}
     </ConsumeContext>
   )
 }

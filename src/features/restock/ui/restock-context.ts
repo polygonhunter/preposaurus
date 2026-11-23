@@ -9,7 +9,8 @@ export type RestockEntry = Pick<RestockItemDto, 'id' | 'label'>
 export interface RestockContextValue {
   setDone: (entry: RestockEntry, isDone: boolean) => void
   remove: (entry: RestockEntry) => void
-  isPending: boolean
+  /** Läuft gerade eine Änderung oder fehlt die Verbindung */
+  isLocked: boolean
 }
 
 export const RestockContext = createContext<RestockContextValue | null>(null)

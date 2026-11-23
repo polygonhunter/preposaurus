@@ -13,7 +13,8 @@ export interface TakenLabel {
 
 export interface ConsumeContextValue {
   consume: (request: ConsumeRequest, label: TakenLabel) => void
-  isPending: boolean
+  /** Eine Entnahme läuft gerade, oder es gibt keine Verbindung zum NAS (M10-02) */
+  isLocked: boolean
 }
 
 export const ConsumeContext = createContext<ConsumeContextValue | null>(null)

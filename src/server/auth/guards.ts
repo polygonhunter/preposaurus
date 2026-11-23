@@ -20,7 +20,7 @@ function checkAdmin(user: SessionUser): Result<SessionUser, AccessError> {
   return user.role === 'admin' ? ok(user) : err({ kind: 'forbidden' })
 }
 
-type HouseholdUser = SessionUser & { householdId: string }
+export type HouseholdUser = SessionUser & { householdId: string }
 
 /** Für alles, was Vorrat liest oder schreibt: angemeldet und einem Haushalt zugeordnet. */
 export async function requireHouseholdUser(): Promise<Result<HouseholdUser, AccessError>> {
@@ -33,4 +33,11 @@ export async function requireHouseholdUser(): Promise<Result<HouseholdUser, Acce
 export async function requireAdmin(): Promise<Result<SessionUser, AccessError>> {
   const result = await requireUser()
   return result.ok ? checkAdmin(result.value) : result
+}
+
+/** Für alles, was ein Admin am Haushalt ändert: Mitglieder, Ziel, Regeln, Nutzer (#37). */
+export async function requireHouseholdAdmin(): Promise<Result<HouseholdUser, AccessError>> {
+  const result = await requireHouseholdUser()
+  if (!result.ok) return result
+  return result.value.role === 'admin' ? result : err({ kind: 'forbidden' })
 }

@@ -1,6 +1,7 @@
 // Nur für die E2E-Tests (tests/e2e/beispielvorrat.setup.ts): legt den Beispielvorrat in den
 // Haushalt des angemeldeten Admins. Ohne E2E_DEMO_STOCK gibt es die Route nicht (404), und env.ts
 // lässt den Schalter im Produktionsbuild nur in der CI zu.
+import { getAuth } from '@/server/auth/get-auth'
 import { requireAdmin } from '@/server/auth/guards'
 import { loadEnv } from '@/shared/config/env'
 import { seedDemoForE2e } from '../../../../../db/seeds/demo-e2e'
@@ -13,6 +14,11 @@ export async function POST(): Promise<Response> {
   if (!admin.ok || admin.value.householdId === null) {
     return new Response(null, { status: 403, headers: NO_STORE })
   }
-  const created = await seedDemoForE2e(admin.value.householdId, admin.value.id)
+  const { password } = await (await getAuth()).$context
+  const created = await seedDemoForE2e({
+    householdId: admin.value.householdId,
+    userId: admin.value.id,
+    hashPassword: (plain) => password.hash(plain),
+  })
   return Response.json({ created }, { headers: NO_STORE })
 }

@@ -1,6 +1,6 @@
 // Form der KI-Antworten, wie die Fachlogik sie liest. Die Quelle ist das Zod-Schema in
-// capture/schemas.ts. domain/ darf kein Zod importieren, deshalb stehen die Typen hier noch
-// einmal. Ein Typtest (src/server/ai/schema-types.test.ts) hält beide deckungsgleich.
+// capture/schemas/ai-answers.ts. domain/ darf kein Zod importieren, deshalb stehen die Typen
+// hier noch einmal. Ein Typtest (src/server/ai/schema-types.test.ts) hält beide deckungsgleich.
 // Die Feldnamen sind deutsch, weil sie im Schema an die KI gehen (technik.html#api-ki).
 
 import type { AI_CONFIDENCE_LEVELS, ContainerKey } from '@/shared/config/constants'

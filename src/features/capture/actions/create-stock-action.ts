@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { requireHouseholdUser, type AccessError } from '@/server/auth/guards'
 import type { CreateStockError } from '../application/create-stock'
 import { createStockForUser } from '../application/stock-request'
-import { createStockSchema } from '../schemas'
+import { createStockSchema } from '../schemas/stock'
 
 export type CreateStockState =
   | {
