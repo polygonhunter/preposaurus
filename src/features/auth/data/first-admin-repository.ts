@@ -13,7 +13,7 @@ import { goals, sources, sourceVersions } from '@/server/db/schema/recommendatio
 import { DEFAULT_SOURCE_KEY } from '@/shared/config/constants'
 import { CREDENTIAL_PROVIDER } from './credential'
 
-// Schritt 1 der Einrichtung ist mit dem Konto erledigt, die übrigen folgen mit #40.
+// Schritt 1 der Einrichtung ist mit dem Konto erledigt, die Folgeschritte zählen ab 2 (#40).
 const ACCOUNT_STEP = 1
 
 type NewFirstAdmin = Readonly<{

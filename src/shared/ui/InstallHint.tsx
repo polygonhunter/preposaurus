@@ -1,6 +1,7 @@
 'use client'
 
 import { useInstallHint } from '../hooks/use-install-hint'
+import { INSTALL_HINT_TEXT, INSTALL_HINT_TITLE } from '../lib/install-hint'
 import { Button } from './Button'
 
 const HEADING_ID = 'hinweis-home-bildschirm'
@@ -16,12 +17,9 @@ export function InstallHint() {
       className="mx-4 mb-4 rounded-group bg-surface px-4 pt-3 breit:mx-6 breit:border breit:border-line"
     >
       <h2 id={HEADING_ID} className="text-headline">
-        Als App auf den Home-Bildschirm
+        {INSTALL_HINT_TITLE}
       </h2>
-      <p className="pt-1 text-callout text-fg2">
-        Tippt in Safari auf „Teilen“ und dann auf „Zum Home-Bildschirm“. Dann startet Preposaurus
-        wie eine App, und Erinnerungen per Push sind möglich.
-      </p>
+      <p className="pt-1 text-callout text-fg2">{INSTALL_HINT_TEXT}</p>
       <Button variant="plain" onClick={dismiss} className="-ml-1">
         Ausblenden
       </Button>

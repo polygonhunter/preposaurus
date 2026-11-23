@@ -86,4 +86,9 @@ export type MemberInput = z.infer<typeof memberSchema>
 
 export const memberIdSchema = z.uuid()
 
+/** Ziel nach dem Speichern einer Person: Mitgliederliste oder Schritt der Einrichtung (#40) */
+export const memberReturnSchema = z.enum(['einstellungen', 'einrichtung'])
+
+export type MemberReturn = z.infer<typeof memberReturnSchema>
+
 export const householdDietSchema = z.enum(DIETS, { error: 'Bitte eine Ernährungsform wählen.' })

@@ -34,7 +34,11 @@ export default async function GoalPage() {
         </p>
       ) : null}
       {isAdmin ? (
-        <GoalForm initialValues={goalFormValuesOf(goal)} defaultDays={goal.defaultDays} />
+        <GoalForm
+          initialValues={goalFormValuesOf(goal)}
+          defaultDays={goal.defaultDays}
+          place="einstellungen"
+        />
       ) : (
         <>
           <GoalSummary goal={goal} labelledBy="ziel" />
