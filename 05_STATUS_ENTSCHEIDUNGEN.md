@@ -198,7 +198,7 @@ Beim Datenmodell getroffen, Details in den Kopfkommentaren von `src/server/db/sc
 - `CaptureDeps` enthält jetzt auch die KI-Umgebung (`APP_SECRET`, `AI_PROVIDER`, `ANTHROPIC_API_KEY`). Die Begrenzung gleichzeitiger Aufrufe bleibt im Adapter (2 je Serverprozess).
 
 ## Technische Festlegung aus #175 (2026-11-23, Schemas aufteilen)
-- Ein Feature darf statt `schemas.ts` einen Ordner `schemas/` mit Dateien nach Thema haben, ohne `index.ts`. Jede Datei gilt als Schicht `schemas` (eslint/boundaries.mjs, Fixture-Test), Schema-Dateien dürfen einander importieren. `capture/schemas.ts` ist aufgeteilt in `ai-answers`, `photos`, `draft`, `stock` und `manual-capture`.
+- Ein Feature darf statt `schemas.ts` einen Ordner `schemas/` mit Dateien nach Thema haben, ohne `index.ts`. Jede Datei gilt als Schicht `schemas` (eslint/boundaries.mjs, Fixture-Test), Schema-Dateien desselben Features dürfen einander importieren, die eines fremden Features nicht. `capture/schemas.ts` ist aufgeteilt in `ai-answers`, `photos`, `draft`, `stock` und `manual-capture`.
 
 ## Technische Festlegungen aus M6-12 (2026-11-23, Bestätigen aus dem Entwurf, Aufräumen, #66)
 - **Bestätigen:** `createStockSchema` hat das Feld `draftId` (Standard null). Ist es gesetzt, werden in derselben Transaktion wie Produkt und Einheiten die Entwurfsfotos fest (`status = 'fest'`, `produkt_id`), danach wird der Entwurf gelöscht (Reihenfolge wegen `ON DELETE SET NULL`). Unter derselben Sperre auf die Nutzerzeile wie Upload und Verwerfen. Ein fremder oder schon verbrauchter Entwurf ändert nichts. Der Foto-Weg nutzt die Entwurfs-ID zugleich als `captureId`, damit ist sie der Idempotenz-Schlüssel (doppeltes Bestätigen ergibt `isReplay`). `einheit_id` am MHD-Foto bleibt vorerst leer.

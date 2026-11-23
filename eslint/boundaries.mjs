@@ -36,6 +36,10 @@ const element = (type, captured) => ({ element: captured ? { type, captured } : 
 const sameFeature = (type) => element(type, { feature: '{{ from.element.captured.feature }}' })
 const serverModule = (module) => element('server', { module })
 const schemas = { file: { categories: 'schemas' } }
+// Schemas untereinander nur im eigenen Feature (Teil-Dateien eines Ordners schemas/)
+const sameFeatureSchemas = {
+  file: { categories: 'schemas', captured: { feature: '{{ from.file.captured.feature }}' } },
+}
 const anyShared = element('shared')
 const typesOnly = (to) => ({ to, dependency: { kind: 'type' } })
 const to = (target) => ({ to: target })
@@ -50,7 +54,11 @@ const policies = [
   },
   {
     from: schemas,
-    allow: [to({ module: { origin: ['external', 'core'] } }), to(schemas), to(anyShared)],
+    allow: [
+      to({ module: { origin: ['external', 'core'] } }),
+      to(sameFeatureSchemas),
+      to(anyShared),
+    ],
   },
   { from: { file: { categories: 'instrumentation' } }, allow: [to(anyShared)] },
   { from: { file: { categories: 'e2e-seed-route' } }, allow: [to(element('seeds'))] },
