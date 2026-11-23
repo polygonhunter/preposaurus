@@ -84,7 +84,7 @@ backup backup wiederherstellen "$stand" && fail "Ohne --ja und ohne Terminal dar
 docker compose exec -T -d db psql -U preposaurus -d preposaurus -c 'select pg_sleep(60)'
 sleep 2
 backup backup wiederherstellen "$stand" --ja && fail "Bei offener Verbindung darf nichts passieren"
-docker compose stop web
+docker compose stop web worker
 psql_value "select pg_terminate_backend(pid) from pg_stat_activity
   where query like '%pg_sleep(60)%' and pid <> pg_backend_pid()" > /dev/null
 

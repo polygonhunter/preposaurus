@@ -9,6 +9,7 @@ import {
   endOfMonth,
   endOfYear,
   formatDayWithPrecision,
+  formatDaysLeft,
   parseCalendarDay,
   toCalendarDay,
   todayInBerlin,
@@ -164,5 +165,17 @@ describe('formatDayWithPrecision', () => {
 
   it('zeigt einstellige Tage und Monate zweistellig', () => {
     expect(formatDayWithPrecision({ date: day('2027-03-05'), precision: 'day' })).toBe('05.03.2027')
+  })
+})
+
+describe('formatDaysLeft', () => {
+  it.each([
+    [0, 'heute'],
+    [1, 'morgen'],
+    [12, 'in 12 Tagen'],
+    [-1, 'seit gestern'],
+    [-3, 'seit 3 Tagen'],
+  ])('zeigt %i als „%s“', (daysLeft, text) => {
+    expect(formatDaysLeft(daysLeft)).toBe(text)
   })
 })

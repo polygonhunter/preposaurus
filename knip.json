@@ -11,6 +11,7 @@
     "src/features/capture/actions/*.ts!",
     "src/server/auth/guards.ts!",
     "scripts/admin.ts!",
+    "src/worker/main.ts!",
     "tests/e2e/*.setup.ts"
   ],
   "project": [

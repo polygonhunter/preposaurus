@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # CI-Rauchtest für compose.yaml (UMSETZUNG M13-02): db → migrate → web bis /api/health,
-# Port nur an 127.0.0.1, web ohne root, Notfall-Befehle im Image.
+# Port nur an 127.0.0.1, web ohne root, Notfall-Befehle im Image, Worker startet und stoppt.
 # Aufruf aus dem Repo-Ordner, das Image ghcr.io/polygonhunter/preposaurus:ci muss gebaut sein.
 set -euo pipefail
 repo_dir=$(pwd)
@@ -80,5 +80,18 @@ docker compose logs web > web.log
 grep -q 'Passwort per Kommandozeile zurückgesetzt' web.log || fail "Die Spur fehlt im Log von web"
 grep -q 'Nutzer per Kommandozeile zum Admin gemacht' web.log || fail "Die Spur von admin-machen fehlt"
 grep -q 'Alle Sitzungen per Kommandozeile beendet' web.log || fail "Die Spur von alle-abmelden fehlt"
+
+# Worker (M11-01): startet mit, legt die Zeitpläne in Europe/Berlin an, endet bei SIGTERM sauber.
+for _ in $(seq 1 30); do
+  if docker compose logs worker | grep -q 'Worker gestartet'; then break; fi
+  sleep 2
+done
+docker compose logs worker | grep -q 'Worker gestartet' || { docker compose logs worker; fail "Der Worker ist nicht gestartet"; }
+[ "$(docker compose exec -T worker id -u)" != "0" ] || fail "worker läuft als root"
+[ "$(psql_value "select timezone from pgboss.schedule where name = 'capture-cleanup'")" = "Europe/Berlin" ] ||
+  fail "Der Zeitplan fürs Aufräumen fehlt"
+docker compose stop worker
+[ "$(docker compose ps -a --format '{{.ExitCode}}' worker)" = "0" ] || fail "Der Worker hat sich nicht sauber beendet"
+docker compose logs worker | grep -q 'Worker beendet' || fail "Das Ende fehlt im Log des Workers"
 
 echo "Compose-Test bestanden"

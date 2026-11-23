@@ -1,7 +1,8 @@
 // Texte der Seite „Bald fällig“ (UX-Konzept §8.2). Die Überschriften folgen den Ampel-Schwellen
 // aus den Einstellungen: Ändert der Admin sie, ändern sich die Überschriften mit.
 import type { DueEntry, DueGroupDto, DueUnits } from '../schemas'
-import { expiryHint, formatDate, formatDaysLeft } from './stock-format'
+import { formatDaysLeft } from '@/shared/lib/dates'
+import { expiryHint, formatDate } from './stock-format'
 
 type Thresholds = DueUnits['thresholds']
 

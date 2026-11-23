@@ -246,7 +246,7 @@ Nicht mehr in der Übersicht: der Baum „Vorrat nach Lebensmitteln“ (gehört 
 1. Satz: „Euer Vorrat reicht für **6 Tage**.“ Ganze Tage, abgerundet. Die Nachkommastelle steht an den Balken.
 2. Zwei Balken auf einer Skala: **Essen 9,4 Tage** · **Wasser 6,0 Tage**, am kürzeren das Wort „begrenzt“. Zielmarke „Ziel 10“.
 3. Zielzeile: „Am 01.03. wären es 5 von 10 Tagen. 6 Packungen laufen vorher ab.“ Tipp öffnet Bald fällig mit der Gruppe „bis zum Ziel“.
-4. Nächster Schritt: „20 l Wasser bringen euch auf 9 Tage.“ Tipp öffnet Nachkaufen.
+4. Nächster Schritt: „20 l Wasser bringen euch ans Ziel.“ Liegt auch der andere Wert unter dem Ziel, stehen beide Mengen im Satz: „Bis zum Ziel fehlen noch 20 l Wasser und etwa 3.400 kcal Essen.“ (geändert im Review von #183, vorher „… bringen euch auf 9 Tage“). Tipp öffnet Nachkaufen.
 5. Tipp auf Satz oder Balken öffnet das **Erklär-Blatt**: Rechnung in Worten und Zahlen (52.600 kcal ÷ 5.600 kcal am Tag = 9,4 Tage), Bedarf je Person, Quelle mit Stand und Link, Anteil Richtwerte.
 
 Sonderfälle der Kachel:
