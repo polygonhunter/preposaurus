@@ -5,9 +5,9 @@ import { requirePageHousehold } from '@/server/auth/household'
 
 // Detail eines Produkts ohne Lebensmittelart: gleiche Seite wie die Art (#43, #45).
 export default async function ProductDetailPage({ params }: PageProps<'/vorrat/produkt/[id]'>) {
-  const { householdId } = await requirePageHousehold()
+  const { householdId, isAdmin } = await requirePageHousehold()
   const { id } = await params
   const result = await loadDetail(householdId, { kind: 'product', id })
   if (!result.ok) notFound()
-  return <FoodTypeDetailView {...result.value} />
+  return <FoodTypeDetailView {...result.value} isAdmin={isAdmin} />
 }

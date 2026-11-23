@@ -6,6 +6,7 @@ import { Sheet } from '@/shared/ui/Sheet'
 import { StatusBadge } from '@/shared/ui/StatusBadge'
 import type { BestBeforeGroupDto } from '../schemas'
 import { groupBadge, groupLabel, partlyCheckedNote, stillGoodCandidates } from './detail-view'
+import { DateRowExtras } from './DateRowExtras'
 import { expiryHint, formatPackages } from './stock-format'
 import { UnitSheetActions } from './UnitSheetActions'
 
@@ -15,6 +16,10 @@ type DateGroupRowProps = Readonly<{
   group: BestBeforeGroupDto
   // Aus dieser Zeile nimmt „1 entnehmen“ (frühestes MHD)
   isNext: boolean
+  // Nur der Admin löscht eine Fehlerfassung (#50)
+  isAdmin: boolean
+  // Wohin es geht, wenn mit der Packung das ganze Produkt verschwindet
+  leaveHref: string | null
 }>
 
 const STILL_GOOD_NOTE =
@@ -22,8 +27,8 @@ const STILL_GOOD_NOTE =
 
 // Datumszeile im Detail (UX-Konzept §8.4): „11/2027 · 5×“ mit Zustand. Ein Tipp öffnet das Blatt
 // mit Verbraucht, Entsorgt und bei abgelaufenem MHD „Noch gut“ (#47). So lässt sich statt der
-// vorgeschlagenen auch eine andere Packung nehmen.
-export function DateGroupRow({ name, group, isNext }: DateGroupRowProps) {
+// vorgeschlagenen auch eine andere Packung nehmen. Dazu Datum ändern (#49) und Löschen (#50).
+export function DateGroupRow({ name, group, isNext, isAdmin, leaveHref }: DateGroupRowProps) {
   const [isOpen, setOpen] = useState(false)
   const label = groupLabel(group)
   const badge = groupBadge(group)
@@ -65,6 +70,15 @@ export function DateGroupRow({ name, group, isNext }: DateGroupRowProps) {
               name={name}
               dateLabel={label}
               onDone={close}
+              extra={
+                <DateRowExtras
+                  group={group}
+                  label={`${name} (${label})`}
+                  isAdmin={isAdmin}
+                  leaveHref={leaveHref}
+                  onDone={close}
+                />
+              }
             />
           }
         >

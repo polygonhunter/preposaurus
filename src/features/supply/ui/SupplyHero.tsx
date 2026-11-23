@@ -1,19 +1,26 @@
 import { DayBar } from '@/shared/ui/DayBar'
-import type { OverviewSupply } from '../schemas'
+import type { OverviewHousehold, OverviewSupply } from '../schemas'
 import { formatDays, headline, limitingSentence, scaleFor } from './head-text'
+import { SupplyExplainer } from './SupplyExplainer'
+import { SupplyExplanation } from './SupplyExplanation'
 
-type SupplyHeroProps = Readonly<{ supply: OverviewSupply; goalDays: number | null }>
+type SupplyHeroProps = Readonly<{
+  supply: OverviewSupply
+  goalDays: number | null
+  source: OverviewHousehold['source']
+}>
 
 const HEADING_ID = 'heute-versorgt'
 
 // „Heute versorgt“ (DESIGN_SYSTEM §7, UX-Konzept §8.1 V1): Satz mit Kernzahl in ganzen Tagen,
 // darunter Essen und Wasser auf einer Tages-Skala mit Zielmarke und ein Satz, was begrenzt.
-export function SupplyHero({ supply, goalDays }: SupplyHeroProps) {
+// Ein Tipp auf den Kopf öffnet das Erklär-Blatt mit dem Rechenweg (#219).
+export function SupplyHero({ supply, goalDays, source }: SupplyHeroProps) {
   const { prefix, value, unit } = headline(supply)
   const scaleDays = scaleFor([supply.energyDays, supply.waterDays], goalDays)
   const goalProps = goalDays === null ? {} : { goalDays }
   return (
-    <section aria-labelledby={HEADING_ID} className="px-4 pt-2 breit:px-6">
+    <section aria-labelledby={HEADING_ID} className="relative px-4 pt-2 breit:px-6">
       <h2 id={HEADING_ID} className="text-body text-fg2">
         Euer Vorrat reicht für
       </h2>
@@ -44,6 +51,9 @@ export function SupplyHero({ supply, goalDays }: SupplyHeroProps) {
         {limitingSentence(supply)}
         {goalDays === null ? null : ` Der Strich markiert euer Ziel: ${formatDays(goalDays)}.`}
       </p>
+      <SupplyExplainer>
+        <SupplyExplanation supply={supply} source={source} />
+      </SupplyExplainer>
     </section>
   )
 }

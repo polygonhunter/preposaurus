@@ -120,6 +120,21 @@
   }
 }
 
+/* „1 entnehmen“ schwebt im Detail über der Tab-Leiste (58 px + 8 px + 50 px). Ein fokussiertes oder
+   angesprungenes Ziel darf nicht darunter verschwinden (WCAG 2.4.11): Fokus, Anker und
+   scrollIntoView halten Abstand. Am Seitenende hält `main` den Abstand per padding-bottom. */
+@layer base {
+  html:has([data-bottom-bar]) {
+    scroll-padding-bottom: calc(124px + env(safe-area-inset-bottom));
+  }
+
+  @media (width >= 900px) {
+    html:has([data-bottom-bar]) {
+      scroll-padding-bottom: 82px;
+    }
+  }
+}
+
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }

@@ -7,7 +7,12 @@ import type { DailyNeed } from '../domain/daily-need'
 import { calculateGoalProgress, type GoalProgress } from '../domain/goal-progress'
 import { calculateNextStep } from '../domain/next-step'
 import { calculateSupplyDays, type SupplyDays, type SupplyUnit } from '../domain/supply-days'
-import type { OverviewGoal, OverviewNextStep, OverviewSupply } from '../schemas'
+import type {
+  OverviewExplanation,
+  OverviewGoal,
+  OverviewNextStep,
+  OverviewSupply,
+} from '../schemas'
 import type { HouseholdGoal } from './household-facts-reader'
 
 interface FiguresInput {
@@ -16,7 +21,12 @@ interface FiguresInput {
   today: CalendarDay
   goal: HouseholdGoal | null
   stillGoodCounts: boolean
+  /** Was das Erklär-Blatt über die Tage hinaus braucht (#219) */
+  explanation: ExplanationBasis
 }
+
+/** Teil des Rechenwegs, der nicht aus den Tagen selbst kommt */
+export type ExplanationBasis = Omit<OverviewExplanation, 'kcal' | 'waterMl' | 'estimatedShare'>
 
 export interface HeadFigures {
   supply: OverviewSupply | null
@@ -26,9 +36,10 @@ export interface HeadFigures {
 
 type Outlook = GoalProgress<SupplyUnit>['target']
 
-function toSupplyDto(days: SupplyDays): OverviewSupply {
-  const { energyDays, waterDays, bottleneck, isApproximate } = days
-  return { days: days.days, energyDays, waterDays, bottleneck, isApproximate }
+function toSupplyDto(days: SupplyDays, basis: ExplanationBasis): OverviewSupply {
+  const { energyDays, waterDays, bottleneck, isApproximate, kcal, waterMl } = days
+  const explanation = { ...basis, kcal, waterMl, estimatedShare: days.estimatedKcalShare }
+  return { days: days.days, energyDays, waterDays, bottleneck, isApproximate, explanation }
 }
 
 function toOutlookDto(target: Outlook): OverviewGoal['outlook'] {
@@ -78,5 +89,5 @@ export function headFigures(input: FiguresInput): HeadFigures {
   if (figures === null) return { supply: null, goal: goalDto, nextStep: null }
   const nextStep =
     goal === null ? null : calculateNextStep({ today: figures.today, goalDays: goal.days, need })
-  return { supply: toSupplyDto(figures.today), goal: goalDto, nextStep }
+  return { supply: toSupplyDto(figures.today, input.explanation), goal: goalDto, nextStep }
 }

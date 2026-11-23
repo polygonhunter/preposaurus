@@ -19,6 +19,8 @@ const STOCK_STATUS_FILTERS = [
 const isoDay = z.iso.date()
 const id = z.uuid()
 const namedRef = z.object({ id, name: z.string() })
+/** Warengruppe mit amtlichem Namen und kurzem Anzeigenamen für Titel und Navigation (#177) */
+const groupRef = z.object({ key: z.string(), name: z.string(), shortName: z.string() })
 
 // ---------- Eingaben ----------
 
@@ -56,6 +58,18 @@ export const undoStillGoodSchema = z.object({
   unitIds: stillGoodRequestSchema,
   checkedAt: isoDay,
 })
+
+/** „Datum ändern“ bzw. „Datum nachtragen“ (#49, #116): ein eingegebenes MHD, nie geschätzt. */
+export const changeUnitDatesSchema = z.object({
+  unitIds: z.array(id).min(1).max(MAX_UNITS_PER_REQUEST),
+  bestBefore: z.object({ date: isoDay, precision: z.enum(['day', 'month', 'year']) }),
+})
+
+/** Fehlerfassung endgültig löschen (#50): ein ganzes Produkt oder eine einzelne Packung. */
+export const deleteEntrySchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('product'), productId: id }),
+  z.object({ kind: z.literal('unit'), unitId: id }),
+])
 
 // ---------- Bausteine ----------
 
@@ -112,9 +126,7 @@ const coverageSchema = z.object({
 /** @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen. */
 export const stockOverviewSchema = z.object({
   groups: z.array(
-    z.object({
-      key: z.string(),
-      name: z.string(),
+    groupRef.extend({
       totals: nodeTotalsSchema,
       /** null ohne Ziel, ohne aktive Quelle oder ohne Zielmenge für diese Gruppe */
       coverage: coverageSchema.nullable(),
@@ -127,7 +139,7 @@ export const stockOverviewSchema = z.object({
 
 /** @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen. */
 export const foodTypeLevelSchema = z.object({
-  group: z.object({ key: z.string(), name: z.string(), totals: nodeTotalsSchema }),
+  group: groupRef.extend({ totals: nodeTotalsSchema }),
   categories: z.array(
     namedRef.extend({
       pictogram: z.string().nullable(),
@@ -177,7 +189,7 @@ export const foodTypeDetailSchema = z.object({
   target: stockTargetSchema,
   name: z.string(),
   path: z.object({
-    group: z.object({ key: z.string(), name: z.string() }),
+    group: groupRef,
     category: namedRef.extend({ pictogram: z.string().nullable() }),
   }),
   typicalShelfLifeMonths: z.number().int().nullable(),
@@ -205,6 +217,18 @@ export const historyEntrySchema = z.object({
   day: isoDay,
   person: z.string().nullable(),
   bestBefore: bestBeforeSchema.nullable(),
+})
+
+/** Datumszeile für „Datum ändern“ (#49): alle Packungen eines Produkts mit diesem Datum. */
+export const unitDateGroupSchema = z.object({
+  target: stockTargetSchema,
+  name: z.string(),
+  productName: z.string(),
+  bestBefore: bestBeforeSchema.nullable(),
+  kind: z.enum(['best-before', 'use-by']),
+  unitIds: z.array(id).min(1),
+  /** Packungen der Zeile mit „Noch gut“, das mit einem neuen Datum entfällt */
+  checkedCount: z.number().int(),
 })
 
 // ---------- 4 · Bald fällig ----------
@@ -238,9 +262,7 @@ export const dueUnitsSchema = z.object({
 export const stockSearchSchema = z.object({
   counts: z.record(z.enum(STOCK_STATUS_FILTERS), z.number().int()),
   groups: z.array(
-    z.object({
-      key: z.string(),
-      name: z.string(),
+    groupRef.extend({
       rows: z.array(stockRowSchema.extend({ matchingPackages: z.number().int() })),
     }),
   ),
@@ -248,6 +270,8 @@ export const stockSearchSchema = z.object({
 })
 
 export type StockTarget = z.infer<typeof stockTargetSchema>
+export type DeleteEntryRequest = z.infer<typeof deleteEntrySchema>
+export type UnitDateGroup = z.infer<typeof unitDateGroupSchema>
 export type StockFilter = z.infer<typeof stockFilterSchema>
 export type DueSort = z.infer<typeof dueSortSchema>
 export type ConsumeRequest = z.infer<typeof consumeRequestSchema>

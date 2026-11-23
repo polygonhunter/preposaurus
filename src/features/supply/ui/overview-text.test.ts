@@ -25,6 +25,17 @@ const supply: OverviewSupply = {
   waterDays: 6,
   bottleneck: 'water',
   isApproximate: false,
+  explanation: {
+    kcal: 18800,
+    waterMl: 12000,
+    kcalPerDay: 2000,
+    waterMlPerDay: 2000,
+    needLines: [{ type: 'adult', count: 1, kcalPerDay: 2000, waterMlPerDay: 2000 }],
+    uncountedMembers: 0,
+    estimatedShare: 0,
+    packages: { expired: 0, stillGood: 0, missingDate: 0 },
+    stillGoodCounts: false,
+  },
 }
 
 const goal = (outlook: OverviewGoal['outlook'], date: string | null = '2027-03-01') => ({

@@ -35,7 +35,7 @@ export function SearchResults({ filter, groups }: SearchResultsProps) {
     const headingId = `treffer-${group.key}`
     return (
       <section key={group.key}>
-        <GroupHeader id={headingId}>{group.name}</GroupHeader>
+        <GroupHeader id={headingId}>{group.shortName}</GroupHeader>
         <Group labelledBy={headingId}>
           {group.rows.map((row) => (
             <StockRowItem

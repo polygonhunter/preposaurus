@@ -35,13 +35,20 @@ export function scaleFor(days: readonly number[], goalDays: number | null): numb
 }
 
 /** Kernzahl: „ca.“ ab 10 % Richtwert-Anteil, dann ganze Tage. */
-export function headline(supply: OverviewSupply): { prefix: string; value: string; unit: string } {
+export function headline(supply: Pick<OverviewSupply, 'days' | 'isApproximate'>): {
+  prefix: string
+  value: string
+  unit: string
+} {
   const days = wholeDays(supply.days)
   return { prefix: supply.isApproximate ? 'ca.' : '', value: String(days), unit: dayWord(days) }
 }
 
 /** Ein Satz, was begrenzt. Bei Gleichstand beides. */
-export function limitingSentence({ energyDays, waterDays }: OverviewSupply): string {
+export function limitingSentence({
+  energyDays,
+  waterDays,
+}: Pick<OverviewSupply, 'energyDays' | 'waterDays'>): string {
   if (energyDays === waterDays) return 'Essen und Wasser reichen gleich lang.'
   return energyDays < waterDays
     ? 'Essen begrenzt euren Vorrat, Wasser reicht länger.'
