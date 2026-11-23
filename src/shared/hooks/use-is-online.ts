@@ -1,7 +1,7 @@
 // Verbindung zum NAS (M10-02, #82). navigator.onLine allein reicht nicht: Ist Tailscale aus, hat
 // das Handy WLAN, erreicht das NAS aber nicht. Darum fragt der Hook beim Start /api/health ab und
 // wiederholt das ohne Verbindung alle paar Sekunden. Meldet der Browser „online“ oder kommt die App
-// wieder nach vorn, fragt er sofort nach, statt dem Browser blind zu glauben.
+// wieder nach vorn, fragt er sofort nach, statt dem Browser allein zu glauben.
 import { useSyncExternalStore } from 'react'
 
 const HEALTH_URL = '/api/health'
@@ -45,8 +45,10 @@ async function probe(): Promise<void> {
 const goOffline = () => {
   setOnline(false)
 }
-// WLAN zurück heißt nicht NAS erreichbar (Tailscale aus): erst nachfragen, dann freigeben.
+// WLAN zurück heißt nicht NAS erreichbar (Tailscale aus): gleich freigeben, aber nachfragen. Ist
+// das NAS nicht da, sperrt die Antwort wieder.
 const goOnline = () => {
+  setOnline(true)
   void probe()
 }
 const recheckWhenVisible = () => {
