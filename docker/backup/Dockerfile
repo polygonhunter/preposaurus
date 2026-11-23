@@ -2,7 +2,7 @@
 # Backup-Image von Preposaurus (UMSETZUNG M13-03): pg_dump und pg_restore in Version 18 aus dem
 # offiziellen Image der Datenbank, dazu rsync für die versionierte Sicherung der Fotos.
 # Bauen aus dem Repo-Ordner: docker build -t preposaurus-backup docker/backup
-FROM postgres:18.7-trixie
+FROM postgres:19.0-trixie
 LABEL org.opencontainers.image.title="Preposaurus Backup" \
       org.opencontainers.image.description="Tägliche Sicherung von Datenbank und Fotos für Preposaurus" \
       org.opencontainers.image.source="https://github.com/polygonhunter/preposaurus" \
