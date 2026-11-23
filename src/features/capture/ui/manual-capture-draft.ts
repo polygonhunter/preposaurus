@@ -17,6 +17,8 @@ export interface ManualCaptureDraft {
   existingProductId: string | null
   nutrition: Record<NutritionField, string>
   units: DateEntry[]
+  /** Foto-Weg: Die Nährwerte sind eine KI-Schätzung, die Zusammenfassung zeigt „ca.“ (#115) */
+  isKcalEstimate?: boolean
 }
 
 export function emptyDraft(storageLocationId: string | null): ManualCaptureDraft {

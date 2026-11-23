@@ -1,13 +1,15 @@
 // Entwurf der Erfassung (M6-03): der Stand der Maske, gesichert bei jedem Schrittwechsel.
-// Vorläufig, bis die Schritte (M6-08 bis M6-11) stehen: alles optional, aber mit festen Grenzen,
-// damit kein beliebiges JSON in `erfassung_entwurf.daten` landet. Fotos hängen über
-// `foto.entwurf_id` am Entwurf und stehen deshalb nicht hier.
+// Alles optional, aber mit festen Grenzen, damit kein beliebiges JSON in `erfassung_entwurf.daten`
+// landet. Fotos hängen über `foto.entwurf_id` am Entwurf und stehen deshalb nicht hier. Seit der
+// Foto-Oberfläche (#62 bis #66) auch Herkunft der Nährwerte, Bestätigung einer Schätzung und
+// Lagerort, damit ein fortgesetzter Entwurf genau so weitergeht.
 import { z } from 'zod'
 import {
   BEST_BEFORE_KINDS,
   BEST_BEFORE_PRECISIONS,
   CAPTURE_METHODS,
   CONTAINER_KEYS,
+  NUTRITION_SOURCES,
 } from '@/shared/config/constants'
 
 const DRAFT_STEPS = ['verpackung', 'naehrwerte', 'mhd', 'zusammenfassung'] as const
@@ -34,6 +36,11 @@ const draftNutritionSchema = z.strictObject({
   kohlenhydrateG: draftAmount,
   fettG: draftAmount,
   geschaetzt: z.boolean().optional(),
+  quelle: z.enum(NUTRITION_SOURCES).nullable().optional(),
+  /** Schätzung ohne Tabelle gesondert bestätigt (#115) */
+  bestaetigt: z.boolean().optional(),
+  /** „Keine Nährwerttabelle“ gewählt */
+  keineTabelle: z.boolean().optional(),
 })
 
 /** Ein Datums-Chip der MHD-Serie. Ohne Datum bleibt `datum` null, nie erfunden. */
@@ -44,6 +51,8 @@ const draftBestBeforeSchema = z.strictObject({
   anzahl: z.int().min(1).max(MAX_UNITS_PER_DATE),
   fotoId: draftId,
   ohneDatum: z.boolean().optional(),
+  /** Nach „Von der KI schätzen lassen“ (#124), nie taggenau */
+  geschaetzt: z.boolean().optional(),
 })
 
 export const captureDraftDataSchema = z.strictObject({
@@ -52,6 +61,7 @@ export const captureDraftDataSchema = z.strictObject({
   verpackung: draftPackagingSchema.optional(),
   naehrwerte: draftNutritionSchema.optional(),
   mhd: z.array(draftBestBeforeSchema).max(MAX_DRAFT_DATES).optional(),
+  lagerortId: draftId,
 })
 
 /** `saveDraftAction`: ohne `entwurfId` der neueste Entwurf des Nutzers, sonst ein neuer. */

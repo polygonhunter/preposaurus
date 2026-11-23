@@ -29,11 +29,15 @@ async function addDate(page: Page, text: string) {
   await bestBefore(page).press('Enter')
 }
 
-test('Erfassen öffnet das Formular, die Lebensmittelart hat sofort den Fokus', async ({ page }) => {
-  await page.goto('/neu')
+test('Das Formular hat den Umschalter, die Lebensmittelart hat sofort den Fokus', async ({
+  page,
+}) => {
+  // /neu öffnet den zuletzt genutzten Weg, im Beispielvorrat mal Foto, mal manuell. Der Weg
+  // selbst ist im Integrationstest von chooseCaptureWay geprüft.
+  await page.goto('/neu/manuell')
 
-  await expect(page).toHaveURL(/\/neu\/manuell$/)
   await expect(page.getByRole('heading', { level: 1, name: 'Erfassen' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Manuell' })).toHaveAttribute('aria-current', 'page')
   await expect(search(page)).toBeFocused()
   await expectAccessibleLayout(page)
 })

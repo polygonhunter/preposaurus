@@ -38,7 +38,7 @@ const per100Text = z.string().transform((text, context) => {
   return z.NEVER
 })
 
-const formUnitSchema = z.object({
+export const formUnitSchema = z.object({
   bestBefore: z
     .object({ date: z.string(), precision: z.enum(['day', 'month', 'year']) })
     .nullable(),
@@ -50,7 +50,7 @@ const formUnitSchema = z.object({
 
 const optionalChoice = z.uuid().nullable()
 
-const manualCaptureFormSchema = z.object({
+export const manualCaptureFormSchema = z.object({
   captureId: z.uuid(),
   foodTypeId: z.uuid({ error: 'Bitte wähle eine Lebensmittelart.' }),
   content: contentText,
