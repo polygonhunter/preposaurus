@@ -146,7 +146,10 @@ export const foodTypeLevelSchema = z.object({
   ),
 })
 
-/** Alle Warengruppen wie Ebene 2, für Liste und Tabelle neben dem Detail (M12-03, M12-04) */
+/**
+ * Alle Warengruppen wie Ebene 2, für Liste und Tabelle neben dem Detail (M12-03, M12-04).
+ * @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen.
+ */
 export const stockTreeSchema = z.object({ groups: z.array(foodTypeLevelSchema) })
 
 // ---------- 3 · Detail einer Lebensmittelart ----------
