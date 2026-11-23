@@ -17,6 +17,15 @@ type FoodTypeEditSectionProps = Readonly<{
 const HIDE_HINT =
   'Ausgeblendet erscheint sie beim Erfassen nicht mehr in der Suche und nicht in der Foto-Erkennung. Produkte darauf bleiben sichtbar und zählen weiter.'
 
+const CATEGORY_HIDDEN_HINT =
+  'Ihre Kategorie ist ausgeblendet, deshalb steht sie beim Erfassen und für die Foto-Erkennung trotzdem nicht zur Wahl.'
+
+function visibilityHint(foodType: FoodTypeEntry): string {
+  if (foodType.isRetired) return 'Diese Art ist nicht mehr in der Startliste.'
+  if (foodType.isCategoryHidden && !foodType.isHidden) return CATEGORY_HIDDEN_HINT
+  return HIDE_HINT
+}
+
 // Was der Admin an einer Lebensmittelart ändern kann (#126): eigene vollständig, jede je Haushalt
 // ausblenden, eigene ohne Produkte löschen.
 export function FoodTypeEditSection({ foodType, categories }: FoodTypeEditSectionProps) {
@@ -44,9 +53,7 @@ export function FoodTypeEditSection({ foodType, categories }: FoodTypeEditSectio
       {foodType.isRetired ? null : (
         <HideToggleForm id={foodType.id} isHidden={foodType.isHidden} action={hideFoodTypeAction} />
       )}
-      <GroupFooter>
-        {foodType.isRetired ? 'Diese Art ist nicht mehr in der Startliste.' : HIDE_HINT}
-      </GroupFooter>
+      <GroupFooter>{visibilityHint(foodType)}</GroupFooter>
       {canRemoveFoodType(foodType) ? (
         <div className="pt-6">
           <RemoveEntryButton
