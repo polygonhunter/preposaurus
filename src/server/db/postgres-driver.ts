@@ -16,8 +16,15 @@ function logIdleClientError(error: Error): void {
   logger.warn('Ruhende Datenbankverbindung getrennt, der Pool verbindet neu', { error })
 }
 
-export function connectPostgres(connectionString: string): DatabaseConnection {
-  const pool = new Pool({ connectionString })
+/** `applicationName` erscheint in `pg_stat_activity`, z. B. „preposaurus-web“ (#261). */
+export function connectPostgres(
+  connectionString: string,
+  applicationName?: string,
+): DatabaseConnection {
+  const pool = new Pool({
+    connectionString,
+    ...(applicationName === undefined ? {} : { application_name: applicationName }),
+  })
   pool.on('error', logIdleClientError)
   const db = drizzle({ client: pool })
   return {

@@ -89,12 +89,20 @@ backup backup wiederherstellen "$stand" && fail "Ohne --ja und ohne Terminal dar
 docker compose exec -T -d -e PGAPPNAME=offene-verbindung db \
   psql -U preposaurus -d preposaurus -c 'select pg_sleep(60)'
 sleep 2
+# Anfragen an den Webserver halten seinen Pool verbunden (ruhende Clients schließt er nach 10 s)
+( for _ in $(seq 1 20); do curl -s -o /dev/null http://127.0.0.1:3000/anmelden || true; sleep 1; done ) &
+web_requests=$!
 backup backup wiederherstellen "$stand" --ja > busy.log 2>&1 &&
   fail "Bei offener Verbindung darf nichts passieren"
+wait "$web_requests"
 cat busy.log
-# Noch läuft auch die App, ihre Verbindungen stehen in derselben Zeile
+# Noch läuft auch die App, ihre Verbindungen stehen in derselben Zeile, mit Namen je Dienst (#261)
 grep 'noch verbunden:' busy.log | grep -q 'offene-verbindung (1)' ||
   fail "Die Meldung nennt die verbliebene Verbindung nicht"
+grep 'noch verbunden:' busy.log | grep -q 'preposaurus-web (' ||
+  fail "Die Meldung nennt den Webserver nicht"
+grep 'noch verbunden:' busy.log | grep -q 'pgboss:preposaurus-worker (' ||
+  fail "Die Meldung nennt den Worker nicht"
 docker compose stop web worker
 psql_value "select pg_terminate_backend(pid) from pg_stat_activity
   where query like '%pg_sleep(60)%' and pid <> pg_backend_pid()" > /dev/null
