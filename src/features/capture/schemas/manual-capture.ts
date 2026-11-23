@@ -11,7 +11,7 @@ import {
 import { createStockSchema, MAX_COUNT_PER_DATE, MAX_DATES_PER_CAPTURE, MAX_PER_100 } from './stock'
 
 const CONTENT_MESSAGES: Record<ContentParseError['kind'], string> = {
-  empty: 'Bitte gib den Inhalt einer Packung an, z. B. 500 g.',
+  empty: 'Bitte gebt den Inhalt einer Packung an, z. B. 500 g.',
   'invalid-number': 'Bitte als Zahl mit Einheit angeben, z. B. 500 g oder 1,5 l.',
   'unknown-unit': 'Bitte mit g, kg, ml oder l angeben, z. B. 500 g.',
   'not-positive': 'Der Inhalt muss größer als 0 sein.',
@@ -38,7 +38,7 @@ const per100Text = z.string().transform((text, context) => {
   return z.NEVER
 })
 
-const formUnitSchema = z.object({
+export const formUnitSchema = z.object({
   bestBefore: z
     .object({ date: z.string(), precision: z.enum(['day', 'month', 'year']) })
     .nullable(),
@@ -50,9 +50,9 @@ const formUnitSchema = z.object({
 
 const optionalChoice = z.uuid().nullable()
 
-const manualCaptureFormSchema = z.object({
+export const manualCaptureFormSchema = z.object({
   captureId: z.uuid(),
-  foodTypeId: z.uuid({ error: 'Bitte wähle eine Lebensmittelart.' }),
+  foodTypeId: z.uuid({ error: 'Bitte wählt eine Lebensmittelart.' }),
   content: contentText,
   containerId: optionalChoice,
   storageLocationId: optionalChoice,
@@ -66,7 +66,7 @@ const manualCaptureFormSchema = z.object({
   }),
   units: z
     .array(formUnitSchema)
-    .min(1, 'Bitte gib ein MHD ein oder wähle „Datum fehlt“.')
+    .min(1, 'Bitte gebt ein MHD ein oder wählt „Datum fehlt“.')
     .max(MAX_DATES_PER_CAPTURE, `Höchstens ${String(MAX_DATES_PER_CAPTURE)} Daten je Erfassung.`),
 })
 

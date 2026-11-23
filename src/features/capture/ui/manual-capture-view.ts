@@ -20,7 +20,7 @@ export interface ManualCaptureView {
 function kcalBasisOf(draft: ManualCaptureDraft, foodType: FoodTypeChoice): KcalBasis | null {
   if (draft.existingProductId !== null) return null
   const own = parseGermanNumber(draft.nutrition.kcal)
-  if (own !== null && own >= 0) return { per100: own, isEstimate: false }
+  if (own !== null && own >= 0) return { per100: own, isEstimate: draft.isKcalEstimate === true }
   return foodType.kcalPer100 === null ? null : { per100: foodType.kcalPer100, isEstimate: true }
 }
 

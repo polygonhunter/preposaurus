@@ -9,7 +9,7 @@ import { accessMessage, DRAFT_GONE, failure, type DraftActionState } from './act
 
 export type SaveDraftState = DraftActionState<{ draftId: string }>
 
-const INVALID = 'Der Stand ließ sich nicht sichern. Bitte prüfe die Eingaben.'
+const INVALID = 'Der Stand ließ sich nicht sichern. Bitte prüft die Eingaben.'
 
 export async function saveDraftAction(input: unknown): Promise<SaveDraftState> {
   const actor = await requireCaptureActor()

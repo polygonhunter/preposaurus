@@ -4,6 +4,7 @@ import 'server-only'
 import {
   applyLastUsed,
   type CaptureOptions,
+  type ContainerChoice,
   type FoodTypeChoice,
   type LastUsed,
   type NamedChoice,
@@ -12,7 +13,7 @@ import {
 export interface CaptureOptionsReader {
   /** System-Arten und eigene Arten des Haushalts, ohne ausgeblendete */
   loadFoodTypes: (householdId: string) => Promise<FoodTypeChoice[]>
-  loadContainers: () => Promise<NamedChoice[]>
+  loadContainers: () => Promise<ContainerChoice[]>
   /** Nur eigene, nicht ausgeblendete Lagerorte */
   loadStorageLocations: (householdId: string) => Promise<NamedChoice[]>
   loadLastUsed: (householdId: string, userId: string) => Promise<LastUsed>

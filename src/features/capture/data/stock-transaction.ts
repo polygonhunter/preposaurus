@@ -10,6 +10,7 @@ import { products, units } from '@/server/db/schema/inventory'
 import type { PlannedNutrition, PlannedUnit } from '../domain/stock-draft'
 import type {
   CaptureLookup,
+  DraftAdoption,
   FoodTypeRef,
   NewCapture,
   NewProductRow,
@@ -22,6 +23,7 @@ import {
   DB_PRECISION,
   toNumeric,
 } from './db-values'
+import { adoptDraft } from './draft-adoption'
 
 async function findCapture(
   tx: Database,
@@ -168,5 +170,6 @@ export function createStockTransaction(tx: Database) {
     claimCapture: (capture: NewCapture) => claimCapture(tx, capture),
     insertProduct: (product: NewProductRow) => insertProduct(tx, product),
     insertUnits: (rows: NewUnitRows) => insertUnits(tx, rows),
+    adoptDraft: (adoption: DraftAdoption) => adoptDraft(tx, adoption),
   }
 }

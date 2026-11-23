@@ -63,7 +63,8 @@ test('Erfassen ist erreichbar, auch wenn die Beschriftung nur für Screenreader 
   await page.goto('/uebersicht')
   await mainNav(page).getByRole('link', { name: 'Erfassen' }).click()
 
-  await expect(page).toHaveURL(/\/neu$/)
+  // /neu öffnet den zuletzt genutzten Weg oder fragt nach einem offenen Entwurf.
+  await expect(page).toHaveURL(/\/neu(\/foto|\/manuell)?$/)
 })
 
 test('Einstellungen sind von der Übersicht aus erreichbar', async ({ page }) => {

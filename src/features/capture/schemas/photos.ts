@@ -19,3 +19,11 @@ export const photoRequestSchema = z.object({
 
 /** Body von `POST /api/recognize`. Nur Lesen, Schätzungen laufen getrennt (#124). */
 export const recognizeRequestSchema = z.strictObject({ fotoId: z.uuid() })
+
+/** `requestEstimateAction` (#124): Schätzung nur auf ausdrückliche Wahl, Grundlage Verpackungsfoto. */
+export const estimateRequestSchema = z.strictObject({
+  fotoId: z.uuid(),
+  ziel: z.enum(['mhd', 'naehrwerte']),
+  lebensmittelartId: z.uuid().nullable(),
+  bezeichnung: z.string().trim().max(120).nullable(),
+})
