@@ -1,4 +1,4 @@
-import { SYSTEM_PATH, USERS_PATH } from '@/shared/config/settings-paths'
+import { AI_SETTINGS_PATH, SYSTEM_PATH, USERS_PATH } from '@/shared/config/settings-paths'
 import { Group } from '@/shared/ui/Group'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { Row } from '@/shared/ui/Row'
@@ -14,6 +14,7 @@ export function AdminSettingsGroups() {
       </Group>
       <GroupHeader id="daten-system">Daten & System</GroupHeader>
       <Group labelledBy="daten-system">
+        <Row title="Foto-Erkennung" action={{ href: AI_SETTINGS_PATH }} />
         <Row title="Lizenz und Quellen" action={{ href: SYSTEM_PATH }} />
       </Group>
     </>

@@ -64,7 +64,8 @@ export function decryptConnection(
   return ok({ provider: stored.provider, apiKey: apiKey.value, baseUrl: stored.baseUrl })
 }
 
-function snapshotOf(settings: HouseholdAiSettings, hasEnvConnection: boolean) {
+/** Stand der Einstellungen für die reinen Regeln in domain/, ohne Schlüssel */
+export function snapshotOf(settings: HouseholdAiSettings, hasEnvConnection: boolean) {
   const connections = settings.connections.map(({ id, isActive, key }) => ({
     id,
     isActive,
