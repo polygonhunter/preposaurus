@@ -7,6 +7,7 @@ import { formatGoalDays } from '@/features/supply/ui/goal-format'
 import { SignOutButton } from '@/features/auth/ui/SignOutButton'
 import { ROLE_LABELS } from '@/features/auth/ui/user-format'
 import { AdminSettingsGroups } from '@/features/settings/ui/AdminSettingsGroups'
+import { SystemSettingsGroup } from '@/features/settings/ui/SystemSettingsGroup'
 import { requirePageHousehold } from '@/server/auth/household'
 import { ACCOUNT_PATH, GOAL_PATH, MEMBERS_PATH, RULES_PATH } from '@/shared/config/settings-paths'
 import { Group } from '@/shared/ui/Group'
@@ -20,7 +21,8 @@ export const metadata: Metadata = { title: 'Einstellungen · Preposaurus' }
 const personCount = (count: number) => (count === 1 ? '1 Person' : `${String(count)} Personen`)
 
 // Einstellungen (#37): Mein Konto · Haushalt · Nutzerverwaltung · Daten & System. Mitglieder sehen
-// den Haushalt nur lesend, die beiden Admin-Gruppen gar nicht. Deren Seiten prüfen die Rolle selbst.
+// den Haushalt nur lesend und die Nutzerverwaltung gar nicht (die Seiten prüfen die Rolle selbst).
+// Daten & System mit Lizenz und Quelltext sehen alle (AGPL, #217).
 export default async function SettingsPage() {
   const { householdId, username, isAdmin } = await requirePageHousehold()
   const [household, goal] = await Promise.all([
@@ -61,6 +63,7 @@ export default async function SettingsPage() {
         <GroupFooter>Ansehen kannst du alles, ändern kann es ein Admin.</GroupFooter>
       )}
       {isAdmin ? <AdminSettingsGroups /> : null}
+      <SystemSettingsGroup isAdmin={isAdmin} />
     </>
   )
 }

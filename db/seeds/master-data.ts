@@ -3,7 +3,8 @@
 // einstellt (ausgeblendet), bleibt beim erneuten Seed erhalten. Richtwerte der Lebensmittelarten
 // (kcal, Makros, übliche Haltbarkeit) übernimmt der Seed auch beim Aktualisieren: Die Quelle dafür
 // sind die Seed-Dateien. Entfallene System-Arten und -Kategorien räumt retired-master-data.ts
-// auf, ohne benutzte Einträge zu löschen.
+// auf, ohne benutzte Einträge zu löschen. Zuletzt die Empfehlungsquelle BBK/BLE
+// (recommendation-source.ts).
 import { sql } from 'drizzle-orm'
 import type { Database } from '../../src/server/db/connection'
 import { categories, containers } from '../../src/server/db/schema/catalog'
@@ -13,6 +14,7 @@ import { CONTAINERS } from './stammdaten/behaelter'
 import { SYSTEM_CATEGORIES } from './stammdaten/kategorien'
 import { MERGED_FOOD_TYPES, SYSTEM_FOOD_TYPES } from './stammdaten/lebensmittelarten'
 import { PRODUCT_GROUPS } from './stammdaten/warengruppen'
+import { seedRecommendationSource } from './recommendation-source'
 import { retireSystemCategories, retireSystemFoodTypes } from './retired-master-data'
 
 const SORT_STEP = 10
@@ -126,5 +128,6 @@ export async function seedMasterData(db: Database): Promise<void> {
       SYSTEM_CATEGORIES.map((category) => category.key),
     )
     await seedContainers(tx)
+    await seedRecommendationSource(tx, groupIds)
   })
 }
