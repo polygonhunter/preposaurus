@@ -33,8 +33,9 @@ async function loadSettingsSummary(): Promise<SettingsSummary> {
 }
 
 // Rahmen der Einstellungen (#37, M12-06): kompakt ist die Liste die Seite /einstellungen, ab „breit“
-// steht sie neben jedem Bereich. Jede Action ruft refresh(), so stehen die Werte der Liste nach dem
-// Speichern gleich richtig da. Die Seiten prüfen Sitzung und Rolle trotzdem selbst.
+// steht sie neben jedem Bereich. Actions ohne Weiterleitung rufen refresh(), weiterleitende Actions,
+// die einen Wert der Liste ändern, revalidatePath(SETTINGS_PATH, 'layout'). So stehen die Werte nach
+// dem Speichern gleich richtig da. Die Seiten prüfen Sitzung und Rolle trotzdem selbst.
 export default async function SettingsLayout({ children }: SettingsLayoutProps) {
   const summary = await loadSettingsSummary()
   return (

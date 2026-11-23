@@ -157,10 +157,11 @@ test('Stufen: mittel Sucher oben und Auslöser unten, ab „breit“ Kamera link
     await expectAccessibleLayout(page)
   }
 
-  // Kamera zu: das Formular bleibt, jetzt allein
+  // Kamera zu: das Formular bleibt, jetzt allein, und der Fokus wandert hinein
   await page.getByRole('button', { name: 'Kamera schließen' }).click()
   await expect(camera).toHaveCount(0)
   await expect(reviewForm).toBeVisible()
+  await expect(reviewForm.locator(':focus')).toHaveCount(1)
 })
 
 test('Foto-Fluss: Erkennung füllt Vorschläge, offenes MHD wird entschieden, Speichern', async ({
