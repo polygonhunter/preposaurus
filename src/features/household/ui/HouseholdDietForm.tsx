@@ -6,7 +6,7 @@ import { SETTING_IDLE } from '../actions/action-messages'
 import { saveHouseholdDietAction } from '../actions/save-household-rules-action'
 import type { Diet } from '../domain/member'
 import { DIET_LABELS, optionsOf } from './member-labels'
-import { SettingStatus } from './SettingStatus'
+import { SaveStatus } from '@/shared/ui/SaveStatus'
 
 type HouseholdDietFormProps = Readonly<{ diet: Diet }>
 
@@ -22,7 +22,7 @@ export function HouseholdDietForm({ diet }: HouseholdDietFormProps) {
         defaultValue={diet}
       />
       <div className="flex items-center justify-between gap-3">
-        <SettingStatus state={state} />
+        <SaveStatus state={state} />
         <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Speichert …' : undefined}>
           Speichern
         </Button>

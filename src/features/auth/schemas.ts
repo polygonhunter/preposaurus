@@ -2,6 +2,7 @@
 // dieses Schema und der Validator des Username-Plugins (#133).
 import { z } from 'zod'
 import {
+  USER_ROLES,
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
   USERNAME_MAX_LENGTH,
@@ -34,14 +35,43 @@ const newPasswordSchema = z
 // Ersteinrichtung, Schritt „Willkommen und Konto“ (ONBOARDING §2.2): Anzeigename, Benutzername,
 // Passwort. Was ein Passwort nicht enthalten darf, prüft domain/password-rules.ts, weil Schemas
 // keine Fachlogik importieren.
+const displayNameSchema = z
+  .string()
+  .trim()
+  .min(1, { error: 'Bitte einen Namen eintragen.' })
+  .max(DISPLAY_NAME_MAX_LENGTH, { error: 'Bitte höchstens 60 Zeichen.' })
+
 export const setupSchema = z.object({
-  displayName: z
-    .string()
-    .trim()
-    .min(1, { error: 'Bitte einen Namen eintragen.' })
-    .max(DISPLAY_NAME_MAX_LENGTH, { error: 'Bitte höchstens 60 Zeichen.' }),
+  displayName: displayNameSchema,
   username: usernameSchema,
   password: newPasswordSchema,
 })
 
 export type SetupInput = z.infer<typeof setupSchema>
+
+export const userIdSchema = z.uuid()
+
+export const roleSchema = z.enum(USER_ROLES, { error: 'Bitte eine Rolle wählen.' })
+
+// Leer heißt „keine Person“
+export const linkedMemberSchema = z.preprocess(
+  (value) => (value === '' ? null : value),
+  z.uuid({ error: 'Diese Person gibt es nicht mehr.' }).nullable(),
+)
+
+// Leer heißt: Preposaurus erzeugt das Passwort (EINSTELLUNGEN_NUTZER §3.1).
+export const chosenPasswordSchema = z.preprocess(
+  (value) => (value === '' ? null : value),
+  newPasswordSchema.nullable(),
+)
+
+// Nutzer anlegen durch den Admin (#123): Anzeigename, Benutzername, Rolle, optional Person und Passwort
+export const createUserSchema = z.object({
+  displayName: displayNameSchema,
+  username: usernameSchema,
+  role: roleSchema,
+  memberId: linkedMemberSchema,
+  password: chosenPasswordSchema,
+})
+
+export type CreateUserInput = z.infer<typeof createUserSchema>

@@ -5,7 +5,8 @@ import {
 } from '@/features/auth/application/list-household-users'
 import { UserList } from '@/features/auth/ui/UserList'
 import { requirePageHouseholdAdmin } from '@/server/auth/household'
-import { SETTINGS_PATH } from '@/shared/config/settings-paths'
+import { NEW_USER_PATH, SETTINGS_PATH } from '@/shared/config/settings-paths'
+import { ButtonLink } from '@/shared/ui/ButtonLink'
 import { GroupFooter } from '@/shared/ui/GroupFooter'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { PageHeader } from '@/shared/ui/PageHeader'
@@ -19,7 +20,15 @@ export default async function UsersPage() {
   const users = await listHouseholdUsers(await userAdminRepository(), householdId)
   return (
     <>
-      <PageHeader title="Nutzer" back={{ href: SETTINGS_PATH, label: 'Einstellungen' }} />
+      <PageHeader
+        title="Nutzer"
+        back={{ href: SETTINGS_PATH, label: 'Einstellungen' }}
+        action={
+          <ButtonLink href={NEW_USER_PATH} variant="plain">
+            Hinzufügen
+          </ButtonLink>
+        }
+      />
       <GroupHeader id="nutzer">Wer sich anmelden kann</GroupHeader>
       <UserList users={users} labelledBy="nutzer" />
       <GroupFooter>

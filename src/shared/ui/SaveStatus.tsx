@@ -1,9 +1,9 @@
-import type { SettingState } from '../actions/action-messages'
+type SaveState = Readonly<{ status: 'idle' | 'saved' | 'error'; message: string | null }>
 
-type SettingStatusProps = Readonly<{ state: SettingState }>
+type SaveStatusProps = Readonly<{ state: SaveState }>
 
 // Rückmeldung nach dem Speichern einer Einstellung: sichtbar und per Screenreader angesagt.
-export function SettingStatus({ state }: SettingStatusProps) {
+export function SaveStatus({ state }: SaveStatusProps) {
   return (
     <p
       aria-live="polite"

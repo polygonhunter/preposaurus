@@ -1,3 +1,4 @@
+import { userPath } from '@/shared/config/settings-paths'
 import { Group } from '@/shared/ui/Group'
 import { Row } from '@/shared/ui/Row'
 import { userSummary } from './user-format'
@@ -12,7 +13,12 @@ export function UserList({ users, labelledBy }: UserListProps) {
   return (
     <Group labelledBy={labelledBy}>
       {users.map((user) => (
-        <Row key={user.id} title={`${user.name} (${user.username})`} subtitle={userSummary(user)} />
+        <Row
+          key={user.id}
+          title={`${user.name} (${user.username})`}
+          subtitle={userSummary(user)}
+          action={{ href: userPath(user.id) }}
+        />
       ))}
     </Group>
   )
