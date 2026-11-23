@@ -76,8 +76,12 @@ export const AI_CONFIDENCE_LEVELS = ['hoch', 'mittel', 'niedrig'] as const
 // entwurf: gehört zu einer unbestätigten Erfassung. fest: gehört zu einem gespeicherten Produkt.
 export const PHOTO_STATUSES = ['entwurf', 'fest'] as const
 
-// Die Lücke zum Ziel wird live berechnet und nicht gespeichert, deshalb fehlt „ziel“.
-export const RESTOCK_SOURCES = ['nachkauf', 'manuell'] as const
+// Die Lücke zum Ziel wird live berechnet; „ziel“ wird nur gespeichert, wenn eine Lücke abgehakt
+// oder ausgeblendet wird (#201, DATENKATALOG §2.10).
+export const RESTOCK_SOURCES = ['ziel', 'nachkauf', 'manuell'] as const
+
+// „ausgeblendet“ gibt es nur für Lücken bis zum Ziel; eine Lücke ist nie „offen“ gespeichert (#201).
+export const RESTOCK_STATUSES = ['offen', 'erledigt', 'ausgeblendet'] as const
 
 export const RESTOCK_UNITS = ['g', 'ml', 'stueck'] as const
 

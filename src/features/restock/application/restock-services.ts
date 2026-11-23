@@ -8,6 +8,8 @@ import { createRestockRepository } from '../data/restock-repository'
 import { countOpenRestockItems } from './count-open-items'
 import { getRestockList } from './get-restock-list'
 import type { RestockRepository } from './restock-repository'
+import { setGapStatus } from './set-gap-status'
+import type { GapStatusChange } from '../schemas'
 
 export async function restockRepository(): Promise<RestockRepository> {
   return createRestockRepository(await getDb())
@@ -18,6 +20,13 @@ export async function loadRestockList(householdId: string) {
   const repository = await restockRepository()
   const today = todayInBerlin(new Date())
   return getRestockList({ repository, loadGoalGaps }, { householdId, today })
+}
+
+/** Lücke abhaken oder ausblenden, gerechnet am heutigen Tag in Berlin (#201). */
+export async function changeGapStatus(householdId: string, change: GapStatusChange) {
+  const repository = await restockRepository()
+  const today = todayInBerlin(new Date())
+  return setGapStatus({ repository, loadGoalGaps }, { householdId, today, ...change })
 }
 
 /** Offene Einträge für die Wochenübersicht der Erinnerungen (#186). */
