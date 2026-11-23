@@ -2,7 +2,7 @@
 // erst ab einem spürbaren Anteil an der Zahl, darunter nennt ihn nur das Erklär-Blatt.
 
 /** Ab diesem Anteil der kcal aus Richtwerten bzw. unbestätigten Schätzungen steht „ca.“ (#115). */
-const APPROXIMATE_SHARE_THRESHOLD = 0.1
+export const APPROXIMATE_SHARE_THRESHOLD = 0.1
 // Gleitkomma: 0,7 von 7 kcal ergibt 0,0999…, das ist genau 10 % und soll „ca.“ bekommen
 const SHARE_EPSILON = 1e-9
 

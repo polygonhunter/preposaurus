@@ -40,6 +40,7 @@ export function duePreview(due: DueUnits): OverviewDue {
 interface GroupName {
   key: string
   name: string
+  shortName: string
 }
 
 /** Balken je Warengruppe ohne Wasser, die knappste der gezeigten Gruppen mit Wort markiert. */
@@ -49,10 +50,11 @@ export function groupCoverage(
 ): OverviewGroup[] {
   const shown = progress.filter((entry) => entry.groupKey !== WATER_GROUP_KEY)
   const tightest = findTightestGroup(shown)
-  const names = new Map(groups.map((group) => [group.key, group.name]))
+  const byKey = new Map(groups.map((group) => [group.key, group]))
   return shown.map(({ groupKey, days, goalDays }) => ({
     key: groupKey,
-    name: names.get(groupKey) ?? groupKey,
+    name: byKey.get(groupKey)?.name ?? groupKey,
+    shortName: byKey.get(groupKey)?.shortName ?? groupKey,
     days,
     goalDays,
     isTightest: groupKey === tightest?.groupKey,

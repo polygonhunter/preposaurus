@@ -4,6 +4,7 @@ import 'server-only'
 import { toNodeUnit } from '@/features/inventory/application/stock-model'
 import type { CalendarDay } from '@/shared/lib/dates'
 import type { GoalGapPorts } from './get-goal-gaps'
+import { explanationBasisOf } from './overview-explanation'
 import { headFigures } from './overview-figures'
 import { dailyNeedOf } from './stock-figures'
 import { loadStockSnapshot, type HouseholdDay } from './stock-snapshot'
@@ -32,6 +33,10 @@ export async function getGoalStatus(
     today: input.today,
     goal,
     stillGoodCounts: context.stillGoodCounts,
+    explanation: explanationBasisOf(
+      context,
+      units.map(({ unit }) => unit),
+    ),
   })
   if (head.supply === null) return null
   const outlook = head.goal?.outlook ?? null

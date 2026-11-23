@@ -68,17 +68,81 @@ test('zeigt Warengruppen ohne Wasser und führt in den Vorrat der Gruppe', async
     page.getByText('BBK/BLE, Stand BBK 11/2025, BLE 2024 · Werte noch nicht geprüft'),
   ).toBeVisible()
 
-  await groups
-    .getByRole('link', { name: /^Getreide, Getreideprodukte, Brot und Kartoffeln/ })
-    .click()
+  // Kurzname in Zeile und Titel, der amtliche Name steht über dem Titel (#177)
+  await groups.getByRole('link', { name: /^Getreide und Kartoffeln/ }).click()
   await expect(page).toHaveURL(/\/vorrat\/getreide$/)
   await expect(
-    page.getByRole('heading', {
-      level: 1,
-      name: 'Getreide, Getreideprodukte, Brot und Kartoffeln',
-    }),
+    page.getByRole('heading', { level: 1, name: 'Getreide und Kartoffeln' }),
   ).toBeVisible()
+  await expect(page.getByText('Getreide, Getreideprodukte, Brot und Kartoffeln')).toBeVisible()
 })
+
+const explainSheet = (page: Page) => page.getByRole('dialog', { name: 'So wird gerechnet' })
+
+test('Erklär-Blatt öffnet per Tastatur und nennt Rechnung, „ca.“ und Quelle', async ({ page }) => {
+  await page.goto('/uebersicht')
+  const trigger = page.getByRole('button', { name: 'So wird gerechnet' })
+
+  const sheet = explainSheet(page)
+  // Erst nach der Hydrierung reagiert der Knopf, deshalb mit Wiederholung
+  await expect(async () => {
+    await trigger.focus()
+    await page.keyboard.press('Enter')
+    await expect(sheet).toBeVisible({ timeout: 1000 })
+  }).toPass()
+  await expect(sheet.getByText(/^\d+ \S+: je [\d.]+ kcal und /).first()).toBeVisible()
+  await expect(sheet.getByText(/^[\d.]+ kcal ÷ [\d.]+ kcal am Tag = [\d,]+ Tage?$/)).toBeVisible()
+  await expect(sheet.getByText(/^[\d,.]+ l ÷ [\d,]+ l am Tag = [\d,]+ Tage?$/)).toBeVisible()
+  await expect(
+    sheet.getByText(/^Es zählt der kleinere Wert|^Essen und Wasser reichen/),
+  ).toBeVisible()
+  await expect(sheet.getByRole('heading', { name: 'Was „ca.“ bedeutet' })).toBeVisible()
+  await expect(sheet.getByRole('heading', { name: 'Was nicht mitzählt' })).toBeVisible()
+  await expect(sheet.getByRole('link', { name: 'Zur Quelle' })).toHaveAttribute('href', /^https:/)
+  await expect(sheet.getByText('Werte noch nicht geprüft')).toBeVisible()
+
+  await page.keyboard.press('Escape')
+  await expect(sheet).toBeHidden()
+})
+
+test('Erklär-Blatt öffnet beim Tippen auf Kernzahl und Balken', async ({ page }) => {
+  await page.goto('/uebersicht')
+  const today = page.getByRole('region', { name: 'Euer Vorrat reicht für' })
+  const sheet = explainSheet(page)
+  // Die Fläche des Knopfs liegt über dem ganzen Kopf, deshalb ein echter Tipp an die Stelle
+  const tapOn = async (target: ReturnType<Page['getByText']>) => {
+    const box = await target.boundingBox()
+    if (box === null) throw new Error('nicht sichtbar')
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+  }
+
+  // Erst nach der Hydrierung reagiert der Knopf, deshalb mit Wiederholung
+  const openBy = async (target: ReturnType<Page['getByText']>) => {
+    await expect(async () => {
+      await tapOn(target)
+      await expect(sheet).toBeVisible({ timeout: 1000 })
+    }).toPass()
+  }
+
+  await openBy(today.getByText(/^\d+$/))
+  await sheet.getByRole('button', { name: 'Schließen' }).click()
+  await expect(sheet).toBeHidden()
+
+  await openBy(today.getByRole('meter', { name: 'Wasser' }))
+})
+
+for (const colorScheme of ['light', 'dark'] as const) {
+  test(`Erklär-Blatt ist barrierefrei (${colorScheme})`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme })
+    await page.goto('/uebersicht')
+    await expect(async () => {
+      await page.getByRole('button', { name: 'So wird gerechnet' }).click()
+      await expect(explainSheet(page)).toBeVisible({ timeout: 1000 })
+    }).toPass()
+
+    await expectAccessibleLayout(page)
+  })
+}
 
 for (const colorScheme of ['light', 'dark'] as const) {
   test(`Übersicht mit Vorrat ist barrierefrei (${colorScheme})`, async ({ page }) => {

@@ -74,6 +74,31 @@ test.describe('Ohne Verbindung', () => {
     await expect(takeOne).toBeEnabled()
   })
 
+  test('zeigt den Hinweis auf der Warengruppe, „−1“ sagt beim Tippen warum', async ({
+    page,
+    context,
+  }) => {
+    await page.goto('/vorrat/getreide')
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Getreide und Kartoffeln' }),
+    ).toBeVisible()
+    const takeOne = page.getByRole('button', { name: /^1 Packung .+ entnehmen$/ }).first()
+    await expect(takeOne).toBeEnabled()
+
+    await context.setOffline(true)
+    await expect(offlineNotice(page)).toContainText('Ohne Verbindung – Stand von')
+    await expect(takeOne).toBeDisabled()
+    // Gesperrt heißt nicht stumm: Ein Tipp sagt, warum es gerade nicht geht (#216)
+    await takeOne.click({ force: true })
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'Ohne Verbindung geht das gerade nicht' }),
+    ).toBeVisible()
+    await expectAccessibleLayout(page)
+
+    await context.setOffline(false)
+    await expect(offlineNotice(page)).toHaveCount(0)
+  })
+
   test('zeigt den Hinweis auch auf der Übersicht', async ({ page, context }) => {
     await page.goto('/uebersicht')
     await expect(page.getByRole('heading', { level: 1, name: 'Übersicht' })).toBeVisible()

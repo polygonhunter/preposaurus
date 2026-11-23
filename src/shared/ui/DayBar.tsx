@@ -13,10 +13,18 @@ type DayBarProps = Readonly<{
   valueText?: string
   // Beschriftung steht schon darüber (z. B. lange Warengruppen-Namen): nur für Screenreader
   isLabelHidden?: boolean
+  // Breite der Wert-Spalte, für alle Balken einer Liste gleich: „9,4 Tage“ oder „6,6 von 10 Tagen“.
+  // So enden die Spuren an derselben Stelle und die Zielmarken fluchten (#218).
+  valueWidth?: ValueWidth
 }>
+
+type ValueWidth = 'days' | 'coverage'
+
+const VALUE_WIDTH: Record<ValueWidth, string> = { days: 'min-w-20', coverage: 'min-w-36' }
 
 export function DayBar(props: DayBarProps) {
   const { label, days, scaleDays, goalDays, isLimiting, valueText, isLabelHidden } = props
+  const valueWidth = VALUE_WIDTH[props.valueWidth ?? 'days']
   const text = valueText ?? `${String(days)} Tage`
   return (
     <div
@@ -49,7 +57,9 @@ export function DayBar(props: DayBarProps) {
           />
         )}
       </div>
-      <span className="min-w-14 text-right font-semibold">{text}</span>
+      <span className={cx('text-right font-semibold whitespace-nowrap tabular-nums', valueWidth)}>
+        {text}
+      </span>
     </div>
   )
 }

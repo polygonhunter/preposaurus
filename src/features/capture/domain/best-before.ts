@@ -18,6 +18,7 @@ export type BestBeforeParseError =
   | { kind: 'no-date' }
   | { kind: 'incomplete' }
   | { kind: 'ambiguous' }
+  | { kind: 'invalid-month' }
   | { kind: 'invalid-date' }
   | { kind: 'year-out-of-range' }
 
@@ -27,6 +28,7 @@ type ParseResult = Result<BestBefore, BestBeforeParseError>
 const MIN_YEAR = 2000
 const MAX_YEAR = 2099
 const CENTURY = 2000
+const MONTHS_PER_YEAR = 12
 /**
  * Ein zweistelliges Jahr (`30.09.27`) gilt nur in einem engen Fenster um heute als 20JJ:
  * höchstens so viele Jahre zurück bzw. voraus. Außerhalb ist die Eingabe mehrdeutig.
@@ -71,6 +73,8 @@ interface DateNumbers {
 
 function build(numbers: DateNumbers, precision: BestBeforePrecision): ParseResult {
   if (numbers.year < MIN_YEAR || numbers.year > MAX_YEAR) return err({ kind: 'year-out-of-range' })
+  // „13/2027“: Der Monat gibt es nicht, nicht der Tag (#218)
+  if (numbers.month < 1 || numbers.month > MONTHS_PER_YEAR) return err({ kind: 'invalid-month' })
   const date = calendarDayFrom(numbers)
   if (date === null) return err({ kind: 'invalid-date' })
   return ok(withPrecision(date, precision))

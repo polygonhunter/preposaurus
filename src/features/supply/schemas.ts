@@ -57,6 +57,33 @@ const isoDay = z.iso.date()
 const days = z.number().nonnegative()
 const count = z.number().int().nonnegative()
 
+const amount = z.number().nonnegative()
+
+/** Bedarf einer Personengruppe je Person und Tag (kcal, Wasser in ml) */
+const needLineSchema = z.object({
+  type: z.enum(['baby', 'child', 'teen', 'adult', 'senior']),
+  count,
+  kcalPerDay: amount,
+  waterMlPerDay: amount,
+})
+
+/** Rechenweg für das Erklär-Blatt (#219): Bedarf, Vorrat und was nicht mitzählt. */
+const explanationSchema = z.object({
+  /** kcal bzw. ml Wasser, die heute zählen */
+  kcal: amount,
+  waterMl: amount,
+  kcalPerDay: amount,
+  waterMlPerDay: amount,
+  needLines: z.array(needLineSchema),
+  /** Personen, die im Bedarf noch nicht zählen (Babys, L20) */
+  uncountedMembers: count,
+  /** Anteil der kcal aus Richtwerten bzw. Schätzungen, 0 bis 1 */
+  estimatedShare: z.number().min(0).max(1),
+  packages: z.object({ expired: count, stillGood: count, missingDate: count }),
+  /** Haushalts-Einstellung „Noch gut zählt mit“ (#117) */
+  stillGoodCounts: z.boolean(),
+})
+
 /** „Heute versorgt“, null ohne Bedarf (keine Mitglieder oder keine aktive Quelle). */
 const supplySchema = z.object({
   /** Kernzahl: der kleinere Wert aus Essen und Wasser, eine Nachkommastelle abgerundet */
@@ -66,6 +93,7 @@ const supplySchema = z.object({
   bottleneck: z.enum(['energy', 'water']),
   /** „ca.“ vor der Kernzahl: Richtwert-Anteil an den kcal ab 10 % */
   isApproximate: z.boolean(),
+  explanation: explanationSchema,
 })
 
 /** Stand am Zieldatum (A3), null ohne Zieldatum oder ohne Bedarf. */
@@ -121,6 +149,8 @@ const dueSchema = z.object({
 const groupCoverageSchema = z.object({
   key: z.string(),
   name: z.string(),
+  /** Kurzer Anzeigename (#177) */
+  shortName: z.string(),
   days,
   goalDays: z.number().int().positive(),
   isTightest: z.boolean(),
@@ -162,3 +192,5 @@ export type OverviewDueEntry = z.infer<typeof dueEntrySchema>
 export type OverviewGroup = z.infer<typeof groupCoverageSchema>
 export type OverviewRestock = z.infer<typeof restockSchema>
 export type OverviewHousehold = z.infer<typeof householdSchema>
+export type OverviewExplanation = z.infer<typeof explanationSchema>
+export type OverviewNeedLine = z.infer<typeof needLineSchema>

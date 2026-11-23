@@ -80,8 +80,10 @@ describe('parseBestBefore – kein geratenes Datum', () => {
     ['29.02.2027', 'invalid-date'],
     ['31.04.2027', 'invalid-date'],
     ['00.09.2027', 'invalid-date'],
-    ['13/2027', 'invalid-date'],
-    ['2027-13', 'invalid-date'],
+    ['13/2027', 'invalid-month'],
+    ['2027-13', 'invalid-month'],
+    ['31.13.2027', 'invalid-month'],
+    ['00/2027', 'invalid-month'],
     ['2027-02-30', 'invalid-date'],
     ['1999', 'year-out-of-range'],
     ['4711', 'year-out-of-range'],
@@ -113,7 +115,7 @@ describe('bestBeforeFromMonth', () => {
   })
 
   it('lehnt einen ungültigen Monat ab', () => {
-    expect(bestBeforeFromMonth(2027, 13)).toEqual({ ok: false, error: { kind: 'invalid-date' } })
+    expect(bestBeforeFromMonth(2027, 13)).toEqual({ ok: false, error: { kind: 'invalid-month' } })
   })
 })
 

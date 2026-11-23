@@ -11,6 +11,7 @@ import { usernameSchema } from '@/features/auth/schemas'
 import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, USER_ROLES } from '@/shared/config/constants'
 import type { Database } from '../db/connection'
 import { accounts, sessions, users, verifications } from '../db/schema/account'
+import { isIgnoredAuthWarning } from './auth-log-filter'
 import { ALLOWED_HTTP_PATHS, httpAllowList } from './http-allow-list'
 
 const DAY_IN_SECONDS = 24 * 60 * 60
@@ -66,6 +67,17 @@ function sessionHooks(db: Database) {
   }
 }
 
+// Weitere Argumente können Nutzerdaten enthalten und bleiben deshalb draußen. Bekannte, im Betrieb
+// bedeutungslose Warnungen fallen weg (Begründung in auth-log-filter.ts).
+function authLogger(log: AuthOptions['log']) {
+  return {
+    log: (level: AuthLogLevel, message: string) => {
+      if (level === 'warn' && isIgnoredAuthWarning(message)) return
+      log(level, message)
+    },
+  }
+}
+
 export function createAuth(options: AuthOptions) {
   const { db, secret, clientIpHeader, secureCookies, log } = options
   return betterAuth({
@@ -91,12 +103,7 @@ export function createAuth(options: AuthOptions) {
       ipAddress: { ipAddressHeaders: [clientIpHeader] },
       useSecureCookies: secureCookies,
     },
-    // Weitere Argumente können Nutzerdaten enthalten und bleiben deshalb draußen.
-    logger: {
-      log: (level, message) => {
-        log(level, message)
-      },
-    },
+    logger: authLogger(log),
     telemetry: { enabled: false },
     plugins: [
       // Über HTTP nur ausdrücklich erlaubte Pfade, auth.api bleibt davon unberührt.
