@@ -5,7 +5,7 @@ import { parseCalendarDay } from '@/shared/lib/dates'
 
 const MAX_CONTENT = 9_999_999
 export const MAX_PER_100 = 9_999
-const MAX_NAME_LENGTH = 120
+export const MAX_NAME_LENGTH = 120
 /** Schnellzahlen gehen bis 12, hochzählen darf weiter. Mehr in einem Chip ist ein Tippfehler. */
 export const MAX_COUNT_PER_DATE = 99
 export const MAX_DATES_PER_CAPTURE = 30
@@ -30,10 +30,10 @@ const unitEntrySchema = z.object({
   count: z.int().min(1).max(MAX_COUNT_PER_DATE),
 })
 
-const per100 = z.number().min(0).max(MAX_PER_100).nullable()
+export const per100 = z.number().min(0).max(MAX_PER_100).nullable()
 const optionalId = z.uuid().nullable().default(null)
 
-const contentSchema = z.object({
+export const contentSchema = z.object({
   value: z.number().positive().max(MAX_CONTENT),
   unit: z.enum(['g', 'ml']),
 })

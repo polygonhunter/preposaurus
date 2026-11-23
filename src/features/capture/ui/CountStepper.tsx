@@ -5,6 +5,8 @@ type CountStepperProps = Readonly<{
   label: string
   count: number
   max: number
+  /** Ohne Angabe 0: Bei 1 entfernt − den Eintrag. Ab 1 ist − dort gesperrt. */
+  min?: number
   onChange: (delta: number) => void
 }>
 
@@ -12,12 +14,14 @@ const STEP_BUTTON =
   'touch-target flex size-8 items-center justify-center rounded-full bg-fill text-accent transition-opacity duration-150 ease-out active:opacity-60 disabled:cursor-not-allowed disabled:opacity-40'
 
 // Anzahl mit − und + (UX §8.5 „Chip je Datum mit Anzahl“). Bei 1 entfernt − den Eintrag.
-export function CountStepper({ label, count, max, onChange }: CountStepperProps) {
+export function CountStepper({ label, count, max, min = 0, onChange }: CountStepperProps) {
+  const removes = count === 1 && min === 0
   return (
     <span className="flex items-center gap-3">
       <button
         type="button"
-        aria-label={count === 1 ? `${label} entfernen` : `Eine Packung weniger mit ${label}`}
+        aria-label={removes ? `${label} entfernen` : `Eine Packung weniger mit ${label}`}
+        disabled={count <= min}
         className={STEP_BUTTON}
         onClick={() => {
           onChange(-1)

@@ -4,7 +4,7 @@
 import { createContext, useContext } from 'react'
 import type { RestockItemDto } from '../schemas'
 
-export type RestockEntry = Pick<RestockItemDto, 'id' | 'label'>
+export type RestockEntry = Pick<RestockItemDto, 'id' | 'label' | 'captureTarget'>
 
 export interface RestockContextValue {
   setDone: (entry: RestockEntry, isDone: boolean) => void

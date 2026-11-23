@@ -25,6 +25,10 @@ function productCondition(productIds: readonly string[] | undefined): SQL | unde
   return productIds === undefined ? undefined : isAnyOf(units.productId, productIds)
 }
 
+function unitCondition(unitIds: readonly string[] | undefined): SQL | undefined {
+  return unitIds === undefined ? undefined : isAnyOf(units.id, unitIds)
+}
+
 function dueCondition(query: UnitQuery): SQL | undefined {
   if (query.dueUntil === undefined) return undefined
   // Ohne Datum fällt eine Packung heraus: lte ist für null nie wahr
@@ -37,7 +41,8 @@ export async function loadUnits(
   householdId: string,
   query: UnitQuery,
 ): Promise<StockProductUnit[]> {
-  if (query.productIds?.length === 0 || query.statuses.length === 0) return []
+  if (query.productIds?.length === 0 || query.unitIds?.length === 0) return []
+  if (query.statuses.length === 0) return []
   const rows = await db
     .select(columns)
     .from(units)
@@ -46,6 +51,7 @@ export async function loadUnits(
       and(
         eq(products.householdId, householdId),
         productCondition(query.productIds),
+        unitCondition(query.unitIds),
         inArray(
           units.status,
           query.statuses.map((status) => DB_UNIT_STATUS[status]),

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getCaptureOptionsForUser } from '@/features/capture/application/stock-request'
+import { resolvePrefill } from '@/features/capture/domain/capture-prefill'
+import { readPrefillParams } from '@/features/capture/schemas/prefill'
 import { CaptureModeSwitch } from '@/features/capture/ui/CaptureModeSwitch'
 import { ManualCapture } from '@/features/capture/ui/ManualCapture'
 import { NoHouseholdPage } from '@/features/capture/ui/NoHouseholdPage'
@@ -13,8 +15,9 @@ const FIRST_START =
   'Euer Vorrat ist noch leer. Fangt mit etwas an, das ihr sicher im Schrank habt, zum Beispiel Nudeln oder Wasser.'
 
 // Manuelles Erfassen (#52, UX §8.5): ein Formular auf einer Seite. Die Auswahllisten kommen aus dem
-// Haushalt der Sitzung, Speichern prüft die Action selbst noch einmal.
-export default async function ManualCapturePage() {
+// Haushalt der Sitzung, Speichern prüft die Action selbst noch einmal. `?art=` bzw. `?produkt=`
+// belegen vor (#195), geprüft gegen dieselben Auswahllisten.
+export default async function ManualCapturePage({ searchParams }: PageProps<'/neu/manuell'>) {
   const user = await requireHouseholdUser()
   if (!user.ok) {
     if (user.error.kind === 'unauthenticated') redirect('/anmelden')
@@ -24,6 +27,7 @@ export default async function ManualCapturePage() {
     householdId: user.value.householdId,
     userId: user.value.id,
   })
+  const prefill = resolvePrefill(options, readPrefillParams(await searchParams))
   return (
     <>
       {options.isStockEmpty ? (
@@ -32,7 +36,7 @@ export default async function ManualCapturePage() {
         <PageHeader title="Erfassen" />
       )}
       <CaptureModeSwitch current="manuell" />
-      <ManualCapture options={options} />
+      <ManualCapture options={options} prefill={prefill} />
     </>
   )
 }

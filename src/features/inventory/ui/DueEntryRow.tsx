@@ -1,10 +1,10 @@
+import { detailPath } from '@/shared/config/stock-paths'
 import { Row } from '@/shared/ui/Row'
 import type { DueEntry } from '../schemas'
 import { ConsumeButton } from './ConsumeButton'
 import { DueEntryActions } from './DueEntryActions'
 import { dueEntryLine, dueEntryTitle } from './due-labels'
 import { formatDate } from './stock-format'
-import { targetPath } from './stock-paths'
 
 type DueEntryRowProps = Readonly<{
   entry: DueEntry
@@ -20,7 +20,7 @@ export function DueEntryRow({ entry, isExpired }: DueEntryRowProps) {
   const content = {
     title: dueEntryTitle(entry),
     subtitle: dueEntryLine(entry),
-    action: { href: targetPath(entry.target) },
+    action: { href: detailPath(entry.target) },
   }
   if (firstUnit === undefined) return <Row {...content} />
   if (isExpired) {

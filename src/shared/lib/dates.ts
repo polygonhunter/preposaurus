@@ -108,6 +108,13 @@ export function endOfYear(day: CalendarDay): CalendarDay {
 /** Wie genau ein Datum aufgedruckt ist: Tag, nur Monat oder nur Jahr. */
 export type DayPrecision = 'day' | 'month' | 'year'
 
+/** Nur Monat oder Jahr bekannt: Es gilt das Monats- bzw. Jahresende. */
+export function normalizeToPrecision(date: CalendarDay, precision: DayPrecision): CalendarDay {
+  if (precision === 'month') return endOfMonth(date)
+  if (precision === 'year') return endOfYear(date)
+  return date
+}
+
 /** Datum so, wie es aufgedruckt war: „30.09.2027“, „09/2027“ oder „2027“. */
 export function formatDayWithPrecision({
   date,
