@@ -4,9 +4,10 @@ name: Release
 # schiebt sie mit der Versionsnummer nach ghcr.io (UMSETZUNG M13-04). Ein "latest" gibt es nicht.
 # Jede Architektur baut nativ auf einem eigenen Runner, danach fasst ein Job beide zu einem
 # Multi-Arch-Image zusammen. Dazu kommt ein GitHub-Release mit den Dateien für die Installation.
-# Gebaut wird nur ein Tag auf einem Commit von main, für den CI und Docker grün sind: also erst
-# mergen, die Läufe auf main abwarten, dann taggen. Actions sind wegen packages: write per
-# Commit-SHA gepinnt, Dependabot hält sie aktuell.
+# Gebaut wird nur ein Tag auf einem Commit von main, für den CI und Docker grün sind und dessen
+# Name zur Version in package.json passt: also erst die Version anheben und mergen, die Läufe auf
+# main abwarten, dann taggen. Actions sind wegen packages: write per Commit-SHA gepinnt,
+# Dependabot hält sie aktuell.
 
 on:
   push:
@@ -24,7 +25,7 @@ env:
 
 jobs:
   verify:
-    name: Tag liegt auf main, CI grün
+    name: Tag liegt auf main, passt zur Version, CI grün
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -40,6 +41,14 @@ jobs:
             echo "::error::Der Tag zeigt auf $GITHUB_SHA, der nicht auf main liegt."
             exit 1
           }
+      # App und Export zeigen die Version aus package.json (shared/config/app-info.ts, #233)
+      - name: Tag passt zur Version in package.json
+        run: |
+          version=$(jq -r .version package.json)
+          if [ "${GITHUB_REF_NAME#v}" != "$version" ]; then
+            echo "::error::Der Tag $GITHUB_REF_NAME passt nicht zu package.json ($version). Erst die Version anheben und mergen, dann v$version taggen."
+            exit 1
+          fi
       - name: CI und Docker sind für diesen Commit grün
         run: |
           for workflow in ci.yml docker.yml; do
