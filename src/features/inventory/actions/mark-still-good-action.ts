@@ -6,7 +6,7 @@ import { refresh } from 'next/cache'
 import { requireHouseholdUser } from '@/server/auth/guards'
 import { markStillGood, type StillGoodError } from '../application/mark-still-good'
 import { stockServices } from '../application/stock-services'
-import { stillGoodRequestSchema } from '../schemas'
+import { stillGoodRequestSchema } from '../schemas/requests'
 import { ACCESS_MESSAGE, GONE_RELOADED, type ActionFailure } from './action-messages'
 
 export type StillGoodActionResult =

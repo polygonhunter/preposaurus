@@ -5,7 +5,7 @@ import { getFoodTypeLevel } from '../../../src/features/inventory/application/ge
 import { getStockOverview } from '../../../src/features/inventory/application/get-stock-overview'
 import { searchStock } from '../../../src/features/inventory/application/search-stock'
 import type { StockReader } from '../../../src/features/inventory/application/stock-reader'
-import { stockFilterSchema } from '../../../src/features/inventory/schemas'
+import { stockFilterSchema } from '../../../src/features/inventory/schemas/requests'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
 import { insertForeignMasterData, SECRET } from './foreign-master-data'
 import { setupStockRead, today } from './stock-read-fixtures'

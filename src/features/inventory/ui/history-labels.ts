@@ -1,6 +1,6 @@
 // Texte des Verlaufs auf der Detailseite (#48): was, wann, von wem und welches MHD.
 import { formatDayWithPrecision, toCalendarDay } from '@/shared/lib/dates'
-import type { HistoryEntry } from '../schemas'
+import type { HistoryEntry } from '../schemas/detail'
 import { formatDate } from './stock-format'
 
 const KIND_LABEL: Record<HistoryEntry['kind'], string> = {

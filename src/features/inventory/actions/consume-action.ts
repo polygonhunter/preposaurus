@@ -7,7 +7,7 @@ import { requireHouseholdUser } from '@/server/auth/guards'
 import { stockServices } from '../application/stock-services'
 import { takeOne, type TakeOneError, type TakenUnit } from '../application/take-one'
 import { takeOutUnit, type TakeOutError } from '../application/take-out-unit'
-import { consumeRequestSchema, type ConsumeRequest } from '../schemas'
+import { type ConsumeRequest, consumeRequestSchema } from '../schemas/requests'
 import type { Result } from '@/shared/lib/result'
 import {
   ACCESS_MESSAGE,

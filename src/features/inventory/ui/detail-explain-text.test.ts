@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { NodeTotalsDto } from '../schemas'
+import type { NodeTotalsDto } from '../schemas/shared'
 import {
   countedText,
   daysCalculation,

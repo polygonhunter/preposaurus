@@ -2,7 +2,8 @@
 // und für alle auf einmal (`getStockTree`, M12-03).
 import 'server-only'
 import type { StockCategory } from '../domain/stock-entry'
-import type { FoodTypeLevel, StockRowDto } from '../schemas'
+import type { StockRowDto } from '../schemas/shared'
+import type { FoodTypeLevel } from '../schemas/stock'
 import { totalsByNode, totalsOf, type ReadContext } from './read-context'
 import type { JoinedUnit } from './stock-model'
 import type { BuiltRow } from './stock-rows'

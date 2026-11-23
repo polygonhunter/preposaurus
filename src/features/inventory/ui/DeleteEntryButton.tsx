@@ -7,7 +7,7 @@ import { Button } from '@/shared/ui/Button'
 import { OFFLINE_WRITE_MESSAGE } from '@/shared/ui/OfflineWriteGuard'
 import { Sheet } from '@/shared/ui/Sheet'
 import { deleteEntryAction } from '../actions/delete-entry-action'
-import type { DeleteEntryRequest } from '../schemas'
+import type { DeleteEntryRequest } from '../schemas/requests'
 
 type DeleteEntryButtonProps = Readonly<{
   target: DeleteEntryRequest

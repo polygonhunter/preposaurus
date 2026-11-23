@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { Segmented } from '@/shared/ui/Segmented'
-import type { DueSort } from '../schemas'
+import type { DueSort } from '../schemas/due'
 import { DUE_SORT_PARAM, dueHref } from './stock-paths'
 
 type DueSortSwitchProps = Readonly<{ sort: DueSort }>

@@ -3,7 +3,7 @@
 import 'server-only'
 import { mostUrgentState } from '../domain/stock-filter'
 import type { StockProduct } from '../domain/stock-entry'
-import type { StockRowDto } from '../schemas'
+import type { StockRowDto } from '../schemas/shared'
 import { totalsByNode, totalsOf, type ReadContext } from './read-context'
 import { rowKeyOf, rowNameOf, rowTargetOf, type JoinedUnit } from './stock-model'
 

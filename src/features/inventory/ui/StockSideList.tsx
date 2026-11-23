@@ -1,4 +1,5 @@
-import type { StockTarget, StockTree } from '../schemas'
+import type { StockTarget } from '../schemas/shared'
+import type { StockTree } from '../schemas/stock'
 import { SelectedGroupList } from './SelectedGroupList'
 import { tableGroupsOf } from './stock-table'
 import { StockTable } from './StockTable'

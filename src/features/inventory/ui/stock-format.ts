@@ -3,13 +3,9 @@
 // sprechen und es Tests gibt.
 import { formatDayWithPrecision, toCalendarDay } from '@/shared/lib/dates'
 import { formatGermanNumber, formatQuantity } from '@/shared/lib/quantities'
-import type {
-  BestBeforeDto,
-  FoodTypeDetail,
-  NodeTotalsDto,
-  StockOverview,
-  UnitStateDto,
-} from '../schemas'
+import type { FoodTypeDetail } from '../schemas/detail'
+import type { BestBeforeDto, NodeTotalsDto, UnitStateDto } from '../schemas/shared'
+import type { StockOverview } from '../schemas/stock'
 
 type StatusTone = 'red' | 'orange' | 'yellow' | 'green' | 'neutral'
 

@@ -1,6 +1,6 @@
 // Einstieg für die Seiten mit Liste daneben (M12-03, M12-04): echte Repositories, Stichtag in Berlin.
 import 'server-only'
-import type { StockTree } from '../schemas'
+import type { StockTree } from '../schemas/stock'
 import { getStockTree } from './get-stock-tree'
 import { stockServices } from './stock-services'
 

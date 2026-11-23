@@ -1,5 +1,6 @@
 import type { RecommendationSource } from '@/shared/config/recommendation-source'
-import type { FoodTypeDetail, HistoryEntry, StockTree } from '../schemas'
+import type { FoodTypeDetail, HistoryEntry } from '../schemas/detail'
+import type { StockTree } from '../schemas/stock'
 import { ConsumeProvider } from './ConsumeProvider'
 import { FoodTypeDetailView } from './FoodTypeDetailView'
 import { ScrollToSelected } from './ScrollToSelected'

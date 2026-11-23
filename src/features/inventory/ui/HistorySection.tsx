@@ -2,7 +2,7 @@ import { useId } from 'react'
 import { Group } from '@/shared/ui/Group'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { Row } from '@/shared/ui/Row'
-import type { HistoryEntry } from '../schemas'
+import type { HistoryEntry } from '../schemas/detail'
 import { historyBestBefore, historyLine, historyTitle } from './history-labels'
 
 type HistorySectionProps = Readonly<{ entries: readonly HistoryEntry[] }>

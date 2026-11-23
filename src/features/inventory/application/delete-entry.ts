@@ -6,7 +6,7 @@ import 'server-only'
 import { deletePhotoFiles, photoKeysFor } from '@/features/capture/application/photo-files'
 import type { PhotoStorage } from '@/server/storage/photo-storage'
 import { err, ok, type Result } from '@/shared/lib/result'
-import type { DeleteEntryRequest } from '../schemas'
+import type { DeleteEntryRequest } from '../schemas/requests'
 import type { EntryEraser, ErasedPhoto } from './entry-eraser'
 import type { NotFound } from './read-context'
 

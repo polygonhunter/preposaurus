@@ -8,7 +8,7 @@ import { removeRestockItem } from '@/features/restock/application/change-restock
 import { restockRepository } from '@/features/restock/application/restock-services'
 import { restockItemIdSchema } from '@/features/restock/schemas'
 import { requireHouseholdUser } from '@/server/auth/guards'
-import { unitIdSchema } from '../schemas'
+import { unitIdSchema } from '../schemas/requests'
 import { ACCESS_MESSAGE, type ActionFailure } from './action-messages'
 
 export type AddToRestockResult =

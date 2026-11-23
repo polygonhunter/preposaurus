@@ -1,7 +1,7 @@
 import type { RecommendationSource } from '@/shared/config/recommendation-source'
 import { ExplainSheet } from '@/shared/ui/ExplainSheet'
 import { StatTiles } from '@/shared/ui/StatTiles'
-import type { FoodTypeDetail } from '../schemas'
+import type { FoodTypeDetail } from '../schemas/detail'
 import { DetailExplanation } from './DetailExplanation'
 import { detailTiles, uncountedNote } from './stock-format'
 

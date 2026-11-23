@@ -2,7 +2,7 @@ import { useId } from 'react'
 import { Group } from '@/shared/ui/Group'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { Row } from '@/shared/ui/Row'
-import type { StockOverview } from '../schemas'
+import type { StockOverview } from '../schemas/stock'
 import { groupCoverageText, hasStock, stockLine } from './stock-format'
 import { groupPath } from './stock-paths'
 

@@ -7,7 +7,8 @@ import {
   estimatedSharePercentText,
 } from '@/shared/lib/approximation'
 import { formatGermanNumber, formatQuantity } from '@/shared/lib/quantities'
-import type { FoodTypeDetail, NodeTotalsDto } from '../schemas'
+import type { FoodTypeDetail } from '../schemas/detail'
+import type { NodeTotalsDto } from '../schemas/shared'
 import { formatAmounts, formatDays, formatKcal, formatPackages, supplyDaysOf } from './stock-format'
 
 type Need = FoodTypeDetail['need']

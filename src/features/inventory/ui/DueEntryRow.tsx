@@ -1,6 +1,6 @@
 import { detailPath } from '@/shared/config/stock-paths'
 import { Row } from '@/shared/ui/Row'
-import type { DueEntry } from '../schemas'
+import type { DueEntry } from '../schemas/due'
 import { ConsumeButton } from './ConsumeButton'
 import { DueEntryActions } from './DueEntryActions'
 import { dueEntryLine, dueEntryTitle } from './due-labels'

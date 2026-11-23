@@ -1,7 +1,7 @@
 import type { RecommendationSource } from '@/shared/config/recommendation-source'
 import { ExplainPart } from '@/shared/ui/ExplainPart'
 import { ExplainSource } from '@/shared/ui/ExplainSource'
-import type { FoodTypeDetail } from '../schemas'
+import type { FoodTypeDetail } from '../schemas/detail'
 import {
   SHELF_LIFE_EXPLAIN_TEXT,
   countedText,

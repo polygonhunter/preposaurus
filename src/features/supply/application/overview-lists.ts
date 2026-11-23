@@ -3,7 +3,7 @@
 // supply/domain, hier wird nur gekürzt und ins DTO übertragen.
 import 'server-only'
 import { WATER_GROUP_KEY } from '@/features/inventory/application/stock-model'
-import type { DueUnits } from '@/features/inventory/schemas'
+import type { DueUnits } from '@/features/inventory/schemas/due'
 import { calculateGoalGap } from '../domain/goal-gap'
 import { findTightestGroup, type GroupProgress } from '../domain/group-progress'
 import type { OverviewDue, OverviewDueEntry, OverviewGroup } from '../schemas'

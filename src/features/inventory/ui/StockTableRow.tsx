@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { detailPath } from '@/shared/config/stock-paths'
 import { cx } from '@/shared/lib/class-names'
 import { StatusBadge } from '@/shared/ui/StatusBadge'
-import type { StockRowDto } from '../schemas'
+import type { StockRowDto } from '../schemas/shared'
 import { STATE_BADGE } from './stock-format'
 import { tableCells } from './stock-table'
 

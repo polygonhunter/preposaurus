@@ -8,7 +8,8 @@ import type { StockProduct } from '../domain/stock-entry'
 import { productFilterFor } from './stock-model'
 import type { CalendarDay } from '@/shared/lib/dates'
 import { err, ok, type Result } from '@/shared/lib/result'
-import type { FoodTypeDetail, StockTarget } from '../schemas'
+import type { FoodTypeDetail } from '../schemas/detail'
+import type { StockTarget } from '../schemas/shared'
 import { bestBeforeGroupsOf, nutritionOf } from './detail-product'
 import {
   loadReadContext,

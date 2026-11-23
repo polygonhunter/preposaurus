@@ -3,7 +3,8 @@
 // Detailseite, auch wenn nichts mehr im Vorrat ist.
 import 'server-only'
 import { historyEventsOf, type UnitHistoryRow } from '../domain/unit-history'
-import type { HistoryEntry, StockTarget } from '../schemas'
+import type { HistoryEntry } from '../schemas/detail'
+import type { StockTarget } from '../schemas/shared'
 import type { StockReader } from './stock-reader'
 import { productFilterFor } from './stock-model'
 

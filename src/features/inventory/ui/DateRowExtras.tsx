@@ -1,6 +1,6 @@
 import { unitDatePath } from '@/shared/config/stock-paths'
 import { ButtonLink } from '@/shared/ui/ButtonLink'
-import type { BestBeforeGroupDto } from '../schemas'
+import type { BestBeforeGroupDto } from '../schemas/detail'
 import { DeleteEntryButton } from './DeleteEntryButton'
 
 type DateRowExtrasProps = Readonly<{

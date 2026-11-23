@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { stockFilterSchema } from '../schemas'
+import { stockFilterSchema } from '../schemas/requests'
 import { dueHref, isHitMode, readDueSort, readStockParams, stockHref } from './stock-paths'
 
 const filterOf = (params: Record<string, string | string[] | undefined>) =>

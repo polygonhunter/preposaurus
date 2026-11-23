@@ -4,7 +4,7 @@
 // auf Ebene 2, nur in einem Durchgang über den ganzen Vorrat.
 import 'server-only'
 import type { CalendarDay } from '@/shared/lib/dates'
-import type { StockTree } from '../schemas'
+import type { StockTree } from '../schemas/stock'
 import { loadReadContext, totalsByNode, totalsOf } from './read-context'
 import { categoriesOf } from './stock-categories'
 import type { StockReader } from './stock-reader'

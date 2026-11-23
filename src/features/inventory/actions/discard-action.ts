@@ -6,7 +6,7 @@ import { refresh } from 'next/cache'
 import { requireHouseholdUser } from '@/server/auth/guards'
 import { stockServices } from '../application/stock-services'
 import { takeOutUnit } from '../application/take-out-unit'
-import { unitIdSchema } from '../schemas'
+import { unitIdSchema } from '../schemas/requests'
 import {
   ACCESS_MESSAGE,
   GONE_RELOADED,

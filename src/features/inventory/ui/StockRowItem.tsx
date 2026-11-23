@@ -1,7 +1,7 @@
 import { detailPath } from '@/shared/config/stock-paths'
 import { Row } from '@/shared/ui/Row'
 import { StatusBadge } from '@/shared/ui/StatusBadge'
-import type { StockRowDto } from '../schemas'
+import type { StockRowDto } from '../schemas/shared'
 import { STATE_BADGE, formatDate, stockLine } from './stock-format'
 import { TakeOneButton } from './TakeOneButton'
 

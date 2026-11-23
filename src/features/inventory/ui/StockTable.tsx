@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import type { StockTarget } from '../schemas'
+import type { StockTarget } from '../schemas/shared'
 import { groupPath } from './stock-paths'
 import { isSameTarget, type TableGroup } from './stock-table'
 import { StockTableRow } from './StockTableRow'

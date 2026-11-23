@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { FoodTypeLevel, StockRowDto } from '../schemas'
+import type { StockRowDto } from '../schemas/shared'
+import type { FoodTypeLevel } from '../schemas/stock'
 import { isSameTarget, tableCells, tableGroupsOf } from './stock-table'
 
 const totals: StockRowDto['totals'] = {
