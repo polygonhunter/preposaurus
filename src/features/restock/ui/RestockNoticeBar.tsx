@@ -13,8 +13,8 @@ type RestockNoticeBarProps = Readonly<{
 }>
 
 // Die eine Meldung unten auf der Seite Nachkaufen. Nach dem Abhaken bietet sie zusätzlich
-// „Jetzt erfassen“ an (UX-Konzept §8.6, F5, #74), nach dem Entfernen und „Auf die Liste“ nur
-// „Rückgängig“ (#202, #200).
+// „Jetzt erfassen“ an (UX-Konzept §8.6, F5, #74), nach dem Entfernen, „Auf die Liste“ und
+// Ausblenden nur „Rückgängig“ (#202, #200, #201).
 export function RestockNoticeBar({ notice, actions, onDismiss }: RestockNoticeBarProps) {
   const router = useRouter()
   switch (notice.kind) {
@@ -51,6 +51,17 @@ export function RestockNoticeBar({ notice, actions, onDismiss }: RestockNoticeBa
         <UndoBar
           key={`listed-${notice.entry.id}`}
           message={`${notice.entry.label} steht jetzt auf der Liste.`}
+          onUndo={() => {
+            actions.unlist(notice.entry)
+          }}
+          onDismiss={onDismiss}
+        />
+      )
+    case 'hidden':
+      return (
+        <UndoBar
+          key={`hidden-${notice.entry.id}`}
+          message={`${notice.entry.label} ausgeblendet.`}
           onUndo={() => {
             actions.unlist(notice.entry)
           }}

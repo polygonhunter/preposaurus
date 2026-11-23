@@ -45,7 +45,12 @@ function ports({ gaps = [waterGap], isCalculable = true, goalDay = targetDay }: 
         productId: 'b1a0c7e2-0000-4000-8000-0000000000a2',
         foodTypeId: 'b1a0c7e2-0000-4000-8000-0000000000b1',
       }),
-      storedItem({ id: 'b1a0c7e2-0000-4000-8000-000000000002', householdId, isDone: true }),
+      storedItem({
+        id: 'b1a0c7e2-0000-4000-8000-000000000002',
+        householdId,
+        status: 'erledigt',
+        doneAt: new Date('2026-11-21T10:00:00Z'),
+      }),
       storedItem({ id: 'b1a0c7e2-0000-4000-8000-000000000003', householdId: 'haushalt-b' }),
     ],
     replacementUnits: [milk],

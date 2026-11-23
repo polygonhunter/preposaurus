@@ -22,8 +22,11 @@ export async function removeRestockItemAction(id: unknown): Promise<RemoveRestoc
   })
   refresh()
   if (!result.ok) return { ok: false, message: GONE_MESSAGE }
-  const { createdAt, ...item } = result.value
-  return { ok: true, removed: { ...item, createdAt: createdAt.toISOString() } }
+  const { createdAt, doneAt, ...item } = result.value
+  return {
+    ok: true,
+    removed: { ...item, createdAt: createdAt.toISOString(), doneAt: doneAt?.toISOString() ?? null },
+  }
 }
 
 export async function restoreRestockItemAction(input: unknown): Promise<RestockActionResult> {
@@ -31,10 +34,14 @@ export async function restoreRestockItemAction(input: unknown): Promise<RestockA
   if (!parsed.success) return { ok: false, message: GONE_MESSAGE }
   const user = await requireHouseholdUser()
   if (!user.ok) return { ok: false, message: ACCESS_MESSAGE }
-  const { createdAt, ...item } = parsed.data
+  const { createdAt, doneAt, ...item } = parsed.data
   await restoreRestockItem(await restockRepository(), {
     householdId: user.value.householdId,
-    item: { ...item, createdAt: new Date(createdAt) },
+    item: {
+      ...item,
+      createdAt: new Date(createdAt),
+      doneAt: doneAt === null ? null : new Date(doneAt),
+    },
   })
   refresh()
   return { ok: true }

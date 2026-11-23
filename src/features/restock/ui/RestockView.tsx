@@ -4,6 +4,7 @@ import { Row } from '@/shared/ui/Row'
 import type { RestockListDto } from '../schemas'
 import { AddItemForm } from './AddItemForm'
 import { GapSection } from './GapSection'
+import { HiddenGapSection } from './HiddenGapSection'
 import { ItemSection } from './ItemSection'
 import { RestockProvider } from './RestockProvider'
 import { RESTOCK_PATHS } from './restock-paths'
@@ -13,8 +14,8 @@ type RestockViewProps = Readonly<{ list: RestockListDto }>
 
 const GOAL_ACTION = { href: RESTOCK_PATHS.goalSettings, label: 'Ziel setzen' }
 
-// Seite Nachkaufen (UX-Konzept §8.6): Fehlt bis zum Ziel · Ersetzen · Eigene Einträge · Erledigt,
-// darunter „Eintrag ergänzen“. Leer steht nur ein Satz da.
+// Seite Nachkaufen (UX-Konzept §8.6): Fehlt bis zum Ziel · Ersetzen · Eigene Einträge · Eintrag
+// ergänzen · Erledigt · Ausgeblendet (#201). Leer steht oben nur ein Satz.
 export function RestockView({ list }: RestockViewProps) {
   const empty = emptyListText(list)
   const showsGoalHint = empty === null && !list.isGoalCalculable
@@ -40,6 +41,7 @@ export function RestockView({ list }: RestockViewProps) {
       <ItemSection id="eigene-eintraege" title="Eigene Einträge" items={list.own} />
       <AddItemForm />
       <ItemSection id="erledigt" title="Erledigt" items={list.done} />
+      <HiddenGapSection list={list} />
     </RestockProvider>
   )
 }

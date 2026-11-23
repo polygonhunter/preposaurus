@@ -36,9 +36,14 @@ export async function removeRestockItem(
   return removed === null ? err({ kind: 'not-found' }) : ok(removed)
 }
 
+/**
+ * Legt einen eben entfernten Eintrag wieder an. Eine Lücke (quelle „ziel“) kommt so nie zurück:
+ * Ihr Eintrag entsteht nur über Abhaken oder Ausblenden mit der Fehlmenge dieses Moments (#201).
+ */
 export async function restoreRestockItem(
   repository: Pick<RestockRepository, 'restoreItem'>,
   { householdId, item }: HouseholdInput & { item: StoredRestockItem },
 ): Promise<void> {
+  if (item.source === 'ziel') return
   await repository.restoreItem(householdId, item)
 }
