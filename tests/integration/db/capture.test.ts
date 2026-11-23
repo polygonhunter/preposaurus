@@ -106,7 +106,7 @@ describe('Schema Erfassung, Nachkaufen, Erinnerungen', () => {
       .insert(restockItems)
       .values({ householdId, label: 'Mineralwasser', source: 'manuell' })
       .returning()
-    expect(item).toMatchObject({ isDone: false, amount: null })
+    expect(item).toMatchObject({ status: 'offen', doneAt: null, amount: null })
 
     await expectConstraintViolation(
       testDb.db

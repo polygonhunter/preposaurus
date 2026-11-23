@@ -12,13 +12,18 @@ import {
 const item = (overrides: Partial<RestockItem> & Pick<RestockItem, 'id'>): RestockItem => ({
   label: 'Knäckebrot',
   source: 'manuell',
-  isDone: false,
+  status: 'offen',
   createdAt: new Date('2026-11-20T10:00:00Z'),
-  changedAt: new Date('2026-11-20T10:00:00Z'),
+  doneAt: null,
   productId: null,
   foodTypeId: null,
+  groupKey: null,
+  amount: null,
   ...overrides,
 })
+
+const doneOn = (iso: string) => ({ status: 'erledigt' as const, doneAt: new Date(iso) })
+const today = toCalendarDay('2026-11-22')
 
 const waterGap: RestockGap = {
   groupKey: 'wasser',
@@ -37,7 +42,7 @@ const lentils: ReplacementCandidate = {
 }
 
 const build = (input: Partial<Parameters<typeof buildRestockList>[0]>) =>
-  buildRestockList({ items: [], gaps: [], foodTypes: [], candidates: [], ...input })
+  buildRestockList({ items: [], gaps: [], foodTypes: [], candidates: [], today, ...input })
 
 describe('buildRestockList', () => {
   it('trennt Ersetzen, eigene und erledigte Einträge', () => {
@@ -45,7 +50,7 @@ describe('buildRestockList', () => {
       items: [
         item({ id: 'a', source: 'nachkauf' }),
         item({ id: 'b' }),
-        item({ id: 'c', isDone: true }),
+        item({ id: 'c', ...doneOn('2026-11-21T10:00:00Z') }),
       ],
       gaps: [waterGap],
     })
@@ -70,7 +75,7 @@ describe('buildRestockList', () => {
 
   it('zählt nur offene, gespeicherte Einträge, keine erledigten, Lücken oder Vorschläge', () => {
     const list = build({
-      items: [item({ id: 'a' }), item({ id: 'b', isDone: true })],
+      items: [item({ id: 'a' }), item({ id: 'b', ...doneOn('2026-11-21T10:00:00Z') })],
       gaps: [waterGap],
       candidates: [lentils],
     })
@@ -92,7 +97,14 @@ describe('buildRestockList', () => {
 
   it('zeigt den Vorschlag wieder, wenn der Eintrag erledigt ist', () => {
     const list = build({
-      items: [item({ id: 'a', label: 'Linsen', productId: 'p-linsen', isDone: true })],
+      items: [
+        item({
+          id: 'a',
+          label: 'Linsen',
+          productId: 'p-linsen',
+          ...doneOn('2026-11-21T10:00:00Z'),
+        }),
+      ],
       candidates: [lentils],
     })
 
@@ -104,8 +116,8 @@ describe('buildRestockList', () => {
       items: [
         item({ id: 'spaet', createdAt: new Date('2026-11-21T10:00:00Z') }),
         item({ id: 'frueh', createdAt: new Date('2026-11-19T10:00:00Z') }),
-        item({ id: 'alt', isDone: true, changedAt: new Date('2026-11-18T10:00:00Z') }),
-        item({ id: 'neu', isDone: true, changedAt: new Date('2026-11-22T10:00:00Z') }),
+        item({ id: 'alt', ...doneOn('2026-11-18T10:00:00Z') }),
+        item({ id: 'neu', ...doneOn('2026-11-22T10:00:00Z') }),
       ],
     })
 
@@ -116,12 +128,74 @@ describe('buildRestockList', () => {
   it('ist leer ohne Einträge, Lücke und Vorschlag', () => {
     expect(build({})).toEqual({
       gaps: [],
+      hiddenGaps: [],
+      belowGoalCount: 0,
       replace: [],
       suggestions: [],
       own: [],
       done: [],
       openItemCount: 0,
     })
+  })
+})
+
+describe('buildRestockList mit abgehakten und ausgeblendeten Lücken (#201)', () => {
+  const goalEntry = (overrides: Partial<RestockItem> & Pick<RestockItem, 'id' | 'status'>) =>
+    item({
+      label: 'Wasser',
+      source: 'ziel',
+      groupKey: 'wasser',
+      amount: { value: 20_000, unit: 'ml' },
+      doneAt: new Date('2026-11-21T10:00:00Z'),
+      ...overrides,
+    })
+
+  it('verdeckt eine abgehakte Lücke und zeigt sie unter „Erledigt“ mit ihrer Menge', () => {
+    const list = build({ items: [goalEntry({ id: 'z', status: 'erledigt' })], gaps: [waterGap] })
+
+    expect(list.gaps).toEqual([])
+    expect(list.hiddenGaps).toEqual([])
+    expect(list.done.map(({ id }) => id)).toEqual(['z'])
+    expect(list.belowGoalCount).toBe(1)
+    expect(list.openItemCount).toBe(0)
+  })
+
+  it('führt eine ausgeblendete Lücke unter „Ausgeblendet“, mit der aktuellen Menge', () => {
+    const smaller = { ...waterGap, missing: { value: 12_000, unit: 'ml' as const } }
+    const list = build({
+      items: [goalEntry({ id: 'z', status: 'ausgeblendet' })],
+      gaps: [smaller],
+    })
+
+    expect(list.gaps).toEqual([])
+    expect(list.hiddenGaps).toEqual([{ ...smaller, entryId: 'z' }])
+    expect(list.done).toEqual([])
+    expect(list.belowGoalCount).toBe(1)
+  })
+
+  it('zeigt die Lücke wieder, wenn sie um mehr als 10 % gewachsen ist', () => {
+    const grown = { ...waterGap, missing: { value: 22_001, unit: 'ml' as const } }
+    const list = build({
+      items: [goalEntry({ id: 'z', status: 'ausgeblendet' })],
+      gaps: [grown],
+    })
+
+    expect(list.gaps.map(({ groupKey }) => groupKey)).toEqual(['wasser'])
+    expect(list.hiddenGaps).toEqual([])
+  })
+
+  it('räumt „Erledigt“ nach 14 Tagen auf, dann ist auch die abgehakte Lücke wieder da', () => {
+    const list = build({
+      items: [
+        goalEntry({ id: 'z', ...doneOn('2026-11-07T10:00:00Z') }),
+        item({ id: 'alt', ...doneOn('2026-11-07T10:00:00Z') }),
+        item({ id: 'gerade-noch', ...doneOn('2026-11-08T10:00:00Z') }),
+      ],
+      gaps: [waterGap],
+    })
+
+    expect(list.done.map(({ id }) => id)).toEqual(['gerade-noch'])
+    expect(list.gaps).toHaveLength(1)
   })
 })
 

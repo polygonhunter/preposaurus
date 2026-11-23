@@ -2,7 +2,9 @@
 // der Verbraucher). Jede Methode bekommt den Haushalt und filtert darauf (#133).
 import 'server-only'
 import type { CalendarDay } from '@/shared/lib/dates'
+import type { ContentQuantity } from '@/shared/lib/quantities'
 import type { GroupFoodType } from '../domain/gap-examples'
+import type { GoalEntryStatus } from '../domain/goal-entries'
 import type { ReplacementUnit } from '../domain/replacement-candidates'
 import type { RestockItem, RestockSource } from '../domain/restock-list'
 
@@ -17,7 +19,16 @@ interface NewRestockItem {
 export interface StoredRestockItem extends NewRestockItem {
   id: string
   isDone: boolean
+  doneAt: Date | null
   createdAt: Date
+}
+
+/** Eine abgehakte oder ausgeblendete Lücke mit der Fehlmenge in diesem Moment (#201). */
+interface GapEntry {
+  groupKey: string
+  label: string
+  missing: ContentQuantity
+  status: GoalEntryStatus
 }
 
 /** Produkt für die Liste, mit dem Namen der Lebensmittelart (ohne Art dem Produktnamen). */
@@ -31,7 +42,10 @@ export interface RestockRepository {
   /** Die eine Zählung offener Einträge für Übersicht und Wochenübersicht (#202) */
   countOpenItems: (householdId: string) => Promise<number>
   addItem: (householdId: string, item: NewRestockItem) => Promise<void>
-  /** false, wenn es den Eintrag im Haushalt nicht gibt */
+  /**
+   * Abhaken und wieder öffnen; false, wenn es den Eintrag im Haushalt nicht gibt. Eine abgehakte
+   * Lücke wieder öffnen heißt: Ihr Eintrag geht weg, die Lücke ist wieder live da (#201).
+   */
   setDone: (
     householdId: string,
     change: Readonly<{ id: string; isDone: boolean }>,
@@ -50,6 +64,11 @@ export interface RestockRepository {
    * Liefert die ID des neuen Eintrags, null, wenn das Produkt schon offen auf der Liste stand.
    */
   addProductOnce: (householdId: string, item: ListableProduct) => Promise<string | null>
+  /**
+   * Speichert eine abgehakte oder ausgeblendete Lücke; ein älterer Eintrag derselben Warengruppe
+   * mit demselben Status wird ersetzt. Liefert die ID, null, wenn es die Warengruppe nicht gibt.
+   */
+  saveGapEntry: (householdId: string, entry: GapEntry) => Promise<string | null>
   findConsumedProduct: (householdId: string, unitId: string) => Promise<ListableProduct | null>
   findProduct: (householdId: string, productId: string) => Promise<ListableProduct | null>
   /** Packungen im Vorrat und seit `consumedSince` verbrauchte, Grundlage für „Ersetzen“ (A14) */

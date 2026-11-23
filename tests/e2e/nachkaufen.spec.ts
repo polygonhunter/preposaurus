@@ -3,7 +3,7 @@ import { E2E_MEMBER, signedOut, signInViaUi } from '../helpers/e2e-auth'
 import { expect, test } from '../helpers/e2e-test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
-// Nachkaufen (#72 bis #74, #200, #202). Der Beispielhaushalt hat ein Ziel mit Datum, also Lücken
+// Nachkaufen (#72 bis #74, #200 bis #202). Der Beispielhaushalt hat ein Ziel mit Datum, also Lücken
 // bis zum Ziel, Packungen, die vorher ablaufen (Vorschläge unter „Ersetzen“), und einen eigenen
 // Eintrag „Mineralwasser“. Tests, die die Liste oder den Vorrat ändern, laufen nur im Projekt
 // „desktop“ und stellen danach alles zurück (vorrat-entnehmen.spec.ts nimmt dort Linsen, Nudeln und
@@ -34,7 +34,9 @@ test('zeigt die Lücken bis zum Ziel und die eigenen Einträge', async ({ page }
   ).toBeVisible()
   const gaps = list(page, 'Fehlt bis zum Ziel')
   // Wasser zuerst, in ganzen Litern
-  await expect(gaps.getByRole('listitem').first()).toHaveText(/^Wasser.*von 10 Tagen.*\d+ l$/)
+  await expect(gaps.getByRole('listitem').first()).toHaveText(
+    /^Wasser.*von 10 Tagen.*\d+ l\s*Ausblenden\s+Wasser$/,
+  )
   // Beispiele aus den Lebensmittelarten, die der Haushalt im Vorrat hat, zuerst
   await expect(gaps.getByRole('listitem').first()).toContainText('z. B. Sprudelwasser')
   await expect(
@@ -147,6 +149,84 @@ test('setzt einen Vorschlag auf die Liste, Entfernen hat Rückgängig', async ({
   await removeEntry(page, 'Haferflocken')
   await expect(suggestion).toBeVisible()
   await expectAccessibleLayout(page)
+})
+
+for (const colorScheme of ['light', 'dark'] as const) {
+  test(`Lücken mit Haken und „Ausblenden“ sind barrierefrei (${colorScheme})`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme })
+    await page.goto('/nachkaufen')
+    const gaps = list(page, 'Fehlt bis zum Ziel')
+
+    await expect(gaps.getByRole('checkbox', { name: 'Wasser' })).not.toBeChecked()
+    await expect(gaps.getByRole('button', { name: /^Ausblenden\s+Wasser$/ })).toBeVisible()
+    await expectAccessibleLayout(page)
+  })
+}
+
+// Wasser bleibt unberührt, weil der erste Test auf allen Geräten gleichzeitig „Wasser zuerst“ prüft.
+// Deshalb die letzte Lücke der Liste.
+async function lastGapName(page: Page) {
+  const name = await list(page, 'Fehlt bis zum Ziel')
+    .getByRole('checkbox')
+    .last()
+    .getAttribute('aria-label')
+  if (name === null || name === 'Wasser')
+    throw new Error('Der Beispielhaushalt braucht eine zweite Lücke')
+  return name
+}
+
+test('blendet eine Lücke aus und holt sie zurück, hakt sie ab und öffnet sie wieder', async ({
+  page,
+}, info) => {
+  onlyDesktop(info.project.name)
+  // Viele Schritte nacheinander, jeder lädt die Liste neu
+  test.slow()
+  await page.goto('/nachkaufen')
+  const subtitle = await page.getByText(/unter dem Ziel$/).textContent()
+  const name = await lastGapName(page)
+  const gap = list(page, 'Fehlt bis zum Ziel').getByRole('checkbox', { name })
+  const hide = page.getByRole('button', { name: new RegExp(`^Ausblenden\\s+${name}$`) })
+  const show = page.getByRole('button', { name: new RegExp(`^Wieder zeigen\\s+${name}$`) })
+
+  await hide.click()
+  const hidden = undoBar(page, `${name} ausgeblendet.`)
+  await expect(hidden).toBeVisible()
+  await expect(gap).toHaveCount(0)
+  await expect(list(page, 'Ausgeblendet').getByRole('listitem')).toContainText(name)
+  // Unter dem Ziel bleibt die Warengruppe trotzdem, wie auf der Übersicht
+  await expect(page.getByText(/unter dem Ziel$/)).toHaveText(subtitle ?? '')
+  await hidden.getByRole('button', { name: 'Rückgängig' }).click()
+  await expect(gap).toBeVisible()
+
+  await hide.click()
+  await expect(show).toBeVisible()
+  await expect(
+    page.getByText(/kommt von selbst zurück, wenn sie um mehr als 10 % wächst/),
+  ).toBeVisible()
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await expectAccessibleLayout(page)
+  await page.emulateMedia({ colorScheme: 'light' })
+  await show.click()
+  await expect(gap).toBeVisible()
+  await expect(show).toHaveCount(0)
+
+  await gap.click()
+  const checked = undoBar(page, `${name} abgehakt.`)
+  const done = list(page, 'Erledigt').getByRole('checkbox', { name })
+  await expect(done).toBeChecked()
+  await expect(gap).toHaveCount(0)
+  await checked.getByRole('button', { name: 'Rückgängig' }).click()
+  await expect(gap).toBeVisible()
+  await expect(done).toHaveCount(0)
+
+  await gap.click()
+  await expect(done).toBeChecked()
+  await expect(
+    list(page, 'Erledigt').getByRole('listitem').filter({ hasText: name }),
+  ).toContainText(/\d+(,\d)? (kg|g|l)/)
+  await expectAccessibleLayout(page)
+  await done.click()
+  await expect(gap).toBeVisible()
 })
 
 test.describe('zwei Nutzer im selben Haushalt', () => {

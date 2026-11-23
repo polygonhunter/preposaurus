@@ -58,7 +58,7 @@ export async function hasOpenItemFor(db: Database, householdId: string, productI
       and(
         eq(restockItems.householdId, householdId),
         eq(restockItems.productId, productId),
-        eq(restockItems.isDone, false),
+        eq(restockItems.status, 'offen'),
       ),
     )
     .limit(1)

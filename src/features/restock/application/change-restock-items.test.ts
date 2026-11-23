@@ -24,7 +24,7 @@ describe('eigene Einträge', () => {
     await addRestockItem(repository, { householdId, label: 'Knäckebrot' })
 
     expect(repository.items).toMatchObject([
-      { householdId, label: 'Knäckebrot', source: 'manuell', productId: null, isDone: false },
+      { householdId, label: 'Knäckebrot', source: 'manuell', productId: null, status: 'offen' },
     ])
   })
 
@@ -37,10 +37,10 @@ describe('eigene Einträge', () => {
       ok: true,
       value: undefined,
     })
-    expect(repository.items[0]?.isDone).toBe(true)
+    expect(repository.items[0]?.status).toBe('erledigt')
 
     await setRestockItemDone(repository, { householdId, id: 'e1', isDone: false })
-    expect(repository.items[0]?.isDone).toBe(false)
+    expect(repository.items[0]?.status).toBe('offen')
   })
 
   it('ändert und entfernt keinen Eintrag eines fremden Haushalts', async () => {
@@ -54,7 +54,7 @@ describe('eigene Einträge', () => {
     expect(done).toEqual({ ok: false, error: { kind: 'not-found' } })
     expect(removed).toEqual({ ok: false, error: { kind: 'not-found' } })
     expect(repository.items).toHaveLength(1)
-    expect(repository.items[0]?.isDone).toBe(false)
+    expect(repository.items[0]?.status).toBe('offen')
   })
 
   it('entfernt einen eigenen Eintrag und gibt ihn für „Rückgängig“ zurück', async () => {
@@ -70,7 +70,7 @@ describe('eigene Einträge', () => {
 
   it('legt einen entfernten Eintrag mit „Rückgängig“ wieder an, einmal', async () => {
     const repository = createFakeRestockRepository({
-      items: [storedItem({ id: 'e1', householdId, isDone: true })],
+      items: [storedItem({ id: 'e1', householdId, status: 'erledigt', doneAt: new Date() })],
     })
     const removed = await removeRestockItem(repository, { householdId, id: 'e1' })
     if (!removed.ok) throw new Error('nicht entfernt')
@@ -78,7 +78,7 @@ describe('eigene Einträge', () => {
     await restoreRestockItem(repository, { householdId, item: removed.value })
     await restoreRestockItem(repository, { householdId, item: removed.value })
 
-    expect(repository.items).toMatchObject([{ id: 'e1', householdId, isDone: true }])
+    expect(repository.items).toMatchObject([{ id: 'e1', householdId, status: 'erledigt' }])
   })
 
   it('übernimmt beim Wiederanlegen kein Produkt eines fremden Haushalts', async () => {
@@ -91,6 +91,7 @@ describe('eigene Einträge', () => {
       source: 'nachkauf' as const,
       productId: 'p-fremd',
       isDone: false,
+      doneAt: null,
       createdAt: new Date('2026-11-20T10:00:00Z'),
     }
 
@@ -168,11 +169,52 @@ describe('countOpenRestockItems', () => {
     const repository = createFakeRestockRepository({
       items: [
         storedItem({ id: 'e1', householdId }),
-        storedItem({ id: 'e2', householdId, isDone: true }),
+        storedItem({ id: 'e2', householdId, status: 'erledigt', doneAt: new Date() }),
         storedItem({ id: 'e3', householdId: foreignId }),
       ],
     })
 
     expect(await countOpenRestockItems(repository, householdId)).toBe(1)
+  })
+})
+
+describe('abgehakte und ausgeblendete Lücken (#201)', () => {
+  const gapItem = (status: 'erledigt' | 'ausgeblendet') =>
+    storedItem({
+      id: 'z1',
+      householdId,
+      label: 'Wasser',
+      source: 'ziel',
+      status,
+      doneAt: new Date('2026-11-21T10:00:00Z'),
+      groupKey: 'wasser',
+      amount: { value: 20_000, unit: 'ml' },
+    })
+
+  it('öffnet eine abgehakte Lücke wieder, indem ihr Eintrag weggeht', async () => {
+    const repository = createFakeRestockRepository({ items: [gapItem('erledigt')] })
+
+    const result = await setRestockItemDone(repository, { householdId, id: 'z1', isDone: false })
+
+    expect(result).toEqual({ ok: true, value: undefined })
+    expect(repository.items).toHaveLength(0)
+  })
+
+  it('zählt Lücken nie als offene Einträge', async () => {
+    const repository = createFakeRestockRepository({
+      items: [gapItem('erledigt'), { ...gapItem('ausgeblendet'), id: 'z2' }],
+    })
+
+    expect(await countOpenRestockItems(repository, householdId)).toBe(0)
+  })
+
+  it('legt eine entfernte Lücke mit „Rückgängig“ nicht wieder an', async () => {
+    const repository = createFakeRestockRepository({ items: [gapItem('ausgeblendet')] })
+    const removed = await removeRestockItem(repository, { householdId, id: 'z1' })
+    if (!removed.ok) throw new Error('nicht entfernt')
+
+    await restoreRestockItem(repository, { householdId, item: removed.value })
+
+    expect(repository.items).toHaveLength(0)
   })
 })
