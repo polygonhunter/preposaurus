@@ -9,10 +9,16 @@ const GRAIN = 'Getreide und Kartoffeln'
 const GRAIN_OFFICIAL = 'Getreide, Getreideprodukte, Brot und Kartoffeln'
 
 test('Drilldown: Warengruppe, Lebensmittelarten nach Kategorie, Detail', async ({ page }) => {
+  // Ab „weit“ steht Ebene 1 als Tabelle da (vorrat-stufen.spec.ts)
+  const isTable = (page.viewportSize()?.width ?? 0) >= 1280
   await page.goto('/vorrat')
   await expect(page.getByRole('heading', { level: 1, name: 'Vorrat' })).toBeVisible()
   // Leere Warengruppen bleiben stehen, denn die Lücke ist eine Information
-  await expect(page.getByRole('link', { name: /^Fette und Öle\s*noch nichts/ })).toBeVisible()
+  await expect(
+    isTable
+      ? page.getByRole('row', { name: 'noch nichts' }).first()
+      : page.getByRole('link', { name: /^Fette und Öle\s*noch nichts/ }),
+  ).toBeVisible()
 
   await page.getByRole('link', { name: new RegExp(`^${GRAIN}`) }).click()
 

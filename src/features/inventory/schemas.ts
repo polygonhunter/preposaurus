@@ -146,6 +146,12 @@ export const foodTypeLevelSchema = z.object({
   ),
 })
 
+/**
+ * Alle Warengruppen wie Ebene 2, für Liste und Tabelle neben dem Detail (M12-03, M12-04).
+ * @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen.
+ */
+export const stockTreeSchema = z.object({ groups: z.array(foodTypeLevelSchema) })
+
 // ---------- 3 · Detail einer Lebensmittelart ----------
 
 const valueOriginSchema = z.enum(['label', 'manual', 'ai-estimate', 'reference'])
@@ -283,6 +289,7 @@ export type NodeTotalsDto = z.infer<typeof nodeTotalsSchema>
 export type StockRowDto = z.infer<typeof stockRowSchema>
 export type StockOverview = z.infer<typeof stockOverviewSchema>
 export type FoodTypeLevel = z.infer<typeof foodTypeLevelSchema>
+export type StockTree = z.infer<typeof stockTreeSchema>
 export type FoodTypeDetail = z.infer<typeof foodTypeDetailSchema>
 export type NutritionDto = z.infer<typeof nutritionSchema>
 export type BestBeforeGroupDto = z.infer<typeof bestBeforeGroupSchema>

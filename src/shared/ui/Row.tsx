@@ -19,7 +19,13 @@ const SEPARATOR =
 const INNER = 'flex min-h-11 w-full items-center gap-3 px-4 py-[11px] text-left'
 
 export function Row({ action, accessory, footer, ...content }: RowProps) {
-  const itemClass = cx(SEPARATOR, content.icon ? 'before:left-[52px]' : 'before:left-4')
+  // Die gewählte Zeile ist samt Knopf daneben getönt (Vorrat neben dem Detail)
+  const isCurrent = action !== undefined && 'href' in action && action.isCurrent === true
+  const itemClass = cx(
+    SEPARATOR,
+    content.icon ? 'before:left-[52px]' : 'before:left-4',
+    isCurrent && 'bg-accent/7 shadow-[inset_3px_0_0_var(--color-accent)]',
+  )
   if (action && footer) {
     return (
       <li className={itemClass}>

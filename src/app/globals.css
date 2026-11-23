@@ -5,6 +5,8 @@
 @custom-variant mittel (@media (width >= 640px) and (height >= 700px));
 @custom-variant breit (@media (width >= 900px));
 @custom-variant weit (@media (width >= 1280px));
+/* Nur „mittel“, nicht darüber: Liste oben, Detail unten im Vorrat (M12-05, Duo hochkant). */
+@custom-variant nur-mittel (@media (640px <= width < 900px) and (height >= 700px));
 
 /* light-dark() folgt color-scheme: hell, dunkel per prefers-color-scheme, scheme-dark/-light erzwingt.
    „inline“, weil Tailwind light-dark() über Variablen nachbildet. Stünde der Wert nur in einer

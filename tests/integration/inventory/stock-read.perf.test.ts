@@ -7,6 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { getDueUnits } from '../../../src/features/inventory/application/get-due-units'
 import { getFoodTypeLevel } from '../../../src/features/inventory/application/get-food-type-level'
 import { getStockOverview } from '../../../src/features/inventory/application/get-stock-overview'
+import { getStockTree } from '../../../src/features/inventory/application/get-stock-tree'
 import { searchStock } from '../../../src/features/inventory/application/search-stock'
 import type { StockReader } from '../../../src/features/inventory/application/stock-reader'
 import { fastestRun, isPerfRun } from '../../helpers/perf'
@@ -42,6 +43,7 @@ describe.runIf(isPerfRun)('Lesepfade mit großem Haushalt', () => {
   it.each([
     ['Ebene 1', () => getStockOverview(reader, { householdId, today })],
     ['Ebene 2', () => getFoodTypeLevel(reader, { householdId, today, groupKey: 'getreide' })],
+    ['Baum', () => getStockTree(reader, { householdId, today })],
     ['Suche', () => searchStock(reader, { householdId, today, filter })],
     ['Bald fällig', () => getDueUnits(reader, { householdId, today, sort: 'date' })],
   ])('%s bleibt unter der Grenze', async (_name, run) => {
