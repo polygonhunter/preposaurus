@@ -50,11 +50,19 @@ export function ConsumeProvider({ children }: ConsumeProviderProps) {
     })
   }
 
-  // Die Rückgängig-Zeile steht fünf Sekunden da, die Verbindung kann in der Zeit wegfallen.
+  // Ohne Verbindung sagt ein Tipp, warum es nicht geht (UX-Konzept §7, #216). Auch die
+  // Rückgängig-Zeile steht fünf Sekunden da, die Verbindung kann in der Zeit wegfallen.
   const isOfflineNow = () => {
     if (isOnline) return false
     setNotice(errorNotice(OFFLINE_WRITE_MESSAGE))
     return true
+  }
+
+  // Die Knöpfe sind nur per aria-disabled gesperrt: Ein echtes disabled nähme ihnen den Fokus, er
+  // fiele nach „−1“ per Tastatur auf body (#218). Darum fängt der Provider den Tipp selbst ab.
+  const runAction = (task: () => Promise<Notice | null>) => {
+    if (isPending || isOfflineNow()) return
+    run(task)
   }
 
   const undo = (current: UndoNotice) => {
@@ -77,13 +85,13 @@ export function ConsumeProvider({ children }: ConsumeProviderProps) {
   const value: ConsumeContextValue = {
     isLocked: isPending || !isOnline,
     consume: (request, label) => {
-      run(() => runConsume(request, label))
+      runAction(() => runConsume(request, label))
     },
     discard: (unitId, label) => {
-      run(() => runDiscard(unitId, label))
+      runAction(() => runDiscard(unitId, label))
     },
     markStillGood: (unitIds, label) => {
-      run(() => runStillGood(unitIds, label))
+      runAction(() => runStillGood(unitIds, label))
     },
   }
 

@@ -23,7 +23,12 @@ export default async function OverviewPage() {
     <>
       <PageHeader
         title="Übersicht"
-        action={<IconLink href="/einstellungen" icon="gear" label="Einstellungen" />}
+        action={
+          // Ab „breit“ steht „Einstellungen“ in der Seitenleiste, ein zweites Ziel wäre doppelt (#218)
+          <span className="breit:hidden">
+            <IconLink href="/einstellungen" icon="gear" label="Einstellungen" />
+          </span>
+        }
       />
       <OfflineNotice loadedAt={new Date().toISOString()} />
       <InstallHint />

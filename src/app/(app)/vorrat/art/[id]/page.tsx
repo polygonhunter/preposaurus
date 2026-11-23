@@ -5,9 +5,9 @@ import { requirePageHousehold } from '@/server/auth/household'
 
 // Detail einer Lebensmittelart (UX-Konzept §8.4, #45).
 export default async function FoodTypeDetailPage({ params }: PageProps<'/vorrat/art/[id]'>) {
-  const { householdId } = await requirePageHousehold()
+  const { householdId, isAdmin } = await requirePageHousehold()
   const { id } = await params
   const result = await loadDetail(householdId, { kind: 'food-type', id })
   if (!result.ok) notFound()
-  return <FoodTypeDetailView {...result.value} />
+  return <FoodTypeDetailView {...result.value} isAdmin={isAdmin} />
 }

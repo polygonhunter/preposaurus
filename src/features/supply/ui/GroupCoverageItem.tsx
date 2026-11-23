@@ -19,19 +19,20 @@ export function GroupCoverageItem({ group, scaleDays }: GroupCoverageItemProps) 
         className="flex flex-col gap-1.5 px-4 py-[11px] transition-colors duration-150 ease-out active:bg-fill"
       >
         <span className="flex items-baseline justify-between gap-3">
-          <span className="min-w-0 text-body">{group.name}</span>
+          <span className="min-w-0 text-body">{group.shortName}</span>
           {group.isTightest ? (
             <span className="shrink-0 text-footnote font-semibold text-fg2">am knappsten</span>
           ) : null}
         </span>
         <DayBar
-          label={group.name}
+          label={group.shortName}
           days={group.days}
           scaleDays={scaleDays}
           goalDays={group.goalDays}
           isLimiting={group.isTightest}
           valueText={coverageText(group)}
           isLabelHidden
+          valueWidth="coverage"
         />
       </Link>
     </li>

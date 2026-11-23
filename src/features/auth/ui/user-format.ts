@@ -1,5 +1,6 @@
 // Texte der Nutzerverwaltung (#41): Rolle, Status und letzte Anmeldung, Zeit in Deutschland.
 import type { USER_ROLES } from '@/shared/config/constants'
+import { formatGermanDateTime } from '@/shared/lib/date-time'
 
 type UserRole = (typeof USER_ROLES)[number]
 
@@ -10,18 +11,9 @@ export const ROLE_OPTIONS = [
   { value: 'admin', label: ROLE_LABELS.admin },
 ]
 
-const SIGN_IN_FORMAT = new Intl.DateTimeFormat('de-DE', {
-  timeZone: 'Europe/Berlin',
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-})
-
 /** „23.11.2026, 08:30“ in deutscher Zeit, ohne Zeitpunkt „noch nie“ */
 export function formatSignInTime(time: Date | null): string {
-  return time === null ? 'noch nie' : SIGN_IN_FORMAT.format(time)
+  return time === null ? 'noch nie' : formatGermanDateTime(time)
 }
 
 function formatLastSignIn(lastSignInAt: Date | null): string {

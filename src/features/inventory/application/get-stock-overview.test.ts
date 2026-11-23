@@ -38,7 +38,7 @@ const water = product({
   },
   foodType: null,
   category: { id: 'kat-wasser', name: 'Wasser', pictogram: '💧' },
-  group: { key: 'wasser', name: 'Wasser' },
+  group: { key: 'wasser', name: 'Wasser', shortName: 'Wasser' },
 })
 
 function setup(stillGoodCounts = false) {

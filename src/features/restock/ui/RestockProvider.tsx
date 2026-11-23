@@ -9,7 +9,7 @@ import { UndoBar } from '@/shared/ui/UndoBar'
 import { removeRestockItemAction } from '../actions/remove-restock-item-action'
 import { setRestockItemDoneAction } from '../actions/set-restock-item-done-action'
 import { RestockContext, type RestockEntry } from './restock-context'
-import { RESTOCK_PATHS } from './restock-paths'
+import { captureHref } from './restock-paths'
 
 type Notice =
   Readonly<{ kind: 'checked'; entry: RestockEntry }> | Readonly<{ kind: 'error'; message: string }>
@@ -66,7 +66,7 @@ export function RestockProvider({ children }: RestockProviderProps) {
           secondary={{
             label: 'Jetzt erfassen',
             onClick: () => {
-              router.push(RESTOCK_PATHS.capture)
+              router.push(captureHref(notice.entry))
             },
           }}
         />

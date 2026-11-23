@@ -29,6 +29,13 @@ describe('summarizeCapture', () => {
     expect(summary.totals).toEqual(['3 kg', 'ca. 10.740 kcal'])
   })
 
+  it('nennt bei Wasser keine kcal', () => {
+    const water = { productName: 'Wasser', content: { value: 6000, unit: 'ml' as const }, entries }
+    const summary = summarizeCapture({ ...water, kcal: { per100: 0, isEstimate: true } })
+
+    expect(summary.totals).toEqual(['36 l'])
+  })
+
   it('lässt kcal ohne Richtwert und alles Mengenbezogene ohne Inhalt weg', () => {
     expect(summarizeCapture({ ...noodles, kcal: null }).totals).toEqual(['3 kg'])
 

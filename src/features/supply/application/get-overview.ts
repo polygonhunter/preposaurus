@@ -12,6 +12,7 @@ import {
 } from '@/features/inventory/application/stock-model'
 import type { Overview } from '../schemas'
 import type { HouseholdFactsReader, HouseholdGoal } from './household-facts-reader'
+import { explanationBasisOf } from './overview-explanation'
 import { headFigures } from './overview-figures'
 import { countGapGroups, duePreview, groupCoverage } from './overview-lists'
 import { coverageOf, dailyNeedOf } from './stock-figures'
@@ -57,6 +58,10 @@ export async function getOverview(ports: OverviewPorts, input: HouseholdDay): Pr
     today: input.today,
     goal: facts.goal,
     stillGoodCounts: context.stillGoodCounts,
+    explanation: explanationBasisOf(
+      context,
+      units.map(({ unit }) => unit),
+    ),
   })
   const coverage = coverageBlocks(context, units, facts.goal)
   return {
