@@ -7,7 +7,6 @@ const PERMISSIONS_POLICY = [
   'geolocation=()',
   'payment=()',
   'usb=()',
-  'browsing-topics=()',
 ].join(', ')
 
 // Ein Jahr, ohne includeSubDomains und preload: Browser beachten HSTS nur über HTTPS (RFC 6797
