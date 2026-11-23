@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from '../helpers/e2e-test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Nachkaufen (#72 bis #74). Der Beispielhaushalt hat ein Ziel mit Datum, also Lücken bis zum Ziel,

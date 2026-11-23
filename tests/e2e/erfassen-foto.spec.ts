@@ -4,7 +4,8 @@
 // die echte Antwort 503. Für den vollen Ablauf liefert eine abgefangene /api/recognize die
 // Vorschläge, wie sie der Fake-Adapter mit festen Antworten gäbe. Läuft im Projekt „foto“
 // nacheinander, weil alle Tests denselben Entwurf des Admins nutzen.
-import { expect, test, type Page, type Route } from '@playwright/test'
+import type { Page, Route } from '@playwright/test'
+import { expect, test } from '../helpers/e2e-test'
 import sharp from 'sharp'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
@@ -101,7 +102,12 @@ async function screenshot(page: Page, name: string) {
 test('Kamera im Vollbild und dunkel, ohne Kamera ist „Von Hand eintragen“ der Hauptknopf', async ({
   page,
 }) => {
+  const pageResponse = page.waitForResponse(
+    (response) => response.request().resourceType() === 'document',
+  )
   await startFresh(page)
+  // Kamera nur für die eigene Seite (#198), die CSP-Prüfung läuft in jedem Test mit
+  expect((await pageResponse).headers()['permissions-policy']).toContain('camera=(self)')
 
   const camera = page.getByRole('region', { name: 'Vorderseite der Verpackung' })
   await expect(camera).toBeVisible()
@@ -216,7 +222,14 @@ test('Verwerfen auf „Neu“ löscht den Entwurf', async ({ page }) => {
     (response) => response.url().includes('/api/photos') && response.request().method() === 'POST',
   )
   await shoot(page, '#246')
-  await uploaded
+  const { fotoId } = (await (await uploaded).json()) as { fotoId: string }
+
+  // Das Foto behält seine eigenen, strengeren Header (#198)
+  const photo = await page.request.get(`/api/photos/${fotoId}?variante=vorschau`)
+  expect(photo.status()).toBe(200)
+  expect(photo.headers()['content-security-policy']).toBe("default-src 'none'; sandbox")
+  expect(photo.headers()['cross-origin-resource-policy']).toBe('same-origin')
+  expect(photo.headers()['x-content-type-options']).toBe('nosniff')
 
   await page.goto('/neu')
   await page.getByRole('button', { name: 'Verwerfen' }).click()
