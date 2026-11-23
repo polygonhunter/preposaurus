@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import { connection } from 'next/server'
 import type { ReactNode } from 'react'
 import { isServiceWorkerEnabled } from '@/shared/config/env'
 import { ServiceWorkerRegistrar } from '@/shared/ui/ServiceWorkerRegistrar'
@@ -22,7 +23,10 @@ export const viewport: Viewport = {
 
 type RootLayoutProps = Readonly<{ children: ReactNode }>
 
-export default function RootLayout({ children }: RootLayoutProps) {
+// Jede Seite rendert je Anfrage, weil Next die Nonce der CSP nur dann an seine Skripte hängen kann
+// (#198, Next-Doku „Content Security Policy“). Eine vorab gebaute Seite liefe ohne Nonce nicht.
+export default async function RootLayout({ children }: RootLayoutProps) {
+  await connection()
   return (
     <html lang="de">
       <body className="bg-bg font-sans text-body text-fg antialiased">

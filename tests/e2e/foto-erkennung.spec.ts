@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from '../helpers/e2e-test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Foto-Erkennung in den Einstellungen (#108, #79). Die E2E-Tests laufen mit AI_PROVIDER=fake: Der

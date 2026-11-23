@@ -1,4 +1,5 @@
-import { expect, test, type Browser, type Page, type TestInfo } from '@playwright/test'
+import type { Browser, Page, TestInfo } from '@playwright/test'
+import { expect, test } from '../helpers/e2e-test'
 import { E2E_ADMIN, signedOut, submitSignIn } from '../helpers/e2e-auth'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 

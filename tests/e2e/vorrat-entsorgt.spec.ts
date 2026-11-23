@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from '../helpers/e2e-test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // „Entsorgt“ und „Noch gut“ auf Bald fällig, Anzeige und Verlauf im Detail (#47, #48). Der Test
