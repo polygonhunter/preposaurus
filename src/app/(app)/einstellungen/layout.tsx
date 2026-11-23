@@ -3,6 +3,9 @@ import { catalogServices } from '@/features/catalog/application/catalog-services
 import { listStorageLocations } from '@/features/catalog/application/storage-locations'
 import { getHousehold } from '@/features/household/application/get-household'
 import { householdServices } from '@/features/household/application/household-services'
+import { getReminderSettings } from '@/features/reminders/application/reminder-settings'
+import { reminderSettingsServices } from '@/features/reminders/application/reminder-settings-services'
+import { formatReminderSummary } from '@/features/reminders/ui/reminder-format'
 import { goalServices } from '@/features/supply/application/goal-services'
 import { getGoalSettings } from '@/features/supply/application/goal-settings'
 import { formatGoalSummary } from '@/features/supply/ui/goal-format'
@@ -16,10 +19,11 @@ type SettingsLayoutProps = Readonly<{ children: ReactNode }>
 
 async function loadSettingsSummary(): Promise<SettingsSummary> {
   const { householdId, username, isAdmin } = await requirePageHousehold()
-  const [household, goal, locations] = await Promise.all([
+  const [household, goal, locations, reminders] = await Promise.all([
     getHousehold(await householdServices(), householdId),
     getGoalSettings(await goalServices(), householdId),
     listStorageLocations(await catalogServices(), householdId),
+    getReminderSettings(await reminderSettingsServices(), householdId),
   ])
   return {
     username,
@@ -29,6 +33,7 @@ async function loadSettingsSummary(): Promise<SettingsSummary> {
     goalSummary: formatGoalSummary(goal),
     locationCount: locations.filter((location) => !location.isHidden).length,
     stillGoodCounts: household.rules.stillGoodCounts,
+    reminderSummary: formatReminderSummary(reminders),
   }
 }
 

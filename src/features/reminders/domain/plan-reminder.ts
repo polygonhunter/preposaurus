@@ -1,11 +1,7 @@
 import { todayInBerlin } from '@/shared/lib/dates'
 import type { ReminderKind, ReminderMessage } from './message'
-import {
-  isUrgentDue,
-  isWeeklySummaryDue,
-  isWeeklySummaryPending,
-  type WeeklySchedule,
-} from './schedule'
+import type { ReminderSettings } from './reminder-settings'
+import { isUrgentDue, isWeeklySummaryDue, isWeeklySummaryPending } from './schedule'
 import { buildUrgentMessage, selectNewUrgentItems } from './urgent'
 import { buildWeeklySummary, type WeeklySummaryInput } from './weekly-summary'
 
@@ -13,11 +9,6 @@ import { buildWeeklySummary, type WeeklySummaryInput } from './weekly-summary'
 // gelten je Haushalt (EINSTELLUNGEN_NUTZER §1.5): Jedes Gerät mit Push-Abo bekommt dieselbe.
 // Am Tag der Wochenübersicht ersetzt sie „Dringend“, denn sie nennt „Diese Woche“ schon. So kommt
 // höchstens eine Nachricht am Tag.
-
-interface ReminderSettings {
-  weeklySummary: WeeklySchedule
-  isUrgentEnabled: boolean
-}
 
 /** Merker „zuletzt gesendet“ je Art (SCHNITTSTELLEN Nr. 27) */
 type LastSent = Record<ReminderKind, Date | null>
