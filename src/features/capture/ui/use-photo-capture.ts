@@ -60,8 +60,8 @@ export function usePhotoCapture(setup: PhotoCaptureSetup) {
     dispatch,
     edit,
     restock: {
-      leaveContent: () => {
-        restock.pickSoleMatch(state)
+      leaveContent: (content) => {
+        restock.pickSoleMatch({ ...state, content })
       },
       chooseProduct: (productId) => {
         restock.chooseProduct(state, productId)

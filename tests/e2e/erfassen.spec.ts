@@ -45,7 +45,7 @@ const resultFor = (page: Page, name: string) =>
 /** Behälter „Packung“ wählen, ohne eine Vorbelegung wieder abzuwählen */
 async function selectPackage(page: Page) {
   const chip = page.getByRole('button', { name: 'Packung', exact: true })
-  if ((await chip.getAttribute('aria-current')) !== 'true') await chip.click()
+  if ((await chip.getAttribute('aria-pressed')) !== 'true') await chip.click()
 }
 
 async function addDate(page: Page, text: string) {
@@ -138,14 +138,16 @@ test('neues Produkt mit zwei Daten und „Datum fehlt“, doppeltes Speichern le
     .getByRole('button', { name: 'Nudeln' })
     .click()
   await content(page).fill(amount)
-  await content(page).blur()
 
-  // Genau ein passendes Produkt ist vorgewählt (#207): Es entstand trotz doppeltem Absenden nur
-  // einmal, sonst stünden zwei Angebote zur Wahl.
+  // Genau ein Angebot: Das Produkt entstand trotz doppeltem Absenden nur einmal. Das Angebot steht,
+  // sobald die Optionen nach „Noch eins“ neu geladen sind.
+  await expect(page.getByRole('button', { name: `Zu Nudeln ${amount} hinzufügen` })).toHaveCount(1)
+  // Verlässt man den Inhalt, wählt die App das eine passende Produkt vor (#207).
+  await content(page).blur()
   await expect(page.getByText(`Wird zu Nudeln ${amount} hinzugefügt`)).toBeVisible()
   await expect(page.getByRole('button', { name: `Zu Nudeln ${amount} hinzufügen` })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Packung', exact: true })).toHaveAttribute(
-    'aria-current',
+    'aria-pressed',
     'true',
   )
   await page.getByRole('button', { name: 'Datum fehlt' }).click()
@@ -213,7 +215,7 @@ test('Nachschub eines bekannten Produkts braucht höchstens 5 Tipps (F2, #207, #
   await page.keyboard.type('05/2028')
   await tap(page.getByRole('button', { name: 'Datum hinzufügen' }))
   // Schnellzahlen wie im Foto-Weg (#211)
-  await tap(page.getByRole('button', { name: '2 Packungen mit 05/2028' }))
+  await tap(page.getByRole('button', { name: '2 Packungen mit 05/2028', exact: true }))
   await expect(form(page).getByRole('list', { name: 'Zusammenfassung' })).toContainText(
     `2 × ${name} 500 g`,
   )

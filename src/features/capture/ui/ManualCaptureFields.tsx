@@ -53,7 +53,7 @@ export function ManualCaptureFields({
           hint="Mit Einheit: g, kg, ml oder l"
           value={draft.content}
           onChange={(event) => change({ content: event.target.value })}
-          onBlur={capture.leaveContent}
+          onBlur={(event) => capture.leaveContent(event.currentTarget.value)}
           error={errors.content}
         />
       </div>

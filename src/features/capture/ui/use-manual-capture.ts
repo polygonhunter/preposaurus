@@ -106,7 +106,8 @@ export function useManualCapture(setup: CaptureSetup, onInvalid: InvalidHandler)
     /** Art gewählt: true, wenn dabei ein vorhandenes Produkt vorgewählt wurde */
     selectFoodType: (foodTypeId: string | null) => restock.pickSoleMatch(change({ foodTypeId })),
     selectContainer: (containerId: string | null) => restock.pickSoleMatch(change({ containerId })),
-    leaveContent: () => restock.pickSoleMatch(draft),
+    /** Mit dem Wert aus dem Feld, falls das Verlassen vor dem neuen Zeichnen kommt */
+    leaveContent: (content: string) => restock.pickSoleMatch({ ...draft, content }),
     chooseProduct: (productId: string | null) => {
       restock.chooseProduct(draft, productId)
     },

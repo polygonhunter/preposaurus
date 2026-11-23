@@ -11,7 +11,7 @@ export type EditUpdate = Extract<PhotoCaptureAction, { type: 'edit' }>['update']
 export interface PhotoEditor {
   edit: (update: EditUpdate) => void
   /** Inhalt verlassen: genau ein passendes Produkt vorwählen (#207) */
-  leaveContent: () => void
+  leaveContent: (content: string) => void
   /** „Zu … hinzufügen“ bzw. „Neu anlegen“ (null) */
   chooseProduct: (productId: string | null) => void
   openCamera: (step: CaptureStep) => void
