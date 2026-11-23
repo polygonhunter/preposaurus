@@ -66,6 +66,7 @@ Beim Aufsetzen von M0 getroffen, Details in `docs/CODE_PRINZIPIEN.md` §9:
 - **Prettier** formatiert keine Markdown-Dokumente und nichts unter `docs/` und `research/`, damit von Hand gepflegte Tabellen nicht umbrechen.
 - **E2E in der CI** laufen gegen den Standalone-Server (`npm run start:standalone`, wie später im Container), nicht gegen `next start`, das nicht zu `output: 'standalone'` passt.
 - **E2E** laufen auf Port 3100 (Prototyp bleibt auf 3000). `playwright.config.ts` darf `process.env` lesen (nur `CI`), weil es Werkzeug und nicht App ist.
+- **Lint-Fixture-Tests (#244):** `tests/lint/*.test.ts` erzeugen ihre ESLint-Instanz einmal je Datei und linten alle Fälle gebündelt in `beforeAll`, die Tests vergleichen danach nur Meldungen. `limits` lintet alle Fixtures in einem `lintFiles`-Aufruf (das TypeScript-Programm entsteht einmal, eigenes Hook-Limit 180 s, weil es unter Last über 60 s brauchte). `boundaries` lintet ohne Project Service und nur mit den Regeln `boundaries/*` (`ruleFilter`), weil die Schichtgrenzen nur an Importen hängen. Gemessen: `boundaries` 15,8 s → 1,6 s allein, im vollen Lauf unter hoher Last 25 bis 72 s → 3,7 s.
 
 ## Fachliche Festlegungen aus M2 (2026-11-22, vorläufig)
 Beim Umsetzen der Fachlogik getroffen, jeweils als benannte Konstante, damit eine andere Antwort nur eine Stelle ändert:
