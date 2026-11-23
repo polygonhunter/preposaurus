@@ -140,7 +140,7 @@ Erwartet: `ls -a` zeigt `.env`, `compose.yaml`, `compose.tailscale.yaml`, `docke
 ### 4.3 Die Datenordner anlegen
 
 ```bash
-mkdir -p db fotos backups tailscale
+mkdir -p db fotos backups/status tailscale
 ```
 
 Die App läuft aus Sicherheitsgründen **nicht als root**, sondern unter einer Nutzer-ID. Diesem Nutzer muss der Ordner `fotos` gehören. Standard ist die ID 1000. Auf vielen NAS hat dein eigener Nutzer eine andere ID, dann nimm diese:
@@ -334,7 +334,9 @@ backups/
 
 Im Log steht jede Sicherung (`docker compose logs backup`), z. B. `Sicherung fertig: taeglich/2026-11-22_030000 (14M)`.
 
-**Fehlgeschlagene Sicherungen fallen auf:** Scheitert eine Sicherung oder ist die letzte älter als 26 Stunden, zeigt `docker compose ps` den Dienst `backup` als `unhealthy`. Schau deshalb ab und zu in `docker compose ps` oder in die Container-Übersicht des NAS. Ein Hinweis in der App kommt später (#147).
+**Fehlgeschlagene Sicherungen fallen auf:** Scheitert eine Sicherung oder ist die letzte älter als 26 Stunden, zeigt `docker compose ps` den Dienst `backup` als `unhealthy`. Schau deshalb ab und zu in `docker compose ps` oder in die Container-Übersicht des NAS.
+
+**In der App:** Admins sehen unter **Einstellungen → Daten & System → Sicherung** Zeitpunkt und Art der letzten Sicherung. Ist sie älter als 26 Stunden oder hat der letzte Lauf nicht geklappt, steht dort ein ruhiger Hinweis. Dafür schreibt der Dienst `backup` zwei kleine Textdateien nach `backups/status/` (`letzter-lauf`, `letzte-sicherung`, nur Zeitpunkt und Art, für alle lesbar). Der Dienst `web` sieht nur diesen Unterordner und nur lesend, nie die Sicherungen selbst.
 
 ### 10.2 Von Hand sichern und Stände ansehen
 
@@ -357,6 +359,7 @@ Erwartet: `Probe in Ordnung: taeglich/2026-11-22_030000 lässt sich einspielen (
 
 - **Zweiter Ort, verschlüsselt:** Ein Backup nur auf demselben NAS hilft nicht, wenn das NAS ausfällt. Kopiere den Ordner `backups` regelmäßig an einen zweiten Ort, z. B. eine externe Platte oder einen Cloud-Speicher, **verschlüsselt**, denn er enthält auch Gesundheitsangaben (Allergien, Schwangerschaft) und die Passwort-Hashes. Dafür eignet sich die Sicherungs-App des NAS (z. B. Hyper Backup mit Verschlüsselung) oder ein Werkzeug wie restic.
 - **Die `.env` getrennt sichern:** Ohne `APP_SECRET` ist ein in der App hinterlegter KI-Schlüssel nach dem Einspielen verloren und alle Geräte sind abgemeldet. Die `.env` gehört nicht in denselben Ordner wie die Backups an den zweiten Ort, sondern z. B. in den Passwort-Manager.
+- **Export als JSON** (Einstellungen → Daten & System → Export, nur Admins): eine lesbare Datei mit Vorrat, Produkten, Packungen, Mitgliedern, Ziel und Quelle mit Version, ohne Passwörter, Sitzungen und KI-Schlüssel, Fotos nur als Verweis. Gut, um die eigenen Daten mitzunehmen oder anzusehen. Sie **ersetzt keine Sicherung**: Zurückspielen geht nur mit einem Stand aus Abschnitt 11.
 - **Snapshots des NAS** für die Ordner `fotos` und `backups` einschalten, falls das NAS sie bietet. Ein Snapshot des laufenden Ordners `db` ersetzt den Dump nicht, weil die Datenbank darin mitten im Schreiben eingefroren sein kann.
 
 ## 11. Wiederherstellen
