@@ -12,7 +12,7 @@ x-app: &app
   image: ghcr.io/polygonhunter/preposaurus:${PREPOSAURUS_VERSION:?PREPOSAURUS_VERSION fehlt in .env}
   # Nutzer-ID, der der Ordner fotos gehört (Standard 1000 = Nutzer node im Image)
   user: '${PREPOSAURUS_UID:-1000}:${PREPOSAURUS_GID:-1000}'
-  environment:
+  environment: &app-env
     NODE_ENV: production
     LOG_LEVEL: ${LOG_LEVEL:-info}
     DATABASE_URL: postgres://preposaurus:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD fehlt in .env}@db:5432/preposaurus
@@ -73,6 +73,14 @@ services:
   web:
     <<: *app
     command: web
+    environment:
+      <<: *app-env
+      # Status des Backup-Dienstes für „Daten & System“ (#147), nur lesend. Darin stehen nur
+      # Zeitpunkt und Art der letzten Sicherung, nie die Sicherungen selbst.
+      BACKUP_STATUS_DIR: /data/backup-status
+    volumes:
+      - ./fotos:/data/fotos
+      - ./backups/status:/data/backup-status:ro
     ports:
       - '127.0.0.1:3000:3000'
     # Der Next-Cache liegt im Arbeitsspeicher und gehört nur dem Nutzer der App. So braucht das

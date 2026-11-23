@@ -18,6 +18,7 @@
     "tests/**/*.{ts,tsx}",
     "eslint/**/*.mjs",
     "scripts/*.ts",
+    "scripts/poc-recognition/*.ts",
     "scripts/admin/*.test.ts",
     "scripts/admin/*.ts!"
   ],

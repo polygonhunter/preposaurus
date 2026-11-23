@@ -1,6 +1,7 @@
 // Deutsche Bezeichnungen der Seite „Foto-Erkennung“ (#108, #79), an einer Stelle.
 import type { AiRole } from '@/shared/config/ai-roles'
 import type { AI_CONNECTION_STATUSES } from '@/shared/config/constants'
+import { formatGermanDateTime } from '@/shared/lib/date-time'
 import type { AiSetupStatus } from '../domain/ai-status'
 
 export const ROLE_LABELS: Record<AiRole, string> = {
@@ -46,16 +47,7 @@ export const TEST_STATUS_LABELS: Record<TestStatus, string> = {
   fehler: 'Fehler',
 }
 
-const TEST_TIME_FORMAT = new Intl.DateTimeFormat('de-DE', {
-  timeZone: 'Europe/Berlin',
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-})
-
-export const formatTestTime = (time: Date): string => TEST_TIME_FORMAT.format(time)
+export const formatTestTime = formatGermanDateTime
 
 export const ENV_CONNECTION_LABELS = {
   anthropic: 'Anthropic · aus Umgebungsvariable',
