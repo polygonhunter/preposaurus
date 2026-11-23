@@ -56,6 +56,37 @@ describe('Schema Erfassung', () => {
     expect(rows.map((row) => row.captureId).sort()).toEqual([basics.captureId, restock.id].sort())
   })
 
+  it('lässt eine Erfassung mit Packungen nicht löschen (Migration 0007)', async () => {
+    const capture = newCapture()
+    await testDb.db.insert(captures).values(capture)
+    await testDb.db
+      .insert(units)
+      .values(buildUnit({ productId: basics.productId, captureId: capture.id }))
+
+    await expectConstraintViolation(
+      testDb.db.delete(captures).where(eq(captures.id, capture.id)),
+      'einheit_erfassung_id_erfassung_id_fk',
+    )
+    const [kept] = await testDb.db.select().from(units).where(eq(units.captureId, capture.id))
+    expect(kept).toBeDefined()
+  })
+
+  it('prüft den Verweis erst am Ende der Transaktion', async () => {
+    const capture = newCapture()
+    await testDb.db.insert(captures).values(capture)
+    await testDb.db
+      .insert(units)
+      .values(buildUnit({ productId: basics.productId, captureId: capture.id }))
+
+    await testDb.db.transaction(async (tx) => {
+      await tx.delete(captures).where(eq(captures.id, capture.id))
+      await tx.delete(units).where(eq(units.captureId, capture.id))
+    })
+
+    const rest = await testDb.db.select().from(captures).where(eq(captures.id, capture.id))
+    expect(rest).toEqual([])
+  })
+
   it('verlangt an jeder Einheit eine Erfassung', async () => {
     await expectConstraintViolation(
       testDb.db
