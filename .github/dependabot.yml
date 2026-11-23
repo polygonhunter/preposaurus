@@ -35,6 +35,10 @@ updates:
     directories: [/docker, /docker/backup]
     schedule:
       interval: weekly
+    ignore:
+      # Node-Hauptversion zusammen mit @types/node und der CI anheben, nicht nur im Image (#187).
+      - dependency-name: node
+        update-types: [version-update:semver-major]
 
   # Feste Image-Versionen in compose.yaml und compose.tailscale.yaml
   - package-ecosystem: docker-compose
