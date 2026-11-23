@@ -1,0 +1,89 @@
+// Schemas des Haushalts (HH-01 bis HH-04, ROT-05). Sie lesen die Textfelder der Formulare: Leere
+// Felder werden zu null, Zahlen dürfen ein Komma haben. Ob das Geburtsjahr in der Zukunft liegt,
+// prüft domain/birth.ts mit dem heutigen Tag, weil ein Schema keine Uhr kennt.
+import { z } from 'zod'
+import {
+  ACTIVITY_LEVELS,
+  DIETS,
+  MEMBER_CONDITIONS,
+  MEMBER_TYPES,
+  SEXES,
+} from '@/shared/config/constants'
+
+const NAME_MAX_LENGTH = 60
+const MIN_BIRTH_YEAR = 1900
+const MAX_BIRTH_YEAR = 2100
+const MAX_WEIGHT_KG = 500
+const ALLERGY_MAX_LENGTH = 40
+const MAX_ALLERGIES = 10
+
+const emptyToNull = (value: unknown) =>
+  typeof value === 'string' && value.trim() === '' ? null : value
+
+const optional = <T extends z.ZodType>(schema: T) => z.preprocess(emptyToNull, schema.nullable())
+
+const optionalChoice = <const T extends readonly [string, ...string[]]>(values: T) =>
+  optional(z.enum(values))
+
+const wholeNumber = (min: number, max: number, message: string) =>
+  z.coerce.number({ error: message }).int({ error: message }).min(min, message).max(max, message)
+
+const decimalText = z
+  .string()
+  .trim()
+  .transform((text) => Number(text.replace(',', '.')))
+
+function splitAllergies(text: string): string[] {
+  const labels = text
+    .split(/[,;\n]/)
+    .map((label) => label.trim())
+    .filter((label) => label !== '')
+  const seen = new Set<string>()
+  return labels.filter((label) => {
+    const key = label.toLocaleLowerCase('de')
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
+const allergiesSchema = z
+  .string()
+  .transform(splitAllergies)
+  .pipe(
+    z
+      .array(
+        z.string().max(ALLERGY_MAX_LENGTH, { error: 'Bitte je Eintrag höchstens 40 Zeichen.' }),
+      )
+      .max(MAX_ALLERGIES, { error: 'Bitte höchstens 10 Einträge.' }),
+  )
+
+export const memberSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, { error: 'Bitte einen Namen eintragen.' })
+    .max(NAME_MAX_LENGTH, { error: 'Bitte höchstens 60 Zeichen.' }),
+  type: z.enum(MEMBER_TYPES, { error: 'Bitte wähle, wer das ist.' }),
+  birthYear: wholeNumber(MIN_BIRTH_YEAR, MAX_BIRTH_YEAR, 'Bitte ein Jahr wie 1988 eintragen.'),
+  birthMonth: optional(wholeNumber(1, 12, 'Bitte einen Monat von 1 bis 12 eintragen.')),
+  sex: optionalChoice(SEXES),
+  activityLevel: optionalChoice(ACTIVITY_LEVELS),
+  weightKg: optional(
+    decimalText.pipe(
+      z
+        .number({ error: 'Bitte das Gewicht in kg als Zahl eintragen.' })
+        .positive({ error: 'Bitte das Gewicht in kg als Zahl eintragen.' })
+        .max(MAX_WEIGHT_KG, { error: 'Bitte das Gewicht in kg als Zahl eintragen.' }),
+    ),
+  ),
+  condition: optionalChoice(MEMBER_CONDITIONS),
+  diet: optionalChoice(DIETS),
+  allergies: allergiesSchema,
+})
+
+export type MemberInput = z.infer<typeof memberSchema>
+
+export const memberIdSchema = z.uuid()
+
+export const householdDietSchema = z.enum(DIETS, { error: 'Bitte eine Ernährungsform wählen.' })
