@@ -27,7 +27,14 @@ const COMMON_PASSWORDS: ReadonlySet<string> = new Set(commonPasswords)
 
 const comparable = (text: string) => text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '')
 
-const isCommon = (password: string) => COMMON_PASSWORDS.has(comparable(password))
+// Nur Satzzeichen und Leerzeichen („          “) oder ein einziges wiederholtes Zeichen
+// („aaaaaaaaaaaaaa“) gelten wie ein häufiges Passwort, egal wie lang.
+const isMonotonous = (form: string) => new Set(form).size <= 1
+
+function isCommon(password: string): boolean {
+  const form = comparable(password)
+  return isMonotonous(form) || COMMON_PASSWORDS.has(form)
+}
 
 function contains(password: string, word: string | undefined): boolean {
   if (word === undefined) return false

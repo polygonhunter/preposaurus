@@ -42,6 +42,13 @@ describe('findPasswordProblem', () => {
     expect(findPasswordProblem('hallo!!!!!', context)).toBe('common-password')
   })
 
+  it('lehnt Passwörter nur aus Satzzeichen, Leerzeichen oder einem Zeichen ab', () => {
+    expect(findPasswordProblem(' '.repeat(12), context)).toBe('common-password')
+    expect(findPasswordProblem('!?.,-_!?.,-_', context)).toBe('common-password')
+    expect(findPasswordProblem('a'.repeat(20), context)).toBe('common-password')
+    expect(findPasswordProblem('ä ä ä ä ä ä', context)).toBe('common-password')
+  })
+
   it('lässt ein häufiges Wort als Teil eines längeren Passworts zu', () => {
     expect(findPasswordProblem('passwort im Vorratsregal links', context)).toBeNull()
   })
