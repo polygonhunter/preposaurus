@@ -40,7 +40,7 @@ x-app: &app
 
 services:
   db:
-    image: postgres:18.7-trixie
+    image: postgres:19.0-trixie
     # Capabilities bleiben: Der Start wechselt per gosu von root zum Nutzer postgres.
     security_opt: ['no-new-privileges:true']
     environment:
