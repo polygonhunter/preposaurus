@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { isSameProduct, type ProductIdentity } from './product-match'
+import {
+  findProductMatches,
+  fitsWish,
+  MAX_OFFERS_WITHOUT_CONTENT,
+  soleMatch,
+  type ProductIdentity,
+  type ProductWish,
+} from './product-match'
 
 const spaghetti: ProductIdentity = {
   foodTypeId: 'nudeln',
@@ -7,35 +14,95 @@ const spaghetti: ProductIdentity = {
   containerId: 'packung',
 }
 
-describe('isSameProduct', () => {
+const wish = (overrides: Partial<ProductWish> = {}): ProductWish => ({
+  foodTypeId: 'nudeln',
+  content: { value: 500, unit: 'g' },
+  containerId: 'packung',
+  ...overrides,
+})
+
+describe('fitsWish', () => {
   it('erkennt gleiche Lebensmittelart, Menge und Behälter', () => {
-    expect(isSameProduct({ ...spaghetti }, spaghetti)).toBe(true)
+    expect(fitsWish(spaghetti, wish())).toBe(true)
   })
 
   it('übersieht Rundung aus der DB', () => {
-    expect(isSameProduct({ ...spaghetti, content: { value: 500.001, unit: 'g' } }, spaghetti)).toBe(
-      true,
-    )
+    expect(fitsWish({ ...spaghetti, content: { value: 500.001, unit: 'g' } }, wish())).toBe(true)
   })
 
-  it('trennt andere Menge, andere Einheit und anderen Behälter', () => {
-    expect(isSameProduct({ ...spaghetti, content: { value: 1000, unit: 'g' } }, spaghetti)).toBe(
-      false,
-    )
-    expect(isSameProduct({ ...spaghetti, content: { value: 500, unit: 'ml' } }, spaghetti)).toBe(
-      false,
-    )
-    expect(isSameProduct({ ...spaghetti, containerId: 'glas' }, spaghetti)).toBe(false)
-    expect(isSameProduct({ ...spaghetti, containerId: null }, spaghetti)).toBe(false)
+  it('trennt andere Art, andere Menge, andere Einheit und anderen Behälter', () => {
+    expect(fitsWish(spaghetti, wish({ foodTypeId: 'reis' }))).toBe(false)
+    expect(fitsWish(spaghetti, wish({ content: { value: 1000, unit: 'g' } }))).toBe(false)
+    expect(fitsWish(spaghetti, wish({ content: { value: 500, unit: 'ml' } }))).toBe(false)
+    expect(fitsWish(spaghetti, wish({ containerId: 'glas' }))).toBe(false)
   })
 
-  it('behandelt „kein Behälter“ auf beiden Seiten als gleich', () => {
-    const loose = { ...spaghetti, containerId: null }
-    expect(isSameProduct({ ...loose }, loose)).toBe(true)
+  it('schließt ohne Behälter auf einer Seite nichts aus (#207)', () => {
+    expect(fitsWish(spaghetti, wish({ containerId: null }))).toBe(true)
+    expect(fitsWish({ ...spaghetti, containerId: null }, wish())).toBe(true)
+  })
+
+  it('passt ohne Inhalt zu jedem Produkt der Art', () => {
+    expect(fitsWish(spaghetti, wish({ content: null, containerId: null }))).toBe(true)
   })
 
   it('erkennt ohne Lebensmittelart nie ein Produkt wieder', () => {
-    const unknown = { ...spaghetti, foodTypeId: null }
-    expect(isSameProduct({ ...unknown }, unknown)).toBe(false)
+    expect(fitsWish({ ...spaghetti, foodTypeId: null }, wish({ foodTypeId: null }))).toBe(false)
+  })
+})
+
+describe('findProductMatches', () => {
+  const product = (id: string, overrides: Partial<ProductIdentity> = {}) => ({
+    id,
+    ...spaghetti,
+    ...overrides,
+  })
+
+  it('bietet schon nach der Art an, solange es wenige Produkte gibt', () => {
+    const candidates = [product('a'), product('b', { content: { value: 1000, unit: 'g' } })]
+
+    const found = findProductMatches(candidates, wish({ content: null, containerId: null }))
+
+    expect(found.map((match) => match.id)).toEqual(['a', 'b'])
+  })
+
+  it('wartet bei vielen Produkten der Art auf den Inhalt', () => {
+    const many = Array.from({ length: MAX_OFFERS_WITHOUT_CONTENT + 1 }, (_, index) =>
+      product(String(index), { content: { value: 100 * (index + 1), unit: 'g' } }),
+    )
+
+    expect(findProductMatches(many, wish({ content: null }))).toEqual([])
+    expect(findProductMatches(many, wish({ content: { value: 200, unit: 'g' } }))).toHaveLength(1)
+  })
+
+  it('liefert dasselbe Produkt an zwei Lagerorten zweimal', () => {
+    const found = findProductMatches([product('keller'), product('kueche')], wish())
+
+    expect(found.map((match) => match.id)).toEqual(['keller', 'kueche'])
+  })
+})
+
+describe('soleMatch', () => {
+  const none = { declinedIds: [], chosenContainerId: null }
+  const product = (id: string, containerId: string | null = 'packung') => ({ id, containerId })
+
+  it('wählt genau ein passendes Produkt vor', () => {
+    expect(soleMatch([product('a')], none)).toEqual(product('a'))
+  })
+
+  it('wählt nichts bei keinem oder mehreren Produkten', () => {
+    expect(soleMatch([], none)).toBeNull()
+    expect(soleMatch([product('a'), product('b')], none)).toBeNull()
+  })
+
+  it('wählt ein abgewähltes Produkt nicht erneut', () => {
+    expect(soleMatch([product('a')], { ...none, declinedIds: ['a'] })).toBeNull()
+  })
+
+  it('überschreibt keinen gewählten Behälter (Produkt ohne Behälter nur angeboten)', () => {
+    expect(soleMatch([product('a', null)], { ...none, chosenContainerId: 'glas' })).toBeNull()
+    expect(soleMatch([product('a')], { ...none, chosenContainerId: 'packung' })).toEqual(
+      product('a'),
+    )
   })
 })

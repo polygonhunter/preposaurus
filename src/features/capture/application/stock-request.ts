@@ -7,9 +7,7 @@ import { createCaptureOptionsRepository } from '../data/capture-options-reposito
 import { createStockWriteRepository } from '../data/stock-write-repository'
 import type { CaptureOptions } from '../domain/capture-options'
 import type { StockDraft } from '../domain/stock-draft'
-import type { ProductMatchQuery } from '../schemas/stock'
 import { createStock, type CreatedStock, type CreateStockError } from './create-stock'
-import { findMatchingProducts, type ProductMatch } from './find-matching-products'
 import { getCaptureOptions } from './get-capture-options'
 
 interface HouseholdUser {
@@ -23,14 +21,6 @@ export async function createStockForUser(
 ): Promise<Result<CreatedStock, CreateStockError>> {
   const writer = createStockWriteRepository(await getDb())
   return createStock({ writer, now: () => new Date() }, { ...user, draft })
-}
-
-export async function findMatchingProductsForHousehold(
-  householdId: string,
-  query: ProductMatchQuery,
-): Promise<ProductMatch[]> {
-  const writer = createStockWriteRepository(await getDb())
-  return findMatchingProducts(writer, { householdId, query })
 }
 
 export async function getCaptureOptionsForUser(user: HouseholdUser): Promise<CaptureOptions> {

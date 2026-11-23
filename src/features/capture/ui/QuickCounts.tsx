@@ -1,16 +1,15 @@
-import { dateEntryKey, dateEntryLabel } from '../domain/date-entries'
+import { dateEntryKey, dateEntryLabel, type DateEntry } from '../domain/date-entries'
 import { MAX_COUNT_PER_DATE } from '../schemas/stock'
-import type { PhotoDateEntry } from './photo-capture-state'
 
 type QuickCountsProps = Readonly<{
-  units: readonly PhotoDateEntry[]
-  onChange: (units: PhotoDateEntry[]) => void
+  units: readonly DateEntry[]
+  onChange: (units: DateEntry[]) => void
 }>
 
 const QUICK_COUNTS = [2, 3, 4, 6, 12] as const
 
-// Schnellzahlen für ein Datum (UX §8.5, F1): Wer zehn gleiche Packungen hat,
-// fotografiert eine und tippt „12“, statt jede einzeln aufzunehmen.
+// Schnellzahlen für ein Datum (UX §8.5, F1, F2): Wer zehn gleiche Packungen hat, tippt „12“, statt
+// hochzuzählen. Steht in beiden Wegen unter den Daten (BestBeforeEntries, #211).
 export function QuickCounts({ units, onChange }: QuickCountsProps) {
   // Das späteste Datum, sonst „Datum fehlt“: Meist sind alle Packungen gleich alt.
   const target = units.findLast((entry) => entry.bestBefore !== null) ?? units.at(-1)

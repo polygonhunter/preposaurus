@@ -4,6 +4,7 @@
 // ein neues Formular beginnt: Ein doppeltes Tippen speichert also nur einmal.
 import { useActionState, useState, startTransition } from 'react'
 import { createStockAction, type CreateStockState } from '../actions/create-stock-action'
+import type { CaptureOptions } from '../domain/capture-options'
 import { manualCaptureSchema } from '../schemas/manual-capture'
 import {
   captureErrorsOf,
@@ -15,7 +16,7 @@ import {
   type CaptureField,
   type ManualCaptureDraft,
 } from './manual-capture-draft'
-import { useProductMatches } from './use-product-matches'
+import { useRestock } from './use-product-matches'
 
 type SavePayload = Parameters<typeof createStockAction>[0]
 
@@ -68,36 +69,48 @@ function outcomeOf({ errors, result, isSaving }: SaveState, captureId: string) {
   }
 }
 
-export function useManualCapture(lastStorageLocationId: string | null, onInvalid: InvalidHandler) {
-  const [draft, setDraft] = useState(() => emptyDraft(lastStorageLocationId))
+type CaptureSetup = Pick<CaptureOptions, 'knownProducts' | 'lastStorageLocationId'>
+
+export function useManualCapture(setup: CaptureSetup, onInvalid: InvalidHandler) {
+  const [draft, setDraft] = useState(() => emptyDraft(setup.lastStorageLocationId))
   const saving = useSaveCapture(onInvalid)
-  const { matches, lookUpMatches, clearMatches } = useProductMatches()
+
+  function show(next: ManualCaptureDraft, changed: readonly string[]) {
+    setDraft(next)
+    saving.setErrors((previous) => clearErrorsFor(previous, changed))
+    return next
+  }
+
+  const restock = useRestock<ManualCaptureDraft>(setup.knownProducts, (fields, update) =>
+    show({ ...fields, ...update }, ['content']),
+  )
 
   function change(update: DraftChange) {
-    const next = { ...draft, ...update }
-    // Ändert sich, was ein Produkt ausmacht, gelten Angebot und Wahl eines vorhandenen nicht mehr.
-    if (touchesMatch(update)) {
-      next.existingProductId = null
-      clearMatches()
-    }
-    setDraft(next)
-    saving.setErrors((previous) => clearErrorsFor(previous, Object.keys(update)))
-    return next
+    // Ändert sich, was ein Produkt ausmacht, gilt die Wahl eines vorhandenen nicht mehr.
+    const reset = touchesMatch(update) ? { existingProductId: null } : {}
+    return show({ ...draft, ...update, ...reset }, Object.keys(update))
   }
 
   function restart() {
     setDraft(emptyDraft(draft.storageLocationId))
     saving.setErrors({})
-    clearMatches()
+    restock.resetDeclined()
   }
 
   return {
     draft,
     ...outcomeOf(saving, draft.captureId),
-    matches,
+    matches: restock.matchesFor(draft),
     isSaving: saving.isSaving,
     change,
-    lookUpMatches,
+    /** Art gewählt: true, wenn dabei ein vorhandenes Produkt vorgewählt wurde */
+    selectFoodType: (foodTypeId: string | null) => restock.pickSoleMatch(change({ foodTypeId })),
+    selectContainer: (containerId: string | null) => restock.pickSoleMatch(change({ containerId })),
+    /** Mit dem Wert aus dem Feld, falls das Verlassen vor dem neuen Zeichnen kommt */
+    leaveContent: (content: string) => restock.pickSoleMatch({ ...draft, content }),
+    chooseProduct: (productId: string | null) => {
+      restock.chooseProduct(draft, productId)
+    },
     submit: () => {
       saving.submit(draft)
     },

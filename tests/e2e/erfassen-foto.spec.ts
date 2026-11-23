@@ -166,7 +166,7 @@ test('Foto-Fluss: Erkennung füllt Vorschläge, offenes MHD wird entschieden, Sp
 
   await page.getByRole('button', { name: 'Speichern' }).click()
   await expect(page.getByRole('heading', { name: 'Gespeichert' })).toBeVisible()
-  await expect(page.getByText('7 Packungen Nudeln sind jetzt im Vorrat.')).toBeVisible()
+  await expect(page.getByText('7 Packungen Nudeln hinzugefügt.')).toBeVisible()
 
   // Der Entwurf ist verbraucht: /neu fragt nicht mehr und öffnet den Foto-Weg.
   await page.goto('/neu')
@@ -177,6 +177,9 @@ test('Erkennung aus: freundlicher Übergang zur Eingabe von Hand, Schätzung nic
   page,
 }) => {
   await startFresh(page)
+  // Der Hinweis steht gleich zu Beginn in der Kamera, nicht erst nach drei Fotos (#210)
+  await expect(page.getByRole('status').filter({ hasText: 'Es wird nichts geraten' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Von Hand weiter' })).toBeVisible()
 
   await shoot(page, '#a63')
   await expect(page.getByRole('heading', { name: 'Nährwerttabelle' })).toBeVisible()
@@ -195,6 +198,13 @@ test('Erkennung aus: freundlicher Übergang zur Eingabe von Hand, Schätzung nic
   await expectAccessibleLayout(page)
   await page.setViewportSize({ width: 1280, height: 900 })
   await screenshot(page, 'ki-aus-1280')
+
+  // Nach dem Fortsetzen derselbe Satz, kein „Vorschlag der Erkennung“ für Getipptes (#210)
+  await page.waitForTimeout(1500)
+  await page.reload()
+  await expect(page.getByLabel('Inhalt je Packung')).toHaveValue('488 g')
+  await expect(page.getByText(/Die Foto-Erkennung ist ausgeschaltet/)).toBeVisible()
+  await expect(page.getByText('Vorschlag der Erkennung. Bitte prüfen.')).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Speichern' }).click()
   await expect(page.getByRole('heading', { name: 'Gespeichert' })).toBeVisible()

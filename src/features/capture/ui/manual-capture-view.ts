@@ -1,15 +1,14 @@
 // Was das Formular aus dem Entwurf ableitet: gewählte Art, Einheit für die Nährwerte, gewähltes
 // vorhandenes Produkt und die Zusammenfassung (#54). Rein, damit es ohne Browser testbar ist.
 import { parseContentQuantity, parseGermanNumber, type ContentUnit } from '@/shared/lib/quantities'
-import type { CaptureOptions, FoodTypeChoice } from '../domain/capture-options'
+import type { CaptureOptions, FoodTypeChoice, KnownProduct } from '../domain/capture-options'
 import { summarizeCapture, type CaptureSummary, type KcalBasis } from '../domain/capture-summary'
 import type { ManualCaptureDraft } from './manual-capture-draft'
-import type { ProductMatch } from './use-product-matches'
 
 export interface ManualCaptureView {
   foodType: FoodTypeChoice | null
   contentUnit: ContentUnit
-  chosenMatch: ProductMatch | null
+  chosenMatch: KnownProduct | null
   /** Name in Zusammenfassung und Bestätigung: vorhandenes Produkt oder Lebensmittelart */
   productName: string
   summary: CaptureSummary | null
@@ -50,14 +49,11 @@ function summaryOf({ draft, foodType, productName }: SummaryParts): CaptureSumma
   })
 }
 
-export function deriveView(
-  options: CaptureOptions,
-  draft: ManualCaptureDraft,
-  matches: readonly ProductMatch[],
-): ManualCaptureView {
+export function deriveView(options: CaptureOptions, draft: ManualCaptureDraft): ManualCaptureView {
   const foodType = options.foodTypes.find((choice) => choice.id === draft.foodTypeId) ?? null
   const content = parseContentQuantity(draft.content)
-  const chosenMatch = matches.find((match) => match.id === draft.existingProductId) ?? null
+  const chosenMatch =
+    options.knownProducts.find((product) => product.id === draft.existingProductId) ?? null
   const productName = chosenMatch?.name ?? foodType?.name ?? ''
   return {
     foodType,

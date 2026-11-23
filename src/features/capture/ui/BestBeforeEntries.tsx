@@ -7,6 +7,7 @@ import { todayInBerlin } from '@/shared/lib/dates'
 import { parseBestBefore, type BestBeforeParseError } from '../domain/best-before'
 import { addDateEntry, changeDateCount, type DateEntry } from '../domain/date-entries'
 import { DateEntryList } from './DateEntryList'
+import { QuickCounts } from './QuickCounts'
 
 type BestBeforeEntriesProps = Readonly<{
   entries: readonly DateEntry[]
@@ -28,6 +29,7 @@ const PENDING_MESSAGE = 'Bitte übernimm das Datum mit Enter oder „Datum hinzu
 
 // MHD manuell (#53): je Datum ein Eintrag mit Anzahl, „Datum fehlt“ als eigene Wahl (#116).
 // Die Genauigkeit folgt der Eingabe (Tag, Monat oder Jahr). Es wird nie ein Datum vorgeschlagen.
+// Darunter die Schnellzahlen, gleich im Formular und im Foto-Weg (#211).
 export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntriesProps) {
   const headerId = useId()
   const [text, setText] = useState('')
@@ -98,6 +100,7 @@ export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntrie
           onChange(next)
         }}
       />
+      <QuickCounts units={entries} onChange={onChange} />
     </section>
   )
 }

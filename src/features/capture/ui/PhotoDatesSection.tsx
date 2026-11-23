@@ -2,7 +2,6 @@ import { Button } from '@/shared/ui/Button'
 import { BestBeforeEntries } from './BestBeforeEntries'
 import { OpenShotList } from './OpenShotList'
 import type { PhotoCaptureState } from './photo-capture-state'
-import { QuickCounts } from './QuickCounts'
 import type { PhotoEditor } from './use-photo-capture'
 
 type PhotoDatesSectionProps = Readonly<{
@@ -24,12 +23,6 @@ export function PhotoDatesSection({ state, editor, error, estimateNote }: PhotoD
           editor.edit({ units })
         }}
         error={error}
-      />
-      <QuickCounts
-        units={state.units}
-        onChange={(units) => {
-          editor.edit({ units })
-        }}
       />
       <div className="mx-4 flex flex-col gap-2 pt-3 breit:mx-6">
         <span>

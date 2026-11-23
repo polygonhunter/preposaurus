@@ -27,14 +27,6 @@ const FIELD_INPUTS: Record<Exclude<CaptureField, 'form'>, string> = {
 const isNutritionField = (field: CaptureField) =>
   (NUTRITION_FIELDS as readonly CaptureField[]).includes(field)
 
-/** Fokus erst nach dem nächsten Zeichnen setzen, wenn das Feld dann steht */
-function focusAfterRender(name: string) {
-  requestAnimationFrame(() => {
-    const input = document.getElementsByName(name)[0]
-    input?.focus()
-  })
-}
-
 const firstMessage = (errors: CaptureErrors) => Object.values(errors).find(Boolean) ?? null
 
 // Manuelles Erfassen (#52, #53, #54): ein Formular, danach Bestätigung mit „Noch eins“.
@@ -55,8 +47,8 @@ export function ManualCapture({ options }: ManualCaptureProps) {
     if (input instanceof HTMLElement) input.focus()
   }
 
-  const capture = useManualCapture(options.lastStorageLocationId, focusField)
-  const view = deriveView(options, capture.draft, capture.matches)
+  const capture = useManualCapture(options, focusField)
+  const view = deriveView(options, capture.draft)
 
   if (capture.savedUnits !== null) {
     return (
@@ -89,9 +81,7 @@ export function ManualCapture({ options }: ManualCaptureProps) {
         capture={capture}
         view={view}
         nutritionOpen={{ isOpen: isNutritionOpen, onToggle: setNutritionOpen }}
-        onFoodTypeChosen={() => {
-          focusAfterRender('inhalt')
-        }}
+        onFocus={focusField}
       />
       <LiveMessage message={firstMessage(capture.errors)} />
       <div className="mx-4 flex flex-col gap-3 pt-8 breit:mx-6">

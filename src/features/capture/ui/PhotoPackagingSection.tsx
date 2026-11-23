@@ -67,7 +67,9 @@ export function PhotoPackagingSection(props: PhotoPackagingSectionProps) {
           onChange={(event) => {
             editor.edit({ content: event.target.value })
           }}
-          onBlur={editor.lookUpMatches}
+          onBlur={(event) => {
+            editor.leaveContent(event.currentTarget.value)
+          }}
           error={errors.content}
         />
         <Field

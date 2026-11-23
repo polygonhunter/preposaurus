@@ -1,7 +1,6 @@
 // Datensätze zwischen Use-Case und Repository des Speicherns (#51). Reine Typen in domain/, damit
 // application/ (Port) und data/ (Umsetzung) dieselbe Form teilen, ohne sich zu importieren.
 import type { ContentQuantity } from '@/shared/lib/quantities'
-import type { ProductIdentity } from './product-match'
 import type { CaptureMethod, PlannedNutrition, PlannedUnit } from './stock-draft'
 
 export interface FoodTypeRef {
@@ -43,14 +42,6 @@ export interface NewUnitRows {
   productId: string
   captureId: string
   units: readonly PlannedUnit[]
-}
-
-/** Ein vorhandenes Produkt, das zum Wiedererkennen in Frage kommt. */
-export interface ProductCandidate extends ProductIdentity {
-  id: string
-  name: string
-  containerName: string | null
-  storageLocationName: string | null
 }
 
 /** Fotos eines Entwurfs werden beim Speichern fest und gehören dann zum Produkt (#66). */

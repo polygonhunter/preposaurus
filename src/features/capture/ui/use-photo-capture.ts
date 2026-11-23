@@ -8,42 +8,68 @@ import { createPhotoEditor, type EditUpdate } from './photo-editor'
 import { usePhotoDraftSync } from './use-photo-draft-sync'
 import { usePhotoEstimate } from './use-photo-estimate'
 import { usePhotoUploads } from './use-photo-uploads'
-import { useProductMatches } from './use-product-matches'
+import { useRestock } from './use-product-matches'
 
 export type { PhotoEditor } from './photo-editor'
 
-/** Ändert sich, was ein Produkt ausmacht, gilt ein gewähltes vorhandenes Produkt nicht mehr. */
+/** Diese Felder entscheiden, ob ein vorhandenes Produkt passt. */
 const MATCH_FIELDS = ['foodTypeId', 'content', 'containerId'] as const
+
+/** Ändert sich, was ein Produkt ausmacht, gilt ein gewähltes vorhandenes nicht mehr. */
+function withMatchReset(update: EditUpdate): EditUpdate {
+  const touchesMatch = MATCH_FIELDS.some((field) => field in update)
+  return touchesMatch && !('existingProductId' in update)
+    ? { ...update, existingProductId: null }
+    : update
+}
 
 interface PhotoCaptureSetup {
   options: CaptureOptions
   initial: PhotoCaptureState
   isActive: boolean
+  /** Satz, warum die Erkennung aus ist: Dann gibt es kein „Nochmal“ (#210) */
+  recognitionOff: string | null
 }
 
-export function usePhotoCapture({ options, initial, isActive }: PhotoCaptureSetup) {
-  const [state, dispatch] = useReducer(photoCaptureReducer, initial)
+export function usePhotoCapture(setup: PhotoCaptureSetup) {
+  const { options, isActive, recognitionOff } = setup
+  const [state, dispatch] = useReducer(photoCaptureReducer, setup.initial)
   const lookup = { foodTypes: options.foodTypes, containers: options.containers }
   const uploads = usePhotoUploads({ dispatch, lookup, draftId: state.draftId })
   const estimates = usePhotoEstimate(state, dispatch)
-  const { matches, lookUpMatches, clearMatches } = useProductMatches()
   usePhotoDraftSync({ state, containers: options.containers, isActive })
 
-  function edit(update: EditUpdate) {
-    const touchesMatch = MATCH_FIELDS.some((field) => field in update)
-    const next = touchesMatch ? { ...update, existingProductId: null } : update
+  function editFields(update: EditUpdate) {
+    const next = withMatchReset(update)
     dispatch({ type: 'edit', update: next })
-    if (touchesMatch) clearMatches()
-    if ('foodTypeId' in update || 'containerId' in update) void lookUpMatches({ ...state, ...next })
+    return { ...state, ...next }
+  }
+
+  // Wiedererkennen wie im Formular (#207), mit Vorwahl bei genau einem passenden Produkt
+  const restock = useRestock<PhotoCaptureState>(options.knownProducts, (_fields, update) => {
+    editFields(update)
+  })
+
+  function edit(update: EditUpdate) {
+    const next = editFields(update)
+    if ('foodTypeId' in update || 'containerId' in update) restock.pickSoleMatch(next)
   }
 
   const editor = createPhotoEditor({
     state,
     dispatch,
     edit,
-    lookUpMatches: () => void lookUpMatches(state),
+    restock: {
+      leaveContent: (content) => {
+        restock.pickSoleMatch({ ...state, content })
+      },
+      chooseProduct: (productId) => {
+        restock.chooseProduct(state, productId)
+      },
+    },
     uploads,
+    canReadAgain: recognitionOff === null,
     estimate: estimates.estimate,
   })
-  return { state, editor, matches, estimates }
+  return { state, editor, matches: restock.matchesFor(state), estimates }
 }

@@ -10,9 +10,6 @@ import { StockRowItem } from './StockRowItem'
 
 type FoodTypeLevelListProps = Readonly<{ categories: FoodTypeLevel['categories'] }>
 
-const packagesOf = (category: FoodTypeLevel['categories'][number]) =>
-  category.rows.reduce((sum, row) => sum + row.packagesInStock, 0)
-
 // Ebene 2 (UX-Konzept §8.3): Kategorien als Zwischenüberschrift mit Summe, darunter direkt die
 // Lebensmittelarten. Die Sprungchips scrollen nur und blenden nichts aus. Bei einer Kategorie
 // entfallen sie.
@@ -38,10 +35,7 @@ export function FoodTypeLevelList({ categories }: FoodTypeLevelListProps) {
       ) : null}
       {categories.map((category) => (
         <section key={category.id} className="scroll-mt-4">
-          <GroupHeader
-            id={categoryAnchor(category.id)}
-            trailing={stockLine(packagesOf(category), category.totals)}
-          >
+          <GroupHeader id={categoryAnchor(category.id)} trailing={stockLine(category.totals)}>
             {category.name}
           </GroupHeader>
           <Group labelledBy={categoryAnchor(category.id)}>

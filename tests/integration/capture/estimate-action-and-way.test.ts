@@ -5,7 +5,10 @@ import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { buildCapture, buildHouseholdSettings } from '../../../db/seeds/factories'
 import type { CaptureDeps } from '../../../src/features/capture/application/capture-deps'
-import { chooseCaptureWay } from '../../../src/features/capture/application/choose-capture-way'
+import {
+  chooseCaptureWay,
+  findRecognitionOffReason,
+} from '../../../src/features/capture/application/choose-capture-way'
 import type { AccessError } from '../../../src/server/auth/guards'
 import type { SessionUser } from '../../../src/server/auth/session'
 import { aiCalls, captureDrafts, photos } from '../../../src/server/db/schema/capture'
@@ -123,8 +126,11 @@ describe('Schätzung auf Wahl und Weg der Erfassung', () => {
     await testDb.db.delete(captures)
 
     expect(await chooseCaptureWay(deps, actor)).toBe('photo')
+    expect(await findRecognitionOffReason(deps, actor)).toBeNull()
     await setAiEnabled(false)
     expect(await chooseCaptureWay(deps, actor)).toBe('manual')
+    // Der Foto-Weg sagt das gleich zu Beginn (#210)
+    expect(await findRecognitionOffReason(deps, actor)).toBe('ai-disabled')
 
     await testDb.db.insert(captures).values(buildCapture({ ...actor, method: 'foto' }))
     expect(await chooseCaptureWay(deps, actor)).toBe('photo')

@@ -8,7 +8,6 @@ import type {
   NewCapture,
   NewProductRow,
   NewUnitRows,
-  ProductCandidate,
 } from '../domain/stock-records'
 
 /** Lesen und Schreiben innerhalb einer Transaktion. */
@@ -34,5 +33,4 @@ export interface StockTransaction {
 export interface StockWriter {
   /** Wirft die Arbeit eine Ausnahme, bleibt nichts gespeichert. */
   transaction: <T>(work: (tx: StockTransaction) => Promise<T>) => Promise<T>
-  findProductsByFoodType: (householdId: string, foodTypeId: string) => Promise<ProductCandidate[]>
 }

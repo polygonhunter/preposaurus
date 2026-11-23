@@ -4,6 +4,7 @@ import { BestBeforeEntries } from './BestBeforeEntries'
 import { CaptureSummaryGroup } from './CaptureSummaryGroup'
 import { ChoiceChips } from './ChoiceChips'
 import { FoodTypePicker } from './FoodTypePicker'
+import type { CaptureField } from './manual-capture-draft'
 import type { ManualCaptureView } from './manual-capture-view'
 import { NewProductExtras } from './NewProductExtras'
 import { ProductMatchOffer } from './ProductMatchOffer'
@@ -14,8 +15,8 @@ type ManualCaptureFieldsProps = Readonly<{
   capture: ReturnType<typeof useManualCapture>
   view: ManualCaptureView
   nutritionOpen: Readonly<{ isOpen: boolean; onToggle: (isOpen: boolean) => void }>
-  /** Nach der Wahl der Art geht es mit dem Inhalt weiter */
-  onFoodTypeChosen: () => void
+  /** Nach der Wahl der Art geht es mit dem Inhalt weiter, beim Nachschub gleich mit dem MHD */
+  onFocus: (field: CaptureField) => void
 }>
 
 // Ein Formular auf einer Seite (UX §8.5, D11): Lebensmittelart · Packung (Inhalt, Behälter) ·
@@ -26,9 +27,9 @@ export function ManualCaptureFields({
   capture,
   view,
   nutritionOpen,
-  onFoodTypeChosen,
+  onFocus,
 }: ManualCaptureFieldsProps) {
-  const { draft, errors, change, lookUpMatches } = capture
+  const { draft, errors, change } = capture
   const isRestock = draft.existingProductId !== null
   return (
     <>
@@ -37,8 +38,9 @@ export function ManualCaptureFields({
         recentIds={options.recentFoodTypeIds}
         selected={view.foodType}
         onSelect={(foodTypeId) => {
-          void lookUpMatches(change({ foodTypeId }))
-          if (foodTypeId !== null) onFoodTypeChosen()
+          const isRestock = capture.selectFoodType(foodTypeId)
+          // Im selben Tipp, damit auf dem Handy die Tastatur aufgeht (F2)
+          if (foodTypeId !== null) onFocus(isRestock ? 'units' : 'content')
         }}
         error={errors.foodTypeId}
       />
@@ -51,7 +53,7 @@ export function ManualCaptureFields({
           hint="Mit Einheit: g, kg, ml oder l"
           value={draft.content}
           onChange={(event) => change({ content: event.target.value })}
-          onBlur={() => void lookUpMatches(draft)}
+          onBlur={(event) => capture.leaveContent(event.currentTarget.value)}
           error={errors.content}
         />
       </div>
@@ -59,13 +61,13 @@ export function ManualCaptureFields({
         label="Behälter"
         choices={options.containers}
         selectedId={draft.containerId}
-        onChange={(containerId) => void lookUpMatches(change({ containerId }))}
+        onChange={capture.selectContainer}
         emptyText="Keine Behälter hinterlegt."
       />
       <ProductMatchOffer
         matches={capture.matches}
-        chosenId={draft.existingProductId}
-        onChoose={(existingProductId) => change({ existingProductId })}
+        chosen={view.chosenMatch}
+        onChoose={capture.chooseProduct}
       />
       <BestBeforeEntries
         entries={draft.units}

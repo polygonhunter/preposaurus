@@ -40,6 +40,7 @@ describe('Entwurf der Foto-Erfassung', () => {
       data,
       photos: [{ id: 'f1', role: 'verpackung' }],
       containers,
+      recognitionOff: null,
     })
     expect(restored).toMatchObject({
       foodTypeId,
@@ -69,13 +70,36 @@ describe('Entwurf der Foto-Erfassung', () => {
       data: toDraftData(perPortion, containers),
       photos: [],
       containers,
+      recognitionOff: null,
     })
 
     expect(restored.isPerPortion).toBe(true)
   })
 
+  it('zeigt bei ausgeschalteter Erkennung keinen „Vorschlag“, sondern denselben Satz (#210)', () => {
+    const restored = fromDraft({
+      draftId: 'e1',
+      data: toDraftData(filled, containers),
+      photos: [
+        { id: 'f1', role: 'verpackung' },
+        { id: 'f2', role: 'naehrwerte' },
+      ],
+      containers,
+      recognitionOff: 'Die Foto-Erkennung ist ausgeschaltet.',
+    })
+
+    const unavailable = { state: 'unavailable', message: 'Die Foto-Erkennung ist ausgeschaltet.' }
+    expect(restored.readings).toEqual({ verpackung: unavailable, naehrwerte: unavailable })
+  })
+
   it('beginnt mit leeren Feldern, wenn der Entwurf nichts enthält', () => {
-    const restored = fromDraft({ draftId: 'e1', data: {}, photos: [], containers })
+    const restored = fromDraft({
+      draftId: 'e1',
+      data: {},
+      photos: [],
+      containers,
+      recognitionOff: null,
+    })
 
     expect(restored).toMatchObject({ foodTypeId: null, content: '', units: [], draftId: 'e1' })
   })

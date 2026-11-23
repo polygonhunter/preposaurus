@@ -63,6 +63,7 @@ describe('Auswahllisten des Erfassens gegen die DB (#52)', () => {
     expect(options.lastStorageLocationId).toBeNull()
     expect(options.recentFoodTypeIds).toEqual([])
     expect(options.isStockEmpty).toBe(true)
+    expect(options.knownProducts).toEqual([])
   })
 
   it('belegt nach einer Erfassung Lagerort und „Zuletzt genutzt“ vor, nur für diesen Nutzer', async () => {
@@ -73,6 +74,17 @@ describe('Auswahllisten des Erfassens gegen die DB (#52)', () => {
     expect(own.lastStorageLocationId).toBe(setup.storageLocationId)
     expect(own.recentFoodTypeIds).toEqual([setup.noodlesId])
     expect(own.isStockEmpty).toBe(false)
+    // Wiedererkennen (#207): beide Produkte (zwei Lagerorte), mit Behälter und Lagerort
+    expect(own.knownProducts).toHaveLength(2)
+    expect(own.knownProducts).toContainEqual({
+      id: expect.any(String) as string,
+      name: 'Nudeln',
+      foodTypeId: setup.noodlesId,
+      content: { value: 500, unit: 'g' },
+      containerId: setup.packageId,
+      containerName: expect.any(String) as string,
+      storageLocationName: 'Keller',
+    })
 
     const foreign = await optionsFor(setup.foreign)
     expect(foreign.storageLocations).toEqual([
@@ -81,6 +93,7 @@ describe('Auswahllisten des Erfassens gegen die DB (#52)', () => {
     expect(foreign.foodTypes.map((foodType) => foodType.id)).toContain(setup.foreign.foodTypeId)
     expect(foreign.recentFoodTypeIds).toEqual([])
     expect(foreign.isStockEmpty).toBe(true)
+    expect(foreign.knownProducts).toEqual([])
   })
 
   it('bietet Ausgeblendetes nicht an und belegt damit nicht vor', async () => {

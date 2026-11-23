@@ -148,6 +148,8 @@ interface RestoreInput {
   data: CaptureDraftData
   photos: readonly { id: string; role: CapturedPhoto['role'] }[]
   containers: readonly ContainerChoice[]
+  /** Satz, warum die Erkennung aus ist, sonst null (#210) */
+  recognitionOff: string | null
 }
 
 const restoredPhoto = ({ id, role }: RestoreInput['photos'][number]): CapturedPhoto => ({
@@ -159,11 +161,21 @@ const restoredPhoto = ({ id, role }: RestoreInput['photos'][number]): CapturedPh
   message: null,
 })
 
+/**
+ * Wie die Erkennung nach dem Fortsetzen dasteht: Ist sie aus, gab es nie einen Vorschlag, dann
+ * steht derselbe Satz wie vorher statt „Vorschlag der Erkennung“ (#210).
+ */
+const restoredReading = (recognitionOff: string | null) =>
+  recognitionOff === null
+    ? ({ state: 'done', message: null } as const)
+    : ({ state: 'unavailable', message: recognitionOff } as const)
+
 /** Fortsetzen: Schritt Prüfen mit dem gesicherten Stand. Erkannt wird nichts erneut. */
-export function fromDraft({ draftId, data, photos, containers }: RestoreInput): PhotoCaptureState {
+export function fromDraft(input: RestoreInput): PhotoCaptureState {
+  const { draftId, data, photos, containers } = input
   const base = initialPhotoCapture(data.lagerortId ?? null)
   const step = CAPTURE_STEPS.find((candidate) => candidate === data.schritt) ?? 'mhd'
-  const done = { state: 'done', message: null } as const
+  const done = restoredReading(input.recognitionOff)
   const hasPhoto = (role: CapturedPhoto['role']) => photos.some((photo) => photo.role === role)
   return {
     ...base,

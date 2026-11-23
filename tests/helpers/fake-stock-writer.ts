@@ -10,7 +10,6 @@ import type {
   NewCapture,
   NewProductRow,
   NewUnitRows,
-  ProductCandidate,
 } from '../../src/features/capture/domain/stock-records'
 
 interface StoredUnit extends PlannedUnit {
@@ -32,7 +31,6 @@ interface FakeMasterData {
   foodTypes?: ByHousehold<FoodTypeRef>
   storageLocations?: ByHousehold<string>
   containers?: readonly string[]
-  candidates?: ByHousehold<ProductCandidate>
 }
 
 const emptyState = (): FakeState => ({ captures: [], products: [], units: [], adoptedDrafts: [] })
@@ -112,11 +110,5 @@ export function createFakeStockWriter(master: FakeMasterData = {}) {
       fake.state = draft
       return result
     },
-    findProductsByFoodType: (householdId: string, foodTypeId: string) =>
-      Promise.resolve(
-        (master.candidates?.[householdId] ?? []).filter(
-          (candidate) => candidate.foodTypeId === foodTypeId,
-        ),
-      ),
   }
 }

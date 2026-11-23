@@ -63,12 +63,24 @@ export function groupCoverageText({ totals, coverage }: GroupFigures): string | 
   return days === null ? null : formatDays(days)
 }
 
-/** „8 Packungen · 4 kg“, die Packungszahl zählt alle im Vorrat (auch abgelaufene). */
-export function stockLine(packagesInStock: number, totals: NodeTotalsDto): string {
+/**
+ * „8 Packungen · 4 kg“: Anzahl und Menge zählen dieselben Packungen, die heute zählen (#208).
+ * Abgelaufene stehen als Zusatz da („dazu 1 abgelaufen“), nur Abgelaufenes als „1 Packung abgelaufen“.
+ */
+export function stockLine(totals: NodeTotalsDto): string {
+  const { packages, uncountedPackages } = totals
+  if (packages === 0 && uncountedPackages > 0)
+    return `${formatPackages(uncountedPackages)} abgelaufen`
   const amounts = formatAmounts(totals.amounts)
-  const packages = formatPackages(packagesInStock)
-  return amounts === null ? packages : `${packages} · ${amounts}`
+  const counted =
+    amounts === null ? formatPackages(packages) : `${formatPackages(packages)} · ${amounts}`
+  return uncountedPackages > 0
+    ? `${counted} · dazu ${formatGermanNumber(uncountedPackages)} abgelaufen`
+    : counted
 }
+
+/** Im Vorrat liegt etwas, auch wenn es heute nicht mehr zählt. */
+export const hasStock = (totals: NodeTotalsDto) => totals.packages + totals.uncountedPackages > 0
 
 /** Meldung in der UndoBar: „Nudeln: 1 Packung verbraucht (11/2027)“. */
 export function formatTakenMessage(name: string, dateLabel: string | null): string {
@@ -84,14 +96,13 @@ export function formatDate({ date, precision, isEstimated }: BestBeforeDto): str
 
 /** Kein Vorrat: in keiner Warengruppe liegt eine Packung (auch keine abgelaufene). */
 export function isEmptyStock(groups: readonly Pick<GroupFigures, 'totals'>[]): boolean {
-  return groups.every(({ totals }) => totals.packages + totals.uncountedPackages === 0)
+  return groups.every(({ totals }) => !hasStock(totals))
 }
 
 /** Untertitel einer Warengruppe bzw. Lebensmittelart: „5 Packungen · 2,5 kg · 3,2 Tage“. */
 export function groupSubtitle(totals: NodeTotalsDto): string {
-  const packages = totals.packages + totals.uncountedPackages
   const days = supplyDaysOf(totals)
-  const line = stockLine(packages, totals)
+  const line = stockLine(totals)
   return days === null ? line : `${line} · ${formatDays(days)}`
 }
 
@@ -108,12 +119,22 @@ export function expiryHint(state: UnitStateDto, kind: 'best-before' | 'use-by'):
 export function detailTiles({ totals }: Pick<FoodTypeDetail, 'totals'>) {
   const days = supplyDaysOf(totals)
   const tiles = [
-    { label: 'Packungen', value: formatGermanNumber(totals.packages + totals.uncountedPackages) },
+    { label: 'Packungen', value: formatGermanNumber(totals.packages) },
     { label: 'Menge', value: formatAmounts(totals.amounts) ?? '–' },
     { label: 'kcal', value: formatKcal(totals.kcal, totals.isApproximate).replace(' kcal', '') },
   ]
   if (days === null) return tiles
   return [...tiles, { label: 'Tage', value: formatGermanNumber(Math.round(days * 10) / 10) }]
+}
+
+/** Unter den Kennwerten: Abgelaufenes zählt nicht in Packungen, Menge, kcal und Tage (#208). */
+export function uncountedNote({ uncountedPackages }: NodeTotalsDto): string | null {
+  if (uncountedPackages === 0) return null
+  const subject =
+    uncountedPackages === 1
+      ? '1 abgelaufene Packung'
+      : `${formatGermanNumber(uncountedPackages)} abgelaufene Packungen`
+  return `Dazu ${subject}, nicht in diesen Zahlen.`
 }
 
 /** Übliche Haltbarkeit nur als Hinweis, nie als MHD (#110). */

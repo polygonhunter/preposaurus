@@ -14,6 +14,7 @@ import { useSavePhotoCapture } from './use-save-photo-capture'
 type PhotoCaptureFlowProps = Readonly<{
   options: CaptureOptions
   initial: PhotoCaptureState
+  recognitionOff: string | null
   /** „Noch eins“ und „Verwerfen“: frischer Stand */
   onRestart: () => void
 }>
@@ -35,15 +36,17 @@ function focusField(field: string) {
 }
 
 // Ein Durchlauf der Foto-Erfassung: Kamera, Prüfen, Speichern, danach die Bestätigung.
-export function PhotoCaptureFlow({ options, initial, onRestart }: PhotoCaptureFlowProps) {
+export function PhotoCaptureFlow(props: PhotoCaptureFlowProps) {
+  const { options, initial, recognitionOff, onRestart } = props
   const saving = useSavePhotoCapture(focusField)
   const { state, editor, matches, estimates } = usePhotoCapture({
     options,
     initial,
     isActive: saving.saved === null,
+    recognitionOff,
   })
   const draft = { ...state, captureId: '', isKcalEstimate: state.nutritionSource === 'ai-estimate' }
-  const view = deriveView(options, draft, matches)
+  const view = deriveView(options, draft)
 
   if (saving.saved !== null) {
     return (
@@ -62,6 +65,7 @@ export function PhotoCaptureFlow({ options, initial, onRestart }: PhotoCaptureFl
         onPhoto={editor.takePhoto}
         onClose={editor.closeCamera}
         onSkipTable={editor.skipTable}
+        notice={recognitionOff}
         dates={{ units: state.units, shots: state.shots }}
       />
     )

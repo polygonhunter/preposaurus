@@ -37,9 +37,12 @@ export function OpenShotList({ state, editor }: OpenShotListProps) {
                 editor.resolveShot(shot.localId, 'typed')
                 focusDateField()
               },
-              readAgain: () => {
-                editor.readAgainShot(shot.localId)
-              },
+              readAgain:
+                editor.readAgainShot === null
+                  ? null
+                  : () => {
+                      editor.readAgainShot?.(shot.localId)
+                    },
               estimate: () => {
                 editor.estimate('mhd', shot.localId)
               },

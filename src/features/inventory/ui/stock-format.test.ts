@@ -11,6 +11,7 @@ import {
   isEmptyStock,
   shelfLifeHint,
   stockLine,
+  uncountedNote,
 } from './stock-format'
 
 function totals(overrides: Partial<NodeTotalsDto> = {}): NodeTotalsDto {
@@ -39,15 +40,33 @@ describe('Kennwerte als Text', () => {
   })
 
   it('nennt Packungen und Menge, kg und l nebeneinander', () => {
-    expect(stockLine(3, totals())).toBe('3 Packungen · 1,5 kg')
-    expect(stockLine(2, totals({ amounts: { g: 400, ml: 3000 } }))).toBe(
+    expect(stockLine(totals())).toBe('3 Packungen · 1,5 kg')
+    expect(stockLine(totals({ packages: 2, amounts: { g: 400, ml: 3000 } }))).toBe(
       '2 Packungen · 400 g · 3 l',
     )
-    expect(stockLine(1, totals({ amounts: { g: 0, ml: 0 } }))).toBe('1 Packung')
+    expect(stockLine(totals({ packages: 1, amounts: { g: 0, ml: 0 } }))).toBe('1 Packung')
   })
 
-  it('zählt im Untertitel auch abgelaufene Packungen und nennt die Tage, wenn es sie gibt', () => {
-    expect(groupSubtitle(totals({ uncountedPackages: 1 }))).toBe('4 Packungen · 1,5 kg')
+  it('zählt Anzahl und Menge mit denselben Packungen, Abgelaufenes als Zusatz (#208)', () => {
+    expect(stockLine(totals({ uncountedPackages: 1 }))).toBe(
+      '3 Packungen · 1,5 kg · dazu 1 abgelaufen',
+    )
+    expect(stockLine(totals({ packages: 0, uncountedPackages: 2, amounts: { g: 0, ml: 0 } }))).toBe(
+      '2 Packungen abgelaufen',
+    )
+    expect(uncountedNote(totals())).toBeNull()
+    expect(uncountedNote(totals({ uncountedPackages: 1 }))).toBe(
+      'Dazu 1 abgelaufene Packung, nicht in diesen Zahlen.',
+    )
+    expect(uncountedNote(totals({ uncountedPackages: 2 }))).toBe(
+      'Dazu 2 abgelaufene Packungen, nicht in diesen Zahlen.',
+    )
+  })
+
+  it('nennt im Untertitel Abgelaufenes als Zusatz und die Tage, wenn es sie gibt', () => {
+    expect(groupSubtitle(totals({ uncountedPackages: 1 }))).toBe(
+      '3 Packungen · 1,5 kg · dazu 1 abgelaufen',
+    )
     expect(groupSubtitle(totals({ energyDays: 2.64 }))).toBe('3 Packungen · 1,5 kg · 2,6 Tage')
     expect(groupSubtitle(totals({ energyDays: 1 }))).toBe('3 Packungen · 1,5 kg · 1 Tag')
   })
@@ -87,6 +106,10 @@ describe('Kennwerte als Text', () => {
       { label: 'Menge', value: '1,5 kg' },
       { label: 'kcal', value: 'ca. 5.385' },
     ])
+    expect(detailTiles({ totals: totals({ uncountedPackages: 1 }) })[0]).toEqual({
+      label: 'Packungen',
+      value: '3',
+    })
     const withDays = detailTiles({ totals: totals({ energyDays: 2.6, amounts: { g: 0, ml: 0 } }) })
     expect(withDays[1]).toEqual({ label: 'Menge', value: '–' })
     expect(withDays[3]).toEqual({ label: 'Tage', value: '2,6' })
