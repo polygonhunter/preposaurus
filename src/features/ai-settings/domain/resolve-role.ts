@@ -31,7 +31,7 @@ export interface AiSettingsSnapshot {
   recommendedModels: Readonly<Record<AiRole, string>>
 }
 
-type ConnectionSource = { source: 'env' } | { source: 'app'; connectionId: string }
+export type ConnectionSource = { source: 'env' } | { source: 'app'; connectionId: string }
 
 export type RoleUnavailable =
   'ai-disabled' | 'role-inactive' | 'not-configured' | 'connection-inactive'
