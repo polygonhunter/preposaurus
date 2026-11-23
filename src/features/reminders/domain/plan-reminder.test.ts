@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { dueItem } from '../../../../tests/helpers/due-items'
-import { planReminder, type ReminderInput } from './plan-reminder'
+import { dueReminderKind, planReminder, type ReminderInput } from './plan-reminder'
 
 const base: ReminderInput = {
   now: new Date('2026-11-24T08:00:00Z'), // Dienstag, 9:00 Uhr in Berlin
@@ -75,5 +75,17 @@ describe('planReminder', () => {
   it('schickt nichts, wenn „Dringend“ aus ist', () => {
     const settings = { ...base.settings, isUrgentEnabled: false }
     expect(planReminder({ ...base, settings })).toBeNull()
+  })
+})
+
+describe('dueReminderKind', () => {
+  it('nennt die Art, die jetzt an der Reihe ist, ohne den Vorrat zu kennen', () => {
+    expect(dueReminderKind(base)).toBe('urgent')
+    expect(dueReminderKind({ ...base, ...saturday('2026-11-28T09:00:00Z') })).toBe('weekly-summary')
+  })
+
+  it('liefert null in der Ruhezeit und vor der Uhrzeit der Wochenübersicht', () => {
+    expect(dueReminderKind({ ...base, now: new Date('2026-11-24T21:00:00Z') })).toBeNull()
+    expect(dueReminderKind({ ...base, ...saturday('2026-11-28T07:30:00Z') })).toBeNull()
   })
 })

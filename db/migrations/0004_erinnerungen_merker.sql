@@ -1,0 +1,2 @@
+ALTER TABLE "haushalt_einstellung" ADD COLUMN "wochenuebersicht_gesendet_am" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "haushalt_einstellung" ADD COLUMN "dringend_gesendet_am" timestamp with time zone;
