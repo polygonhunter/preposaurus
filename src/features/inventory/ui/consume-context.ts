@@ -1,6 +1,6 @@
 'use client'
-// Gemeinsamer Zugang zu „Verbraucht“ und „−1“ für alle Knöpfe einer Seite. Die UndoBar gibt es
-// je Seite nur einmal (ConsumeProvider), egal welche Zeile entnommen hat.
+// Gemeinsamer Zugang zu „Verbraucht“, „−1“, „Entsorgt“ und „Noch gut“ für alle Knöpfe einer Seite.
+// Die UndoBar gibt es je Seite nur einmal (ConsumeProvider), egal welche Zeile gehandelt hat.
 import { createContext, useContext } from 'react'
 import type { ConsumeRequest } from '../schemas'
 
@@ -13,7 +13,10 @@ export interface TakenLabel {
 
 export interface ConsumeContextValue {
   consume: (request: ConsumeRequest, label: TakenLabel) => void
-  /** Eine Entnahme läuft gerade, oder es gibt keine Verbindung zum NAS (M10-02) */
+  discard: (unitId: string, label: TakenLabel) => void
+  /** „Noch gut“ für alle genannten Packungen eines Eintrags (#47) */
+  markStillGood: (unitIds: readonly string[], label: TakenLabel) => void
+  /** Eine Aktion läuft gerade, oder es gibt keine Verbindung zum NAS (M10-02) */
   isLocked: boolean
 }
 

@@ -5,11 +5,13 @@ import {
   expiryHint,
   formatDate,
   formatPackages,
+  formatStillGoodMessage,
   formatTakenMessage,
   groupCoverageText,
   groupSubtitle,
   isEmptyStock,
   shelfLifeHint,
+  stillGoodLabel,
   stockLine,
   uncountedNote,
 } from './stock-format'
@@ -135,6 +137,16 @@ describe('Datum und Hinweise', () => {
   it('formuliert die Rückgängig-Zeile mit und ohne Datum', () => {
     expect(formatTakenMessage('Nudeln', '11/2027')).toBe('Nudeln: 1 Packung verbraucht (11/2027)')
     expect(formatTakenMessage('Nudeln', null)).toBe('Nudeln: 1 Packung verbraucht')
+    expect(formatTakenMessage('Walnüsse', '01.11.2026', 'discarded')).toBe(
+      'Walnüsse: 1 Packung entsorgt (01.11.2026)',
+    )
+  })
+
+  it('nennt „Noch gut“ mit dem Tag der Prüfung', () => {
+    expect(stillGoodLabel('2026-11-23')).toBe('noch gut (geprüft am 23.11.2026)')
+    expect(formatStillGoodMessage('Walnüsse', 2, '2026-11-23')).toBe(
+      'Walnüsse: 2 Packungen noch gut (geprüft am 23.11.2026)',
+    )
   })
 
   it('nennt die übliche Haltbarkeit nur als Richtwert', () => {

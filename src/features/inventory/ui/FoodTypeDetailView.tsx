@@ -1,9 +1,10 @@
 import { EmptyState } from '@/shared/ui/EmptyState'
 import { PageHeader } from '@/shared/ui/PageHeader'
 import { StatTiles } from '@/shared/ui/StatTiles'
-import type { FoodTypeDetail } from '../schemas'
+import type { FoodTypeDetail, HistoryEntry } from '../schemas'
 import { ConsumeProvider } from './ConsumeProvider'
 import { fifoGroupOf, groupLabel, shelfLifeColumns } from './detail-view'
+import { HistorySection } from './HistorySection'
 import { PathLine } from './PathLine'
 import { ProductSection } from './ProductSection'
 import { ShelfLifeChart } from './ShelfLifeChart'
@@ -11,11 +12,15 @@ import { detailTiles, shelfLifeHint, uncountedNote } from './stock-format'
 import { CAPTURE_PATH, groupPath } from './stock-paths'
 import { TakeFifoBar } from './TakeFifoBar'
 
-type FoodTypeDetailViewProps = Readonly<{ detail: FoodTypeDetail }>
+type FoodTypeDetailViewProps = Readonly<{
+  detail: FoodTypeDetail
+  history: readonly HistoryEntry[]
+}>
 
 // Detail einer Lebensmittelart (UX-Konzept §8.4, #45): Pfadzeile, Large Title, Kennwerte,
-// Säulen je MHD, Abschnitte je Produkt mit Zeilen je Datum, unten fest „1 entnehmen · MHD“.
-export function FoodTypeDetailView({ detail }: FoodTypeDetailViewProps) {
+// Säulen je MHD, Abschnitte je Produkt mit Zeilen je Datum, Verlauf (#48), unten fest
+// „1 entnehmen · MHD“.
+export function FoodTypeDetailView({ detail, history }: FoodTypeDetailViewProps) {
   const fifoGroup = fifoGroupOf(detail.products, detail.fifoUnitId)
   const columns = shelfLifeColumns(detail.products)
   const hint = shelfLifeHint(detail.typicalShelfLifeMonths)
@@ -53,6 +58,7 @@ export function FoodTypeDetailView({ detail }: FoodTypeDetailViewProps) {
       {hint === null ? null : (
         <p className="px-8 pt-3 text-footnote text-fg2 breit:px-10">{hint}</p>
       )}
+      <HistorySection entries={history} />
       {detail.fifoUnitId === null || fifoGroup === null ? null : (
         <TakeFifoBar
           name={detail.name}

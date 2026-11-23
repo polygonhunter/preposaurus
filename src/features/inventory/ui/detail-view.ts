@@ -2,7 +2,7 @@
 // je MHD, die Datumszeile für „1 entnehmen“ und die Nährwertzeile mit Herkunft.
 import { formatGermanNumber } from '@/shared/lib/quantities'
 import type { BestBeforeGroupDto, FoodTypeDetail, NutritionDto, UnitStateDto } from '../schemas'
-import { formatDate } from './stock-format'
+import { STATE_BADGE, formatDate, formatPackages, stillGoodLabel } from './stock-format'
 
 type DetailProduct = FoodTypeDetail['products'][number]
 
@@ -52,6 +52,37 @@ export function fifoGroupOf(
   if (fifoUnitId === null) return null
   const groups = products.flatMap((product) => product.bestBeforeGroups)
   return groups.find((group) => group.units.some((unit) => unit.id === fifoUnitId)) ?? null
+}
+
+/** Packungen einer Datumszeile, die „Noch gut“ bekommen können: abgelaufen, MHD, noch ungeprüft. */
+export function stillGoodCandidates(group: BestBeforeGroupDto): string[] {
+  if (group.kind !== 'dated' || group.state !== 'expired') return []
+  return group.units
+    .filter((unit) => unit.kind === 'best-before' && unit.checkedAt === null)
+    .map((unit) => unit.id)
+}
+
+/** Zustand einer Datumszeile als Ton und Wort. Alle geprüft: „noch gut (geprüft am …)“ (#47). */
+export function groupBadge(group: BestBeforeGroupDto) {
+  if (group.kind === 'no-date') return STATE_BADGE['no-date']
+  const checked = group.units.map((unit) => unit.checkedAt)
+  const isAllChecked = checked.every((day) => day !== null)
+  const latest = checked
+    .filter((day) => day !== null)
+    .sort()
+    .at(-1)
+  if (isAllChecked && latest !== undefined) {
+    return { tone: 'green' as const, label: stillGoodLabel(latest) }
+  }
+  return STATE_BADGE[group.state]
+}
+
+/** Nur einige Packungen geprüft: „1 Packung noch gut (geprüft am …)“, sonst null. */
+export function partlyCheckedNote(group: BestBeforeGroupDto): string | null {
+  const checked = group.units.map((unit) => unit.checkedAt).filter((day) => day !== null)
+  const latest = checked.sort().at(-1)
+  if (latest === undefined || checked.length === group.units.length) return null
+  return `${formatPackages(checked.length)} ${stillGoodLabel(latest)}`
 }
 
 const ORIGIN_LABEL: Record<NonNullable<NutritionDto['per100']['kcal']['origin']>, string> = {

@@ -9,5 +9,5 @@ export default async function ProductDetailPage({ params }: PageProps<'/vorrat/p
   const { id } = await params
   const result = await loadDetail(householdId, { kind: 'product', id })
   if (!result.ok) notFound()
-  return <FoodTypeDetailView detail={result.value} />
+  return <FoodTypeDetailView {...result.value} />
 }

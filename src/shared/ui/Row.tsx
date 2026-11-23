@@ -9,6 +9,8 @@ type RowProps = RowContentProps &
     // Eigener Knopf rechts neben Link oder Knopf der Zeile, z. B. „−1“. Er liegt außerhalb der
     // Zeilen-Handlung, weil ein Knopf in einem Link nicht erlaubt ist.
     accessory?: ReactNode
+    // Knopfreihe unter Link oder Knopf der Zeile, wenn rechts kein Platz für mehrere Knöpfe ist
+    footer?: ReactNode
   }>
 
 // Trennlinie oberhalb jeder Zeile außer der ersten, eingerückt wie der Text.
@@ -16,8 +18,18 @@ const SEPARATOR =
   'relative not-first:before:absolute not-first:before:top-0 not-first:before:right-0 not-first:before:hairline'
 const INNER = 'flex min-h-11 w-full items-center gap-3 px-4 py-[11px] text-left'
 
-export function Row({ action, accessory, ...content }: RowProps) {
+export function Row({ action, accessory, footer, ...content }: RowProps) {
   const itemClass = cx(SEPARATOR, content.icon ? 'before:left-[52px]' : 'before:left-4')
+  if (action && footer) {
+    return (
+      <li className={itemClass}>
+        <RowHandle action={action} {...content} />
+        <div className={cx('flex flex-wrap gap-2 pr-4 pb-3', content.icon ? 'pl-[52px]' : 'pl-4')}>
+          {footer}
+        </div>
+      </li>
+    )
+  }
   if (!action) {
     // Inhalt in eigenem Flex-Element: Das ::before der Trennlinie wäre sonst in der ersten Zeile
     // ein Flex-Kind und rückte den Text um den Abstand ein.
