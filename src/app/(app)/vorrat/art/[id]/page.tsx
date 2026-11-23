@@ -1,13 +1,17 @@
 import { notFound } from 'next/navigation'
 import { loadDetail } from '@/features/inventory/application/load-detail'
-import { FoodTypeDetailView } from '@/features/inventory/ui/FoodTypeDetailView'
+import { loadStockTree } from '@/features/inventory/application/load-stock-tree'
+import { StockDetailSplit } from '@/features/inventory/ui/StockDetailSplit'
 import { requirePageHousehold } from '@/server/auth/household'
 
-// Detail einer Lebensmittelart (UX-Konzept §8.4, #45).
+// Detail einer Lebensmittelart (UX-Konzept §8.4, #45), ab „mittel“ mit der Liste daneben (M12-03).
 export default async function FoodTypeDetailPage({ params }: PageProps<'/vorrat/art/[id]'>) {
-  const { householdId } = await requirePageHousehold()
+  const { householdId, isAdmin } = await requirePageHousehold()
   const { id } = await params
-  const result = await loadDetail(householdId, { kind: 'food-type', id })
+  const [result, tree] = await Promise.all([
+    loadDetail(householdId, { kind: 'food-type', id }),
+    loadStockTree(householdId),
+  ])
   if (!result.ok) notFound()
-  return <FoodTypeDetailView {...result.value} />
+  return <StockDetailSplit {...result.value} tree={tree} isAdmin={isAdmin} />
 }

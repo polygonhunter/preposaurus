@@ -5,7 +5,7 @@
   "license": "AGPL-3.0-or-later",
   "type": "module",
   "engines": {
-    "node": ">=24"
+    "node": ">=26"
   },
   "scripts": {
     "predev": "node scripts/build-sw.ts",
@@ -31,6 +31,7 @@
     "db:migrate": "tsx --env-file-if-exists=.env --conditions=react-server src/server/db/migrate.ts",
     "db:seed": "tsx --env-file-if-exists=.env --conditions=react-server db/seeds/index.ts",
     "db:seed:demo": "tsx --env-file-if-exists=.env --conditions=react-server db/seeds/demo-cli.ts",
+    "poc:recognition": "tsx --env-file-if-exists=.env --conditions=react-server scripts/poc-recognition.ts",
     "check": "npm run format:check && npm run lint && npm run lint:budget && npm run typecheck && npm run knip && npm run test",
     "prepare": "lefthook install"
   },
@@ -56,7 +57,7 @@
     "@eslint-community/eslint-plugin-eslint-comments": "4.8.1",
     "@playwright/test": "1.65.1",
     "@tailwindcss/postcss": "4.3.5",
-    "@types/node": "24.19.2",
+    "@types/node": "26.6.6",
     "@types/pg": "8.23.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",

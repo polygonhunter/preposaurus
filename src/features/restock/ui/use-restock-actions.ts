@@ -16,10 +16,13 @@ import { setRestockItemDoneAction } from '../actions/set-restock-item-done-actio
 import type { RemovedRestockItem } from '../schemas'
 import type { RestockEntry, SuggestionEntry } from './restock-context'
 
+/** Ein eben aus einem Vorschlag angelegter Eintrag: „Rückgängig“ braucht nur ID und Namen. */
+type ListedEntry = Pick<RestockEntry, 'id' | 'label'>
+
 export type RestockNotice =
   | Readonly<{ kind: 'checked'; entry: RestockEntry }>
   | Readonly<{ kind: 'removed'; item: RemovedRestockItem }>
-  | Readonly<{ kind: 'listed'; entry: RestockEntry }>
+  | Readonly<{ kind: 'listed'; entry: ListedEntry }>
   | Readonly<{ kind: 'error'; message: string }>
 
 type Success<T extends object> = Readonly<{ ok: true } & T>
@@ -63,7 +66,7 @@ function restockActions(run: Run) {
       )
     },
     /** „Rückgängig“ nach „Auf die Liste“: Der neue Eintrag geht still wieder weg. */
-    unlist: (entry: RestockEntry) => {
+    unlist: (entry: ListedEntry) => {
       run(
         () => removeRestockItemAction(entry.id),
         () => null,

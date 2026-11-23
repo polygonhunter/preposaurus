@@ -1,11 +1,12 @@
 import { useId } from 'react'
-import { formatQuantity } from '@/shared/lib/quantities'
+import { prefilledCapturePath } from '@/shared/config/stock-paths'
 import { Group } from '@/shared/ui/Group'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { Row } from '@/shared/ui/Row'
-import type { FoodTypeDetail } from '../schemas'
+import type { FoodTypeDetail } from '../schemas/detail'
 import { DateGroupRow } from './DateGroupRow'
-import { groupLabel, nutritionLine, nutritionOrigin } from './detail-view'
+import { groupLabel, packagingOf } from './detail-view'
+import { ProductDetailsGroup } from './ProductDetailsGroup'
 
 type ProductSectionProps = Readonly<{
   product: FoodTypeDetail['products'][number]
@@ -14,18 +15,20 @@ type ProductSectionProps = Readonly<{
   fifoUnitId: string | null
   // Bei nur einem Produkt entfällt die eigene Überschrift (UX-Konzept §8.4)
   hasOwnHeading: boolean
+  // Nur der Admin löscht eine Fehlerfassung (#50)
+  isAdmin: boolean
+  // Wohin es geht, wenn das Produkt gelöscht ist. null: Die Seite bleibt
+  leaveHref: string | null
 }>
 
-// Abschnitt je Produkt: Packungen nach Datum, frühestes oben, dazu Inhalt, Lagerort und
-// Nährwerte mit Herkunft („ca.“ bei Richtwert oder Schätzung).
-export function ProductSection({ product, name, fifoUnitId, hasOwnHeading }: ProductSectionProps) {
+// Abschnitt je Produkt: Packungen nach Datum, frühestes oben, danach die Angaben. „Packungen
+// hinzufügen“ springt in die Erfassung mit diesem Produkt, direkt zu Datum und Anzahl (#195).
+export function ProductSection(props: ProductSectionProps) {
+  const { product, name, fifoUnitId, hasOwnHeading, isAdmin, leaveHref } = props
   const datesId = useId()
-  const detailsId = useId()
-  const content = formatQuantity(product.content)
-  const packaging = product.container ? `${content} · ${product.container.name}` : content
   return (
     <section>
-      <GroupHeader id={datesId} trailing={hasOwnHeading ? packaging : undefined}>
+      <GroupHeader id={datesId} trailing={hasOwnHeading ? packagingOf(product) : undefined}>
         {hasOwnHeading ? product.name : 'Packungen nach Datum'}
       </GroupHeader>
       <Group labelledBy={datesId}>
@@ -38,22 +41,22 @@ export function ProductSection({ product, name, fifoUnitId, hasOwnHeading }: Pro
               name={name}
               group={group}
               isNext={group.units.some((unit) => unit.id === fifoUnitId)}
+              isAdmin={isAdmin}
+              leaveHref={leaveHref}
             />
           ))
         )}
-      </Group>
-      <GroupHeader id={detailsId}>
-        {hasOwnHeading ? 'Angaben' : `Angaben · ${product.name}`}
-      </GroupHeader>
-      <Group labelledBy={detailsId}>
-        <Row title="Inhalt" trailing={packaging} />
-        <Row title="Lagerort" trailing={product.storageLocation?.name ?? 'nicht angegeben'} />
         <Row
-          title={`Nährwerte je 100 ${product.content.unit}`}
-          subtitle={nutritionLine(product.nutrition) ?? 'Noch keine Nährwerte'}
-          trailing={nutritionOrigin(product.nutrition) ?? undefined}
+          title={<span className="text-accent">Packungen hinzufügen</span>}
+          action={{ href: prefilledCapturePath({ kind: 'product', id: product.id }) }}
         />
       </Group>
+      <ProductDetailsGroup
+        product={product}
+        heading={hasOwnHeading ? 'Angaben' : `Angaben · ${product.name}`}
+        isAdmin={isAdmin}
+        leaveHref={leaveHref}
+      />
     </section>
   )
 }

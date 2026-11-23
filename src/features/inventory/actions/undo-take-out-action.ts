@@ -5,7 +5,7 @@ import { refresh } from 'next/cache'
 import { requireHouseholdUser } from '@/server/auth/guards'
 import { returnToStock } from '../application/return-to-stock'
 import { stockServices } from '../application/stock-services'
-import { unitIdSchema } from '../schemas'
+import { unitIdSchema } from '../schemas/requests'
 import { ACCESS_MESSAGE, type ActionFailure } from './action-messages'
 
 export type UndoActionResult = Readonly<{ ok: true }> | ActionFailure

@@ -5,6 +5,8 @@
 @custom-variant mittel (@media (width >= 640px) and (height >= 700px));
 @custom-variant breit (@media (width >= 900px));
 @custom-variant weit (@media (width >= 1280px));
+/* Nur „mittel“, nicht darüber: Liste oben, Detail unten im Vorrat (M12-05, Duo hochkant). */
+@custom-variant nur-mittel (@media (640px <= width < 900px) and (height >= 700px));
 
 /* light-dark() folgt color-scheme: hell, dunkel per prefers-color-scheme, scheme-dark/-light erzwingt.
    „inline“, weil Tailwind light-dark() über Variablen nachbildet. Stünde der Wert nur in einer
@@ -83,6 +85,14 @@
   }
 }
 
+/* Sehr niedrig, z. B. Duo außen quer (368 px hoch): kleinere Kopfzeile, das Dock bleibt (M12-01). */
+@media (height < 500px) and (width < 900px) {
+  :root {
+    --text-title: 28px;
+    --text-title--line-height: 34px;
+  }
+}
+
 @layer base {
   :root {
     color-scheme: light dark;
@@ -117,6 +127,21 @@
     width: max(100%, 44px);
     height: max(100%, 44px);
     transform: translate(-50%, -50%);
+  }
+}
+
+/* „1 entnehmen“ schwebt im Detail über der Tab-Leiste (58 px + 8 px + 50 px). Ein fokussiertes oder
+   angesprungenes Ziel darf nicht darunter verschwinden (WCAG 2.4.11): Fokus, Anker und
+   scrollIntoView halten Abstand. Am Seitenende hält `main` den Abstand per padding-bottom. */
+@layer base {
+  html:has([data-bottom-bar]) {
+    scroll-padding-bottom: calc(124px + env(safe-area-inset-bottom));
+  }
+
+  @media (width >= 900px) {
+    html:has([data-bottom-bar]) {
+      scroll-padding-bottom: 82px;
+    }
   }
 }
 

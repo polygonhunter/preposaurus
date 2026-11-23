@@ -3,13 +3,9 @@
 // sprechen und es Tests gibt.
 import { formatDayWithPrecision, toCalendarDay } from '@/shared/lib/dates'
 import { formatGermanNumber, formatQuantity } from '@/shared/lib/quantities'
-import type {
-  BestBeforeDto,
-  FoodTypeDetail,
-  NodeTotalsDto,
-  StockOverview,
-  UnitStateDto,
-} from '../schemas'
+import type { FoodTypeDetail } from '../schemas/detail'
+import type { BestBeforeDto, NodeTotalsDto, UnitStateDto } from '../schemas/shared'
+import type { StockOverview } from '../schemas/stock'
 
 type StatusTone = 'red' | 'orange' | 'yellow' | 'green' | 'neutral'
 
@@ -27,7 +23,7 @@ export function formatPackages(count: number): string {
 }
 
 /** Menge in kg bzw. l, beides nebeneinander, wenn es beides gibt. Ohne Menge null. */
-function formatAmounts({ g, ml }: NodeTotalsDto['amounts']): string | null {
+export function formatAmounts({ g, ml }: NodeTotalsDto['amounts']): string | null {
   const parts = [
     g > 0 ? formatQuantity({ value: g, unit: 'g' }) : null,
     ml > 0 ? formatQuantity({ value: ml, unit: 'ml' }) : null,
@@ -35,18 +31,18 @@ function formatAmounts({ g, ml }: NodeTotalsDto['amounts']): string | null {
   return parts.length === 0 ? null : parts.join(' · ')
 }
 
-function formatKcal(kcal: number, isApproximate: boolean): string {
+export function formatKcal(kcal: number, isApproximate: boolean): string {
   const value = `${formatGermanNumber(Math.round(kcal))} kcal`
   return isApproximate ? `ca. ${value}` : value
 }
 
-function formatDays(days: number): string {
+export function formatDays(days: number): string {
   const rounded = Math.round(days * 10) / 10
   return rounded === 1 ? '1 Tag' : `${formatGermanNumber(rounded)} Tage`
 }
 
 /** Beitrag in Tagen: Wasser zählt in Wasser-Tagen, alles andere in Essen-Tagen. */
-function supplyDaysOf(totals: NodeTotalsDto): number | null {
+export function supplyDaysOf(totals: NodeTotalsDto): number | null {
   if (totals.amounts.ml > 0 && totals.kcal === 0) return totals.waterDays
   return totals.energyDays
 }

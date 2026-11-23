@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 import { defineConfig, devices } from '@playwright/test'
-import { ADMIN_STORAGE_STATE } from './tests/helpers/e2e-auth'
+import { ADMIN_STORAGE_STATE, E2E_BACKUP_STATUS_DIR } from './tests/helpers/e2e-auth'
 
 // E2E_PORT, wenn mehrere Arbeitskopien gleichzeitig testen (sonst nutzt reuseExistingServer den
 // Server einer anderen Kopie mit anderer Datenbank).
@@ -117,6 +117,8 @@ export default defineConfig({
       // Absolut, weil der Standalone-Server der CI in .next/standalone startet (chdir)
       DATABASE_URL: `pglite://${resolve(E2E_DATA_DIR)}`,
       AI_PROVIDER: 'fake',
+      // Status-Dateien des Backup-Dienstes, schreibt daten-system.spec.ts (#147)
+      BACKUP_STATUS_DIR: resolve(E2E_BACKUP_STATUS_DIR),
       // Nur für die E2E-Tests, kein Geheimnis (env.ts verlangt mindestens 32 Zeichen)
       APP_SECRET: 'e2e-nur-zum-testen-kein-geheimnis-000',
       LOG_LEVEL: 'warn',

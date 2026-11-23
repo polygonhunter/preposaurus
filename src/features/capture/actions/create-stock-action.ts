@@ -6,6 +6,7 @@
 import { z } from 'zod'
 import { requireHouseholdUser, type AccessError } from '@/server/auth/guards'
 import type { CreateStockError } from '../application/create-stock'
+import type { SupplyChange } from '../domain/supply-change'
 import { createStockForUser } from '../application/stock-request'
 import { createStockSchema } from '../schemas/stock'
 
@@ -17,6 +18,8 @@ export type CreateStockState =
       unitCount: number
       /** true: Dieselbe Erfassung war schon gespeichert (doppeltes Tippen), nichts kam dazu */
       isReplay: boolean
+      /** Änderung an „Heute versorgt“ für den Satz nach dem Speichern (#231), sonst null */
+      supplyChange: SupplyChange | null
     }
   | { status: 'error'; message: string; fieldErrors: Readonly<Record<string, string[]>> }
 

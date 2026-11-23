@@ -8,8 +8,8 @@ import {
   resultText,
   waterCalculation,
 } from './explain-text'
-import { ExplainPart } from './ExplainPart'
-import { ExplainSource } from './ExplainSource'
+import { ExplainPart } from '@/shared/ui/ExplainPart'
+import { ExplainSource } from '@/shared/ui/ExplainSource'
 
 type SupplyExplanationProps = Readonly<{
   supply: OverviewSupply
@@ -21,7 +21,7 @@ type SupplyExplanationProps = Readonly<{
 export function SupplyExplanation({ supply, source }: SupplyExplanationProps) {
   const { explanation } = supply
   return (
-    <div className="flex flex-col gap-5 pb-1">
+    <>
       <ExplainPart title="Bedarf am Tag">
         <ul className="text-callout">
           {explanation.needLines.map((line) => (
@@ -50,7 +50,7 @@ export function SupplyExplanation({ supply, source }: SupplyExplanationProps) {
           ))}
         </ul>
       </ExplainPart>
-      {source === null ? null : <ExplainSource source={source} />}
-    </div>
+      {source === null ? null : <ExplainSource source={source} subject="Bedarf und Zielmengen" />}
+    </>
   )
 }

@@ -5,7 +5,7 @@ import { markStillGood } from '../../../src/features/inventory/application/mark-
 import { takeOutUnit } from '../../../src/features/inventory/application/take-out-unit'
 import { createStockReadRepository } from '../../../src/features/inventory/data/stock-read-repository'
 import { createUnitWriteRepository } from '../../../src/features/inventory/data/unit-write-repository'
-import { historyEntrySchema } from '../../../src/features/inventory/schemas'
+import { historyEntrySchema } from '../../../src/features/inventory/schemas/detail'
 import { users } from '../../../src/server/db/schema/account'
 import { products, units } from '../../../src/server/db/schema/inventory'
 import { createTestDb, type TestDb } from '../../helpers/test-db'

@@ -82,6 +82,9 @@ const baseSchema = z.object({
   // der Empfehlung in ai-roles.ts (Entscheidung #59).
   ANTHROPIC_API_KEY: optionalText,
   PHOTO_STORAGE_DIR: z.string().min(1).default('./.data/fotos'),
+  // Ordner mit den Status-Dateien des Backup-Dienstes (#147), im Container nur lesend eingebunden.
+  // Leer: Die App zeigt keine letzte Sicherung an (z. B. in der Entwicklung).
+  BACKUP_STATUS_DIR: optionalText,
   // Adresse der App für Links in Mails, z. B. https://haushalt.beispiel.ts.net (M11-05). Ohne sie
   // haben Mails keinen Link. Die App selbst braucht sie nicht, sie kennt ihre Adresse aus der Anfrage.
   APP_URL: optionalText.pipe(
@@ -156,6 +159,25 @@ export function isServiceWorkerEnabled(source: EnvSource = process.env): boolean
 // weil der Proxy vor jeder Seite läuft und keine volle Umgebung braucht.
 export function isDevelopmentServer(source: EnvSource = process.env): boolean {
   return source['NODE_ENV'] === 'development'
+}
+
+// Das PoC-Messskript (#103) braucht weder DB noch APP_SECRET. AI_PROVIDER ohne Standard, damit
+// ein Trockenlauf nur auf ausdrücklichen Wunsch (AI_PROVIDER=fake) entsteht, nie aus Versehen.
+const recognitionPocEnvSchema = z.object({
+  AI_PROVIDER: z.preprocess(emptyAsUnset, z.enum(['anthropic', 'fake']).optional()),
+  ANTHROPIC_API_KEY: optionalText,
+})
+
+/** @internal Nur das PoC-Messskript. */
+export type RecognitionPocEnv = z.infer<typeof recognitionPocEnvSchema>
+
+/** @internal Nur das PoC-Messskript (scripts/poc-recognition.ts), nicht Teil der App. */
+export function loadRecognitionPocEnv(
+  source: EnvSource = process.env,
+): Result<RecognitionPocEnv, string> {
+  const parsed = recognitionPocEnvSchema.safeParse(source)
+  if (parsed.success) return ok(parsed.data)
+  return err(`Ungültige Umgebungsvariablen:\n${z.prettifyError(parsed.error)}`)
 }
 
 // Wirft bei ungültigen Werten: ohne gültige Umgebung soll der Server gar nicht erst starten.

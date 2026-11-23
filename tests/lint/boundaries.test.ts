@@ -1,8 +1,7 @@
+import type { Linter } from 'eslint'
 import { dirname, relative } from 'node:path'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { fixturePath, lintTextAs, warmUpEslint } from './run-eslint'
-
-beforeAll(warmUpEslint)
+import { createBoundariesLinter, fixturePath, lintTexts, type LintTextInput } from './run-eslint'
 
 const featureFile = (feature: string, layer: string): string =>
   `src/features/${feature}/${layer}/${layer}-module.ts`
@@ -54,6 +53,38 @@ function importCode(from: string, to: string, kind: 'value' | 'type'): string {
     ? `import type { Marker } from '${specifier}'\nexport type Probe = Marker\n`
     : `import { marker } from '${specifier}'\nexport const probe = marker\n`
 }
+
+// Jeder Fall meldet beim Sammeln seinen Text an. beforeAll lintet alle gebündelt (#244), die Tests
+// lesen danach nur die Meldungen.
+const inputs = new Map<string, LintTextInput>()
+let messagesByKey: ReadonlyMap<string, Linter.LintMessage[]> = new Map()
+
+function register(key: string, input: LintTextInput): string {
+  inputs.set(key, input)
+  return key
+}
+
+function registerImport(from: string, to: string, kind: 'value' | 'type'): string {
+  return register(`${from} → ${to} (${kind})`, {
+    code: importCode(from, to, kind),
+    asFile: fileOf(from),
+  })
+}
+
+function messagesOf(key: string): Linter.LintMessage[] {
+  const messages = messagesByKey.get(key)
+  if (messages === undefined) throw new Error(`Nicht gelintet: ${key}`)
+  return messages
+}
+
+const ruleIdsOf = (key: string) => messagesOf(key).map((message) => message.ruleId)
+const fatalOf = (key: string) => messagesOf(key).filter((message) => message.fatal)
+
+beforeAll(async () => {
+  const keys = [...inputs.keys()]
+  const results = await lintTexts(createBoundariesLinter(), [...inputs.values()])
+  messagesByKey = new Map(keys.map((key, index) => [key, results[index] ?? []]))
+})
 
 const cases: readonly ImportCase[] = [
   ['app', 'ui', 'value', true],
@@ -149,15 +180,18 @@ const cases: readonly ImportCase[] = [
 ]
 
 describe('Schichtgrenzen', () => {
-  const rows = cases.map(([from, to, kind, allowed]) => ({ from, to, kind, allowed }))
+  const rows = cases.map(([from, to, kind, allowed]) => ({
+    from,
+    to,
+    kind,
+    allowed,
+    key: registerImport(from, to, kind),
+  }))
 
-  it.each(rows)('$from → $to ($kind): erlaubt = $allowed', async ({ from, to, kind, allowed }) => {
-    const messages = await lintTextAs({ code: importCode(from, to, kind), asFile: fileOf(from) })
-
-    expect(messages.filter((message) => message.fatal)).toEqual([])
-    const ruleIds = messages.map((message) => message.ruleId)
-    if (allowed) expect(ruleIds).not.toContain('boundaries/dependencies')
-    else expect(ruleIds).toContain('boundaries/dependencies')
+  it.each(rows)('$from → $to ($kind): erlaubt = $allowed', ({ key, allowed }) => {
+    expect(fatalOf(key)).toEqual([])
+    if (allowed) expect(ruleIdsOf(key)).not.toContain('boundaries/dependencies')
+    else expect(ruleIdsOf(key)).toContain('boundaries/dependencies')
   })
 })
 
@@ -167,41 +201,37 @@ describe('Umwege über Dateien außerhalb der Schichten', () => {
     { from: 'ui', to: 'lib/unknown', ruleId: 'boundaries/no-unknown-dependencies' },
     { from: 'barrel', to: 'data', ruleId: 'boundaries/no-unknown-files' },
     { from: 'lib/unknown', to: 'data', ruleId: 'boundaries/no-unknown-files' },
-  ]
+  ].map((detour) => ({ ...detour, key: registerImport(detour.from, detour.to, 'value') }))
 
-  it.each(detours)('lehnt $from → $to über $ruleId ab', async ({ from, to, ruleId }) => {
-    const messages = await lintTextAs({ code: importCode(from, to, 'value'), asFile: fileOf(from) })
-
-    expect(messages.map((message) => message.ruleId)).toContain(ruleId)
+  it.each(detours)('lehnt $from → $to über $ruleId ab', ({ key, ruleId }) => {
+    expect(ruleIdsOf(key)).toContain(ruleId)
   })
 
-  it.each(['app', 'schemas', 'schemas/part', 'instrumentation', 'ui', 'shared/lib'])(
-    'kennt %s als Datei einer Schicht',
-    async (from) => {
-      const code = importCode(from, 'shared/config', 'value')
-      const messages = await lintTextAs({ code, asFile: fileOf(from) })
-      const ruleIds = messages.map((message) => message.ruleId)
-
-      expect(ruleIds).not.toContain('boundaries/no-unknown-files')
-      expect(ruleIds).not.toContain('boundaries/no-unknown-dependencies')
-    },
+  const known = ['app', 'schemas', 'schemas/part', 'instrumentation', 'ui', 'shared/lib'].map(
+    (from) => ({ from, key: registerImport(from, 'shared/config', 'value') }),
   )
+
+  it.each(known)('kennt $from als Datei einer Schicht', ({ key }) => {
+    expect(ruleIdsOf(key)).not.toContain('boundaries/no-unknown-files')
+    expect(ruleIdsOf(key)).not.toContain('boundaries/no-unknown-dependencies')
+  })
 })
 
 describe('Tests neben dem Code', () => {
   const vitestImport = "import { expect } from 'vitest'\nexport const probe = expect\n"
 
-  it('erlaubt vitest in einer Testdatei der Fachlogik', async () => {
-    const asFile = 'boundaries/src/features/alpha/domain/domain-module.test.ts'
-    const messages = await lintTextAs({ code: vitestImport, asFile })
+  const inTest = register('vitest im Test', {
+    code: vitestImport,
+    asFile: 'boundaries/src/features/alpha/domain/domain-module.test.ts',
+  })
+  const inCode = register('vitest im Code', { code: vitestImport, asFile: fileOf('domain') })
 
-    expect(messages.filter((message) => message.fatal)).toEqual([])
-    expect(messages.map((message) => message.ruleId)).not.toContain('boundaries/dependencies')
+  it('erlaubt vitest in einer Testdatei der Fachlogik', () => {
+    expect(fatalOf(inTest)).toEqual([])
+    expect(ruleIdsOf(inTest)).not.toContain('boundaries/dependencies')
   })
 
-  it('verbietet vitest im Code der Fachlogik', async () => {
-    const messages = await lintTextAs({ code: vitestImport, asFile: fileOf('domain') })
-
-    expect(messages.map((message) => message.ruleId)).toContain('boundaries/dependencies')
+  it('verbietet vitest im Code der Fachlogik', () => {
+    expect(ruleIdsOf(inCode)).toContain('boundaries/dependencies')
   })
 })

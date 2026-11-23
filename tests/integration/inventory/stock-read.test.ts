@@ -2,15 +2,17 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { getFoodTypeDetail } from '../../../src/features/inventory/application/get-food-type-detail'
 import { getFoodTypeLevel } from '../../../src/features/inventory/application/get-food-type-level'
 import { getStockOverview } from '../../../src/features/inventory/application/get-stock-overview'
+import { getStockTree } from '../../../src/features/inventory/application/get-stock-tree'
 import { searchStock } from '../../../src/features/inventory/application/search-stock'
 import type { StockReader } from '../../../src/features/inventory/application/stock-reader'
+import { foodTypeDetailSchema } from '../../../src/features/inventory/schemas/detail'
+import { stockFilterSchema } from '../../../src/features/inventory/schemas/requests'
 import {
-  foodTypeDetailSchema,
   foodTypeLevelSchema,
-  stockFilterSchema,
   stockOverviewSchema,
   stockSearchSchema,
-} from '../../../src/features/inventory/schemas'
+  stockTreeSchema,
+} from '../../../src/features/inventory/schemas/stock'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
 import { setupStockRead, today } from './stock-read-fixtures'
 
@@ -75,6 +77,19 @@ describe('Vorrat lesen gegen die Datenbank (Demo-Daten)', () => {
     expect(level.categories[0]?.rows).toMatchObject([
       { target: { kind: 'product' }, name: 'Linsen', packagesInStock: 3, state: 'good' },
     ])
+  })
+
+  it('liefert den ganzen Vorrat als Baum, je Warengruppe wie Ebene 2', async () => {
+    const tree = stockTreeSchema.parse(await getStockTree(reader, { householdId, today }))
+    const vegetables = tree.groups.find(({ group }) => group.key === 'gemuese_huelsenfruechte')
+    const level = await getFoodTypeLevel(reader, {
+      householdId,
+      today,
+      groupKey: 'gemuese_huelsenfruechte',
+    })
+
+    expect(vegetables).toEqual(level.ok ? level.value : null)
+    expect(tree.groups.find(({ group }) => group.key === 'fette_oele')?.categories).toEqual([])
   })
 
   it('liefert das Detail der Nudeln mit Herkunft der Nährwerte', async () => {

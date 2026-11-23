@@ -67,7 +67,11 @@ backup backup pruefen "$stand" | tee probe.log
 grep -q 'Probe in Ordnung' probe.log || fail "Die Probe hat den Stand nicht eingespielt"
 
 docker compose exec -T backup backup gesund || fail "Healthcheck nach erfolgreicher Sicherung krank"
-docker compose exec -T backup sh -c 'echo "fehler test" > /backups/.letzter-lauf'
+# Status für die App (#147): lesbar für alle, letzte Sicherung mit Art und Stand
+[ "$(stat -c '%a' backups/status/letzte-sicherung)" = "644" ] || fail "Status nicht für die App lesbar"
+grep -Eq '^[0-9]{4}-[0-9]{2}-[0-9]{2}T.* [a-z-]+/[0-9]{4}-' backups/status/letzte-sicherung ||
+  fail "letzte-sicherung hat nicht die Form <zeit> <art>/<stand>"
+docker compose exec -T backup sh -c 'echo "fehler test" > /backups/status/letzter-lauf'
 docker compose exec -T backup backup gesund && fail "Healthcheck muss einen Fehlschlag melden"
 
 # Nach der Sicherung: neue Zeile, gelöschtes und neues Foto. Alles das soll verschwinden.
@@ -81,9 +85,16 @@ changed=$(psql_value "$ROW_COUNTS")
 backup backup wiederherstellen "$stand" && fail "Ohne --ja und ohne Terminal darf nichts passieren"
 
 # Eine offene Verbindung steht für eine laufende App: Dann darf das Zurückspielen nicht starten.
-docker compose exec -T -d db psql -U preposaurus -d preposaurus -c 'select pg_sleep(60)'
+# Es wartet bis zu 10 s (#247) und nennt danach den Anwendungsnamen der Verbindung.
+docker compose exec -T -d -e PGAPPNAME=offene-verbindung db \
+  psql -U preposaurus -d preposaurus -c 'select pg_sleep(60)'
 sleep 2
-backup backup wiederherstellen "$stand" --ja && fail "Bei offener Verbindung darf nichts passieren"
+backup backup wiederherstellen "$stand" --ja > busy.log 2>&1 &&
+  fail "Bei offener Verbindung darf nichts passieren"
+cat busy.log
+# Noch läuft auch die App, ihre Verbindungen stehen in derselben Zeile
+grep 'noch verbunden:' busy.log | grep -q 'offene-verbindung (1)' ||
+  fail "Die Meldung nennt die verbliebene Verbindung nicht"
 docker compose stop web worker
 psql_value "select pg_terminate_backend(pid) from pg_stat_activity
   where query like '%pg_sleep(60)%' and pid <> pg_backend_pid()" > /dev/null
@@ -97,7 +108,15 @@ backup backup wiederherstellen manuell/2026-01-01_000000 --ja && fail "Ein kaput
 
 # Rest eines abgebrochenen Laufs: Eine alte Kopie unter preposaurus_alt räumt der nächste Lauf weg.
 psql_value 'create database preposaurus_alt' > /dev/null
+# Eine Verbindung, die sich erst kurz nach dem Stoppen schließt (wie App-Pool oder pg-boss, #247):
+# Das Zurückspielen wartet auf sie, statt abzubrechen. 8 s, damit sie den Start des Containers
+# backup sicher überdauert und trotzdem innerhalb der 10 s Wartezeit endet.
+docker compose exec -T -d -e PGAPPNAME=kurze-verbindung db \
+  psql -U preposaurus -d preposaurus -c 'select pg_sleep(8)'
+sleep 1
 backup backup wiederherstellen "$stand" --ja | tee restore.log
+grep -q 'Warte bis zu 10 s.*kurze-verbindung' restore.log ||
+  fail "Das Zurückspielen hat nicht auf die kurze Verbindung gewartet"
 [ "$(psql_value "select count(*) from pg_database where datname like 'preposaurus\_%'")" = "0" ] ||
   fail "Nach dem Zurückspielen sind preposaurus_alt oder preposaurus_neu übrig"
 after=$(psql_value "$ROW_COUNTS")

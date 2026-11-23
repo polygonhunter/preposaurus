@@ -4,7 +4,7 @@
 import 'server-only'
 import { coverageOf, type GroupCoverage } from '@/features/supply/application/stock-figures'
 import type { CalendarDay } from '@/shared/lib/dates'
-import type { StockOverview } from '../schemas'
+import type { StockOverview } from '../schemas/stock'
 import { loadReadContext, totalsByNode, totalsOf } from './read-context'
 import type { StockReader } from './stock-reader'
 import { joinUnits, toGroupUnit } from './stock-model'

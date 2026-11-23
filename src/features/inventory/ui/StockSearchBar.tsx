@@ -1,6 +1,7 @@
 import Form from 'next/form'
 import { SearchField } from '@/shared/ui/SearchField'
-import type { StockFilter, StockSearch } from '../schemas'
+import type { StockFilter } from '../schemas/requests'
+import type { StockSearch } from '../schemas/stock'
 import { FilterSheet } from './FilterSheet'
 import { STOCK_PARAMS, STOCK_PATH, statusSlug } from './stock-paths'
 
@@ -23,6 +24,7 @@ export function StockSearchBar({ filter, options }: StockSearchBarProps) {
           defaultValue={filter.search ?? ''}
           placeholder="Lebensmittel suchen"
           enterKeyHint="search"
+          shortcut="search"
         />
         {filter.status === 'in-stock' ? null : (
           <input type="hidden" name={STOCK_PARAMS.status} value={statusSlug(filter.status)} />

@@ -9,7 +9,7 @@ interface StoredItem extends RestockItem {
 }
 
 /** Wie `StoredRestockItem` des Ports (Test-Helfer dürfen `application/` nicht importieren) */
-type RemovedItem = Omit<RestockItem, 'changedAt'>
+type RemovedItem = Omit<RestockItem, 'changedAt' | 'foodTypeId'>
 
 interface ConsumedUnit {
   householdId: string
@@ -44,6 +44,7 @@ export function storedItem(
     source: 'manuell' as RestockSource,
     isDone: false,
     productId: null,
+    foodTypeId: null,
     createdAt: NOW,
     changedAt: NOW,
     ...overrides,

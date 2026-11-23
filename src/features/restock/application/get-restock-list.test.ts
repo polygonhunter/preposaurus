@@ -38,7 +38,13 @@ interface Options {
 function ports({ gaps = [waterGap], isCalculable = true, goalDay = targetDay }: Options = {}) {
   const repository = createFakeRestockRepository({
     items: [
-      storedItem({ id: 'b1a0c7e2-0000-4000-8000-000000000001', householdId, source: 'nachkauf' }),
+      storedItem({
+        id: 'b1a0c7e2-0000-4000-8000-000000000001',
+        householdId,
+        source: 'nachkauf',
+        productId: 'b1a0c7e2-0000-4000-8000-0000000000a2',
+        foodTypeId: 'b1a0c7e2-0000-4000-8000-0000000000b1',
+      }),
       storedItem({ id: 'b1a0c7e2-0000-4000-8000-000000000002', householdId, isDone: true }),
       storedItem({ id: 'b1a0c7e2-0000-4000-8000-000000000003', householdId: 'haushalt-b' }),
     ],
@@ -56,6 +62,10 @@ describe('getRestockList', () => {
     expect(restockListSchema.parse(list)).toEqual(list)
     expect(list.gaps).toEqual([{ ...waterGap, examples: ['Sprudelwasser'] }])
     expect(list.replace).toHaveLength(1)
+    expect(list.replace[0]?.captureTarget).toEqual({
+      kind: 'food-type',
+      id: 'b1a0c7e2-0000-4000-8000-0000000000b1',
+    })
     expect(list.suggestions).toEqual([
       {
         rowKey: milk.rowKey,
@@ -65,6 +75,7 @@ describe('getRestockList', () => {
       },
     ])
     expect(list.done).toHaveLength(1)
+    expect(list.done[0]?.captureTarget).toBeNull()
     expect(list.openItemCount).toBe(1)
   })
 

@@ -5,7 +5,7 @@ import { refresh } from 'next/cache'
 import { requireHouseholdUser } from '@/server/auth/guards'
 import { undoStillGood } from '../application/mark-still-good'
 import { stockServices } from '../application/stock-services'
-import { undoStillGoodSchema } from '../schemas'
+import { undoStillGoodSchema } from '../schemas/requests'
 import { toCalendarDay } from '@/shared/lib/dates'
 
 /** Ist „Noch gut“ schon weg, ist nichts zu tun. */

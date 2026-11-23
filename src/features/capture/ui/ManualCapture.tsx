@@ -1,17 +1,22 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { Button } from '@/shared/ui/Button'
 import { LiveMessage } from '@/shared/ui/LiveMessage'
 import type { CaptureOptions } from '../domain/capture-options'
+import type { CapturePrefill } from '../domain/capture-prefill'
 import { CaptureSaved } from './CaptureSaved'
 import { NUTRITION_FIELDS, type CaptureErrors, type CaptureField } from './manual-capture-draft'
 import { deriveView } from './manual-capture-view'
 import { ManualCaptureFields } from './ManualCaptureFields'
 import { useManualCapture } from './use-manual-capture'
 
-type ManualCaptureProps = Readonly<{ options: CaptureOptions }>
+type ManualCaptureProps = Readonly<{
+  options: CaptureOptions
+  // Art bzw. Produkt aus der Adresse (#195), sonst null
+  prefill: CapturePrefill | null
+}>
 
 /** name-Attribut des Eingabefelds je Feld, damit der Fokus beim Speichern dorthin springt */
 const FIELD_INPUTS: Record<Exclude<CaptureField, 'form'>, string> = {
@@ -27,10 +32,15 @@ const FIELD_INPUTS: Record<Exclude<CaptureField, 'form'>, string> = {
 const isNutritionField = (field: CaptureField) =>
   (NUTRITION_FIELDS as readonly CaptureField[]).includes(field)
 
+/** Vorbelegt geht es beim Inhalt weiter, mit vorgewähltem Produkt gleich beim MHD (F2). */
+const firstPrefilledField = (prefill: CapturePrefill) =>
+  prefill.product === null ? ('content' as const) : ('units' as const)
+
 const firstMessage = (errors: CaptureErrors) => Object.values(errors).find(Boolean) ?? null
 
-// Manuelles Erfassen (#52, #53, #54): ein Formular, danach Bestätigung mit „Noch eins“.
-export function ManualCapture({ options }: ManualCaptureProps) {
+// Manuelles Erfassen (#52, #53, #54): ein Formular, danach Bestätigung mit „Noch eins“. Vorbelegt
+// (#195) steht der Fokus gleich beim Inhalt, mit vorgewähltem Produkt beim MHD.
+export function ManualCapture({ options, prefill }: ManualCaptureProps) {
   const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
   const [isNutritionOpen, setNutritionOpen] = useState(false)
@@ -47,13 +57,21 @@ export function ManualCapture({ options }: ManualCaptureProps) {
     if (input instanceof HTMLElement) input.focus()
   }
 
-  const capture = useManualCapture(options, focusField)
+  const capture = useManualCapture({ ...options, prefill }, focusField)
   const view = deriveView(options, capture.draft)
 
-  if (capture.savedUnits !== null) {
+  const prefilledField = prefill === null ? null : firstPrefilledField(prefill)
+  useEffect(() => {
+    // Nur beim ersten Zeichnen: Das Feld steht schon im DOM, es gibt nichts aufzuklappen
+    if (prefilledField === null) return
+    const input = formRef.current?.elements.namedItem(FIELD_INPUTS[prefilledField])
+    if (input instanceof HTMLElement) input.focus()
+  }, [prefilledField])
+
+  if (capture.saved !== null) {
     return (
       <CaptureSaved
-        unitCount={capture.savedUnits}
+        saved={capture.saved}
         productName={view.productName}
         isFirst={options.isStockEmpty}
         onAnother={() => {

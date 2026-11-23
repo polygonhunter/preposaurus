@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Icon } from '@/shared/ui/Icon'
-import type { StockFilter, StockSearch } from '../schemas'
+import type { StockFilter } from '../schemas/requests'
+import type { StockSearch } from '../schemas/stock'
 import { stockHref } from './stock-paths'
 
 type ActiveFiltersProps = Readonly<{ filter: StockFilter; options: StockSearch['options'] }>

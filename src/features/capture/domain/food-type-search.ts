@@ -5,6 +5,7 @@
 // Kleinschreibung, Umlaute (auch als ae, oe, ue) und ß spielen keine Rolle. Kurze Eingaben (unter
 // drei Zeichen) treffen nur Wortanfänge, damit „Öl“ nicht „Brokkoli“ findet. Mehrere Wörter
 // treffen auch einzeln („tomaten dose“).
+import { normalizeSearchText } from '@/shared/lib/search-text'
 import { FOOD_TYPE_SEARCH_TERMS } from './food-type-search-terms'
 
 interface SearchableFoodType {
@@ -13,6 +14,8 @@ interface SearchableFoodType {
   name: string
   categoryName: string
   productGroupName: string
+  /** Eigene Suchwörter einer eigenen Art (#126), zusätzlich zu FOOD_TYPE_SEARCH_TERMS */
+  searchTerms?: readonly string[]
 }
 
 const NO_MATCH = Number.POSITIVE_INFINITY
@@ -26,17 +29,6 @@ const RANK = {
   infix: 4,
   path: 5,
 } as const
-
-/** Kleinschreibung ohne Akzente, ß als ss, ae/oe/ue wie ä/ö/ü. „Knaecke“ und „Knäcke“ sind gleich. */
-export function normalizeSearchText(text: string): string {
-  return text
-    .trim()
-    .toLowerCase()
-    .replaceAll('ß', 'ss')
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/([aou])e/g, '$1')
-}
 
 const wordsOf = (text: string) => text.split(/[\s,()/:-]+/)
 
@@ -65,7 +57,10 @@ function looseRank(texts: readonly string[], path: string, query: string): numbe
 /** Kleinerer Rang = besserer Treffer. */
 function rankOf(foodType: SearchableFoodType, query: string): number {
   const name = normalizeSearchText(foodType.name)
-  const terms = (FOOD_TYPE_SEARCH_TERMS[foodType.key] ?? []).map(normalizeSearchText)
+  const terms = [
+    ...(FOOD_TYPE_SEARCH_TERMS[foodType.key] ?? []),
+    ...(foodType.searchTerms ?? []),
+  ].map(normalizeSearchText)
   if (name === query) return RANK.exact
   const byTerm = searchTermRank(terms, query)
   if (byTerm === RANK.exact) return RANK.exact

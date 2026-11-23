@@ -1,13 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { stockFilterSchema } from '../schemas'
-import {
-  dueHref,
-  isHitMode,
-  readDueSort,
-  readStockParams,
-  stockHref,
-  targetPath,
-} from './stock-paths'
+import { stockFilterSchema } from '../schemas/requests'
+import { dueHref, isHitMode, readDueSort, readStockParams, stockHref } from './stock-paths'
 
 const filterOf = (params: Record<string, string | string[] | undefined>) =>
   stockFilterSchema.parse(readStockParams(params))
@@ -42,11 +35,6 @@ describe('Adressen im Vorrat', () => {
     expect(isHitMode(filterOf({ suche: 'nu' }))).toBe(true)
     expect(isHitMode(filterOf({ zustand: 'unvollstaendig' }))).toBe(true)
     expect(isHitMode(filterOf({ behaelter: ID }))).toBe(true)
-  })
-
-  it('führt zur Lebensmittelart bzw. zum Produkt ohne Art', () => {
-    expect(targetPath({ kind: 'food-type', id: ID })).toBe(`/vorrat/art/${ID}`)
-    expect(targetPath({ kind: 'product', id: ID })).toBe(`/vorrat/produkt/${ID}`)
   })
 
   it('merkt sich die Sortierung von Bald fällig in der Adresse', () => {

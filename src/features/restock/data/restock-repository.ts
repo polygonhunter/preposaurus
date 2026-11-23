@@ -3,6 +3,7 @@
 import 'server-only'
 import { and, count, eq } from 'drizzle-orm'
 import type { Database } from '@/server/db/connection'
+import { products } from '@/server/db/schema/inventory'
 import { restockItems } from '@/server/db/schema/restock'
 import type { CalendarDay } from '@/shared/lib/dates'
 import type { RestockItem } from '../domain/restock-list'
@@ -41,10 +42,21 @@ const storedColumns = {
 }
 
 async function listItems(db: Database, householdId: string): Promise<RestockItem[]> {
-  return db
-    .select({ ...storedColumns, changedAt: restockItems.updatedAt })
-    .from(restockItems)
-    .where(eq(restockItems.householdId, householdId))
+  return (
+    db
+      .select({
+        ...storedColumns,
+        changedAt: restockItems.updatedAt,
+        foodTypeId: products.foodTypeId,
+      })
+      .from(restockItems)
+      // Nur Produkte des eigenen Haushalts (#133), auch wenn der Eintrag schon dazugehört
+      .leftJoin(
+        products,
+        and(eq(products.id, restockItems.productId), eq(products.householdId, householdId)),
+      )
+      .where(eq(restockItems.householdId, householdId))
+  )
 }
 
 // Offen heißt hier und nur hier: nicht abgehakt. Übersicht und Wochenübersicht zählen damit (#202).

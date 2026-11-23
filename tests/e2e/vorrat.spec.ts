@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
@@ -9,10 +10,16 @@ const GRAIN = 'Getreide und Kartoffeln'
 const GRAIN_OFFICIAL = 'Getreide, Getreideprodukte, Brot und Kartoffeln'
 
 test('Drilldown: Warengruppe, Lebensmittelarten nach Kategorie, Detail', async ({ page }) => {
+  // Ab „weit“ steht Ebene 1 als Tabelle da (vorrat-stufen.spec.ts)
+  const isTable = (page.viewportSize()?.width ?? 0) >= 1280
   await page.goto('/vorrat')
   await expect(page.getByRole('heading', { level: 1, name: 'Vorrat' })).toBeVisible()
   // Leere Warengruppen bleiben stehen, denn die Lücke ist eine Information
-  await expect(page.getByRole('link', { name: /^Fette und Öle\s*noch nichts/ })).toBeVisible()
+  await expect(
+    isTable
+      ? page.getByRole('row', { name: 'noch nichts' }).first()
+      : page.getByRole('link', { name: /^Fette und Öle\s*noch nichts/ }),
+  ).toBeVisible()
 
   await page.getByRole('link', { name: new RegExp(`^${GRAIN}`) }).click()
 
@@ -97,6 +104,59 @@ test('Zustand „Bald fällig“ und Filter-Blatt stehen in der Adresse', async 
   await page.getByRole('link', { name: 'Filter Küche entfernen' }).click()
 
   await expect(page).toHaveURL(/\/vorrat$/)
+})
+
+async function openOatsDetail(page: Page) {
+  await page.goto('/vorrat/getreide')
+  await page.getByRole('link', { name: /^Haferflocken/ }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Haferflocken' })).toBeVisible()
+}
+
+const detailSheet = (page: Page) => page.getByRole('dialog', { name: 'So wird gerechnet' })
+
+test('Erklär-Blatt der Kennwerte öffnet per Tastatur und nennt die Tage der Kachel (#230)', async ({
+  page,
+}) => {
+  await openOatsDetail(page)
+  const daysTile = page
+    .getByRole('main')
+    .locator('dl > div')
+    .filter({ has: page.getByRole('term').filter({ hasText: /^Tage$/ }) })
+  const days = (await daysTile.getByRole('definition').textContent()) ?? 'fehlt'
+  const sheet = detailSheet(page)
+
+  // Erst nach der Hydrierung reagiert der Knopf, deshalb mit Wiederholung
+  await expect(async () => {
+    await page.getByRole('button', { name: 'So wird gerechnet' }).focus()
+    await page.keyboard.press('Enter')
+    await expect(sheet).toBeVisible({ timeout: 1000 })
+  }).toPass()
+  await expect(
+    sheet.getByText(new RegExp(`^[\\d.]+ kcal ÷ [\\d.]+ kcal am Tag = ${days} Tage?$`)),
+  ).toBeVisible()
+  await expect(sheet.getByText(/zählt heute mit|zählen heute mit/).first()).toBeVisible()
+  await expect(sheet.getByText(/„X von 10 Tagen“/)).toBeVisible()
+  await expect(sheet.getByRole('link', { name: 'Zur Quelle' })).toHaveAttribute('href', /^https:/)
+
+  await page.keyboard.press('Escape')
+  await expect(sheet).toBeHidden()
+})
+
+test('Tipp auf eine Kachel im Detail öffnet das Erklär-Blatt (#230)', async ({ page }) => {
+  await openOatsDetail(page)
+  const tile = page
+    .getByRole('main')
+    .getByRole('term')
+    .filter({ hasText: /^kcal$/ })
+  const sheet = detailSheet(page)
+
+  await expect(async () => {
+    const box = await tile.boundingBox()
+    if (box === null) throw new Error('nicht sichtbar')
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+    await expect(sheet).toBeVisible({ timeout: 1000 })
+  }).toPass()
+  await expectAccessibleLayout(page)
 })
 
 test('unbekannte Lebensmittelart zeigt „Nicht gefunden“', async ({ page }) => {

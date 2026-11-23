@@ -92,3 +92,10 @@ export const memberReturnSchema = z.enum(['einstellungen', 'einrichtung'])
 export type MemberReturn = z.infer<typeof memberReturnSchema>
 
 export const householdDietSchema = z.enum(DIETS, { error: 'Bitte eine Ernährungsform wählen.' })
+
+// Ampel-Schwellen (EIN-05, #78) als ganze Tage. Wie sie zueinander stehen (Orange mindestens
+// 7 Tage und nie größer als Gelb), prüft die Fachlogik validateAmpelThresholds.
+const MAX_AMPEL_DAYS = 365
+const ampelDays = wholeNumber(1, MAX_AMPEL_DAYS, 'Bitte ganze Tage von 1 bis 365 eintragen.')
+
+export const ampelThresholdsSchema = z.object({ soonDays: ampelDays, urgentDays: ampelDays })

@@ -1,16 +1,22 @@
 import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
 import type { ReplacementCandidate } from './replacement-candidates'
-import { buildRestockList, type RestockGap, type RestockItem } from './restock-list'
+import {
+  buildRestockList,
+  captureTargetOf,
+  type RestockGap,
+  type RestockItem,
+} from './restock-list'
 
 // Frei gewählte Testdaten.
 const item = (overrides: Partial<RestockItem> & Pick<RestockItem, 'id'>): RestockItem => ({
   label: 'Knäckebrot',
   source: 'manuell',
   isDone: false,
-  productId: null,
   createdAt: new Date('2026-11-20T10:00:00Z'),
   changedAt: new Date('2026-11-20T10:00:00Z'),
+  productId: null,
+  foodTypeId: null,
   ...overrides,
 })
 
@@ -116,5 +122,19 @@ describe('buildRestockList', () => {
       done: [],
       openItemCount: 0,
     })
+  })
+})
+
+describe('captureTargetOf', () => {
+  it('belegt mit der Lebensmittelart vor, ohne Art mit dem Produkt (#195)', () => {
+    expect(captureTargetOf({ productId: 'p', foodTypeId: 'art' })).toEqual({
+      kind: 'food-type',
+      id: 'art',
+    })
+    expect(captureTargetOf({ productId: 'p', foodTypeId: null })).toEqual({
+      kind: 'product',
+      id: 'p',
+    })
+    expect(captureTargetOf({ productId: null, foodTypeId: null })).toBeNull()
   })
 })

@@ -1,7 +1,8 @@
 // Adressen der Vorrat-Seiten (UX-Konzept §6: jeder Screen hat eine Adresse, auch Filter stehen
 // dort). Die Parameter heißen deutsch, die Werte der Fachlogik bleiben englisch. Die Prüfung
 // übernimmt `stockFilterSchema`.
-import type { DueSort, StockFilter, StockTarget } from '../schemas'
+import type { DueSort } from '../schemas/due'
+import type { StockFilter } from '../schemas/requests'
 
 type StockStatus = StockFilter['status']
 type SearchParams = Readonly<Record<string, string | string[] | undefined>>
@@ -33,9 +34,6 @@ const STATUS_BY_SLUG = new Map(Object.entries(STATUS_SLUGS).map(([status, slug])
 
 // Schlüssel der Warengruppen sind feste Slugs aus dem Seed (a–z, _)
 export const groupPath = (groupKey: string) => `${STOCK_PATH}/${groupKey}`
-
-export const targetPath = ({ kind, id }: StockTarget) =>
-  `${STOCK_PATH}/${kind === 'food-type' ? 'art' : 'produkt'}/${id}`
 
 /** Sprungmarke einer Kategorie auf Ebene 2 */
 export const categoryAnchor = (categoryId: string) => `kategorie-${categoryId}`

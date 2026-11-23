@@ -4,7 +4,7 @@
 import { createContext, useContext } from 'react'
 import type { RestockItemDto, RestockSuggestionDto } from '../schemas'
 
-export type RestockEntry = Pick<RestockItemDto, 'id' | 'label'>
+export type RestockEntry = Pick<RestockItemDto, 'id' | 'label' | 'captureTarget'>
 
 export type SuggestionEntry = Pick<RestockSuggestionDto, 'productId' | 'label'>
 

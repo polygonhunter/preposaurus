@@ -4,9 +4,10 @@ import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { todayInBerlin } from '@/shared/lib/dates'
-import { parseBestBefore, type BestBeforeParseError } from '../domain/best-before'
+import { parseBestBefore } from '../domain/best-before'
 import { doubtAboutBestBefore, type BestBeforeDoubt } from '../domain/best-before-plausibility'
 import { addDateEntry, changeDateCount, type DateEntry } from '../domain/date-entries'
+import { PARSE_MESSAGES } from './best-before-messages'
 import { DateEntryList } from './DateEntryList'
 import { QuickCounts } from './QuickCounts'
 
@@ -15,16 +16,6 @@ type BestBeforeEntriesProps = Readonly<{
   onChange: (entries: DateEntry[]) => void
   error: string | undefined
 }>
-
-const PARSE_MESSAGES: Record<BestBeforeParseError['kind'], string> = {
-  empty: 'Bitte gebt das Datum ein, wie es aufgedruckt ist, oder wählt „Datum fehlt“.',
-  'no-date': 'Das ist kein Datum. Bitte so eingeben: 30.09.2027, 09/2027 oder 2027.',
-  incomplete: 'Bitte mit Jahr eingeben, z. B. 30.09.2027.',
-  ambiguous: 'Bitte das Jahr vierstellig eingeben, z. B. 09/2027.',
-  'invalid-month': 'Diesen Monat gibt es nicht. Bitte prüft das Datum.',
-  'invalid-date': 'Diesen Tag gibt es nicht. Bitte prüft das Datum.',
-  'year-out-of-range': 'Bitte ein Jahr zwischen 2000 und 2099 eingeben.',
-}
 
 // Leise Rückfrage nach dem Hinzufügen, das Datum bleibt trotzdem in der Liste (#218)
 const DOUBT_MESSAGES: Record<BestBeforeDoubt, string> = {

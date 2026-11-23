@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { BestBeforeGroupDto, FoodTypeDetail, NutritionDto } from '../schemas'
+import type { BestBeforeGroupDto, FoodTypeDetail, NutritionDto } from '../schemas/detail'
 import { fifoGroupOf, nutritionLine, nutritionOrigin, shelfLifeColumns } from './detail-view'
 
 type DetailProduct = FoodTypeDetail['products'][number]

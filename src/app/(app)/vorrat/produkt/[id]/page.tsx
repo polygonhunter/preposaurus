@@ -1,13 +1,17 @@
 import { notFound } from 'next/navigation'
 import { loadDetail } from '@/features/inventory/application/load-detail'
-import { FoodTypeDetailView } from '@/features/inventory/ui/FoodTypeDetailView'
+import { loadStockTree } from '@/features/inventory/application/load-stock-tree'
+import { StockDetailSplit } from '@/features/inventory/ui/StockDetailSplit'
 import { requirePageHousehold } from '@/server/auth/household'
 
-// Detail eines Produkts ohne Lebensmittelart: gleiche Seite wie die Art (#43, #45).
+// Detail eines Produkts ohne Lebensmittelart: gleiche Seite wie die Art (#43, #45, M12-03).
 export default async function ProductDetailPage({ params }: PageProps<'/vorrat/produkt/[id]'>) {
-  const { householdId } = await requirePageHousehold()
+  const { householdId, isAdmin } = await requirePageHousehold()
   const { id } = await params
-  const result = await loadDetail(householdId, { kind: 'product', id })
+  const [result, tree] = await Promise.all([
+    loadDetail(householdId, { kind: 'product', id }),
+    loadStockTree(householdId),
+  ])
   if (!result.ok) notFound()
-  return <FoodTypeDetailView {...result.value} />
+  return <StockDetailSplit {...result.value} tree={tree} isAdmin={isAdmin} />
 }

@@ -10,6 +10,7 @@ import { getDueUnits } from './get-due-units'
 import { getFoodTypeDetail } from './get-food-type-detail'
 import { getFoodTypeLevel } from './get-food-type-level'
 import { getStockOverview } from './get-stock-overview'
+import { getStockTree } from './get-stock-tree'
 import { searchStock } from './search-stock'
 
 const today = toCalendarDay('2026-11-22')
@@ -57,6 +58,7 @@ describe.runIf(isPerfRun)('Lesepfade mit großem Haushalt (ohne Datenbank)', () 
   it.each([
     ['Ebene 1', () => getStockOverview(reader, { householdId, today })],
     ['Ebene 2', () => getFoodTypeLevel(reader, { householdId, today, groupKey: 'getreide' })],
+    ['Baum', () => getStockTree(reader, { householdId, today })],
     ['Detail', () => getFoodTypeDetail(reader, { householdId, today, target: detailTarget })],
     ['Suche', () => searchStock(reader, { householdId, today, filter: { status: 'in-stock' } })],
     ['Bald fällig', () => getDueUnits(reader, { householdId, today, sort: 'date' })],

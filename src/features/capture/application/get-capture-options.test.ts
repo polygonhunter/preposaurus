@@ -8,6 +8,7 @@ const noodles = {
   categoryName: 'Nudeln, Reis und Getreide',
   productGroupName: 'Getreide',
   kcalPer100: 358,
+  searchTerms: [],
 }
 
 const knownNoodles = {

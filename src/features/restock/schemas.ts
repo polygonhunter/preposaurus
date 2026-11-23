@@ -67,6 +67,8 @@ const itemSchema = z.object({
   label: z.string(),
   source: z.enum(RESTOCK_SOURCES),
   isDone: z.boolean(),
+  /** Vorbelegung für „Erfassen“ (#195): Lebensmittelart, ohne Art das Produkt, sonst null */
+  captureTarget: z.object({ kind: z.enum(['food-type', 'product']), id }).nullable(),
 })
 
 /** @internal Nur Tests prüfen das DTO gegen das Schema, die Seite nutzt die Typen. */

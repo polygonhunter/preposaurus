@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { NoticeBar } from '@/shared/ui/NoticeBar'
 import { UndoBar } from '@/shared/ui/UndoBar'
-import { RESTOCK_PATHS } from './restock-paths'
+import { captureHref } from './restock-paths'
 import type { RestockActions, RestockNotice } from './use-restock-actions'
 
 type RestockNoticeBarProps = Readonly<{
@@ -30,7 +30,7 @@ export function RestockNoticeBar({ notice, actions, onDismiss }: RestockNoticeBa
           secondary={{
             label: 'Jetzt erfassen',
             onClick: () => {
-              router.push(RESTOCK_PATHS.capture)
+              router.push(captureHref(notice.entry))
             },
           }}
         />

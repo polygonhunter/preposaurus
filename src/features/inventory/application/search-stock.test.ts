@@ -1,7 +1,7 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
 import type { StockStatusFilter } from '../domain/stock-filter'
-import { stockFilterSchema, type StockFilter } from '../schemas'
+import { type StockFilter, stockFilterSchema } from '../schemas/requests'
 import {
   createFakeStockReader,
   product,

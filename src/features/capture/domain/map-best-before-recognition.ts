@@ -2,9 +2,8 @@
 // dem Feld `datum`. `roh_text` ist reine Anzeige und wird nie zu einem Datum geparst, auch wenn
 // darin eines stünde: Hat die KI kein Datum geliefert, war sie sich nicht sicher.
 import type { BestBefore, BestBeforePrecision, DateKind } from '@/features/inventory/domain/unit'
-import { parseCalendarDay } from '@/shared/lib/dates'
+import { normalizeToPrecision, parseCalendarDay } from '@/shared/lib/dates'
 import type { AiBestBeforeAnswer } from './ai-answers'
-import { normalizeToPrecision } from './best-before'
 import { mapConfidence } from './map-recognition'
 import type { Confidence } from './plausibility'
 

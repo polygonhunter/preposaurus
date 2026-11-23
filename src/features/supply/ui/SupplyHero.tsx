@@ -1,7 +1,7 @@
 import { DayBar } from '@/shared/ui/DayBar'
 import type { OverviewHousehold, OverviewSupply } from '../schemas'
 import { formatDays, headline, limitingSentence, scaleFor } from './head-text'
-import { SupplyExplainer } from './SupplyExplainer'
+import { ExplainSheet } from '@/shared/ui/ExplainSheet'
 import { SupplyExplanation } from './SupplyExplanation'
 
 type SupplyHeroProps = Readonly<{
@@ -11,6 +11,16 @@ type SupplyHeroProps = Readonly<{
 }>
 
 const HEADING_ID = 'heute-versorgt'
+const EXPLAIN_TITLE = 'So wird gerechnet'
+
+// Der Knopf ist sichtbar und per Tastatur erreichbar, seine Fläche (::after) deckt den ganzen Kopf
+// ab: Ein Tipp auf Kernzahl, „ca.“ oder Balken öffnet dasselbe Blatt. Die Balken bleiben dabei für
+// Screenreader eigene Messwerte (#219).
+const EXPLAIN_TRIGGER = {
+  label: EXPLAIN_TITLE,
+  className:
+    'mt-1 inline-flex min-h-11 items-center text-footnote text-accent after:absolute after:inset-0 after:rounded-group',
+}
 
 // „Heute versorgt“ (DESIGN_SYSTEM §7, UX-Konzept §8.1 V1): Satz mit Kernzahl in ganzen Tagen,
 // darunter Essen und Wasser auf einer Tages-Skala mit Zielmarke und ein Satz, was begrenzt.
@@ -51,9 +61,9 @@ export function SupplyHero({ supply, goalDays, source }: SupplyHeroProps) {
         {limitingSentence(supply)}
         {goalDays === null ? null : ` Der Strich markiert euer Ziel: ${formatDays(goalDays)}.`}
       </p>
-      <SupplyExplainer>
+      <ExplainSheet title={EXPLAIN_TITLE} trigger={EXPLAIN_TRIGGER}>
         <SupplyExplanation supply={supply} source={source} />
-      </SupplyExplainer>
+      </ExplainSheet>
     </section>
   )
 }

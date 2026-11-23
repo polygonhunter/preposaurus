@@ -1,7 +1,8 @@
 // Ableitungen für die Detailseite (UX-Konzept §8.4) aus dem DTO von `getFoodTypeDetail`: Säulen
 // je MHD, die Datumszeile für „1 entnehmen“ und die Nährwertzeile mit Herkunft.
-import { formatGermanNumber } from '@/shared/lib/quantities'
-import type { BestBeforeGroupDto, FoodTypeDetail, NutritionDto, UnitStateDto } from '../schemas'
+import { formatGermanNumber, formatQuantity } from '@/shared/lib/quantities'
+import type { BestBeforeGroupDto, FoodTypeDetail, NutritionDto } from '../schemas/detail'
+import type { UnitStateDto } from '../schemas/shared'
 import { STATE_BADGE, formatDate, formatPackages, stillGoodLabel } from './stock-format'
 
 type DetailProduct = FoodTypeDetail['products'][number]
@@ -16,6 +17,12 @@ export interface ShelfLifeColumn {
 const NO_DATE_LABEL = 'Datum fehlt'
 // Sortiert hinter jedes ISO-Datum
 const NO_DATE_SORT_KEY = '9999'
+
+/** Packung eines Produkts: „500 g · Dose“, ohne Behälter nur „500 g“. */
+export function packagingOf(product: Pick<DetailProduct, 'content' | 'container'>): string {
+  const content = formatQuantity(product.content)
+  return product.container === null ? content : `${content} · ${product.container.name}`
+}
 
 /** Text einer Datumszeile: „11/2027“, „03/2028, geschätzt“ oder „Datum fehlt“. */
 export function groupLabel(group: BestBeforeGroupDto): string {

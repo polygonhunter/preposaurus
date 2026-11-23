@@ -116,11 +116,14 @@ export const units = pgTable(
     takenBy: uuid('entnommen_von').references(() => users.id, { onDelete: 'set null' }),
     checkedAt: date('geprueft_am'),
     // Erfassung, mit der die Packung dazukam (Idempotenz auch beim Nachschub, Verlauf „hinzugefügt“).
-    // CASCADE statt NO ACTION: Eine Erfassung verschwindet nur mit ihrem Haushalt. Dort prüfte NO
-    // ACTION, bevor die Einheiten über Haushalt → Produkt → Einheit (eine Ebene tiefer) weg sind.
+    // NO ACTION DEFERRABLE INITIALLY DEFERRED (Migration 0007, #237, #133): Eine Erfassung mit
+    // Packungen lässt sich nicht einzeln löschen, die Historie verschwindet also nie still. Geprüft
+    // wird erst am Ende der Transaktion, damit das Löschen eines Haushalts weiter alles per CASCADE
+    // entfernt. Drizzle kennt DEFERRABLE nicht: Wer diesen Fremdschlüssel ändert, übernimmt es von
+    // Hand in die neue Migration.
     captureId: uuid('erfassung_id')
       .notNull()
-      .references(() => captures.id, { onDelete: 'cascade' }),
+      .references(() => captures.id, { onDelete: 'no action' }),
     ...timestamps(),
   },
   (table) => [

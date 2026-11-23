@@ -11,7 +11,7 @@ import {
   type DueGroup,
 } from '../domain/due-bundles'
 import { canConfirmStillGood, unitStateFor } from '../domain/unit-state'
-import type { DueEntry, DueSort, DueUnits } from '../schemas'
+import type { DueEntry, DueSort, DueUnits } from '../schemas/due'
 import { loadReadContext, type ReadContext } from './read-context'
 import type { StockReader } from './stock-reader'
 import { joinUnits, rowKeyOf, rowNameOf, rowTargetOf, type JoinedUnit } from './stock-model'
