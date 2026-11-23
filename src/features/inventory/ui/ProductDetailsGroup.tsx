@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { useId } from 'react'
 import { productEditPath } from '@/shared/config/stock-paths'
 import { Group } from '@/shared/ui/Group'
@@ -18,7 +19,7 @@ type ProductDetailsGroupProps = Readonly<{
 }>
 
 // Angaben zum Produkt (UX-Konzept §8.4 Nr. 4 und 5): Packung, Lagerort, Nährwerte mit Herkunft,
-// dazu „Angaben bearbeiten“ (#49) und für den Admin „Fehlerfassung löschen“ (#50).
+// dazu „Bearbeiten“ im Gruppenkopf (#49) und für den Admin „Fehlerfassung löschen“ (#50).
 export function ProductDetailsGroup({
   product,
   heading,
@@ -29,7 +30,16 @@ export function ProductDetailsGroup({
   const packaging = packagingOf(product)
   return (
     <>
-      <GroupHeader id={headerId}>{heading}</GroupHeader>
+      <GroupHeader
+        id={headerId}
+        trailing={
+          <Link href={productEditPath(product.id)} className="touch-target text-accent">
+            Bearbeiten<span className="sr-only"> · Angaben zu {product.name}</span>
+          </Link>
+        }
+      >
+        {heading}
+      </GroupHeader>
       <Group labelledBy={headerId}>
         <Row title="Packung" trailing={packaging} />
         <Row title="Lagerort" trailing={product.storageLocation?.name ?? 'nicht angegeben'} />
@@ -37,10 +47,6 @@ export function ProductDetailsGroup({
           title={`Nährwerte je 100 ${product.content.unit}`}
           subtitle={nutritionLine(product.nutrition) ?? 'Noch keine Nährwerte'}
           trailing={nutritionOrigin(product.nutrition) ?? undefined}
-        />
-        <Row
-          title={<span className="text-accent">Angaben bearbeiten</span>}
-          action={{ href: productEditPath(product.id) }}
         />
       </Group>
       {isAdmin ? (

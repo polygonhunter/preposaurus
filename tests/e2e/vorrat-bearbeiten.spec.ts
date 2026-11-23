@@ -22,7 +22,7 @@ async function captureWithoutDate(page: Page, food: Food, count = 1) {
   await page.getByRole('button', { name: new RegExp(`^${escape(food.name)}`) }).click()
   await page.getByLabel('Inhalt je Packung').fill('330 g')
   for (let added = 0; added < count; added += 1) {
-    await page.getByRole('button', { name: 'Datum fehlt' }).click()
+    await page.getByRole('button', { name: 'Datum fehlt', exact: true }).click()
   }
   await page.getByRole('button', { name: 'Speichern' }).click()
   const packages = count === 1 ? '1 Packung' : `${String(count)} Packungen`
@@ -35,7 +35,22 @@ async function openDetail(page: Page, food: Food) {
     .getByRole('link', { name: new RegExp(`^${escape(food.name)}`) })
     .first()
     .click()
-  await expect(page.getByRole('heading', { level: 1, name: food.name })).toBeVisible()
+  // Der Dev-Server übersetzt die Detailseite beim ersten Aufruf erst
+  await expect(page.getByRole('heading', { level: 1, name: food.name })).toBeVisible({
+    timeout: 15_000,
+  })
+}
+
+/**
+ * axe auf der Detailseite erst am Seitenende: Dort steht „1 entnehmen“ (sticky) an seinem Platz.
+ * Weiter oben liegt der Knopf über der Liste, und axe zählt die halb verdeckte Zeile darunter als
+ * zu kleines Ziel, je nachdem, welche Zeile gerade dort steht.
+ */
+async function expectAccessibleDetail(page: Page) {
+  await page.evaluate(() => {
+    window.scrollTo(0, document.documentElement.scrollHeight)
+  })
+  await expectAccessibleLayout(page)
 }
 
 /** Aufräumen: Der Admin löscht das Produkt endgültig, danach findet die Suche nichts mehr. */
@@ -56,7 +71,7 @@ test('Packungen hinzufügen, Datum nachtragen, bearbeiten und löschen', async (
   const food = { name: 'Spargel (Konserve)', search: 'spargel' }
   await captureWithoutDate(page, food)
   await openDetail(page, food)
-  await expectAccessibleLayout(page)
+  await expectAccessibleDetail(page)
 
   // Packungen hinzufügen: Produkt vorgewählt, der Fokus steht gleich im MHD (#195, UX §8.4)
   await page.getByRole('link', { name: 'Packungen hinzufügen' }).click()
@@ -84,7 +99,7 @@ test('Packungen hinzufügen, Datum nachtragen, bearbeiten und löschen', async (
   await expect(page.getByRole('button', { name: /^Datum fehlt/ })).toHaveCount(0)
 
   // Angaben bearbeiten: Bezeichnung und eigene Nährwerte (#49)
-  await page.getByRole('link', { name: 'Angaben bearbeiten' }).click()
+  await page.getByRole('link', { name: /^Bearbeiten · Angaben zu/ }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Angaben bearbeiten' })).toBeVisible()
   await expectAccessibleLayout(page)
   await page.getByLabel('Bezeichnung').fill('Spargel vom Hof')
@@ -132,7 +147,7 @@ test.describe('als Mitglied', () => {
     await signInViaUi(page, E2E_MEMBER)
     await openDetail(page, { name: 'Linsen', search: 'lins' })
 
-    await expect(page.getByRole('link', { name: 'Angaben bearbeiten' }).first()).toBeVisible()
+    await expect(page.getByRole('link', { name: /^Bearbeiten · Angaben zu/ }).first()).toBeVisible()
     await expect(page.getByRole('button', { name: 'Fehlerfassung löschen …' })).toHaveCount(0)
     await page
       .getByRole('button', { name: /^\d{2}\.\d{2}\.\d{4}|^\d{2}\/\d{4}/ })
