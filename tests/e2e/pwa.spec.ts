@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from '../helpers/e2e-test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Installierbar und letzter Stand ohne Verbindung (M10, #81 bis #83). Der Service Worker läuft nur

@@ -1,6 +1,6 @@
 // Folgeschritte der Einrichtung nach dem Abschluss (#40). Den ersten Start selbst samt Überspringen
 // und Wiedereinstieg prüft das Projekt „einrichtung“ (einrichtung.setup.ts) gegen die leere DB.
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../helpers/e2e-test'
 import { E2E_MEMBER, signedOut, signInViaUi } from '../helpers/e2e-auth'
 
 const STEP_PATHS = [

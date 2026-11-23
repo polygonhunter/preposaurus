@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../helpers/e2e-test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Viewports aus Issue #35. Der Test setzt sie selbst, darum läuft er nur in einem Projekt.

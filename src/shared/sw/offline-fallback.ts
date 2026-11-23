@@ -33,6 +33,12 @@ const SERVICE_UNAVAILABLE = 503
 export function offlineFallbackResponse(): Response {
   return new Response(OFFLINE_HTML, {
     status: SERVICE_UNAVAILABLE,
-    headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' },
+    headers: {
+      'content-type': 'text/html; charset=utf-8',
+      'cache-control': 'no-store',
+      // Eigene CSP wie die übrigen Seiten (#198): nichts laden, nur das eingebettete Stylesheet.
+      'content-security-policy':
+        "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'",
+    },
   })
 }

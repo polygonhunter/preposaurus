@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from '../helpers/e2e-test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Übersicht (#67 bis #70) mit dem Beispielvorrat (tests/e2e/beispielvorrat.setup.ts): 3 Personen,
