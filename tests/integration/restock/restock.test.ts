@@ -117,18 +117,32 @@ describe('Nachkaufen-Liste gegen die Datenbank', () => {
     const first = await addConsumedUnit(repository, { householdId, unitId })
     const second = await addConsumedUnit(repository, { householdId, unitId })
 
-    expect(first).toEqual({ ok: true, value: { label, wasListed: false } })
-    expect(second).toEqual({ ok: true, value: { label, wasListed: true } })
+    expect(first.ok && first.value.label).toBe(label)
+    expect(first.ok && first.value.addedItemId).toBeTypeOf('string')
+    expect(second).toEqual({ ok: true, value: { label, addedItemId: null } })
     expect((await load()).replace.map((item) => item.label)).toEqual([label])
+  })
+
+  it('legt bei zwei gleichzeitigen Tipps auf „Nachkaufen“ nur einen Eintrag an', async () => {
+    const unitId = await unitOf(householdId, 'Ravioli')
+    const before = (await load()).replace.length
+
+    const results = await Promise.all([
+      addConsumedUnit(repository, { householdId, unitId }),
+      addConsumedUnit(repository, { householdId, unitId }),
+    ])
+
+    const added = results.filter((result) => result.ok && result.value.addedItemId !== null)
+    expect(added).toHaveLength(1)
+    expect((await load()).replace).toHaveLength(before + 1)
   })
 
   it('nimmt ohne Lebensmittelart den Produktnamen', async () => {
     const unitId = await unitOf(householdId, 'Linsen')
 
-    expect(await addConsumedUnit(repository, { householdId, unitId })).toEqual({
-      ok: true,
-      value: { label: 'Linsen', wasListed: false },
-    })
+    const result = await addConsumedUnit(repository, { householdId, unitId })
+
+    expect(result.ok && result.value.label).toBe('Linsen')
   })
 
   it('kennt keine Packung eines fremden Haushalts', async () => {

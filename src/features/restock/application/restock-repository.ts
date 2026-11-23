@@ -26,6 +26,11 @@ export interface RestockRepository {
   ) => Promise<boolean>
   /** false, wenn es den Eintrag im Haushalt nicht gibt */
   removeItem: (householdId: string, id: string) => Promise<boolean>
-  hasOpenItemFor: (householdId: string, productId: string) => Promise<boolean>
+  /**
+   * Setzt das Produkt einer Entnahme als „nachkauf“ auf die Liste, nur wenn es dort noch nicht offen
+   * steht. Prüfen und Anlegen laufen in einem Schritt, damit schnelles Tippen keine Dubletten
+   * erzeugt. Liefert die ID des neuen Eintrags, null, wenn das Produkt schon offen auf der Liste stand.
+   */
+  addProductOnce: (householdId: string, item: ConsumedProduct) => Promise<string | null>
   findConsumedProduct: (householdId: string, unitId: string) => Promise<ConsumedProduct | null>
 }

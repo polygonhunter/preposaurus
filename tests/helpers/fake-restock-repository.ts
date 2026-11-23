@@ -60,13 +60,16 @@ export function createFakeRestockRepository(data: FakeRestockData = {}) {
       if (item) items.splice(items.indexOf(item), 1)
       return Promise.resolve(item !== undefined)
     },
-    hasOpenItemFor: (householdId: string, productId: string) =>
-      Promise.resolve(
-        items.some(
-          (item) =>
-            item.householdId === householdId && item.productId === productId && !item.isDone,
-        ),
-      ),
+    addProductOnce: (householdId: string, item: { label: string; productId: string }) => {
+      const isListed = items.some(
+        (entry) =>
+          entry.householdId === householdId && entry.productId === item.productId && !entry.isDone,
+      )
+      if (isListed) return Promise.resolve(null)
+      const id = `neu-${String(items.length + 1)}`
+      items.push(storedItem({ id, householdId, ...item, source: 'nachkauf' }))
+      return Promise.resolve(id)
+    },
     findConsumedProduct: (householdId: string, unitId: string) => {
       const unit = data.consumedUnits?.find(
         (entry) => entry.householdId === householdId && entry.unitId === unitId,

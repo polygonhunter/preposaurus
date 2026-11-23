@@ -69,7 +69,7 @@ describe('addConsumedUnit', () => {
 
     const result = await addConsumedUnit(repository, { householdId, unitId: 'u1' })
 
-    expect(result).toEqual({ ok: true, value: { label: 'Linsen', wasListed: false } })
+    expect(result).toEqual({ ok: true, value: { label: 'Linsen', addedItemId: 'neu-1' } })
     expect(repository.items).toMatchObject([
       { label: 'Linsen', source: 'nachkauf', productId: 'p-linsen' },
     ])
@@ -81,7 +81,7 @@ describe('addConsumedUnit', () => {
 
     const again = await addConsumedUnit(repository, { householdId, unitId: 'u1' })
 
-    expect(again).toEqual({ ok: true, value: { label: 'Linsen', wasListed: true } })
+    expect(again).toEqual({ ok: true, value: { label: 'Linsen', addedItemId: null } })
     expect(repository.items).toHaveLength(1)
   })
 

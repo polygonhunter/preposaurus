@@ -3,7 +3,7 @@
 import { useState, useTransition, type ReactNode } from 'react'
 import { ActionErrorBar } from '@/shared/ui/ActionErrorBar'
 import { UndoBar } from '@/shared/ui/UndoBar'
-import { addToRestockAction } from '../actions/add-to-restock-action'
+import { addToRestockAction, takeBackFromRestockAction } from '../actions/add-to-restock-action'
 import { consumeAction } from '../actions/consume-action'
 import { undoConsumeAction } from '../actions/undo-consume-action'
 import type { BestBeforeDto, ConsumeRequest } from '../schemas'
@@ -16,6 +16,8 @@ type UndoNotice = Readonly<{
   message: string
   // Nach „Nachkaufen“ steht das Produkt auf der Liste, das zweite Angebot entfällt
   isListed: boolean
+  // Von diesem Tipp angelegt: „Rückgängig“ nimmt ihn mit zurück (DATENKATALOG §5)
+  addedRestockItemId: string | null
 }>
 
 type Notice = UndoNotice | Readonly<{ kind: 'error'; message: string }>
@@ -42,26 +44,35 @@ export function ConsumeProvider({ children }: ConsumeProviderProps) {
               unitId: result.taken.unitId,
               message: formatTakenMessage(name, dateLabel ?? dateOf(result.taken.bestBefore)),
               isListed: false,
+              addedRestockItemId: null,
             }
           : { kind: 'error', message: result.message },
       )
     })
   }
 
-  const undo = (unitId: string) => {
+  const undo = ({ unitId, addedRestockItemId }: UndoNotice) => {
     setNotice(null)
     startTransition(async () => {
       const result = await undoConsumeAction(unitId)
       if (!result.ok) setNotice({ kind: 'error', message: result.message })
+      else if (addedRestockItemId !== null) await takeBackFromRestockAction(addedRestockItemId)
     })
   }
 
+  // Das Angebot verschwindet sofort, damit ein zweiter schneller Tipp nichts mehr auslöst
   const putOnRestockList = (current: UndoNotice) => {
+    setNotice({ ...current, isListed: true })
     startTransition(async () => {
       const result = await addToRestockAction(current.unitId)
       setNotice(
         result.ok
-          ? { ...current, message: result.message, isListed: true }
+          ? {
+              ...current,
+              message: result.message,
+              isListed: true,
+              addedRestockItemId: result.addedItemId,
+            }
           : { kind: 'error', message: result.message },
       )
     })
@@ -79,7 +90,7 @@ export function ConsumeProvider({ children }: ConsumeProviderProps) {
           key={notice.unitId}
           message={notice.message}
           onUndo={() => {
-            undo(notice.unitId)
+            undo(notice)
           }}
           onDismiss={dismiss}
           {...(notice.isListed

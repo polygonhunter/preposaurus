@@ -76,7 +76,9 @@ test('zeigt einen Fehler am Feld, wenn der Eintrag leer ist', async ({ page }) =
   await expect(page.getByText('Bitte tragt ein, was auf die Liste soll.').first()).toBeVisible()
 })
 
-test('setzt nach „−1“ mit einem Tipp auf die Liste', async ({ page }, info) => {
+test('setzt nach „−1“ mit einem Tipp auf die Liste, Rückgängig nimmt es mit', async ({
+  page,
+}, info) => {
   onlyDesktop(info.project.name)
   await page.goto('/vorrat/milch')
 
@@ -90,7 +92,9 @@ test('setzt nach „−1“ mit einem Tipp auf die Liste', async ({ page }, info
   await listed.getByRole('button', { name: 'Rückgängig' }).click()
   await expect(listed).toHaveCount(0)
 
+  await expect(page.getByRole('button', { name: '1 Packung H-Milch entnehmen' })).toBeEnabled()
+
   await page.goto('/nachkaufen')
-  await expect(list(page, 'Ersetzen').getByRole('checkbox', { name: 'H-Milch' })).toBeVisible()
-  await removeEntry(page, 'H-Milch')
+  await expect(page.getByRole('heading', { level: 1, name: 'Nachkaufen' })).toBeVisible()
+  await expect(page.getByRole('checkbox', { name: 'H-Milch' })).toHaveCount(0)
 })

@@ -15,7 +15,7 @@ import type { HouseholdFactsReader, HouseholdGoal } from './household-facts-read
 import { headFigures } from './overview-figures'
 import { countGapGroups, duePreview, groupCoverage } from './overview-lists'
 import { coverageOf, dailyNeedOf } from './stock-figures'
-import { gapReference, loadStockSnapshot, type HouseholdDay } from './stock-snapshot'
+import { loadStockSnapshot, progressAtTarget, type HouseholdDay } from './stock-snapshot'
 
 export interface OverviewPorts {
   stock: StockReader
@@ -33,9 +33,7 @@ function coverageBlocks(
     today: context.today,
     stillGoodCounts: context.stillGoodCounts,
   }
-  const today = coverageOf(input).progress
-  const atTarget = coverageOf({ ...input, reference: gapReference(goal, context.today) }).progress
-  return { today, atTarget }
+  return { today: coverageOf(input).progress, atTarget: progressAtTarget(context, units, goal) }
 }
 
 async function loadFacts(ports: OverviewPorts, { householdId, today }: HouseholdDay) {

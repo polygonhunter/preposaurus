@@ -5,7 +5,7 @@ import 'server-only'
 import { err, ok, type Result } from '@/shared/lib/result'
 import type { RestockRepository } from './restock-repository'
 
-type Repository = Pick<RestockRepository, 'findConsumedProduct' | 'hasOpenItemFor' | 'addItem'>
+type Repository = Pick<RestockRepository, 'findConsumedProduct' | 'addProductOnce'>
 
 interface ConsumedUnitInput {
   householdId: string
@@ -14,8 +14,8 @@ interface ConsumedUnitInput {
 
 export interface ListedProduct {
   label: string
-  /** true, wenn der Eintrag schon offen auf der Liste stand */
-  wasListed: boolean
+  /** Der neue Eintrag; null, wenn das Produkt schon offen auf der Liste stand */
+  addedItemId: string | null
 }
 
 export async function addConsumedUnit(
@@ -24,10 +24,6 @@ export async function addConsumedUnit(
 ): Promise<Result<ListedProduct, Readonly<{ kind: 'not-found' }>>> {
   const product = await repository.findConsumedProduct(householdId, unitId)
   if (product === null) return err({ kind: 'not-found' })
-  const { productId, label } = product
-  if (await repository.hasOpenItemFor(householdId, productId)) {
-    return ok({ label, wasListed: true })
-  }
-  await repository.addItem(householdId, { label, source: 'nachkauf', productId })
-  return ok({ label, wasListed: false })
+  const addedItemId = await repository.addProductOnce(householdId, product)
+  return ok({ label: product.label, addedItemId })
 }

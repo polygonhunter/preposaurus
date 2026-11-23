@@ -5,6 +5,7 @@ import { and, eq } from 'drizzle-orm'
 import type { Database } from '@/server/db/connection'
 import { foodTypes } from '@/server/db/schema/food-types'
 import { products, units } from '@/server/db/schema/inventory'
+import { households } from '@/server/db/schema/household'
 import { restockItems } from '@/server/db/schema/restock'
 import type { RestockItem } from '../domain/restock-list'
 
@@ -12,6 +13,11 @@ interface NewItem {
   label: string
   source: RestockItem['source']
   productId: string | null
+}
+
+interface ProductItem {
+  label: string
+  productId: string
 }
 
 const ownItem = (householdId: string, id: string) =>
@@ -68,6 +74,27 @@ async function hasOpenItemFor(db: Database, householdId: string, productId: stri
   return row !== undefined
 }
 
+/**
+ * Setzt das Produkt nur auf die Liste, wenn es dort noch nicht offen steht. Die Haushaltszeile ist
+ * bis zum Ende der Transaktion gesperrt, damit zwei schnelle Tipps auf „Nachkaufen“ nicht beide
+ * „noch nicht da“ lesen und zwei Einträge anlegen. Ohne Migration, auf PGlite und PostgreSQL gleich.
+ */
+async function addProductOnce(db: Database, householdId: string, item: ProductItem) {
+  return db.transaction(async (tx) => {
+    await tx
+      .select({ id: households.id })
+      .from(households)
+      .where(eq(households.id, householdId))
+      .for('update')
+    if (await hasOpenItemFor(tx, householdId, item.productId)) return null
+    const [added] = await tx
+      .insert(restockItems)
+      .values({ householdId, ...item, source: 'nachkauf' })
+      .returning({ id: restockItems.id })
+    return added?.id ?? null
+  })
+}
+
 // Auf der Liste steht die Lebensmittelart („Linsen“), nicht der Produktname (UX-Konzept §5).
 async function findConsumedProduct(db: Database, householdId: string, unitId: string) {
   const [row] = await db
@@ -87,8 +114,8 @@ export function createRestockRepository(db: Database) {
     setDone: (householdId: string, change: { id: string; isDone: boolean }) =>
       setDone(db, householdId, change),
     removeItem: (householdId: string, id: string) => removeItem(db, householdId, id),
-    hasOpenItemFor: (householdId: string, productId: string) =>
-      hasOpenItemFor(db, householdId, productId),
+    addProductOnce: (householdId: string, item: ProductItem) =>
+      addProductOnce(db, householdId, item),
     findConsumedProduct: (householdId: string, unitId: string) =>
       findConsumedProduct(db, householdId, unitId),
   }

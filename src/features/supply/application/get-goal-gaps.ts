@@ -2,13 +2,12 @@
 // und gleiche Rechnung wie der Hinweis auf der Übersicht, damit beide dieselbe Zahl nennen.
 import 'server-only'
 import type { StockReader } from '@/features/inventory/application/stock-reader'
-import { toGroupUnit, WATER_GROUP_KEY } from '@/features/inventory/application/stock-model'
+import { WATER_GROUP_KEY } from '@/features/inventory/application/stock-model'
 import type { ContentQuantity } from '@/shared/lib/quantities'
 import { calculateGoalGap } from '../domain/goal-gap'
 import type { GroupProgress } from '../domain/group-progress'
 import type { HouseholdFactsReader } from './household-facts-reader'
-import { coverageOf } from './stock-figures'
-import { gapReference, loadStockSnapshot, type HouseholdDay } from './stock-snapshot'
+import { loadStockSnapshot, progressAtTarget, type HouseholdDay } from './stock-snapshot'
 
 export interface GoalGapPorts {
   stock: StockReader
@@ -49,13 +48,7 @@ export async function getGoalGaps(ports: GoalGapPorts, input: HouseholdDay): Pro
     loadStockSnapshot(ports.stock, input),
     ports.facts.loadGoal(input.householdId),
   ])
-  const { progress } = coverageOf({
-    basis: context.basis,
-    units: units.map(toGroupUnit),
-    today: input.today,
-    stillGoodCounts: context.stillGoodCounts,
-    reference: gapReference(goal, input.today),
-  })
+  const progress = progressAtTarget(context, units, goal)
   const names = new Map(groups.map((group) => [group.key, group.name]))
   return {
     isCalculable: progress.length > 0,
