@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { useIsOnline } from '@/shared/hooks/use-is-online'
 import { Button } from '@/shared/ui/Button'
+import { OFFLINE_WRITE_MESSAGE } from '@/shared/ui/OfflineWriteGuard'
 import { Sheet } from '@/shared/ui/Sheet'
 import { deleteEntryAction } from '../actions/delete-entry-action'
 import type { DeleteEntryRequest } from '../schemas'
@@ -37,6 +38,12 @@ export function DeleteEntryButton(props: DeleteEntryButtonProps) {
   }
 
   const confirm = () => {
+    // Nur per aria-disabled gesperrt: Der Tipp erklärt im Blatt, warum es gerade nicht geht (#216)
+    if (!isOnline) {
+      setMessage(OFFLINE_WRITE_MESSAGE)
+      return
+    }
+    if (isPending) return
     startTransition(async () => {
       const result = await deleteEntryAction(target)
       if (!result.ok) {
@@ -69,7 +76,7 @@ export function DeleteEntryButton(props: DeleteEntryButtonProps) {
           <>
             <Button
               variant="destructive"
-              disabled={!isOnline}
+              aria-disabled={!isOnline}
               pendingLabel={isPending ? 'Löscht …' : undefined}
               onClick={confirm}
             >

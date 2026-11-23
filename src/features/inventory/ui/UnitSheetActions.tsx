@@ -18,7 +18,9 @@ type UnitSheetActionsProps = Readonly<{
 }>
 
 // Aktionen im Blatt „Einheit“ (UX-Konzept §8.4, #47): Verbraucht · Entsorgt · Noch gut. Jede
-// Aktion schließt das Blatt, danach steht unten „Rückgängig“ statt einer Rückfrage vorher.
+// Aktion schließt das Blatt, danach steht unten „Rückgängig“ statt einer Rückfrage vorher. Ohne
+// Verbindung sind die Knöpfe nur per aria-disabled gesperrt: Der Tipp schließt das Blatt, und der
+// ConsumeProvider sagt unten, warum es gerade nicht geht (#216, #218).
 export function UnitSheetActions({
   unitId,
   stillGoodIds,
@@ -36,7 +38,8 @@ export function UnitSheetActions({
   return (
     <>
       <Button
-        disabled={isLocked || unitId === null}
+        disabled={unitId === null}
+        aria-disabled={isLocked}
         onClick={after(() => {
           if (unitId !== null) consume({ kind: 'unit', unitId }, label)
         })}
@@ -45,7 +48,8 @@ export function UnitSheetActions({
       </Button>
       <Button
         variant="plain"
-        disabled={isLocked || unitId === null}
+        disabled={unitId === null}
+        aria-disabled={isLocked}
         onClick={after(() => {
           if (unitId !== null) discard(unitId, label)
         })}
@@ -55,7 +59,7 @@ export function UnitSheetActions({
       {stillGoodIds.length === 0 ? null : (
         <Button
           variant="plain"
-          disabled={isLocked}
+          aria-disabled={isLocked}
           onClick={after(() => {
             markStillGood(stillGoodIds, label)
           })}
