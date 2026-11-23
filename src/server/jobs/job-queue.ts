@@ -44,8 +44,20 @@ function queueOptionsFor({ retry }: Job) {
   }
 }
 
+// Ein Job mit Zeitplan ist nie doppelt eingestellt oder aktiv (`exclusive`), auch nicht mit einem
+// zweiten Worker oder nach einem Lauf über die Ablaufzeit. Den Typ legt pg-boss beim Anlegen fest.
+const policyFor = (job: Job) => (job.schedule === null ? 'standard' : 'exclusive')
+
+// createQueue lässt eine vorhandene Warteschlange unverändert, deshalb gelten neue Werte für
+// Versuche und Ablaufzeit erst über updateQueue.
+async function ensureQueue(boss: PgBoss, job: Job): Promise<void> {
+  const options = queueOptionsFor(job)
+  await boss.createQueue(job.name, { ...options, policy: policyFor(job) })
+  await boss.updateQueue(job.name, options)
+}
+
 async function registerJob(boss: PgBoss, job: Job, logger: Logger): Promise<void> {
-  await boss.createQueue(job.name, queueOptionsFor(job))
+  await ensureQueue(boss, job)
   await boss.work(job.name, async (jobs) => {
     for (const { data, retryCount } of jobs)
       await runJob({ job, payload: data, retryCount }, logger)
@@ -63,6 +75,19 @@ interface StartJobQueue {
   logger: Logger
 }
 
+// Scheitert der Start halb, laufen sonst Pool und Zeitgeber weiter, und der Prozess endet nie.
+async function startAndRegister(boss: PgBoss, jobs: readonly Job[], logger: Logger) {
+  try {
+    await boss.start({ attempts: START_ATTEMPTS })
+    for (const job of jobs) await registerJob(boss, job, logger)
+  } catch (error: unknown) {
+    await boss.stop({ graceful: false }).catch((stopError: unknown) => {
+      logger.error('Warteschlange ließ sich nach dem Fehlstart nicht schließen', { stopError })
+    })
+    throw error
+  }
+}
+
 export async function startJobQueue({ database, jobs, logger }: StartJobQueue): Promise<JobQueue> {
   const boss = new PgBoss(database)
   boss.on('error', (error) => {
@@ -71,8 +96,7 @@ export async function startJobQueue({ database, jobs, logger }: StartJobQueue): 
   boss.on('warning', (warning) => {
     logger.warn('Hinweis der Warteschlange', { warning })
   })
-  await boss.start({ attempts: START_ATTEMPTS })
-  for (const job of jobs) await registerJob(boss, job, logger)
+  await startAndRegister(boss, jobs, logger)
   return {
     send: (name, payload) => boss.send(name, payload),
     stop: () => boss.stop({ graceful: true, timeout: STOP_TIMEOUT_MS }),
