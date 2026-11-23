@@ -1,25 +1,33 @@
 'use client'
 
 import { useState, useTransition, type ReactNode } from 'react'
+import { ActionErrorBar } from '@/shared/ui/ActionErrorBar'
 import { UndoBar } from '@/shared/ui/UndoBar'
+import { addToRestockAction } from '../actions/add-to-restock-action'
 import { consumeAction } from '../actions/consume-action'
 import { undoConsumeAction } from '../actions/undo-consume-action'
 import type { BestBeforeDto, ConsumeRequest } from '../schemas'
-import { ActionErrorBar } from './ActionErrorBar'
 import { ConsumeContext, type TakenLabel } from './consume-context'
 import { formatDate, formatTakenMessage } from './stock-format'
 
-type Notice =
-  | Readonly<{ kind: 'undo'; unitId: string; message: string }>
-  | Readonly<{ kind: 'error'; message: string }>
+type UndoNotice = Readonly<{
+  kind: 'undo'
+  unitId: string
+  message: string
+  // Nach „Nachkaufen“ steht das Produkt auf der Liste, das zweite Angebot entfällt
+  isListed: boolean
+}>
+
+type Notice = UndoNotice | Readonly<{ kind: 'error'; message: string }>
 
 const dateOf = (bestBefore: BestBeforeDto | null) =>
   bestBefore === null ? null : formatDate(bestBefore)
 
 type ConsumeProviderProps = Readonly<{ children: ReactNode }>
 
-// Erfolg zeigt fünf Sekunden „Rückgängig“, keine Rückfrage vorher (UX-Konzept §7, P7). Ein Fehler
-// steht unten an derselben Stelle, die Seite lädt dabei neu, die Zeile springt also zurück.
+// Erfolg zeigt fünf Sekunden „Rückgängig“, keine Rückfrage vorher (UX-Konzept §7, P7), dazu das
+// Angebot „Nachkaufen“ (UX D15, #74). Ein Fehler steht unten an derselben Stelle, die Seite lädt
+// dabei neu, die Zeile springt also zurück.
 export function ConsumeProvider({ children }: ConsumeProviderProps) {
   const [notice, setNotice] = useState<Notice | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -33,6 +41,7 @@ export function ConsumeProvider({ children }: ConsumeProviderProps) {
               kind: 'undo',
               unitId: result.taken.unitId,
               message: formatTakenMessage(name, dateLabel ?? dateOf(result.taken.bestBefore)),
+              isListed: false,
             }
           : { kind: 'error', message: result.message },
       )
@@ -44,6 +53,17 @@ export function ConsumeProvider({ children }: ConsumeProviderProps) {
     startTransition(async () => {
       const result = await undoConsumeAction(unitId)
       if (!result.ok) setNotice({ kind: 'error', message: result.message })
+    })
+  }
+
+  const putOnRestockList = (current: UndoNotice) => {
+    startTransition(async () => {
+      const result = await addToRestockAction(current.unitId)
+      setNotice(
+        result.ok
+          ? { ...current, message: result.message, isListed: true }
+          : { kind: 'error', message: result.message },
+      )
     })
   }
 
@@ -62,6 +82,16 @@ export function ConsumeProvider({ children }: ConsumeProviderProps) {
             undo(notice.unitId)
           }}
           onDismiss={dismiss}
+          {...(notice.isListed
+            ? {}
+            : {
+                secondary: {
+                  label: 'Nachkaufen',
+                  onClick: () => {
+                    putOnRestockList(notice)
+                  },
+                },
+              })}
         />
       ) : null}
       {notice?.kind === 'error' ? (

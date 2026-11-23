@@ -2,7 +2,7 @@
 
 type ActionErrorBarProps = Readonly<{ message: string; onDismiss: () => void }>
 
-// Meldung, wenn eine Entnahme nicht geklappt hat (UX-Konzept §7: „Nichts geht still verloren“).
+// Meldung, wenn eine Handlung nicht geklappt hat (UX-Konzept §7: „Nichts geht still verloren“).
 // Sie steht dort, wo sonst die UndoBar steht, und bleibt, bis man sie schließt.
 export function ActionErrorBar({ message, onDismiss }: ActionErrorBarProps) {
   return (
