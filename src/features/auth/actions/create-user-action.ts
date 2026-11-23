@@ -2,12 +2,13 @@
 // Nutzer anlegen (#123), nur der Admin. Das Passwort steht genau einmal in dieser Antwort und nie in
 // der Adresse oder im Log. Die übrigen Eingaben kommen nach einem Fehler zurück, das Passwort nicht.
 import { z } from 'zod'
+import { adminAccessMessage } from '@/server/auth/admin-access-message'
 import { requireHouseholdAdmin } from '@/server/auth/guards'
 import { firstMessages, readFormText } from '@/shared/lib/form-data'
 import { createUser, type CreateUserError } from '../application/create-user'
 import { userAdminServices } from '../application/user-admin-services'
 import { createUserSchema, type CreateUserInput } from '../schemas'
-import { PASSWORD_PROBLEM_MESSAGES, accessMessage } from './user-action-messages'
+import { PASSWORD_PROBLEM_MESSAGES } from './user-action-messages'
 
 type CreateUserField = keyof CreateUserInput
 
@@ -53,7 +54,7 @@ export async function createUserAction(
 ): Promise<CreateUserState> {
   const values = readForm(formData)
   const admin = await requireHouseholdAdmin()
-  if (!admin.ok) return failure(values, {}, accessMessage(admin.error))
+  if (!admin.ok) return failure(values, {}, adminAccessMessage(admin.error))
   const parsed = createUserSchema.safeParse({
     ...values,
     password: readFormText(formData, 'passwort'),

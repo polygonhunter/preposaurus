@@ -4,7 +4,7 @@ import { Segmented } from '@/shared/ui/Segmented'
 import { changeUserRoleAction } from '../actions/change-user-role-action'
 import { endUserSessionsAction } from '../actions/end-user-sessions-action'
 import { linkUserMemberAction } from '../actions/link-user-member-action'
-import { LAST_ADMIN } from '../actions/user-action-messages'
+import { LAST_ADMIN, OWN_PASSWORD } from '../actions/user-action-messages'
 import { MemberChoice, type MemberOption } from './MemberChoice'
 import { ResetPasswordForm } from './ResetPasswordForm'
 import { UserChangeForm } from './UserChangeForm'
@@ -53,7 +53,7 @@ export function UserAdminSections({
         <MemberChoice members={members} defaultValue={user.memberId ?? ''} />
       </UserChangeForm>
       <GroupHeader id="passwort">Passwort</GroupHeader>
-      <ResetPasswordForm userId={user.id} />
+      {isSelf ? <GroupFooter>{OWN_PASSWORD}</GroupFooter> : <ResetPasswordForm userId={user.id} />}
       <GroupHeader id="geraete">Geräte</GroupHeader>
       <UserChangeForm
         action={endUserSessionsAction}

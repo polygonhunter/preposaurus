@@ -88,5 +88,9 @@ test('das eigene Konto lässt sich weder deaktivieren noch als letzter Admin her
   await expect(page.getByText('Dein eigenes Konto deaktiviert ein anderer Admin.')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Deaktivieren' })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Rolle speichern' })).toHaveCount(0)
+  await expect(
+    page.getByText('Dein eigenes Passwort setzt ein anderer Admin zurück.'),
+  ).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Passwort zurücksetzen' })).toHaveCount(0)
   await expectAccessibleLayout(page)
 })

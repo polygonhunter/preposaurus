@@ -129,7 +129,10 @@ async function insertUser(db: Database, user: NewUser): Promise<string | null> {
     if (await isUsernameTaken(tx, user.username)) return null
     // Eine Person gehört höchstens zu einem Nutzer: Eine alte Verknüpfung löst sich.
     if (user.memberId !== null) {
-      await tx.update(users).set({ memberId: null }).where(eq(users.memberId, user.memberId))
+      await tx
+        .update(users)
+        .set({ memberId: null })
+        .where(and(eq(users.householdId, user.householdId), eq(users.memberId, user.memberId)))
     }
     const id = crypto.randomUUID()
     await tx.insert(users).values({

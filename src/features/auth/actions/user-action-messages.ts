@@ -1,6 +1,5 @@
 // Gemeinsame Sätze und Helfer der Actions der Nutzerverwaltung (#41, #123). Mitglieder sehen die
 // Formulare nicht. Kommt trotzdem eine Anfrage an, gibt es einen ruhigen Satz statt einer Änderung.
-import type { AccessError } from '@/server/auth/guards'
 import type { ManageUserError } from '../application/manage-users'
 import type { PasswordProblem } from '../domain/password-rules'
 
@@ -13,12 +12,10 @@ export const USER_ACTION_IDLE: UserActionState = { status: 'idle', message: null
 
 export const USER_GONE = 'Diesen Nutzer gibt es nicht mehr. Bitte lade die Seite neu.'
 
+export const OWN_PASSWORD = 'Dein eigenes Passwort setzt ein anderer Admin zurück.'
+
 export const LAST_ADMIN =
   'Ihr braucht mindestens einen Admin. Mach zuerst jemand anderen zum Admin.'
-
-export function accessMessage(error: AccessError): string {
-  return error.kind === 'unauthenticated' ? 'Bitte melde dich erneut an.' : 'Das ändert ein Admin.'
-}
 
 export const PASSWORD_PROBLEM_MESSAGES: Record<PasswordProblem, string> = {
   'contains-app-name': 'Bitte ein Passwort ohne „Preposaurus“.',

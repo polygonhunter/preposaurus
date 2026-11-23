@@ -311,6 +311,20 @@ describe('Passwort zurücksetzen', () => {
     ])
   })
 
+  it('nie für das eigene Konto, die eigene Sitzung bliebe sonst nicht bestehen', async () => {
+    const { services, resets } = fakeServices([alex, sam])
+
+    const result = await resetUserPassword(services, {
+      householdId: HOUSEHOLD,
+      actorId: 'alex',
+      userId: 'alex',
+      password: null,
+    })
+
+    expect(result).toEqual({ ok: false, error: { kind: 'self' } })
+    expect(resets).toEqual([])
+  })
+
   it('findet keinen Nutzer eines anderen Haushalts', async () => {
     const { services, resets } = fakeServices([alex, user('fremd', { householdId: 'x' })])
 
