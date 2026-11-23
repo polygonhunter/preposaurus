@@ -5,6 +5,11 @@ type UserRole = (typeof USER_ROLES)[number]
 
 export const ROLE_LABELS: Record<UserRole, string> = { admin: 'Admin', mitglied: 'Mitglied' }
 
+export const ROLE_OPTIONS = [
+  { value: 'mitglied', label: ROLE_LABELS.mitglied },
+  { value: 'admin', label: ROLE_LABELS.admin },
+]
+
 const SIGN_IN_FORMAT = new Intl.DateTimeFormat('de-DE', {
   timeZone: 'Europe/Berlin',
   day: '2-digit',
@@ -14,10 +19,13 @@ const SIGN_IN_FORMAT = new Intl.DateTimeFormat('de-DE', {
   minute: '2-digit',
 })
 
+/** „23.11.2026, 08:30“ in deutscher Zeit, ohne Zeitpunkt „noch nie“ */
+export function formatSignInTime(time: Date | null): string {
+  return time === null ? 'noch nie' : SIGN_IN_FORMAT.format(time)
+}
+
 function formatLastSignIn(lastSignInAt: Date | null): string {
-  return lastSignInAt === null
-    ? 'noch nie angemeldet'
-    : `zuletzt ${SIGN_IN_FORMAT.format(lastSignInAt)}`
+  return lastSignInAt === null ? 'noch nie angemeldet' : `zuletzt ${formatSignInTime(lastSignInAt)}`
 }
 
 type UserLine = Readonly<{
