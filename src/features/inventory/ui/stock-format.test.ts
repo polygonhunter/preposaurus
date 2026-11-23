@@ -23,6 +23,7 @@ function totals(overrides: Partial<NodeTotalsDto> = {}): NodeTotalsDto {
     uncountedPackages: 0,
     amounts: { g: 1500, ml: 0 },
     kcal: 5385,
+    waterMl: 0,
     macros: { protein: 0, carbs: 0, fat: 0 },
     productsWithoutMacros: 0,
     energyDays: null,

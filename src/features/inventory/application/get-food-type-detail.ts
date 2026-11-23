@@ -2,6 +2,7 @@
 // Produkte mit Nährwerten und deren Herkunft, Packungen nach Datum mit Zustand. Auch ohne Packung
 // im Vorrat bleibt die Seite erreichbar. Ein Produkt ohne Lebensmittelart hat seine eigene Seite.
 import 'server-only'
+import { dailyNeedOf } from '@/features/supply/application/stock-figures'
 import { pickFifoUnit } from '../domain/fifo'
 import type { StockProduct } from '../domain/stock-entry'
 import { productFilterFor } from './stock-model'
@@ -70,6 +71,7 @@ export async function getFoodTypeDetail(
     path: { group: first.group, category: first.category },
     typicalShelfLifeMonths: first.foodType?.typicalShelfLifeMonths ?? null,
     totals: totalsOf(totals, node),
+    need: dailyNeedOf(context.basis),
     fifoUnitId: pickFifoUnit(stock)?.id ?? null,
     products: productsOf(context, products, units),
   })

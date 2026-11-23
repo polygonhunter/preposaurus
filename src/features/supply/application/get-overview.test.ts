@@ -158,6 +158,9 @@ describe('getOverview', () => {
         days: 16.6,
         goalDays: 10,
         isTightest: true,
+        unit: 'g',
+        stock: 2500,
+        targetPerDay: 150,
       },
     ])
   })

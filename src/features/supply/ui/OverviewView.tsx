@@ -36,7 +36,9 @@ export function OverviewView({ overview }: OverviewViewProps) {
       </div>
       <div>
         <RestockHint restock={overview.restock} />
-        {overview.groups.length === 0 ? null : <GroupCoverageList groups={overview.groups} />}
+        {overview.groups.length === 0 ? null : (
+          <GroupCoverageList groups={overview.groups} source={overview.household.source} />
+        )}
         <HouseholdSection household={overview.household} goal={overview.goal} />
       </div>
     </div>

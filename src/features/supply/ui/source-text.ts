@@ -1,10 +1,7 @@
-// Texte rund um die Empfehlungsquelle (#20, #206): Hinweis auf ungeprüfte Werte und der Satz der
-// Übersicht, wenn es keine Tage gibt. Rein, damit es Tests gibt.
+// Satz der Übersicht, wenn es keine Tage gibt (#20, #206). Rein, damit es Tests gibt. Der Hinweis
+// auf ungeprüfte Werte steht in shared/config/recommendation-source.ts.
 import { GOAL_PATH, MEMBERS_PATH } from '@/shared/config/settings-paths'
 import type { OverviewHousehold } from '../schemas'
-
-/** Dezent an der Quelle, solange niemand die Werte gegen das Original geprüft hat (M1-09). */
-export const UNVERIFIED_SOURCE_NOTE = 'Werte noch nicht geprüft'
 
 type NoNeedState = Readonly<{ text: string; action: { href: string; label: string } }>
 

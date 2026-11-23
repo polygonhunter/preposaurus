@@ -11,7 +11,7 @@ import type {
   OverviewRestock,
 } from '../schemas'
 import { formatDate, formatDays } from './head-text'
-import { UNVERIFIED_SOURCE_NOTE } from './source-text'
+import { UNVERIFIED_SOURCE_NOTE } from '@/shared/config/recommendation-source'
 
 type DueGroup = OverviewDueEntry['group']
 type StatusTone = 'red' | 'orange' | 'yellow'

@@ -86,6 +86,8 @@ const nodeTotalsSchema = z.object({
   uncountedPackages: z.number().int(),
   amounts: z.object({ g: z.number(), ml: z.number() }),
   kcal: z.number(),
+  /** Wasser in ml, das in die Wasser-Tage zählt */
+  waterMl: z.number(),
   macros: macrosSchema,
   productsWithoutMacros: z.number().int(),
   energyDays: z.number().nullable(),
@@ -197,6 +199,8 @@ export const foodTypeDetailSchema = z.object({
   }),
   typicalShelfLifeMonths: z.number().int().nullable(),
   totals: nodeTotalsSchema,
+  /** Tagesbedarf des Haushalts für das Erklär-Blatt der Kennwerte (#230), ohne Bedarf 0 */
+  need: z.object({ kcalPerDay: z.number().nonnegative(), waterMlPerDay: z.number().nonnegative() }),
   /** Packung für „1 entnehmen“ (frühestes MHD), null ohne Vorrat */
   fifoUnitId: id.nullable(),
   products: z.array(

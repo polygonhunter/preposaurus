@@ -51,13 +51,16 @@ export function groupCoverage(
   const shown = progress.filter((entry) => entry.groupKey !== WATER_GROUP_KEY)
   const tightest = findTightestGroup(shown)
   const byKey = new Map(groups.map((group) => [group.key, group]))
-  return shown.map(({ groupKey, days, goalDays }) => ({
+  return shown.map(({ groupKey, days, goalDays, unit, stock, targetPerDay }) => ({
     key: groupKey,
     name: byKey.get(groupKey)?.name ?? groupKey,
     shortName: byKey.get(groupKey)?.shortName ?? groupKey,
     days,
     goalDays,
     isTightest: groupKey === tightest?.groupKey,
+    unit,
+    stock,
+    targetPerDay,
   }))
 }
 
