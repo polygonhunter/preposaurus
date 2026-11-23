@@ -11,13 +11,21 @@ type DayBarProps = Readonly<{
   isLimiting?: boolean
   // Text rechts, z. B. „9,6 T“. Ohne Angabe die Zahl der Tage.
   valueText?: string
+  // Beschriftung steht schon darüber (z. B. lange Warengruppen-Namen): nur für Screenreader
+  isLabelHidden?: boolean
 }>
 
-export function DayBar({ label, days, scaleDays, goalDays, isLimiting, valueText }: DayBarProps) {
+export function DayBar(props: DayBarProps) {
+  const { label, days, scaleDays, goalDays, isLimiting, valueText, isLabelHidden } = props
   const text = valueText ?? `${String(days)} Tage`
   return (
-    <div className="grid grid-cols-[4rem_1fr_auto] items-center gap-x-2.5 text-callout">
-      <span>{label}</span>
+    <div
+      className={cx(
+        'grid items-center gap-x-2.5 text-callout',
+        isLabelHidden ? 'grid-cols-[1fr_auto]' : 'grid-cols-[4rem_1fr_auto]',
+      )}
+    >
+      {isLabelHidden ? null : <span>{label}</span>}
       <div
         role="meter"
         aria-label={label}

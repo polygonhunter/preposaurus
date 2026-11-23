@@ -11,6 +11,7 @@
     "src/features/capture/actions/*.ts!",
     "src/server/auth/guards.ts!",
     "scripts/admin.ts!",
+    "src/worker/main.ts!",
     "tests/e2e/*.setup.ts"
   ],
   "project": [
@@ -19,7 +20,7 @@
     "!src/shared/lib/{dates,quantities,slug,stock-unit}.ts!",
     "!src/server/{ai,crypto,notify,storage}/**!",
     "!src/features/ai-settings/{application,data}/**!",
-    "!src/features/capture/{application/clean-up-captures.ts,data/capture-cleanup-repository.ts,schemas/ai-answers.ts}!",
+    "!src/features/capture/schemas/ai-answers.ts!",
     "!src/features/inventory/schemas.ts!",
     "db/**/*.ts!",
     "!db/seeds/{demo*,factories}.ts!",

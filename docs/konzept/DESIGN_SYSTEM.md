@@ -76,7 +76,7 @@ Alle Text-Kombinationen erfüllen WCAG AA (4,5 : 1). Der helle Akzent ist dafür
 | `Chip` | Pill auf `surface`; aktiv invertiert (`fg` auf `bg`). Eine Reihe, waagerecht scrollbar |
 | `StatusBadge` | Ampel-Punkt 8 px plus Wort in Ampelfarbe, 13/600 |
 | `DayBar` | Balken auf Tages-Skala: Spur `fill`, Füllung `bar` oder `bar-warn`, Zielmarke 2 px `fg`, Wert rechts |
-| `StatTiles` | 2–4 Kennzahlen nebeneinander in einer Gruppe, durch Linien getrennt (Zahl `title2`, Wort `footnote`) |
+| `StatTiles` | 2–4 Kennzahlen nebeneinander in einer Gruppe, durch Linien getrennt (Zahl `title2`, Wort `footnote`). Vier Kacheln stehen kompakt als 2 × 2, ab „mittel“ in einer Reihe |
 | `Field` | Label über dem Feld, Feld auf `surface` mit Rand `line-strong`, Hinweis und Fehler darunter (`red`, mit `aria-describedby`) |
 | `Toggle` | Schalter wie iOS, Grün für „an“, „aus“ als Spur `fill` mit 1-px-Innenrand `line-strong` |
 | `Sheet` | Blatt von unten (`<dialog>`), Griff, Titel, Inhalt, Aktionen unten. Am PC als zentrierter Dialog |

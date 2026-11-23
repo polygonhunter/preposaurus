@@ -4,7 +4,7 @@ type LogLevel = (typeof LOG_LEVELS)[number]
 
 type LogContext = Readonly<Record<string, unknown>>
 type LogMethod = (message: string, context?: LogContext) => void
-type Logger = Readonly<Record<LogLevel, LogMethod>>
+export type Logger = Readonly<Record<LogLevel, LogMethod>>
 
 type LogSink = (line: string) => void
 
