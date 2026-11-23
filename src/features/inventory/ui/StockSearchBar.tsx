@@ -1,5 +1,4 @@
 import Form from 'next/form'
-import { SHORTCUT_KEYS } from '@/shared/lib/keyboard-shortcuts'
 import { SearchField } from '@/shared/ui/SearchField'
 import type { StockFilter, StockSearch } from '../schemas'
 import { FilterSheet } from './FilterSheet'
@@ -24,7 +23,7 @@ export function StockSearchBar({ filter, options }: StockSearchBarProps) {
           defaultValue={filter.search ?? ''}
           placeholder="Lebensmittel suchen"
           enterKeyHint="search"
-          shortcut={SHORTCUT_KEYS.search}
+          shortcut="search"
         />
         {filter.status === 'in-stock' ? null : (
           <input type="hidden" name={STOCK_PARAMS.status} value={statusSlug(filter.status)} />

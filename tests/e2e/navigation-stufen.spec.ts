@@ -131,6 +131,38 @@ test.describe('Tastenkürzel', () => {
   })
 })
 
+test.describe('Tastenkürzel abgeschaltet (#254)', () => {
+  test('aus heißt: „n“ tut nichts, keine Tasten und kein aria-keyshortcuts', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, 'Tastenkürzel gibt es nur mit Tastatur')
+    // Die Wahl steht im Cookie dieses Browser-Kontexts, andere Tests sehen sie nicht
+    await page.goto('/einstellungen/konto')
+    const toggle = page.getByRole('switch', { name: 'Tastenkürzel' })
+    await expect(toggle).toBeChecked()
+    await page.locator('label', { hasText: 'Tastenkürzel' }).click()
+    await expect(toggle).not.toBeChecked()
+    await page.getByRole('button', { name: 'Speichern' }).last().click()
+    await expect(page.getByText('Gespeichert.')).toBeVisible()
+
+    await page.goto('/vorrat')
+    const search = page.getByRole('searchbox', { name: 'Vorrat durchsuchen' })
+    await expect(search).not.toHaveAttribute('aria-keyshortcuts')
+    await expect(page.locator('kbd')).toHaveCount(0)
+
+    await page.locator('body').press('n')
+    await page.locator('body').press('/')
+    // Ein Wechsel bräuchte einen Moment, deshalb erst danach prüfen, dass keiner kam
+    await page.waitForTimeout(1000)
+    await expect(page).toHaveURL(/\/vorrat$/)
+    await expect(search).not.toBeFocused()
+
+    await page.goto('/einstellungen/konto')
+    await expect(page.getByRole('switch', { name: 'Tastenkürzel' })).not.toBeChecked()
+  })
+})
+
 test.describe('kompakt und mittel', () => {
   test.beforeEach(({ page }) => {
     test.skip(widthOf(page) >= BREIT, 'Tab-Leiste nur unter 900 px')
