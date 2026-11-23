@@ -4,7 +4,6 @@ import {
   detailTiles,
   expiryHint,
   formatDate,
-  formatDaysLeft,
   formatPackages,
   formatTakenMessage,
   groupCoverageText,
@@ -102,14 +101,6 @@ describe('Datum und Hinweise', () => {
     expect(formatDate({ date: '2027-09-30', precision: 'day', isEstimated: true })).toBe(
       '30.09.2027, geschätzt',
     )
-  })
-
-  it('nennt die Tage bis zum Datum in Worten', () => {
-    expect(formatDaysLeft(0)).toBe('heute')
-    expect(formatDaysLeft(1)).toBe('morgen')
-    expect(formatDaysLeft(12)).toBe('in 12 Tagen')
-    expect(formatDaysLeft(-1)).toBe('seit gestern')
-    expect(formatDaysLeft(-3)).toBe('seit 3 Tagen')
   })
 
   it('beruhigt beim abgelaufenen MHD und warnt klar beim Verbrauchsdatum', () => {

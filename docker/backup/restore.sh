@@ -1,5 +1,5 @@
 # Wiederherstellen (UMSETZUNG M13-03): spielt einen Stand zurück und setzt den Ordner fotos auf
-# den Stand der Sicherung. Vorher muss die App gestoppt sein (docker compose stop web).
+# den Stand der Sicherung. Vorher muss die App gestoppt sein (docker compose stop web worker).
 #   wiederherstellen <stand> [--ja]     Stand z. B. manuell/2026-11-22_010000
 #   pruefen <stand>                     Probe in eine Wegwerf-Datenbank, der Betrieb läuft weiter
 # Sicherheitsnetz: Zuerst entsteht ein Stand vor-wiederherstellung/… des aktuellen Zustands. Der
@@ -32,7 +32,7 @@ confirm_restore() {
 ensure_no_connections() {
   open=$(psql --dbname=postgres -tAc \
     "select count(*) from pg_stat_activity where datname = '$PGDATABASE' and pid <> pg_backend_pid()")
-  [ "$open" = "0" ] || fail "Die App ist noch verbunden. Bitte zuerst: docker compose stop web"
+  [ "$open" = "0" ] || fail "Die App ist noch verbunden. Bitte zuerst: docker compose stop web worker"
 }
 
 # Spielt einen Dump in eine frische Datenbank. Scheitert es, ist die Datenbank wieder weg.

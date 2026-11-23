@@ -36,7 +36,7 @@ Preposaurus läuft als kleine Gruppe von Containern (Programmpaketen) mit Docker
 | `web` | die App selbst |
 | `backup` | sichert jede Nacht Datenbank und Fotos |
 | `tailscale` | bringt die App verschlüsselt (HTTPS) in dein privates Tailscale-Netz |
-| `worker` | Erinnerungen und Mails, kommt mit einer späteren Version |
+| `worker` | erledigt Aufgaben nach Zeitplan im Hintergrund (nächtliches Aufräumen, später Erinnerungen und Mails) |
 
 **Erreichbar ist die App nur über Tailscale**, nicht aus dem offenen Internet und nicht direkt im Heimnetz. Tailscale ist ein privates, verschlüsseltes Netz zwischen deinen eigenen Geräten (dem „Tailnet“). Die App bekommt darin eine Adresse wie `https://haushalt.dein-tailnet.ts.net`.
 
@@ -231,6 +231,7 @@ docker compose ps -a
 | `db` | `Up … (healthy)` |
 | `migrate` | `Exited (0)` – richtig so, er ist fertig |
 | `web` | `Up … (healthy)` |
+| `worker` | `Up` |
 | `backup` | `Up` |
 | `tailscale` | `Up` |
 
@@ -239,6 +240,8 @@ Im Log von `migrate` stehen `Migrationen eingespielt` und `Stammdaten eingespiel
 ```bash
 docker compose logs migrate
 ```
+
+Im Log von `worker` steht `Worker gestartet` (`docker compose logs worker`). Der Worker legt seine Warteschlange beim ersten Start selbst in der Datenbank an (Schema `pgboss`), sie ist in den Backups mit enthalten. Seine Zeitpläne gelten immer in deutscher Zeit (Europe/Berlin).
 
 Läuft der Tailscale-Container, erscheint das Gerät mit deinem `TS_HOSTNAME` im Admin-Bereich unter **Machines** (*noch nicht am Gerät geprüft*). Dort beim Gerät über das Menü **Disable key expiry** wählen, sonst muss es sich nach einigen Monaten neu anmelden.
 
@@ -341,13 +344,13 @@ Erwartet: `Probe in Ordnung: taeglich/2026-11-22_030000 lässt sich einspielen (
 So spielst du einen Stand zurück. **Datenbank und Fotos werden dabei durch den Stand ersetzt.**
 
 ```bash
-docker compose stop web                                                  # App anhalten
+docker compose stop web worker                                           # App anhalten
 docker compose run --rm backup liste                                     # Stand aussuchen
 docker compose run --rm backup wiederherstellen taeglich/2026-11-22_030000
 docker compose up -d                                                     # App wieder starten
 ```
 
-Der Container fragt vor dem Ersetzen nach und erwartet die Eingabe `ja`. Läuft die App noch, bricht er ohne Änderung ab: `Die App ist noch verbunden. Bitte zuerst: docker compose stop web`.
+Der Container fragt vor dem Ersetzen nach und erwartet die Eingabe `ja`. Läuft die App noch, bricht er ohne Änderung ab: `Die App ist noch verbunden. Bitte zuerst: docker compose stop web worker`.
 
 So bleibt es sicher:
 - **Zuerst sichert er den jetzigen Zustand** nach `vor-wiederherstellung/…`. Hast du den falschen Stand gewählt, spielst du einfach diesen zurück.
@@ -384,7 +387,7 @@ Neue Versionen stehen auf der [Release-Seite](https://github.com/polygonhunter/p
 5. **Prüfen:** `docker compose ps -a` wie in Abschnitt 6, dann die App öffnen.
 
 **Zurück zur alten Version:** Datenbank-Änderungen laufen nur vorwärts. Der Weg zurück ist deshalb:
-1. `docker compose stop web`
+1. `docker compose stop web worker`
 2. Alte Nummer in `PREPOSAURUS_VERSION` eintragen, `docker compose pull`.
 3. Den Stand von vor dem Update einspielen: `docker compose run --rm backup wiederherstellen vor-update/2026-11-22_100512` (Abschnitt 11).
 4. `docker compose up -d`

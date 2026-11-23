@@ -1,6 +1,7 @@
 import { daysBetween, formatDayWithPrecision, type CalendarDay } from '@/shared/lib/dates'
 import type { DueGroup } from '@/features/inventory/domain/due-bundles'
 import type { BestBefore } from '@/features/inventory/domain/unit'
+import { listNames } from '@/shared/lib/german-list'
 
 // Bausteine für die Texte der Erinnerungen. Ton ruhig und freundlich, keine Angstmache
 // (CLAUDE.md). Begriffe wie in der UI: Packung, bald fällig, abgelaufen (UX-Konzept §10).
@@ -52,17 +53,12 @@ export function sortByDate(items: readonly DueItem[]): DueItem[] {
   })
 }
 
-function joinGerman(parts: readonly string[]): string {
-  if (parts.length <= 1) return parts.join('')
-  return `${parts.slice(0, -1).join(', ')} und ${parts.at(-1) ?? ''}`
-}
-
 /** „Thunfisch, Reis und Linsen“ oder „Thunfisch, Reis, Linsen und 2 weitere“, ohne Doppelte. */
 export function nameItems(items: readonly DueItem[]): string {
-  const names = [...new Set(sortByDate(items).map((item) => item.label))]
-  if (names.length <= MAX_NAMED_ITEMS) return joinGerman(names)
-  const rest = names.length - MAX_NAMED_ITEMS
-  return joinGerman([...names.slice(0, MAX_NAMED_ITEMS), `${String(rest)} weitere`])
+  return listNames(
+    sortByDate(items).map((item) => item.label),
+    MAX_NAMED_ITEMS,
+  )
 }
 
 function describeDaysLeft(daysLeft: number): string {

@@ -139,6 +139,8 @@ const policies = [
       // Fake-Adapter brauchen den Port, den sie nachbilden
       to(serverModule('storage')),
       to(serverModule('notify')),
+      // Warteschlange: Test-Datenbank für pg-boss (M11-01)
+      to(serverModule('jobs')),
       to(anyShared),
     ],
   },

@@ -3,7 +3,9 @@
 // der Erinnerungen, hier steht nur der Rahmen.
 import { renderMail, type MailLink } from './mail-layout'
 import type { MailContent } from './mail-sender'
+import { listNames } from '@/shared/lib/german-list'
 
+// „Mais, Reis und Linsen“, ab sechs Namen „… und 3 weitere“
 const MAX_NAMES = 5
 
 const overviewLink = (appUrl: string | null): MailLink | null =>
@@ -23,16 +25,6 @@ export function weeklySummaryMail({ lines, appUrl }: WeeklySummaryMailInput): Ma
   })
 }
 
-/** „Mais, Reis und Linsen“, ab sechs Namen „… und 3 weitere“. */
-export function listNames(names: readonly string[]): string {
-  const unique = [...new Set(names)]
-  const shown = unique.slice(0, MAX_NAMES)
-  const rest = unique.length - shown.length
-  const parts = rest > 0 ? [...shown, `${String(rest)} weitere`] : shown
-  if (parts.length <= 1) return parts.join('')
-  return `${parts.slice(0, -1).join(', ')} und ${parts.at(-1) ?? ''}`
-}
-
 interface CheckInMailInput {
   /** Namen abgelaufener Einträge, früheste zuerst */
   expired: readonly string[]
@@ -44,8 +36,8 @@ interface CheckInMailInput {
 function checkInLines({ expired, dueSoon }: CheckInMailInput): string[] {
   const lines = ['Wie sieht’s aus? Zeit für einen kurzen Blick in den Vorrat.']
   if (expired.length > 0)
-    lines.push(`Abgelaufen: ${listNames(expired)}. Kurz ansehen und entscheiden.`)
-  if (dueSoon.length > 0) lines.push(`Bald fällig: ${listNames(dueSoon)}.`)
+    lines.push(`Abgelaufen: ${listNames(expired, MAX_NAMES)}. Kurz ansehen und entscheiden.`)
+  if (dueSoon.length > 0) lines.push(`Bald fällig: ${listNames(dueSoon, MAX_NAMES)}.`)
   if (expired.length === 0 && dueSoon.length === 0) {
     lines.push('Gerade ist nichts fällig. Euer Vorrat ist gut in Schuss.')
   }

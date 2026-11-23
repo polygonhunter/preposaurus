@@ -11,12 +11,13 @@
     "src/features/capture/actions/*.ts!",
     "src/server/auth/guards.ts!",
     "scripts/admin.ts!",
+    "src/worker/main.ts!",
     "tests/e2e/*.setup.ts"
   ],
   "project": [
     "src/**/*.{ts,tsx,css}!",
     "!src/features/*/domain/**!",
-    "!src/shared/lib/{dates,quantities,slug,stock-unit}.ts!",
+    "!src/shared/lib/{dates,german-list,quantities,slug,stock-unit}.ts!",
     "!src/server/{ai,crypto,notify,storage}/**!",
     "!src/features/ai-settings/{application,data}/**!",
     "!src/features/capture/{application/{estimate-on-request,find-open-draft}.ts,schemas.ts}!",

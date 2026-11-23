@@ -11,7 +11,8 @@ import { createVisionRecognizer } from '@/server/ai/create-vision-recognizer'
 import type { VisionRecognizer } from '@/server/ai/vision-recognizer'
 import type { AiRole } from '@/shared/config/ai-roles'
 import { err, ok, type Result } from '@/shared/lib/result'
-import { insertAiCall, isPhotoOfHousehold } from '../data/ai-call-repository'
+import { isPhotoOfHousehold } from '@/features/capture/application/photo-of-household'
+import { insertAiCall } from '../data/ai-call-repository'
 import {
   loadAiConfig,
   type AiConfigDeps,
@@ -42,6 +43,8 @@ function routeFor(deps: AiConfigDeps, config: RoleConfig): RoleRoute {
   }
 }
 
+// Die Verbindung prüft schon der zusammengesetzte Fremdschlüssel der Rollen-Zuweisung
+// (verbindung_id, haushalt_id), das Foto prüft das Foto-Repository (#133, #171).
 async function isForeignPhoto(deps: AiConfigDeps, input: PrepareRecognitionInput) {
   const { householdId, photoId } = input
   if (photoId === null) return false
