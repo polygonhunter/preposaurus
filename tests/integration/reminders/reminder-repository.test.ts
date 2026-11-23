@@ -98,23 +98,28 @@ describe('createReminderRepository', () => {
     expect(await repository.countMissingDates(basics.householdId)).toBe(1)
   })
 
-  it('nennt die Adressen aktiver Nutzer des Haushalts', async () => {
+  it('nennt nur die freiwilligen Adressen aktiver Nutzer des Haushalts (#75)', async () => {
     const inactive = buildUser({ householdId: basics.householdId, isActive: false })
-    await testDb.db.insert(users).values({ ...inactive, email: 'alt@example.org' })
+    await testDb.db.insert(users).values({ ...inactive, reminderEmail: 'alt@example.org' })
+    // Ohne freiwillige Adresse zählt die technische nie, auch keine echte in nutzer.email
+    const withoutAddress = buildUser({ householdId: basics.householdId, email: 'ohne@example.org' })
+    await testDb.db.insert(users).values(withoutAddress)
     await testDb.db
       .update(users)
-      .set({ email: 'alex@example.org' })
+      .set({ reminderEmail: 'alex@example.org' })
       .where(eq(users.id, basics.userId))
 
     expect(await repository.listAddresses(basics.householdId)).toEqual(['alex@example.org'])
   })
 
   it('findet Check-in-Abos nach Rhythmus, nur eingeschaltete', async () => {
-    const off = buildUser({ householdId: basics.householdId, email: 'aus@example.org' })
-    await testDb.db.insert(users).values(off)
+    const off = buildUser({ householdId: basics.householdId, reminderEmail: 'aus@example.org' })
+    const noAddress = buildUser({ householdId: basics.householdId })
+    await testDb.db.insert(users).values([off, noAddress])
     await testDb.db.insert(notificationSettings).values([
       { userId: basics.userId, kind: 'checkin_mail', schedule: 'woechentlich' },
       { userId: off.id, kind: 'checkin_mail', schedule: 'woechentlich', isEnabled: false },
+      { userId: noAddress.id, kind: 'checkin_mail', schedule: 'woechentlich' },
     ])
 
     expect(await repository.listCheckInRecipients('woechentlich')).toEqual([

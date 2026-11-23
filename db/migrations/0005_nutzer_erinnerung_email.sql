@@ -1,0 +1,1 @@
+ALTER TABLE "nutzer" ADD COLUMN "erinnerung_email" text;

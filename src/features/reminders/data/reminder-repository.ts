@@ -57,15 +57,21 @@ async function countMissingDates(db: Database, householdId: string): Promise<num
 
 async function listAddresses(db: Database, householdId: string): Promise<string[]> {
   const rows = await db
-    .select({ address: users.email })
+    .select({ address: users.reminderEmail })
     .from(users)
-    .where(and(eq(users.householdId, householdId), eq(users.isActive, true)))
-  return rows.map((row) => row.address)
+    .where(
+      and(
+        eq(users.householdId, householdId),
+        eq(users.isActive, true),
+        isNotNull(users.reminderEmail),
+      ),
+    )
+  return rows.flatMap(({ address }) => (address === null ? [] : [address]))
 }
 
 async function listCheckInRecipients(db: Database, cadence: string) {
   const rows = await db
-    .select({ householdId: users.householdId, address: users.email })
+    .select({ householdId: users.householdId, address: users.reminderEmail })
     .from(notificationSettings)
     .innerJoin(users, eq(users.id, notificationSettings.userId))
     .where(
@@ -75,10 +81,11 @@ async function listCheckInRecipients(db: Database, cadence: string) {
         eq(notificationSettings.schedule, cadence),
         eq(users.isActive, true),
         isNotNull(users.householdId),
+        isNotNull(users.reminderEmail),
       ),
     )
   return rows.flatMap(({ householdId, address }) =>
-    householdId === null ? [] : [{ householdId, address }],
+    householdId === null || address === null ? [] : [{ householdId, address }],
   )
 }
 

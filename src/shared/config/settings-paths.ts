@@ -1,6 +1,7 @@
 // Adressen der Einstellungen (#37), an einer Stelle für Seiten, Links und Weiterleitungen der Actions.
 
 export const SETTINGS_PATH = '/einstellungen'
+export const ACCOUNT_PATH = '/einstellungen/konto'
 export const MEMBERS_PATH = '/einstellungen/mitglieder'
 export const NEW_MEMBER_PATH = '/einstellungen/mitglieder/neu'
 export const GOAL_PATH = '/einstellungen/ziel'

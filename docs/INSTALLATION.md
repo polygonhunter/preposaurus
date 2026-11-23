@@ -211,7 +211,7 @@ docker run --rm alpine:3.22 sh -c "apk add -q openssl && openssl rand -base64 32
 | `SMTP_FROM` | mit `SMTP_HOST` | Absender, z. B. `Preposaurus <vorrat@example.org>` |
 | `APP_URL` | nein | Adresse der App, z. B. `https://haushalt.dein-tailnet.ts.net`. Nur für den Link „Vorrat öffnen“ in Mails. Leer: Mails ohne Link |
 
-Mails sind optional. Sie gehen nur an Nutzer mit einer echten E-Mail-Adresse; die Anmeldung braucht keine. Das Feld für die eigene Adresse kommt mit dem Profil in einer späteren Version, bis dahin geht keine Mail hinaus. Push-Benachrichtigungen folgen ebenfalls später.
+Mails sind optional. Sie gehen nur an Nutzer, die selbst eine Adresse hinterlegt haben; die Anmeldung braucht keine. So trägt jeder seine Adresse ein: **Einstellungen → Profil, Passwort und Mails → E-Mail für Erinnerungen**, dann **Speichern**. Leer lassen heißt: keine Mails. Darunter lässt sich die Check-in-Mail (wöchentlich oder monatlich) wählen, sobald `SMTP_HOST` gesetzt und eine Adresse eingetragen ist. Die Wochenübersicht geht per Mail an alle mit Adresse, solange kein Gerät Push hat. Push-Benachrichtigungen folgen später.
 
 Erwartet: `docker compose config --quiet` gibt nichts aus. Fehlt ein Pflichtwert, nennt die Meldung die Variable, z. B. `APP_SECRET fehlt in .env`.
 
