@@ -1,7 +1,6 @@
+import type { Linter } from 'eslint'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { lintFile, warmUpEslint } from './run-eslint'
-
-beforeAll(warmUpEslint)
+import { createFixtureLinter, lintFixtures } from './run-eslint'
 
 const rejectedFixtures = [
   { file: 'max-lines.ts', ruleId: 'max-lines' },
@@ -29,16 +28,32 @@ const rejectedFixtures = [
   },
 ] as const
 
-describe('harte Linter-Grenzen', () => {
-  it.each(rejectedFixtures)('lehnt $file über $ruleId ab', async ({ file, ruleId }) => {
-    const messages = await lintFile(`limits/${file}`)
+const CLEAN_FIXTURE = 'clean.ts'
 
-    expect(messages.map((message) => message.ruleId)).toContain(ruleId)
+let messagesByFile: ReadonlyMap<string, Linter.LintMessage[]> = new Map()
+
+// Typbasierte Regeln brauchen das TypeScript-Programm des ganzen Projekts. Allein entsteht es in
+// rund 3 s, im Pre-Push neben allen anderen Testdateien dauerte schon das Aufwärmen über 60 s.
+// Darum großzügig 3 Minuten: Das Limit fängt nur einen hängenden Lauf.
+const LINT_ALL_TIMEOUT_MS = 180_000
+
+// Alle Fixtures in einem Aufruf: Das TypeScript-Programm entsteht einmal (#244).
+beforeAll(async () => {
+  const files = [...rejectedFixtures.map(({ file }) => file), CLEAN_FIXTURE]
+  messagesByFile = await lintFixtures(
+    createFixtureLinter(),
+    files.map((file) => `limits/${file}`),
+  )
+}, LINT_ALL_TIMEOUT_MS)
+
+const messagesOf = (file: string) => messagesByFile.get(`limits/${file}`)
+
+describe('harte Linter-Grenzen', () => {
+  it.each(rejectedFixtures)('lehnt $file über $ruleId ab', ({ file, ruleId }) => {
+    expect(messagesOf(file)?.map((message) => message.ruleId)).toContain(ruleId)
   })
 
-  it('lässt eine saubere Datei ohne Meldung durch', async () => {
-    const messages = await lintFile('limits/clean.ts')
-
-    expect(messages).toEqual([])
+  it('lässt eine saubere Datei ohne Meldung durch', () => {
+    expect(messagesOf(CLEAN_FIXTURE)).toEqual([])
   })
 })
