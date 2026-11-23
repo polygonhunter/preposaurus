@@ -2,9 +2,11 @@ import { useEffect, useRef } from 'react'
 import { Button } from '@/shared/ui/Button'
 import { ButtonLink } from '@/shared/ui/ButtonLink'
 import { Icon } from '@/shared/ui/Icon'
+import type { SupplyChange } from '../domain/supply-change'
+import { supplyChangeText } from './saved-text'
 
 type CaptureSavedProps = Readonly<{
-  unitCount: number
+  saved: Readonly<{ unitCount: number; supplyChange: SupplyChange | null }>
   productName: string
   /** Erste Erfassung in einen leeren Vorrat (#54, erster Start) */
   isFirst: boolean
@@ -15,8 +17,10 @@ const packages = (count: number) => (count === 1 ? '1 Packung' : `${String(count
 
 // Bestätigung nach dem Speichern (#54) mit den beiden Wegen „Noch eins“ und „Zum Vorrat“. Der Fokus
 // springt auf die Meldung, damit auch ein Screenreader das Ergebnis ansagt. „Hinzugefügt“ statt
-// „sind jetzt im Vorrat“, weil beim Nachschub schon mehr Packungen da sind (#207).
-export function CaptureSaved({ unitCount, productName, isFirst, onAnother }: CaptureSavedProps) {
+// „sind jetzt im Vorrat“, weil beim Nachschub schon mehr Packungen da sind (#207). Ändern sich die
+// ganzen Tage von Essen oder Wasser, sagt ein zweiter Satz, wie lange es jetzt reicht (#231).
+export function CaptureSaved({ saved, productName, isFirst, onAnother }: CaptureSavedProps) {
+  const { unitCount, supplyChange } = saved
   const headingRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
@@ -34,6 +38,9 @@ export function CaptureSaved({ unitCount, productName, isFirst, onAnother }: Cap
           {packages(unitCount)} {productName} hinzugefügt.
           {isFirst ? ' Der Anfang ist gemacht.' : ''}
         </p>
+        {supplyChange === null ? null : (
+          <p className="max-w-sm text-body">{supplyChangeText(supplyChange)}</p>
+        )}
       </div>
       <div className="flex flex-col items-center gap-3">
         <Button onClick={onAnother}>Noch eins erfassen</Button>

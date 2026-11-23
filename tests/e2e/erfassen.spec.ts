@@ -158,6 +158,26 @@ test('neues Produkt mit zwei Daten und „Datum fehlt“, doppeltes Speichern le
   await expect(page.getByText('1 Packung Nudeln hinzugefügt.')).toBeVisible()
 })
 
+test('Nach dem Speichern sagt ein Satz, wie lange das Essen jetzt reicht (#231)', async ({
+  page,
+}, testInfo) => {
+  // Gut 5 kg Nudeln sind mehr als zwei Tage kcal für den Haushalt: Die ganze Zahl ändert sich sicher,
+  // auch wenn parallel kurz eine Person dazukommt (einstellungen.spec.ts).
+  await page.goto('/neu/manuell')
+  await chooseNoodles(page)
+  await content(page).fill(contentFor(testInfo, 2200))
+  await selectPackage(page)
+  await addDate(page, '09/2028')
+  await addDate(page, '09/2028')
+  await page.getByRole('button', { name: 'Speichern' }).click()
+
+  await expect(page.getByText('2 Packungen Nudeln hinzugefügt.')).toBeVisible()
+  await expect(
+    page.getByText(/^Euer Essen reicht jetzt (für [\d,]+ Tage|[\d,]+ statt [\d,]+ Tage)\.$/),
+  ).toBeVisible()
+  await expectAccessibleLayout(page)
+})
+
 test('Erfassen geht ganz per Tastatur', async ({ page, browserName }, testInfo) => {
   // WebKit erreicht Knöpfe per Tab nur mit einer Systemeinstellung (siehe rahmen.spec.ts).
   test.skip(browserName === 'webkit', 'Tab-Reihenfolge nur in Chromium')

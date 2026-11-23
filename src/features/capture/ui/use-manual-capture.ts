@@ -66,7 +66,7 @@ function outcomeOf({ errors, result, isSaving }: SaveState, captureId: string) {
   const form = errors.form ?? serverError
   return {
     errors: form === undefined ? errors : { ...errors, form },
-    savedUnits: isSaved ? result.unitCount : null,
+    saved: isSaved ? result : null,
   }
 }
 
