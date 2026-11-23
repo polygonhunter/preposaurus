@@ -40,6 +40,13 @@ const PRECISION: Record<DbValue<typeof BEST_BEFORE_PRECISIONS>, BestBeforePrecis
   jahr: 'year',
 }
 
+/** Genauigkeit zurück in den Wert der Datenbank, z. B. für „Datum ändern“ (#49). */
+export const DB_PRECISION: Record<BestBeforePrecision, DbValue<typeof BEST_BEFORE_PRECISIONS>> = {
+  day: 'tag',
+  month: 'monat',
+  year: 'jahr',
+}
+
 const DATE_KIND: Record<DbValue<typeof BEST_BEFORE_KINDS>, DateKind> = {
   mhd: 'best-before',
   verbrauchen_bis: 'use-by',

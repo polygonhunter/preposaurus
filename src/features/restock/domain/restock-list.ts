@@ -15,6 +15,15 @@ export interface RestockItem {
   createdAt: Date
   /** Letzte Änderung, beim Abhaken also der Zeitpunkt des Abhakens */
   changedAt: Date
+  /** Produkt nach einer Entnahme samt Lebensmittelart, für das vorbelegte Erfassen (#195) */
+  productId: string | null
+  foodTypeId: string | null
+}
+
+/** Womit „Erfassen“ vorbelegt (#195): die Lebensmittelart, ohne Art das Produkt, sonst nichts. */
+export function captureTargetOf(item: Pick<RestockItem, 'productId' | 'foodTypeId'>) {
+  if (item.foodTypeId !== null) return { kind: 'food-type', id: item.foodTypeId } as const
+  return item.productId === null ? null : ({ kind: 'product', id: item.productId } as const)
 }
 
 /** Lücke einer Warengruppe bis zum Ziel (A13), in Menge und Tagen. */

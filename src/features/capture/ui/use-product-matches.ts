@@ -21,7 +21,7 @@ function wishOf({ foodTypeId, content, containerId }: MatchFields): ProductWish 
 }
 
 /** Was beim Wählen eines vorhandenen Produkts ins Formular übernommen wird. */
-function fieldsOfProduct(product: KnownProduct) {
+export function fieldsOfProduct(product: KnownProduct) {
   return {
     existingProductId: product.id,
     content: formatQuantity(product.content),

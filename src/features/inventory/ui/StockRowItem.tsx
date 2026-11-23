@@ -1,8 +1,8 @@
+import { detailPath } from '@/shared/config/stock-paths'
 import { Row } from '@/shared/ui/Row'
 import { StatusBadge } from '@/shared/ui/StatusBadge'
 import type { StockRowDto } from '../schemas'
 import { STATE_BADGE, formatDate, stockLine } from './stock-format'
-import { targetPath } from './stock-paths'
 import { TakeOneButton } from './TakeOneButton'
 
 type StockRowItemProps = Readonly<{
@@ -35,7 +35,7 @@ export function StockRowItem({ row, note }: StockRowItemProps) {
           )}
         </>
       }
-      action={{ href: targetPath(row.target) }}
+      action={{ href: detailPath(row.target) }}
       accessory={
         row.packagesInStock > 0 ? <TakeOneButton target={row.target} name={row.name} /> : undefined
       }

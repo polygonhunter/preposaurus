@@ -9,9 +9,9 @@ import type {
   StoredNutritionSource,
 } from '@/features/inventory/domain/nutrition-source'
 import type { BestBefore, DateKind } from '@/features/inventory/domain/unit'
+import { normalizeToPrecision } from '@/shared/lib/dates'
 import type { ContentQuantity } from '@/shared/lib/quantities'
 import { err, ok, type Result } from '@/shared/lib/result'
-import { normalizeToPrecision } from './best-before'
 
 export type CaptureMethod = 'photo' | 'manual'
 

@@ -56,7 +56,7 @@ const NO_NUTRITION = {
   nutritionConfirmedAt: null,
 }
 
-function nutritionColumns(nutrition: PlannedNutrition | null) {
+export function nutritionColumns(nutrition: PlannedNutrition | null) {
   if (nutrition === null) return NO_NUTRITION
   const { values, source, confirmedAt } = nutrition
   return {

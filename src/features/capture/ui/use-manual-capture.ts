@@ -5,6 +5,7 @@
 import { useActionState, useState, startTransition } from 'react'
 import { createStockAction, type CreateStockState } from '../actions/create-stock-action'
 import type { CaptureOptions } from '../domain/capture-options'
+import type { CapturePrefill } from '../domain/capture-prefill'
 import { manualCaptureSchema } from '../schemas/manual-capture'
 import {
   captureErrorsOf,
@@ -16,7 +17,7 @@ import {
   type CaptureField,
   type ManualCaptureDraft,
 } from './manual-capture-draft'
-import { useRestock } from './use-product-matches'
+import { fieldsOfProduct, useRestock } from './use-product-matches'
 
 type SavePayload = Parameters<typeof createStockAction>[0]
 
@@ -69,10 +70,21 @@ function outcomeOf({ errors, result, isSaving }: SaveState, captureId: string) {
   }
 }
 
-type CaptureSetup = Pick<CaptureOptions, 'knownProducts' | 'lastStorageLocationId'>
+type CaptureSetup = Pick<CaptureOptions, 'knownProducts' | 'lastStorageLocationId'> & {
+  /** Art bzw. Produkt aus der Adresse (#195), sonst null */
+  prefill: CapturePrefill | null
+}
+
+/** Erstes Formular: leer oder vorbelegt mit Art bzw. Produkt aus der Adresse (#195). */
+function initialDraft({ lastStorageLocationId, prefill }: CaptureSetup): ManualCaptureDraft {
+  const draft = emptyDraft(lastStorageLocationId)
+  if (prefill === null) return draft
+  const product = prefill.product === null ? {} : fieldsOfProduct(prefill.product)
+  return { ...draft, foodTypeId: prefill.foodTypeId, ...product }
+}
 
 export function useManualCapture(setup: CaptureSetup, onInvalid: InvalidHandler) {
-  const [draft, setDraft] = useState(() => emptyDraft(setup.lastStorageLocationId))
+  const [draft, setDraft] = useState(() => initialDraft(setup))
   const saving = useSaveCapture(onInvalid)
 
   function show(next: ManualCaptureDraft, changed: readonly string[]) {

@@ -3,14 +3,14 @@ import { Row } from '@/shared/ui/Row'
 import type { RestockItemDto } from '../schemas'
 import { CheckButton } from './CheckButton'
 import { RemoveButton } from './RemoveButton'
-import { RESTOCK_PATHS } from './restock-paths'
+import { captureHref } from './restock-paths'
 
 type RestockItemRowProps = Readonly<{ item: RestockItemDto }>
 
 // Eine Zeile der Liste: Haken links, Name, rechts Entfernen. Erledigte bieten „Erfassen“ an
-// („Gekauft und erfassen“, UX-Konzept §8.6).
+// („Gekauft und erfassen“, UX-Konzept §8.6), vorbelegt mit der Lebensmittelart (#195).
 export function RestockItemRow({ item }: RestockItemRowProps) {
-  const entry = { id: item.id, label: item.label }
+  const entry = { id: item.id, label: item.label, captureTarget: item.captureTarget }
   return (
     <Row
       icon={<CheckButton entry={entry} isDone={item.isDone} />}
@@ -18,7 +18,7 @@ export function RestockItemRow({ item }: RestockItemRowProps) {
       accessory={
         <div className="-my-2 -mr-3 flex shrink-0 items-center gap-1">
           {item.isDone ? (
-            <ButtonLink href={RESTOCK_PATHS.capture} variant="tinted">
+            <ButtonLink href={captureHref(item)} variant="tinted">
               Erfassen<span className="sr-only"> für {item.label}</span>
             </ButtonLink>
           ) : null}
