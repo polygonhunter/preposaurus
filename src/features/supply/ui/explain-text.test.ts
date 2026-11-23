@@ -87,6 +87,16 @@ describe('approximateText', () => {
       'Hier ist es weniger.',
     )
   })
+
+  it('folgt an der Schwelle derselben Regel wie „ca.“ an der Kernzahl', () => {
+    // 0,0999… gilt als 10 % (Gleitkomma) und bekommt „ca.“
+    expect(approximateText({ ...explanation, estimatedShare: 0.7 / 7 - 1e-12 })).toContain(
+      'Tragt die Werte vom Etikett nach',
+    )
+    const justBelow = approximateText({ ...explanation, estimatedShare: 0.097 })
+    expect(justBelow).toContain('etwa 9 %')
+    expect(justBelow).toContain('Hier ist es weniger.')
+  })
 })
 
 describe('caveatTexts', () => {

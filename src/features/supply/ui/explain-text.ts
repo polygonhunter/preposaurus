@@ -1,6 +1,6 @@
 // Texte des Erklär-Blatts (#219, UX-Konzept §8.1 Punkt 5 und §4): Rechnung in Worten und Zahlen,
 // was „ca.“ heißt und was nicht mitzählt. Gerechnet ist alles im DTO, hier wird nur formuliert.
-import { APPROXIMATE_SHARE_THRESHOLD } from '../domain/approximation'
+import { APPROXIMATE_SHARE_THRESHOLD, isApproximate } from '../domain/approximation'
 import { formatGermanNumber } from '@/shared/lib/quantities'
 import type { OverviewExplanation, OverviewNeedLine, OverviewSupply } from '../schemas'
 import { formatDays } from './head-text'
@@ -60,19 +60,21 @@ export function resultText({ energyDays, waterDays, days }: OverviewSupply): str
   return `Es zählt der kleinere Wert, hier ${limit}: ${formatDays(days)}. ${rounding}`
 }
 
+const THRESHOLD_PERCENT = Math.round(APPROXIMATE_SHARE_THRESHOLD * PERCENT)
+
+// Unter der Schwelle nie „etwa 10 %“ zeigen, sonst widerspräche der Satz „Hier ist es weniger.“
 function percentText(share: number): string {
-  const percent = Math.round(share * PERCENT)
+  const rounded = Math.round(share * PERCENT)
+  const percent = isApproximate(share) ? rounded : Math.min(rounded, THRESHOLD_PERCENT - 1)
   return percent === 0 ? 'weniger als 1 %' : `etwa ${String(percent)} %`
 }
-
-const THRESHOLD_PERCENT = String(Math.round(APPROXIMATE_SHARE_THRESHOLD * PERCENT))
 
 /** Was „ca.“ heißt, wie groß der Anteil der Richtwerte ist und wie man es los wird. */
 export function approximateText({ estimatedShare }: OverviewExplanation): string {
   if (estimatedShare === 0) return 'Alle kcal stammen von den Etiketten. Die Zahl ist genau.'
-  const share = `Bei ${percentText(estimatedShare)} der kcal fehlt die Nährwerttabelle, dort rechnet Preposaurus mit einem Richtwert.`
-  const rule = `„ca.“ vor der Zahl heißt: Ab ${THRESHOLD_PERCENT} % stammen die kcal spürbar aus Richtwerten.`
-  if (estimatedShare < APPROXIMATE_SHARE_THRESHOLD) return `${share} ${rule} Hier ist es weniger.`
+  const share = `Bei ${percentText(estimatedShare)} der kcal fehlt die Nährwerttabelle, dort rechnet Preposaurus mit einem Richtwert oder einer Schätzung.`
+  const rule = `„ca.“ vor der Zahl heißt: Ab ${String(THRESHOLD_PERCENT)} % stammen die kcal spürbar aus Richtwerten oder Schätzungen.`
+  if (!isApproximate(estimatedShare)) return `${share} ${rule} Hier ist es weniger.`
   return `${share} ${rule} Tragt die Werte vom Etikett nach, dann wird die Zahl genau.`
 }
 

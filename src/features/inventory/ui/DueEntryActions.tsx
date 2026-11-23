@@ -15,7 +15,8 @@ type DueEntryActionsProps = Readonly<{
 
 // Knöpfe eines abgelaufenen Eintrags auf „Bald fällig“ (UX-Konzept §8.2, F4, #47): Verbraucht und
 // Entsorgt nehmen je eine Packung, „Noch gut“ prüft alle Packungen des Eintrags. Alle sichtbar,
-// ohne „Mehr“ und ohne Wischen (UX §14 Nr. 14).
+// ohne „Mehr“ und ohne Wischen (UX §14 Nr. 14). Gesperrt nur per aria-disabled: Fokus bleibt, und
+// ohne Verbindung sagt ein Tipp warum (ConsumeProvider, #216).
 export function DueEntryActions({
   unitIds,
   name,
@@ -31,7 +32,7 @@ export function DueEntryActions({
       <Button
         variant="tinted"
         aria-label={`1 Packung ${name} verbraucht`}
-        disabled={isLocked}
+        aria-disabled={isLocked}
         onClick={() => {
           consume({ kind: 'unit', unitId: first }, label)
         }}
@@ -41,7 +42,7 @@ export function DueEntryActions({
       <Button
         variant="tinted"
         aria-label={`1 Packung ${name} entsorgt`}
-        disabled={isLocked}
+        aria-disabled={isLocked}
         onClick={() => {
           discard(first, label)
         }}
@@ -52,7 +53,7 @@ export function DueEntryActions({
         <Button
           variant="tinted"
           aria-label={`${name} noch gut`}
-          disabled={isLocked}
+          aria-disabled={isLocked}
           onClick={() => {
             markStillGood(unitIds, label)
           }}
