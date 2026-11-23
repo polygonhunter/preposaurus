@@ -24,7 +24,7 @@ export type GoalFormState = Readonly<{
   values: GoalTexts | null
 }>
 
-const PAST_DATE = 'Dieses Datum ist schon vorbei. Magst du ein neues wählen?'
+const PAST_DATE = 'Dieses Datum ist schon vorbei. Mögt ihr ein neues wählen?'
 
 function readForm(formData: FormData): GoalTexts {
   return {

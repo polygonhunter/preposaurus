@@ -160,3 +160,11 @@ export function shelfLifeHint(months: number | null): string | null {
   const span = months === 1 ? '1 Monat' : `${String(months)} Monate`
   return `Richtwert: ungeöffnet meist etwa ${span} haltbar. Es zählt das Datum auf der Packung.`
 }
+
+/**
+ * Der amtliche Name einer Warengruppe über dem Kurznamen im Titel (#177). Sind beide gleich,
+ * steht nichts darüber.
+ */
+export function officialNameEyebrow(group: { name: string; shortName: string }) {
+  return group.name === group.shortName ? {} : { eyebrow: group.name }
+}

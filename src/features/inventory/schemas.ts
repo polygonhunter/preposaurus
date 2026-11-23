@@ -19,6 +19,8 @@ const STOCK_STATUS_FILTERS = [
 const isoDay = z.iso.date()
 const id = z.uuid()
 const namedRef = z.object({ id, name: z.string() })
+/** Warengruppe mit amtlichem Namen und kurzem Anzeigenamen für Titel und Navigation (#177) */
+const groupRef = z.object({ key: z.string(), name: z.string(), shortName: z.string() })
 
 // ---------- Eingaben ----------
 
@@ -110,9 +112,7 @@ const coverageSchema = z.object({
 
 export const stockOverviewSchema = z.object({
   groups: z.array(
-    z.object({
-      key: z.string(),
-      name: z.string(),
+    groupRef.extend({
       totals: nodeTotalsSchema,
       /** null ohne Ziel, ohne aktive Quelle oder ohne Zielmenge für diese Gruppe */
       coverage: coverageSchema.nullable(),
@@ -124,7 +124,7 @@ export const stockOverviewSchema = z.object({
 // ---------- 2 · Lebensmittelarten einer Warengruppe (Ebene 2) ----------
 
 export const foodTypeLevelSchema = z.object({
-  group: z.object({ key: z.string(), name: z.string(), totals: nodeTotalsSchema }),
+  group: groupRef.extend({ totals: nodeTotalsSchema }),
   categories: z.array(
     namedRef.extend({
       pictogram: z.string().nullable(),
@@ -173,7 +173,7 @@ export const foodTypeDetailSchema = z.object({
   target: stockTargetSchema,
   name: z.string(),
   path: z.object({
-    group: z.object({ key: z.string(), name: z.string() }),
+    group: groupRef,
     category: namedRef.extend({ pictogram: z.string().nullable() }),
   }),
   typicalShelfLifeMonths: z.number().int().nullable(),
@@ -229,9 +229,7 @@ export const dueUnitsSchema = z.object({
 export const stockSearchSchema = z.object({
   counts: z.record(z.enum(STOCK_STATUS_FILTERS), z.number().int()),
   groups: z.array(
-    z.object({
-      key: z.string(),
-      name: z.string(),
+    groupRef.extend({
       rows: z.array(stockRowSchema.extend({ matchingPackages: z.number().int() })),
     }),
   ),

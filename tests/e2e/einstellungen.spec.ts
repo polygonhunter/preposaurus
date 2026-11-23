@@ -90,7 +90,7 @@ test('ein Zieldatum in der Vergangenheit wird nicht gespeichert', async ({ page 
   await saveButton(page).click()
 
   await expect(date).toHaveAccessibleDescription(
-    /Dieses Datum ist schon vorbei\. Magst du ein neues wählen\?/,
+    /Dieses Datum ist schon vorbei\. Mögt ihr ein neues wählen\?/,
   )
   await expect(date).toBeFocused()
   // Erst prüfen, wenn der Knopf nach dem Laden wieder voll sichtbar ist (Übergang 150 ms)

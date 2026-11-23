@@ -50,11 +50,15 @@ test('„−1“ in der Zeile nimmt eine Packung, Rückgängig holt sie zurück'
   const row = page.getByRole('link', { name: rowName(list.name) })
   const before = await packagesOf(row)
 
-  await page.getByRole('button', { name: `1 Packung ${list.name} entnehmen` }).click()
+  const takeOne = page.getByRole('button', { name: `1 Packung ${list.name} entnehmen` })
+  // Per Tastatur: Der Fokus bleibt auf dem Knopf, statt auf body zu fallen (#218)
+  await takeOne.focus()
+  await takeOne.press('Enter')
 
   const bar = undoBar(page, `${list.name}: 1 Packung verbraucht`)
   await expect(bar).toBeVisible()
   await expect(row).toContainText(`${String(before - 1)} Packung`)
+  await expect(takeOne).toBeFocused()
   await expectAccessibleLayout(page)
 
   await bar.getByRole('button', { name: 'Rückgängig' }).click()

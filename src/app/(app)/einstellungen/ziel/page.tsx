@@ -14,7 +14,7 @@ import { PageHeader } from '@/shared/ui/PageHeader'
 export const metadata: Metadata = { title: 'Ziel und Empfehlung · Preposaurus' }
 
 const PAST_DATE_NOTE =
-  'Euer Zieldatum ist schon vorbei. Magst du ein neues wählen? Bis dahin zeigt die Übersicht, wie lange ihr heute versorgt seid.'
+  'Euer Zieldatum ist schon vorbei. Mögt ihr ein neues wählen? Bis dahin zeigt die Übersicht, wie lange ihr heute versorgt seid.'
 
 // Ziel und Empfehlung (#39, ZIEL-01, ZIEL-03, ZIEL-04). Der Admin ändert Dauer und Datum, Mitglieder
 // lesen. Quelle und Rechenmodus stehen fest.

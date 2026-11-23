@@ -17,7 +17,7 @@ export function TakeFifoBar({ name, unitId, dateLabel }: TakeFifoBarProps) {
   return (
     <div className="sticky bottom-[calc(58px+env(safe-area-inset-bottom))] z-10 mt-6 px-4 pb-2 breit:bottom-4 breit:px-6">
       <Button
-        disabled={isLocked}
+        aria-disabled={isLocked}
         onClick={() => {
           consume({ kind: 'unit', unitId }, { name, dateLabel })
         }}

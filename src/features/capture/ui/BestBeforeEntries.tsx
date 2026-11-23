@@ -5,6 +5,7 @@ import { Field } from '@/shared/ui/Field'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { todayInBerlin } from '@/shared/lib/dates'
 import { parseBestBefore, type BestBeforeParseError } from '../domain/best-before'
+import { doubtAboutBestBefore, type BestBeforeDoubt } from '../domain/best-before-plausibility'
 import { addDateEntry, changeDateCount, type DateEntry } from '../domain/date-entries'
 import { DateEntryList } from './DateEntryList'
 import { QuickCounts } from './QuickCounts'
@@ -20,8 +21,15 @@ const PARSE_MESSAGES: Record<BestBeforeParseError['kind'], string> = {
   'no-date': 'Das ist kein Datum. Bitte so eingeben: 30.09.2027, 09/2027 oder 2027.',
   incomplete: 'Bitte mit Jahr eingeben, z. B. 30.09.2027.',
   ambiguous: 'Bitte das Jahr vierstellig eingeben, z. B. 09/2027.',
+  'invalid-month': 'Diesen Monat gibt es nicht. Bitte prüft das Datum.',
   'invalid-date': 'Diesen Tag gibt es nicht. Bitte prüft das Datum.',
   'year-out-of-range': 'Bitte ein Jahr zwischen 2000 und 2099 eingeben.',
+}
+
+// Leise Rückfrage nach dem Hinzufügen, das Datum bleibt trotzdem in der Liste (#218)
+const DOUBT_MESSAGES: Record<BestBeforeDoubt, string> = {
+  'in-past': 'Das Datum liegt schon zurück, stimmt das?',
+  'far-future': 'Das Datum liegt sehr weit in der Zukunft, stimmt das?',
 }
 
 /** Beim Speichern steht noch ein Datum im Feld, das nicht hinzugefügt wurde. */
@@ -34,17 +42,20 @@ export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntrie
   const headerId = useId()
   const [text, setText] = useState('')
   const [parseError, setParseError] = useState<string>()
+  const [doubt, setDoubt] = useState<BestBeforeDoubt | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const isPending = error !== undefined && entries.length === 0 && text.trim() !== ''
   const fieldError = parseError ?? (isPending ? PENDING_MESSAGE : error)
 
   function addTyped() {
-    const parsed = parseBestBefore(text, todayInBerlin(new Date()))
+    const today = todayInBerlin(new Date())
+    const parsed = parseBestBefore(text, today)
     if (!parsed.ok) {
       setParseError(PARSE_MESSAGES[parsed.error.kind])
       return
     }
     setParseError(undefined)
+    setDoubt(doubtAboutBestBefore(parsed.value, today))
     setText('')
     onChange(addDateEntry(entries, parsed.value))
   }
@@ -70,6 +81,7 @@ export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntrie
           value={text}
           onChange={(event) => {
             setText(event.target.value)
+            setDoubt(null)
           }}
           onKeyDown={addOnEnter}
           ref={inputRef}
@@ -83,12 +95,16 @@ export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntrie
             variant="tinted"
             onClick={() => {
               setParseError(undefined)
+              setDoubt(null)
               onChange(addDateEntry(entries, null))
             }}
           >
             Datum fehlt
           </Button>
         </div>
+        <p role="status" className="px-4 text-footnote text-fg2 empty:hidden">
+          {doubt === null ? '' : DOUBT_MESSAGES[doubt]}
+        </p>
       </div>
       <DateEntryList
         entries={entries}
