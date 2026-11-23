@@ -34,6 +34,6 @@ test-results/
 # Agenten-Arbeitskopien
 .claude/worktrees/
 
-# PoC-Fotos (können EXIF/GPS enthalten)
-poc/fotos/
-poc/
+# PoC-Daten im Projektordner: Fotos (können EXIF/GPS enthalten), Erwartungen, Berichte (#103).
+# Nur der Ordner im Root, docs/poc/ (Beispiel, Ergebnis M14-03) gehört ins Repository.
+/poc/
