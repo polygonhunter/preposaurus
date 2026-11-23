@@ -68,6 +68,8 @@ export default defineConfig([
   boundariesConfig,
   prettier,
   globalIgnores([
+    // Arbeitskopien der Agenten (git worktree), nicht Teil des Projekts
+    '.claude/**',
     '.next/**',
     'out/**',
     'build/**',
