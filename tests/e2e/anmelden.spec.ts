@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../helpers/e2e-test'
 import { E2E_ADMIN, signedOut, signInViaUi, submitSignIn } from '../helpers/e2e-auth'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 

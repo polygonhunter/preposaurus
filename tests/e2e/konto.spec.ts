@@ -1,4 +1,5 @@
-import { expect, test, type Browser, type Page, type TestInfo } from '@playwright/test'
+import type { Browser, Page, TestInfo } from '@playwright/test'
+import { expect, test } from '../helpers/e2e-test'
 import { signedOut, submitSignIn } from '../helpers/e2e-auth'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
@@ -17,7 +18,12 @@ async function createUser(page: Page, info: TestInfo) {
   await page.goto('/einstellungen/nutzer/neu')
   await page.getByLabel('Anzeigename').fill(`Konto ${info.project.name}`)
   await page.getByLabel('Benutzername').fill(usernameFor(info))
-  await page.getByLabel('Passwort (freiwillig)').fill(FIRST_PASSWORD)
+  // Häufige Passwörter lehnt die Sperrliste ab, ruhig am Feld (#174)
+  const password = page.getByLabel('Passwort (freiwillig)')
+  await password.fill('Passwort123!')
+  await page.getByRole('button', { name: 'Anlegen' }).click()
+  await expect(password).toHaveAccessibleDescription(/sehr verbreitet/)
+  await password.fill(FIRST_PASSWORD)
   await page.getByRole('button', { name: 'Anlegen' }).click()
   await expect(
     page.getByRole('region', { name: 'Dieses Passwort wird nur jetzt angezeigt.' }),

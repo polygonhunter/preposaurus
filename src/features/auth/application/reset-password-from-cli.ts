@@ -6,6 +6,7 @@
 import 'server-only'
 import { err, ok, type Result } from '@/shared/lib/result'
 import type { PasswordResetRepository } from '../data/password-reset-repository'
+import { generateAllowedPassword } from './choose-password'
 import { GLOBAL_LOCK_KEY, IP_LOCK_PREFIX, nameLockKey } from '../domain/sign-in-brake'
 import { usernameSchema } from '../schemas'
 
@@ -34,7 +35,9 @@ export async function resetPasswordFromCli(
   const username = parsed.data
   const user = await deps.repository.findUserByUsername(username)
   if (user === null) return err({ kind: 'not-found' })
-  const password = deps.generatePassword()
+  // Dieselben Regeln wie überall (§4.4, #174): Ein erzeugtes Passwort mit Namen oder aus der Liste
+  // häufiger Passwörter wird neu gezogen.
+  const password = generateAllowedPassword({ username, generate: deps.generatePassword })
   await deps.repository.resetPassword({
     userId: user.id,
     passwordHash: await deps.hashPassword(password),

@@ -17,8 +17,13 @@ export const OWN_PASSWORD = 'Dein eigenes Passwort setzt ein anderer Admin zurü
 export const LAST_ADMIN =
   'Ihr braucht mindestens einen Admin. Mach zuerst jemand anderen zum Admin.'
 
+// Ruhig und mit Ausweg, ohne Stärke-Balken (EINSTELLUNGEN_NUTZER §4.4).
+export const COMMON_PASSWORD =
+  'Dieses Passwort ist sehr verbreitet und schnell erraten. Ein Satz oder ein paar Wörter sind gut.'
+
 export const PASSWORD_PROBLEM_MESSAGES: Record<PasswordProblem, string> = {
   'contains-app-name': 'Bitte ein Passwort ohne „Preposaurus“.',
+  'common-password': COMMON_PASSWORD,
   'contains-username': 'Bitte ein Passwort ohne den Benutzernamen.',
   'contains-display-name': 'Bitte ein Passwort ohne den Anzeigenamen.',
   'contains-household-name': 'Bitte ein Passwort ohne den Namen des Haushalts.',

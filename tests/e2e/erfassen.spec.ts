@@ -3,7 +3,8 @@
 // Tipps (F2, #207) und die Suche nach Alltagswörtern (#212). Alle Projekte teilen sich eine
 // Datenbank, deshalb nutzt jedes Projekt einen eigenen Inhalt (z. B. 412 g) bzw. eine eigene
 // Lebensmittelart und erkennt nur sein eigenes Produkt wieder.
-import { expect, test, type Locator, type Page, type TestInfo } from '@playwright/test'
+import type { Locator, Page, TestInfo } from '@playwright/test'
+import { expect, test } from '../helpers/e2e-test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 const PROJECTS = ['iphone', 'duo-aussen', 'duo-hoch', 'duo-quer', 'desktop']

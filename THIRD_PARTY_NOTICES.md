@@ -22,6 +22,12 @@ Preposaurus selbst steht unter der [AGPL-3.0-or-later](LICENSE). Diese Datei nen
 | Fluent Emoji (geplant) | MIT | © Microsoft Corporation |
 | Open Food Facts (nur falls genutzt) | Datenbank ODbL 1.0, Inhalte DbCL 1.0 | Namensnennung „Daten von Open Food Facts (ODbL)“ in der App |
 
+## Eigene Datenlisten
+
+| Bestandteil | Lizenz | Hinweis |
+|---|---|---|
+| Liste häufiger Passwörter (`src/features/auth/domain/common-passwords.json`) | wie die App (AGPL-3.0-or-later) | **selbst zusammengestellt**, keine übernommene Datei. Grundlage sind allgemein bekannte Muster aus öffentlich berichteten Ranglisten häufiger Passwörter (Ziffernfolgen, Tastaturmuster, „passwort“, „hallo“, „ichliebedich“, Vereine, Städte, Vornamen) und daraus abgeleitete Varianten mit typischen Anhängseln. Einzelne Passwörter sind als bloße Wörter und Zeichenfolgen nicht schutzfähig; eine fremde Liste (z. B. aus SecLists, MIT) wurde bewusst nicht kopiert, damit kein Lizenzhinweis Dritter nötig ist. Begründung in `05_STATUS_ENTSCHEIDUNGEN.md` (#174) |
+
 ## Nur im Design-Prototyp (`prototypes/`)
 
 | Bestandteil | Lizenz | Hinweis |
