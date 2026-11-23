@@ -1,4 +1,5 @@
 import type { CalendarDay } from '@/shared/lib/dates'
+import { incompleteReasonsOf, type IncompleteCheck } from './incomplete'
 import { timeGroupFor } from './time-group'
 import { unitStateFor, type AmpelThresholds, type UnitState } from './unit-state'
 import type { StockUnit } from './unit'
@@ -14,10 +15,10 @@ import type { StockUnit } from './unit'
 export type StockStatusFilter =
   'in-stock' | 'due-soon' | 'expired' | 'incomplete' | 'consumed' | 'discarded'
 
-export interface FilterableUnit extends Pick<StockUnit, 'status' | 'bestBefore' | 'checkedAt'> {
-  /** Dem Produkt fehlen kcal ganz, oder eine KI-Schätzung ist unbestätigt (`countsAsIncomplete`) */
-  hasNutritionGap: boolean
-}
+/** Filter über den Packungen im Vorrat, nur sie stehen als Chips über der Liste. */
+export type InStockStatusFilter = Exclude<StockStatusFilter, 'consumed' | 'discarded'>
+
+export type FilterableUnit = IncompleteCheck & Pick<StockUnit, 'checkedAt'>
 
 export interface StateContext {
   today: CalendarDay
@@ -51,7 +52,7 @@ const STATUS_PREDICATES: Record<
   'due-soon': isDueSoon,
   // Wie die Gruppe „Abgelaufen“ auf Bald fällig: „Noch gut“ geprüfte Packungen sind entschieden
   expired: (unit, { today, thresholds }) => timeGroupFor(unit, today, thresholds) === 'expired',
-  incomplete: (unit) => isInStock(unit) && (unit.bestBefore === null || unit.hasNutritionGap),
+  incomplete: (unit) => incompleteReasonsOf(unit).length > 0,
   consumed: (unit) => unit.status === 'consumed',
   discarded: (unit) => unit.status === 'discarded',
 }
@@ -64,20 +65,21 @@ export function matchesStatusFilter(
   return STATUS_PREDICATES[filter](unit, context)
 }
 
-/** Zähler je Filter, gezählt in Packungen. */
+/**
+ * Zähler je Filter im Vorrat, gezählt in Packungen. Alle aus denselben geladenen Packungen, keine
+ * Abfrage je Chip (#221).
+ */
 export function countByStatusFilter(
   units: readonly FilterableUnit[],
   context: StateContext,
-): Record<StockStatusFilter, number> {
-  const counts: Record<StockStatusFilter, number> = {
+): Record<InStockStatusFilter, number> {
+  const counts: Record<InStockStatusFilter, number> = {
     'in-stock': 0,
     'due-soon': 0,
     expired: 0,
     incomplete: 0,
-    consumed: 0,
-    discarded: 0,
   }
-  for (const filter of Object.keys(counts) as StockStatusFilter[]) {
+  for (const filter of Object.keys(counts) as InStockStatusFilter[]) {
     counts[filter] = units.filter((unit) => matchesStatusFilter(unit, filter, context)).length
   }
   return counts

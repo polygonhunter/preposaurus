@@ -2,7 +2,8 @@ import { Group } from '@/shared/ui/Group'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { EmptyState } from '@/shared/ui/EmptyState'
 import type { StockFilter } from '../schemas/requests'
-import type { StockSearch } from '../schemas/stock'
+import type { StockSearch, StockSearchRow } from '../schemas/stock'
+import { incompleteNote } from './incomplete-labels'
 import { formatPackages } from './stock-format'
 import { STOCK_PATH } from './stock-paths'
 import { StockRowItem } from './StockRowItem'
@@ -13,14 +14,17 @@ const MATCH_WORD: Record<StockFilter['status'], string | null> = {
   'in-stock': null,
   'due-soon': 'bald fällig',
   expired: 'abgelaufen',
-  incomplete: 'unvollständig',
+  // Statt eines Worts steht der Grund (noteFor)
+  incomplete: null,
   consumed: 'verbraucht',
   discarded: 'entsorgt',
 }
 
-function noteFor(status: StockFilter['status'], matching: number): string | undefined {
+// Unter „Unvollständig“ steht der Grund statt „2 Packungen unvollständig“ (#221)
+function noteFor(status: StockFilter['status'], row: StockSearchRow): string | undefined {
+  if (status === 'incomplete') return incompleteNote(row) ?? undefined
   const word = MATCH_WORD[status]
-  return word === null ? undefined : `${formatPackages(matching)} ${word}`
+  return word === null ? undefined : `${formatPackages(row.matchingPackages)} ${word}`
 }
 
 // Treffermodus (UX-Konzept §8.3, Muster B): flache Liste der Lebensmittelarten, gegliedert nach
@@ -42,7 +46,7 @@ export function SearchResults({ filter, groups }: SearchResultsProps) {
             <StockRowItem
               key={`${row.target.kind}:${row.target.id}`}
               row={row}
-              note={noteFor(filter.status, row.matchingPackages)}
+              note={noteFor(filter.status, row)}
             />
           ))}
         </Group>

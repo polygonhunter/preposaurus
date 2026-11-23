@@ -4,11 +4,13 @@ import 'server-only'
 import type { GroupUnit } from '@/features/supply/domain/group-progress'
 import type { NodeUnit } from '@/features/supply/domain/node-totals'
 import type { ContentQuantity } from '@/shared/lib/quantities'
+import { nutritionGapOf } from '../domain/incomplete'
 import {
   hasEstimatedKcal,
   resolveNutrition,
   type ResolvedNutrition,
 } from '../domain/resolve-nutrition'
+import type { FilterableUnit } from '../domain/stock-filter'
 import type { ProductFilter, StockProduct, StockProductUnit } from '../domain/stock-entry'
 import type { StockTarget } from '../schemas/shared'
 
@@ -63,6 +65,12 @@ export function perPackage(per100: number | null, content: ContentQuantity): num
 export function resolvedNutritionOf(product: StockProduct): ResolvedNutrition {
   return resolveNutrition(product.nutrition, product.foodType?.reference ?? null)
 }
+
+/** Packung mit der Nährwert-Lücke ihres Produkts, für Zustands-Filter und „Unvollständig“. */
+export const toFilterableUnit = ({ unit, product }: JoinedUnit): FilterableUnit => ({
+  ...unit,
+  nutritionGap: nutritionGapOf(product.nutrition, product.foodType?.reference ?? null),
+})
 
 const isWater = (product: StockProduct) =>
   product.group.key === WATER_GROUP_KEY && product.content.unit === 'ml'
