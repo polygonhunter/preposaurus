@@ -41,6 +41,8 @@ const draftNutritionSchema = z.strictObject({
   bestaetigt: z.boolean().optional(),
   /** „Keine Nährwerttabelle“ gewählt */
   keineTabelle: z.boolean().optional(),
+  /** Tabelle nennt nur Werte je Portion, die Portionsgröße fehlt noch (sperrt das Speichern) */
+  jePortion: z.boolean().optional(),
 })
 
 /** Ein Datums-Chip der MHD-Serie. Ohne Datum bleibt `datum` null, nie erfunden. */

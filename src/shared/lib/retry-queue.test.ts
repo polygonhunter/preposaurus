@@ -90,4 +90,40 @@ describe('createRetryQueue', () => {
 
     expect(updates).toEqual([])
   })
+
+  it('startet nach stop() nichts mehr, wiederholt nicht und meldet nichts', async () => {
+    const { queue, updates } = setup(1)
+    const first = deferred()
+    let calls = 0
+
+    queue.add('a', () => first.promise)
+    queue.add('b', () => {
+      calls += 1
+      return Promise.resolve('b')
+    })
+    await flush()
+    const before = updates.length
+    queue.stop()
+    first.resolve('a')
+    queue.add('c', () => Promise.resolve('c'))
+    for (let i = 0; i < 4; i += 1) await flush()
+
+    expect(calls).toBe(0)
+    expect(updates).toHaveLength(before)
+  })
+
+  it('wiederholt eine gescheiterte Aufgabe nach stop() nicht mehr', async () => {
+    const { queue, last } = setup(1, 3)
+    let calls = 0
+
+    queue.add('a', () => {
+      calls += 1
+      queue.stop()
+      return Promise.reject(new Error('Netz weg'))
+    })
+    for (let i = 0; i < 6; i += 1) await flush()
+
+    expect(calls).toBe(1)
+    expect(last('a')?.status).toBe('running')
+  })
 })

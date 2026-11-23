@@ -7,6 +7,7 @@ import { deriveView } from './manual-capture-view'
 import type { PhotoCaptureState } from './photo-capture-state'
 import { PhotoReview } from './PhotoReview'
 import { PhotoSaveBar } from './PhotoSaveBar'
+import { saveBlocker } from './photo-shots'
 import { usePhotoCapture } from './use-photo-capture'
 import { useSavePhotoCapture } from './use-save-photo-capture'
 
@@ -81,6 +82,8 @@ export function PhotoCaptureFlow({ options, initial, onRestart }: PhotoCaptureFl
       />
       <PhotoSaveBar
         errors={saving.errors}
+        blocker={saveBlocker(state)}
+        isBlockerShown={saving.isBlockerShown}
         isSaving={saving.isSaving}
         onDiscard={async () => {
           if (state.draftId !== null) await discardDraftAction({ entwurfId: state.draftId })

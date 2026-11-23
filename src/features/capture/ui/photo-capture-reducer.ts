@@ -153,11 +153,16 @@ function recognized(
   }
 }
 
+/**
+ * Schätzung für ein offenes MHD-Foto. Ist es inzwischen anders entschieden („Datum fehlt“,
+ * Entfernen, doppelt getippt), kommt keine weitere Packung mit geschätztem Datum dazu.
+ */
 function addEstimatedDate(
   state: PhotoCaptureState,
   localId: string | null,
   bestBefore: BestBefore,
 ) {
+  if (localId !== null && !state.shots.some((shot) => shot.localId === localId)) return state
   const shots = state.shots.filter((shot) => shot.localId !== localId)
   return { ...state, shots, units: addReadDate(state.units, { bestBefore, kind: 'best-before' }) }
 }

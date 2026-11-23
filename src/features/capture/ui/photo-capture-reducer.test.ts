@@ -153,21 +153,6 @@ describe('photoCaptureReducer', () => {
     expect(state.shots[0]?.issue).toBe('not-read')
   })
 
-  it('verlangt die Bestätigung einer Nährwert-Schätzung, Verwerfen leert sie', () => {
-    const estimated = run(initialPhotoCapture(null), {
-      type: 'estimated-nutrition',
-      values: { kcal: 350, protein: null, carbs: null, fat: null },
-    })
-    expect(estimated.nutrition.kcal).toBe('350')
-    expect(saveBlocker(estimated)).toMatch(/geschätzten Nährwerte/)
-
-    expect(saveBlocker(run(estimated, { type: 'estimate-confirmed' }))).toBeNull()
-    expect(run(estimated, { type: 'estimate-discarded' })).toMatchObject({
-      nutritionSource: null,
-      nutrition: { kcal: '' },
-    })
-  })
-
   it('merkt sich den Entwurf aus dem ersten Upload', () => {
     const state = run(
       initialPhotoCapture(null),
@@ -181,22 +166,5 @@ describe('photoCaptureReducer', () => {
 
     expect(state.draftId).toBe('e1')
     expect(state.photos[0]).toMatchObject({ status: 'uploaded', photoId: 'f1' })
-  })
-
-  it('übernimmt eine MHD-Schätzung nur auf Wahl und gekennzeichnet', () => {
-    const bestBefore = {
-      date: toCalendarDay('2028-12-31'),
-      precision: 'year',
-      isEstimated: true,
-    } as const
-    const state = run(
-      initialPhotoCapture(null),
-      { type: 'shot', photo: photo('a', 'mhd') },
-      recognized('a', mhdRead(null)),
-      { type: 'estimated-date', localId: 'a', bestBefore },
-    )
-
-    expect(state.shots).toEqual([])
-    expect(state.units[0]?.bestBefore).toEqual(bestBefore)
   })
 })

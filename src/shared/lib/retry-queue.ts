@@ -1,7 +1,8 @@
 // Warteschlange für Arbeit im Hintergrund, z. B. Foto-Uploads (#61): höchstens `concurrency`
 // Aufgaben gleichzeitig, eine geworfene Ausnahme wird mit wachsender Pause wiederholt. Nach dem
-// letzten Versuch bleibt die Aufgabe `failed` und lässt sich von Hand neu anstoßen. Ohne React und
-// ohne Browser, damit sie mit falscher Uhr testbar ist.
+// letzten Versuch bleibt die Aufgabe `failed` und lässt sich von Hand neu anstoßen. `stop()` beendet
+// sie beim Verlassen der Seite: Nichts Wartendes startet mehr, nichts wird wiederholt und keine
+// Meldung kommt mehr an. Ohne React und ohne Browser, damit sie mit falscher Uhr testbar ist.
 
 type QueueStatus = 'waiting' | 'running' | 'done' | 'failed'
 
@@ -35,7 +36,11 @@ interface QueueState<T> {
   waiting: Entry<T>[]
   failed: Map<string, Entry<T>>
   running: number
+  isStopped: boolean
 }
+
+/** Als Funktion, weil sich `isStopped` während eines await ändern kann. */
+const isStopped = (queue: Pick<QueueState<unknown>, 'isStopped'>) => queue.isStopped
 
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => {
@@ -48,12 +53,13 @@ async function execute<T>(queue: QueueState<T>, entry: Entry<T>) {
   onUpdate({ id: entry.id, status: 'running', attempt: entry.attempt })
   try {
     const result = await entry.run()
-    onUpdate({ id: entry.id, status: 'done', attempt: entry.attempt, result })
+    if (!queue.isStopped) onUpdate({ id: entry.id, status: 'done', attempt: entry.attempt, result })
   } catch {
     // Erwartet: Netz weg oder Server beschäftigt. Der Zustand zeigt es, nichts wird verschluckt.
+    if (queue.isStopped) return
     if (entry.attempt < maxAttempts) {
       await (queue.options.wait ?? sleep)(retryDelayMs * entry.attempt)
-      queue.waiting.unshift(entry)
+      if (!isStopped(queue)) queue.waiting.unshift(entry)
     } else {
       queue.failed.set(entry.id, entry)
       onUpdate({ id: entry.id, status: 'failed', attempt: entry.attempt })
@@ -62,7 +68,11 @@ async function execute<T>(queue: QueueState<T>, entry: Entry<T>) {
 }
 
 function pump<T>(queue: QueueState<T>) {
-  while (queue.running < queue.options.concurrency && queue.waiting.length > 0) {
+  while (
+    !queue.isStopped &&
+    queue.running < queue.options.concurrency &&
+    queue.waiting.length > 0
+  ) {
     const entry = queue.waiting.shift()
     if (entry === undefined) return
     queue.running += 1
@@ -74,13 +84,20 @@ function pump<T>(queue: QueueState<T>) {
 }
 
 function enqueue<T>(queue: QueueState<T>, entry: Entry<T>) {
+  if (queue.isStopped) return
   queue.waiting.push(entry)
   queue.options.onUpdate({ id: entry.id, status: 'waiting', attempt: 0 })
   pump(queue)
 }
 
 export function createRetryQueue<T>(options: QueueOptions<T>) {
-  const queue: QueueState<T> = { options, waiting: [], failed: new Map(), running: 0 }
+  const queue: QueueState<T> = {
+    options,
+    waiting: [],
+    failed: new Map(),
+    running: 0,
+    isStopped: false,
+  }
   return {
     add(id: string, run: () => Promise<T>) {
       enqueue(queue, { id, run, attempt: 0 })
@@ -92,6 +109,12 @@ export function createRetryQueue<T>(options: QueueOptions<T>) {
       queue.failed.delete(id)
       entry.attempt = 0
       enqueue(queue, entry)
+    },
+    /** Endgültig: Laufende Aufgaben enden still, Wartendes und Gescheitertes verfällt. */
+    stop() {
+      queue.isStopped = true
+      queue.waiting.length = 0
+      queue.failed.clear()
     },
   }
 }

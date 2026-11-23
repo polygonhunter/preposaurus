@@ -2,7 +2,9 @@
 // Warteschlange lädt höchstens zwei Fotos gleichzeitig und wiederholt bei Netzfehlern. Scheitert
 // es endgültig, bleibt das Foto im Gerät und lässt sich neu senden. Nach dem Upload folgt die
 // Erkennung. Ist die KI aus (503), fragt die Maske danach nicht mehr und geht von Hand weiter.
-import { useRef, type Dispatch } from 'react'
+// Verlässt man den Ablauf (Seite, „Noch eins“, „Verwerfen“), endet die Warteschlange: Wartendes
+// geht nicht mehr hoch und legt so keinen neuen Entwurf an. Die Vorschauen werden freigegeben.
+import { useEffect, useRef, type Dispatch } from 'react'
 import type { PhotoRole } from '@/shared/config/constants'
 import { todayInBerlin } from '@/shared/lib/dates'
 import { createRetryQueue, type QueueUpdate } from '@/shared/lib/retry-queue'
@@ -53,8 +55,7 @@ async function readPhoto(
 }
 
 /** Foto im Gerät, die Vorschau kommt sofort aus der Datei. */
-function newPhoto(file: Blob, role: PhotoRole): CapturedPhoto {
-  const previewUrl = URL.createObjectURL(file)
+function newPhoto(role: PhotoRole, previewUrl: string): CapturedPhoto {
   return {
     localId: createUuid(),
     role,
@@ -65,10 +66,30 @@ function newPhoto(file: Blob, role: PhotoRole): CapturedPhoto {
   }
 }
 
+/** Beim Verlassen: Warteschlange beenden und die Object-URLs der Vorschauen freigeben. */
+function useUploadCleanup(queueRef: { current: UploadQueue | null }) {
+  const previewsRef = useRef(new Set<string>())
+  useEffect(() => {
+    const previews = previewsRef.current
+    return () => {
+      queueRef.current?.stop()
+      queueRef.current = null
+      for (const url of previews) URL.revokeObjectURL(url)
+      previews.clear()
+    }
+  }, [queueRef])
+  return (file: Blob) => {
+    const url = URL.createObjectURL(file)
+    previewsRef.current.add(url)
+    return url
+  }
+}
+
 export function usePhotoUploads({ dispatch, lookup, draftId }: UploadDeps) {
   const draftIdRef = useRef(draftId)
   const unavailableRef = useRef<string | null>(null)
   const queueRef = useRef<UploadQueue | null>(null)
+  const createPreview = useUploadCleanup(queueRef)
 
   async function recognize(localId: string, photoId: string) {
     const outcome = await readPhoto(photoId, unavailableRef)
@@ -90,7 +111,7 @@ export function usePhotoUploads({ dispatch, lookup, draftId }: UploadDeps) {
   }
 
   function takePhoto(file: Blob, role: PhotoRole) {
-    const photo = newPhoto(file, role)
+    const photo = newPhoto(role, createPreview(file))
     dispatch({ type: 'shot', photo })
     queue().add(photo.localId, () => uploadPhoto(file, role, draftIdRef.current))
   }

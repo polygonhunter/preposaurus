@@ -71,6 +71,7 @@ function nutritionOf(state: PhotoCaptureState): DraftNutrition {
     quelle: state.nutritionSource === null ? null : SOURCE_TO_DRAFT[state.nutritionSource],
     bestaetigt: state.isEstimateConfirmed,
     keineTabelle: state.hasNoTable,
+    jePortion: state.isPerPortion,
   }
 }
 
@@ -138,6 +139,7 @@ function restoreNutrition(nutrition: DraftNutrition) {
     nutritionSource: source,
     isEstimateConfirmed: nutrition.bestaetigt === true,
     hasNoTable: nutrition.keineTabelle === true,
+    isPerPortion: nutrition.jePortion === true,
   }
 }
 

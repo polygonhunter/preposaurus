@@ -9,10 +9,13 @@ type NutritionTableActionsProps = Readonly<{
 }>
 
 // Erst das Foto der Tabelle, sonst „Keine Nährwerttabelle“ (#115). Erst danach gibt es die
-// KI-Schätzung, und nur auf ausdrückliche Wahl (#124).
+// KI-Schätzung, und nur auf ausdrückliche Wahl (#124). Eigene Werte ersetzt sie nicht.
 export function NutritionTableActions({ state, editor, estimate }: NutritionTableActionsProps) {
   const hasTablePhoto = state.photos.some((photo) => photo.role === 'naehrwerte')
-  const canEstimate = state.hasNoTable && state.nutritionSource !== 'ai-estimate'
+  const hasOwnValues =
+    state.nutritionSource === 'manual' &&
+    Object.values(state.nutrition).some((text) => text.trim() !== '')
+  const canEstimate = state.hasNoTable && state.nutritionSource !== 'ai-estimate' && !hasOwnValues
   return (
     <div className="mx-4 flex flex-col gap-2 pt-3 breit:mx-6">
       <div className="flex flex-wrap gap-2">

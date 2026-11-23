@@ -61,6 +61,19 @@ describe('Entwurf der Foto-Erfassung', () => {
     ])
   })
 
+  it('behält „Werte je Portion“, damit das Speichern auch nach dem Fortsetzen gesperrt bleibt', () => {
+    const perPortion = { ...filled, nutritionSource: 'label' as const, isPerPortion: true }
+
+    const restored = fromDraft({
+      draftId: 'e1',
+      data: toDraftData(perPortion, containers),
+      photos: [],
+      containers,
+    })
+
+    expect(restored.isPerPortion).toBe(true)
+  })
+
   it('beginnt mit leeren Feldern, wenn der Entwurf nichts enthält', () => {
     const restored = fromDraft({ draftId: 'e1', data: {}, photos: [], containers })
 

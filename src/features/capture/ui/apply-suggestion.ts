@@ -73,11 +73,15 @@ export function applyNutrition(
   }
 }
 
-/** Schätzung ohne Tabelle (#115): sichtbar „ca.“ und erst nach Bestätigung gültig. */
+/**
+ * Schätzung ohne Tabelle (#115): sichtbar „ca.“ und erst nach Bestätigung gültig. Hat jemand
+ * inzwischen selbst Werte eingetippt, bleiben sie.
+ */
 export function applyNutritionEstimate(
   state: PhotoCaptureState,
   values: NutritionSuggestion['values'],
 ): PhotoCaptureState {
+  if (hasOwnNutrition(state) && state.nutritionSource === 'manual') return state
   return {
     ...state,
     nutrition: nutritionTexts(values),
@@ -106,6 +110,8 @@ export function applyBestBefore(
   localId: string,
   { reading, today }: { reading: BestBeforeReading; today: CalendarDay },
 ): PhotoCaptureState {
+  // Schon entschieden oder entfernt: Ein spätes Ergebnis ändert nichts mehr.
+  if (!state.shots.some((shot) => shot.localId === localId)) return state
   const kind = reading.kind ?? 'best-before'
   const assessed = assessBestBefore({
     bestBefore: reading.bestBefore,

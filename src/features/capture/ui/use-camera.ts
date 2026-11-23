@@ -61,6 +61,8 @@ export function useCamera() {
         setStatus('live')
       })
       .catch((error: unknown) => {
+        // Auch wenn erst play() scheitert: Ohne Bild soll die Kamera nicht weiter an sein.
+        if (stream !== null) stopStream(stream)
         if (isActive) setStatus(errorStatus(error))
       })
     return () => {

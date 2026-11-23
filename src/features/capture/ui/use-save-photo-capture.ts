@@ -57,17 +57,20 @@ async function ensureDraftId(state: PhotoCaptureState): Promise<string | null> {
 
 export function useSavePhotoCapture(onInvalid: (field: CaptureField) => void) {
   const [errors, setErrors] = useState<CaptureErrors>({})
+  // Nach einem Antippen trotz Sperre steht der Grund rot am Knopf, bis er sich erledigt hat.
+  const [isBlockerShown, setBlockerShown] = useState(false)
   const [result, dispatch, isSaving] = useActionState(save, null)
 
   async function submit(state: PhotoCaptureState) {
     const blocker = saveBlocker(state)
+    setBlockerShown(blocker !== null)
     if (blocker !== null) {
-      setErrors({ form: blocker })
+      setErrors({})
       return
     }
     const draftId = await ensureDraftId(state)
     if (draftId === null) {
-      setErrors({ form: 'Das Speichern hat nicht geklappt. Bitte versuch es noch einmal.' })
+      setErrors({ form: 'Das Speichern hat nicht geklappt. Bitte versucht es noch einmal.' })
       return
     }
     const parsed = photoCaptureSchema.safeParse(formOf(state, draftId))
@@ -90,9 +93,7 @@ export function useSavePhotoCapture(onInvalid: (field: CaptureField) => void) {
     errors: form === undefined ? errors : { ...errors, form },
     saved: result?.status === 'saved' ? result : null,
     isSaving,
+    isBlockerShown,
     submit,
-    clearErrors: () => {
-      setErrors({})
-    },
   }
 }
