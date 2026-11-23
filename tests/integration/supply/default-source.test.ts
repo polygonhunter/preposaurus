@@ -12,6 +12,8 @@ import { setupFirstAdmin } from '../../../src/features/auth/application/setup-fi
 import { createFirstAdminRepository } from '../../../src/features/auth/data/first-admin-repository'
 import { createStockReadRepository } from '../../../src/features/inventory/data/stock-read-repository'
 import { getOverview } from '../../../src/features/supply/application/get-overview'
+import { countOpenRestockItems } from '../../../src/features/restock/application/count-open-items'
+import { createRestockRepository } from '../../../src/features/restock/data/restock-repository'
 import { createHouseholdFactsRepository } from '../../../src/features/supply/data/household-facts-repository'
 import { overviewSchema } from '../../../src/features/supply/schemas'
 import { users } from '../../../src/server/db/schema/account'
@@ -182,6 +184,7 @@ describe('Empfehlungsquelle BBK/BLE im Seed', () => {
     const ports = {
       stock: createStockReadRepository(db),
       facts: createHouseholdFactsRepository(db),
+      countOpenRestockItems: (id: string) => countOpenRestockItems(createRestockRepository(db), id),
     }
     const overview = overviewSchema.parse(await getOverview(ports, { householdId, today }))
 

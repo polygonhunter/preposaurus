@@ -31,7 +31,12 @@ export function RestockView({ list }: RestockViewProps) {
         </div>
       ) : null}
       <GapSection list={list} />
-      <ItemSection id="ersetzen" title="Ersetzen" items={list.replace} />
+      <ItemSection
+        id="ersetzen"
+        title="Ersetzen"
+        items={list.replace}
+        suggestions={list.suggestions}
+      />
       <ItemSection id="eigene-eintraege" title="Eigene Einträge" items={list.own} />
       <AddItemForm />
       <ItemSection id="erledigt" title="Erledigt" items={list.done} />

@@ -74,6 +74,15 @@ describe('getGoalGaps', () => {
       { groupKey: 'getreide', missing: { value: 500, unit: 'g' } },
     ])
     expect(result.gaps[0]).toMatchObject({ name: 'Wasser', days: 9, goalDays: 10 })
+    expect(result.targetDay).toBe('2027-03-01')
+  })
+
+  it('nennt ein vergangenes Zieldatum nicht als Stichtag', async () => {
+    const goal = { days: 10, targetDay: toCalendarDay('2026-01-01') }
+
+    const result = await getGoalGaps(ports(goal), { householdId, today })
+
+    expect(result.targetDay).toBeNull()
   })
 
   it('rechnet ohne Zieldatum mit heute, dann zählt auch „Datum fehlt“', async () => {
@@ -86,7 +95,7 @@ describe('getGoalGaps', () => {
   it('kann ohne Ziel nichts rechnen', async () => {
     const result = await getGoalGaps(ports(null), { householdId, today })
 
-    expect(result).toEqual({ isCalculable: false, gaps: [] })
+    expect(result).toEqual({ isCalculable: false, gaps: [], targetDay: null })
   })
 })
 

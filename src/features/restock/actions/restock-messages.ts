@@ -1,6 +1,10 @@
 // Gemeinsame Antwortform der Nachkaufen-Actions: Erwartete Fehler kommen als ruhiger deutscher Satz
-// zurück, den die Oberfläche am Ort der Aktion zeigt (UX-Konzept §7).
-export type RestockActionResult = Readonly<{ ok: true }> | Readonly<{ ok: false; message: string }>
+// zurück, den die Oberfläche am Ort der Aktion zeigt (UX-Konzept §7). Ein Erfolg kann Daten für die
+// Rückgängig-Zeile mitbringen.
+export type RestockActionFailure = Readonly<{ ok: false; message: string }>
+
+export type RestockActionResult<T extends object = object> =
+  Readonly<{ ok: true } & T> | RestockActionFailure
 
 export const ACCESS_MESSAGE = 'Bitte zuerst anmelden.'
 

@@ -1,12 +1,12 @@
-// Zahl offener, gespeicherter Einträge der Nachkaufen-Liste für die Wochenübersicht (#186). Die
-// Lücken bis zum Ziel zählen dort nicht mit, dafür hat die Wochenübersicht die eigene Zeile „Ziel“.
+// Zahl offener, gespeicherter Einträge der Nachkaufen-Liste, die eine Zählung für Übersicht und
+// Wochenübersicht (#186, #202). Lücken und Vorschläge zählen dort nicht mit: Die Übersicht nennt die
+// Lücken eigens, die Wochenübersicht hat die Zeile „Ziel“.
 import 'server-only'
 import type { RestockRepository } from './restock-repository'
 
 export async function countOpenRestockItems(
-  repository: Pick<RestockRepository, 'listItems'>,
+  repository: Pick<RestockRepository, 'countOpenItems'>,
   householdId: string,
 ): Promise<number> {
-  const items = await repository.listItems(householdId)
-  return items.filter((item) => !item.isDone).length
+  return repository.countOpenItems(householdId)
 }

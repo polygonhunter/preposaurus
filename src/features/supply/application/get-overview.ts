@@ -21,6 +21,8 @@ import { loadStockSnapshot, progressAtTarget, type HouseholdDay } from './stock-
 export interface OverviewPorts {
   stock: StockReader
   facts: HouseholdFactsReader
+  /** Die eine Zählung offener Nachkaufen-Einträge, dieselbe wie in der Wochenübersicht (#202) */
+  countOpenRestockItems: (householdId: string) => Promise<number>
 }
 
 function coverageBlocks(
@@ -41,7 +43,7 @@ async function loadFacts(ports: OverviewPorts, { householdId, today }: Household
   const [goal, source, openItems, due] = await Promise.all([
     ports.facts.loadGoal(householdId),
     ports.facts.loadActiveSource(householdId),
-    ports.facts.countOpenRestockItems(householdId),
+    ports.countOpenRestockItems(householdId),
     getDueUnits(ports.stock, { householdId, today, sort: 'date' }),
   ])
   return { goal, source, openItems, due }

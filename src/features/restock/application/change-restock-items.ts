@@ -1,9 +1,10 @@
-// Use-Cases für eigene Einträge (#73, NK-03, NK-04): ergänzen, abhaken und entfernen. Die Eingaben
-// sind schon geprüft (Action mit Zod), der Haushalt kommt aus der Sitzung.
+// Use-Cases für Einträge der Liste (#73, NK-03, NK-04, #202): ergänzen, abhaken, entfernen und
+// „Rückgängig“ nach dem Entfernen. Die Eingaben sind schon geprüft (Action mit Zod), der Haushalt
+// kommt aus der Sitzung.
 import 'server-only'
 import { err, ok, type Result } from '@/shared/lib/result'
 import type { RestockItemDone } from '../schemas'
-import type { RestockRepository } from './restock-repository'
+import type { RestockRepository, StoredRestockItem } from './restock-repository'
 
 type NotFound = Readonly<{ kind: 'not-found' }>
 
@@ -26,10 +27,18 @@ export async function setRestockItemDone(
   return found ? ok(undefined) : err({ kind: 'not-found' })
 }
 
+/** Entfernt den Eintrag und gibt ihn zurück, damit „Rückgängig“ ihn wieder anlegen kann. */
 export async function removeRestockItem(
   repository: Pick<RestockRepository, 'removeItem'>,
   { householdId, id }: HouseholdInput & { id: string },
-): Promise<Result<void, NotFound>> {
-  const found = await repository.removeItem(householdId, id)
-  return found ? ok(undefined) : err({ kind: 'not-found' })
+): Promise<Result<StoredRestockItem, NotFound>> {
+  const removed = await repository.removeItem(householdId, id)
+  return removed === null ? err({ kind: 'not-found' }) : ok(removed)
+}
+
+export async function restoreRestockItem(
+  repository: Pick<RestockRepository, 'restoreItem'>,
+  { householdId, item }: HouseholdInput & { item: StoredRestockItem },
+): Promise<void> {
+  await repository.restoreItem(householdId, item)
 }

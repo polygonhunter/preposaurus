@@ -19,12 +19,16 @@ export interface HouseholdDay {
   today: CalendarDay
 }
 
+/** Das Zieldatum, wenn es heute oder später ist; ein vergangenes gilt wie keines. */
+export function validTargetDay(goal: HouseholdGoal | null, today: CalendarDay): CalendarDay | null {
+  const targetDay = goal?.targetDay ?? null
+  return targetDay !== null && targetDay >= today ? targetDay : null
+}
+
 /** Die Ziel-Lücke zählt am Zieldatum (A13), ohne gültiges Zieldatum heute. */
 function gapReference(goal: HouseholdGoal | null, today: CalendarDay): ReferenceDay {
-  const targetDay = goal?.targetDay ?? null
-  return targetDay !== null && targetDay >= today
-    ? { day: targetDay, kind: 'target' }
-    : { day: today, kind: 'today' }
+  const targetDay = validTargetDay(goal, today)
+  return targetDay === null ? { day: today, kind: 'today' } : { day: targetDay, kind: 'target' }
 }
 
 /** Rechengrundlage, Warengruppen und die Packungen im Vorrat samt Produkt. */

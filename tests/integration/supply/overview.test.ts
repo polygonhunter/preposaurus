@@ -5,6 +5,8 @@ import {
   getOverview,
   type OverviewPorts,
 } from '../../../src/features/supply/application/get-overview'
+import { countOpenRestockItems } from '../../../src/features/restock/application/count-open-items'
+import { createRestockRepository } from '../../../src/features/restock/data/restock-repository'
 import { createHouseholdFactsRepository } from '../../../src/features/supply/data/household-facts-repository'
 import { overviewSchema } from '../../../src/features/supply/schemas'
 import { households } from '../../../src/server/db/schema/household'
@@ -25,7 +27,12 @@ describe('Übersicht gegen die Datenbank', () => {
     const setup = await setupStockRead(testDb.db)
     ;({ householdId, foreignId } = setup)
     await seedDemoSource(testDb.db, householdId)
-    ports = { stock: setup.reader, facts: createHouseholdFactsRepository(testDb.db) }
+    const restock = createRestockRepository(testDb.db)
+    ports = {
+      stock: setup.reader,
+      facts: createHouseholdFactsRepository(testDb.db),
+      countOpenRestockItems: (id) => countOpenRestockItems(restock, id),
+    }
   })
 
   afterAll(async () => {

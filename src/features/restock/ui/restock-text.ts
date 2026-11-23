@@ -1,6 +1,7 @@
-// Texte der Seite Nachkaufen (#73, UX-Konzept §8.6). Rein, damit es Tests gibt.
+// Texte der Seite Nachkaufen (#73, #200, #202, UX-Konzept §8.6). Rein, damit es Tests gibt.
+import { formatDayWithPrecision, toCalendarDay } from '@/shared/lib/dates'
 import { formatGermanNumber } from '@/shared/lib/quantities'
-import type { RestockGapDto, RestockListDto } from '../schemas'
+import type { RestockGapDto, RestockListDto, RestockSuggestionDto } from '../schemas'
 
 const GRAMS_PER_KG = 1000
 const ML_PER_LITRE = 1000
@@ -18,17 +19,53 @@ export function formatGapAmount({ value, unit }: RestockGapDto['missing']): stri
 }
 
 /** „6 von 10 Tagen“ am Stichtag des Ziels */
-export const gapDaysText = ({ days, goalDays }: RestockGapDto) =>
+const gapDaysText = ({ days, goalDays }: RestockGapDto) =>
   `${formatGermanNumber(days)} von ${String(goalDays)} Tagen`
 
-/** Untertitel der Seite: „3 offen“, auch „0 offen“ */
-export const openCountText = ({ openCount }: RestockListDto) =>
-  `${formatGermanNumber(openCount)} offen`
+/** Zweitzeile einer Lücke: „6 von 10 Tagen · z. B. Nudeln, Reis“ */
+export function gapSubtitle(gap: RestockGapDto): string {
+  const days = gapDaysText(gap)
+  return gap.examples.length === 0 ? days : `${days} · z. B. ${gap.examples.join(', ')}`
+}
+
+/** Warum ein Vorschlag unter „Ersetzen“ steht (A14). */
+export function suggestionReasonText({ reason }: RestockSuggestionDto): string {
+  if (reason.kind === 'consumed') {
+    const day = formatDayWithPrecision({ date: toCalendarDay(reason.lastDay), precision: 'day' })
+    return `Am ${day} aufgebraucht`
+  }
+  return reason.count === 1
+    ? 'Läuft vor dem Ziel ab'
+    : `${String(reason.count)} Packungen laufen vor dem Ziel ab`
+}
+
+const countWithNoun = (count: number, one: string, many: string) =>
+  `${formatGermanNumber(count)} ${count === 1 ? one : many}`
+
+/**
+ * Untertitel der Seite, z. B. „3 Einträge offen · 2 Vorschläge · 1 Warengruppe unter dem Ziel“.
+ * Die Einträge stehen immer da (auch „0 Einträge offen“) und sind dieselbe Zahl wie auf der
+ * Übersicht und in der Wochenübersicht; Vorschläge und Lücken werden eigens genannt (#202).
+ */
+export function openCountText({ openItemCount, suggestions, gaps }: RestockListDto): string {
+  return [
+    `${countWithNoun(openItemCount, 'Eintrag', 'Einträge')} offen`,
+    suggestions.length > 0 ? countWithNoun(suggestions.length, 'Vorschlag', 'Vorschläge') : null,
+    gaps.length > 0
+      ? `${countWithNoun(gaps.length, 'Warengruppe', 'Warengruppen')} unter dem Ziel`
+      : null,
+  ]
+    .filter((part) => part !== null)
+    .join(' · ')
+}
+
+const hasAnythingOpen = ({ openItemCount, suggestions, gaps }: RestockListDto) =>
+  openItemCount + suggestions.length + gaps.length > 0
 
 export const NO_GOAL_TEXT = 'Setzt ein Ziel, dann rechnet die App die Lücken aus.'
 
 /** Leerzustand in einem Satz, null, wenn noch etwas offen ist. */
 export function emptyListText(list: RestockListDto): string | null {
-  if (list.openCount > 0) return null
+  if (hasAnythingOpen(list)) return null
   return list.isGoalCalculable ? 'Nichts offen. Euer Ziel ist erreicht.' : NO_GOAL_TEXT
 }
