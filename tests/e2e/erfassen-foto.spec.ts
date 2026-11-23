@@ -7,7 +7,7 @@
 import type { Page, Route } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
 import sharp from 'sharp'
-import { expectAccessibleLayout } from '../helpers/page-checks'
+import { expectAccessibleLayout, expectNothingOnVerticalFold } from '../helpers/page-checks'
 
 test.describe.configure({ mode: 'serial' })
 
@@ -119,6 +119,49 @@ test('Kamera im Vollbild und dunkel, ohne Kamera ist „Von Hand eintragen“ de
   await screenshot(page, 'kamera-375')
   await page.setViewportSize({ width: 1280, height: 800 })
   await screenshot(page, 'kamera-1280')
+})
+
+test('Stufen: mittel Sucher oben und Auslöser unten, ab „breit“ Kamera links und Formular rechts', async ({
+  page,
+}) => {
+  await startFresh(page)
+  const camera = page.getByRole('region', { name: 'Vorderseite der Verpackung' })
+  const reviewForm = page.getByRole('form', { name: 'Foto-Erfassung prüfen' })
+  const shutter = page.getByRole('button', { name: 'Foto aufnehmen' })
+
+  // Duo hochkant (M12-05): nichts Antippbares im Streifen um die waagrechte Falz
+  await page.setViewportSize({ width: 669, height: 867 })
+  const fold = 867 / 2
+  await expect(reviewForm).toHaveCount(0)
+  const shutterBox = await shutter.boundingBox()
+  expect(shutterBox?.y ?? 0).toBeGreaterThanOrEqual(fold + 12)
+  const onFold = await camera.evaluate((section, middle) => {
+    return [...section.querySelectorAll('button')].filter((button) => {
+      const rect = button.getBoundingClientRect()
+      return rect.height > 0 && rect.top < middle + 12 && rect.bottom > middle - 12
+    }).length
+  }, fold)
+  expect(onFold).toBe(0)
+
+  // Duo quer: Kamera links, Formular rechts, die Falz bleibt frei (UX §8.5 „Am PC“, M12-06)
+  await page.setViewportSize({ width: 951, height: 585 })
+  await expect(reviewForm).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Erfassen' })).toBeVisible()
+  const [cameraBox, formBox] = await Promise.all([camera.boundingBox(), reviewForm.boundingBox()])
+  expect(formBox?.x ?? 0).toBeGreaterThanOrEqual((cameraBox?.x ?? 0) + (cameraBox?.width ?? 0))
+  await expectNothingOnVerticalFold(page)
+
+  await page.setViewportSize({ width: 1280, height: 800 })
+  for (const colorScheme of ['light', 'dark'] as const) {
+    await page.emulateMedia({ colorScheme })
+    await expectAccessibleLayout(page)
+  }
+
+  // Kamera zu: das Formular bleibt, jetzt allein, und der Fokus wandert hinein
+  await page.getByRole('button', { name: 'Kamera schließen' }).click()
+  await expect(camera).toHaveCount(0)
+  await expect(reviewForm).toBeVisible()
+  await expect(reviewForm.locator(':focus')).toHaveCount(1)
 })
 
 test('Foto-Fluss: Erkennung füllt Vorschläge, offenes MHD wird entschieden, Speichern', async ({

@@ -37,10 +37,16 @@ export default async function PhotoCapturePage() {
       ? initialPhotoCapture(options.lastStorageLocationId)
       : fromDraft({ ...draft, containers: options.containers, recognitionOff })
   return (
-    <>
-      <PageHeader title="Erfassen" />
-      <CaptureModeSwitch current="foto" />
-      <PhotoCapture options={options} initial={initial} recognitionOff={recognitionOff} />
-    </>
+    <PhotoCapture
+      options={options}
+      initial={initial}
+      recognitionOff={recognitionOff}
+      header={
+        <>
+          <PageHeader title="Erfassen" />
+          <CaptureModeSwitch current="foto" />
+        </>
+      }
+    />
   )
 }

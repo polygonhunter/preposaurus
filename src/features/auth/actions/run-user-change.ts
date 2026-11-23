@@ -1,10 +1,11 @@
 // Gemeinsamer Ablauf der kleinen Actions der Nutzerverwaltung (#41): Admin prüfen, Nutzer-ID lesen,
 // Use-Case aufrufen, Ergebnis in einen ruhigen Satz übersetzen und die Seite neu laden.
 import 'server-only'
-import { refresh } from 'next/cache'
+import { refresh, revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { adminAccessMessage } from '@/server/auth/admin-access-message'
 import { requireHouseholdAdmin, type HouseholdUser } from '@/server/auth/guards'
+import { SETTINGS_PATH } from '@/shared/config/settings-paths'
 import { readFormText } from '@/shared/lib/form-data'
 import type { Result } from '@/shared/lib/result'
 import type { ManageUserError } from '../application/manage-users'
@@ -38,7 +39,12 @@ export async function runUserChange(
   const result = await change(await userAdminServices(), context)
   if (!result.ok) return failed(manageErrorMessage(result.error))
   const target = redirectAfter?.(context) ?? null
-  if (target !== null) redirect(target)
+  if (target !== null) {
+    // Wer sich selbst die Admin-Rolle nimmt, landet in den Einstellungen. Deren Liste (Layout) zeigt
+    // Rolle und Nutzerverwaltung und würde beim Weiterleiten sonst nicht neu gezeichnet.
+    revalidatePath(SETTINGS_PATH, 'layout')
+    redirect(target)
+  }
   refresh()
   return { status: 'saved', message: savedMessage }
 }

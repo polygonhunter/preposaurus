@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { cx } from '@/shared/lib/class-names'
+import { FOLD_SPLIT_COLUMNS } from '@/shared/ui/split-columns'
 
 type StockSplitProps = Readonly<{
   list: ReactNode
@@ -8,11 +9,12 @@ type StockSplitProps = Readonly<{
   children: ReactNode
 }>
 
-// Ab „breit“ nebeneinander: Die Grenze liegt in der Fenstermitte, 24 px frei um die Mitte, damit auf
-// dem Duo quer nichts Antippbares auf der Falz liegt (UX_KONZEPT §6). Ab „weit“ (PC, keine Falz)
-// wächst die Tabelle, das Detail bleibt bei 40 % und mindestens 420 px.
-const COLUMNS =
-  'breit:grid breit:grid-cols-[calc(50vw-228px)_minmax(0,1fr)] breit:gap-x-6 weit:grid-cols-[minmax(0,1fr)_minmax(420px,40%)] weit:gap-x-0'
+// Ab „breit“ nebeneinander, die Grenze in der Fenstermitte (FOLD_SPLIT_COLUMNS). Ab „weit“ (PC, keine
+// Falz) wächst die Tabelle, das Detail bleibt bei 40 % und mindestens 420 px.
+const COLUMNS = cx(
+  FOLD_SPLIT_COLUMNS,
+  'weit:grid-cols-[minmax(0,1fr)_minmax(420px,40%)] weit:gap-x-0',
+)
 // Stufe mittel (Duo hochkant): Liste oben, Detail unten, jede Hälfte rollt für sich, 24 px frei um
 // die Mitte. Die Höhe zieht das Polster für das Dock ab, das `main` unten hält, so rollt die Seite
 // selbst nicht.
