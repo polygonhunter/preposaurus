@@ -23,6 +23,8 @@ export interface StoredConnection {
   baseUrl: string | null
   isActive: boolean
   key: EncryptedKey | null
+  /** Ergebnis von „Verbindung testen“, null, solange nie getestet wurde */
+  lastTest: { status: ConnectionTestStatus; testedAt: Date } | null
 }
 
 export interface HouseholdAiSettings {
@@ -44,9 +46,16 @@ function toEncryptedKey(row: ConnectionRow): EncryptedKey | null {
   return { ...key, hint: apiKeyHint, version: apiKeyVersion }
 }
 
+// Der CHECK in der DB garantiert: Status und Zeitpunkt gibt es nur zusammen.
+function toLastTest({ lastTestStatus, lastTestedAt }: ConnectionRow): StoredConnection['lastTest'] {
+  if (lastTestStatus === null || lastTestedAt === null) return null
+  return { status: lastTestStatus, testedAt: lastTestedAt }
+}
+
 function toStoredConnection(row: ConnectionRow): StoredConnection {
   const { id, provider, name, baseUrl, isActive } = row
-  return { id, provider, name, baseUrl, isActive, key: toEncryptedKey(row) }
+  const key = toEncryptedKey(row)
+  return { id, provider, name, baseUrl, isActive, key, lastTest: toLastTest(row) }
 }
 
 async function readIsAiEnabled(db: Database, householdId: string): Promise<boolean> {
@@ -63,7 +72,11 @@ export async function loadHouseholdAiSettings(
 ): Promise<HouseholdAiSettings> {
   const [isAiEnabled, connections, assignments] = await Promise.all([
     readIsAiEnabled(db, householdId),
-    db.select().from(aiConnections).where(eq(aiConnections.householdId, householdId)),
+    db
+      .select()
+      .from(aiConnections)
+      .where(eq(aiConnections.householdId, householdId))
+      .orderBy(aiConnections.createdAt),
     db
       .select({
         role: aiRoleAssignments.role,

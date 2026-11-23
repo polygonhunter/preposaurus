@@ -265,6 +265,16 @@ Danach den Auth-Schlüssel wieder aus der `.env` nehmen (Zeile `TS_AUTHKEY=` lee
 
 Die Foto-Erkennung ist anfangs aus. Der Admin kann sie später in den Einstellungen mit einem eigenen Anthropic-Schlüssel einschalten. Fotos gehen dann zur Auswertung an Anthropic, alles andere bleibt auf dem NAS.
 
+### 7.1 Foto-Erkennung einrichten (Anthropic-Schlüssel in der App)
+
+1. In der [Konsole von Anthropic](https://platform.claude.com/settings/keys) unter **API Keys** einen Schlüssel anlegen (beginnt mit `sk-ant-`) und kopieren. Die Kosten rechnet Anthropic direkt mit deinem Konto ab, ein Ausgabenlimit lässt sich dort setzen.
+2. In Preposaurus als Admin: **Einstellungen → Daten & System → Foto-Erkennung**.
+3. Unter **Verbindung hinzufügen** den Schlüssel einfügen und **Hinzufügen** tippen. Die App speichert ihn verschlüsselt (AES-256-GCM mit einem Schlüssel aus `APP_SECRET`) und zeigt danach nur noch „gespeichert · endet auf …“ mit den letzten vier Zeichen. Jede Foto-Art bekommt die neue Verbindung mit dem empfohlenen Modell (Haiku 5.5, zweiter Versuch beim MHD Sonnet 5.5).
+4. **Verbindung testen** tippen. Erwartet: „Die Verbindung funktioniert.“ Sonst sagt die App, was fehlt (z. B. Schlüssel ungültig, kein Guthaben).
+5. Unter **Für den Haushalt** den Schalter **Foto-Erkennung** einschalten und **Speichern**. Oben im **Status** steht dann „eingerichtet“ und je Foto-Art das Modell.
+
+Voraussetzung ist `AI_PROVIDER=anthropic` (Standard in `compose.yaml`). Ein Neustart ist nicht nötig. Steht `ANTHROPIC_API_KEY` in der `.env`, hat er Vorrang vor den Verbindungen aus der App und erscheint dort als „aus Umgebungsvariable“. Ändert sich `APP_SECRET`, lässt sich der gespeicherte Schlüssel nicht mehr lesen: dann unter der Verbindung **Schlüssel ersetzen**.
+
 ## 8. Weitere Geräte und Haushaltsmitglieder
 
 Jedes Gerät braucht die Tailscale-App, und Tailscale muss zum Öffnen der App verbunden sein.

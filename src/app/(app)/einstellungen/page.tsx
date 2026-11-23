@@ -62,7 +62,7 @@ export default async function SettingsPage() {
         <GroupFooter>Ansehen kannst du alles, ändern kann es ein Admin.</GroupFooter>
       )}
       {isAdmin ? <AdminSettingsGroups /> : null}
-      <SystemSettingsGroup />
+      <SystemSettingsGroup isAdmin={isAdmin} />
     </>
   )
 }
