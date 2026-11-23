@@ -82,6 +82,9 @@ const baseSchema = z.object({
   // der Empfehlung in ai-roles.ts (Entscheidung #59).
   ANTHROPIC_API_KEY: optionalText,
   PHOTO_STORAGE_DIR: z.string().min(1).default('./.data/fotos'),
+  // Ordner mit den Status-Dateien des Backup-Dienstes (#147), im Container nur lesend eingebunden.
+  // Leer: Die App zeigt keine letzte Sicherung an (z. B. in der Entwicklung).
+  BACKUP_STATUS_DIR: optionalText,
   // Adresse der App für Links in Mails, z. B. https://haushalt.beispiel.ts.net (M11-05). Ohne sie
   // haben Mails keinen Link. Die App selbst braucht sie nicht, sie kennt ihre Adresse aus der Anfrage.
   APP_URL: optionalText.pipe(
