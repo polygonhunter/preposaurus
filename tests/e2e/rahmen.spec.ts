@@ -14,6 +14,22 @@ test('/ leitet auf die Übersicht', async ({ page }) => {
 })
 
 for (const colorScheme of ['light', 'dark'] as const) {
+  test(`unbekannte Adresse zeigt eine deutsche Seite mit Weg zurück (${colorScheme})`, async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme })
+    const response = await page.goto('/gibtsnicht')
+
+    expect(response?.status()).toBe(404)
+    await expect(page.getByRole('heading', { level: 1, name: 'Nicht gefunden' })).toBeVisible()
+    await expect(page.getByText('Diese Seite gibt es nicht.')).toBeVisible()
+    await expectAccessibleLayout(page)
+    await page.getByRole('link', { name: 'Zur Übersicht' }).click()
+    await expect(page).toHaveURL(/\/uebersicht$/)
+  })
+}
+
+for (const colorScheme of ['light', 'dark'] as const) {
   test(`Rahmen ist barrierefrei (${colorScheme})`, async ({ page }) => {
     await page.emulateMedia({ colorScheme })
     await page.goto('/uebersicht')

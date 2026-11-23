@@ -2,20 +2,21 @@ import { expect, test } from '@playwright/test'
 import { E2E_MEMBER, signedOut, signInViaUi } from '../helpers/e2e-auth'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
-// Einstellungen als Mitglied (#37, #38, #39): Haushalt nur lesend, Nutzerverwaltung und Daten &
-// System gar nicht, auch nicht per Direktaufruf. Eigene Sitzung, damit die des Admins bleibt.
+// Einstellungen als Mitglied (#37, #38, #39): Haushalt nur lesend, Nutzerverwaltung gar nicht, auch
+// nicht per Direktaufruf. Lizenz und Quellen sieht jede Person (AGPL, #217). Eigene Sitzung, damit
+// die des Admins bleibt.
 test.use(signedOut)
 
 test.beforeEach(async ({ page }) => {
   await signInViaUi(page, E2E_MEMBER)
 })
 
-test('sieht den Haushalt nur lesend und keine Admin-Bereiche', async ({ page }) => {
+test('sieht den Haushalt nur lesend und keine Nutzerverwaltung', async ({ page }) => {
   await page.goto('/einstellungen')
 
   await expect(page.getByRole('heading', { level: 2, name: 'Haushalt' })).toBeVisible()
   await expect(page.getByRole('heading', { level: 2, name: 'Nutzerverwaltung' })).toHaveCount(0)
-  await expect(page.getByRole('heading', { level: 2, name: 'Daten & System' })).toHaveCount(0)
+  await expect(page.getByRole('heading', { level: 2, name: 'Daten & System' })).toBeVisible()
   await expect(page.getByText('Ansehen kannst du alles, ändern kann es ein Admin.')).toBeVisible()
   await expectAccessibleLayout(page)
 
@@ -37,10 +38,19 @@ test('sieht den Haushalt nur lesend und keine Admin-Bereiche', async ({ page }) 
   await expect(page.getByText('Das ändert ein Admin.')).toBeVisible()
 })
 
+test('sieht Lizenz und Quelltext (AGPL, #217)', async ({ page }) => {
+  await page.goto('/einstellungen')
+  await page.getByRole('link', { name: /Lizenz und Quellen/ }).click()
+
+  await expect(page.getByRole('heading', { level: 1, name: 'Daten & System' })).toBeVisible()
+  await expect(page.getByText('AGPL-3.0-or-later')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'GitHub' })).toBeVisible()
+  await expectAccessibleLayout(page)
+})
+
 test('Admin-Seiten antworten auch per Direktaufruf mit „nicht gefunden“', async ({ page }) => {
   for (const path of [
     '/einstellungen/nutzer',
-    '/einstellungen/system',
     '/einstellungen/nutzer/neu',
     '/einstellungen/mitglieder/neu',
   ]) {

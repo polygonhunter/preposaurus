@@ -5,7 +5,7 @@ import type { CalendarDay } from '@/shared/lib/dates'
 interface FakeFacts {
   householdId: string
   goal?: { days: number; targetDay: CalendarDay | null } | null
-  source?: { name: string; asOf: string; link: string } | null
+  source?: { name: string; asOf: string; link: string; isVerified: boolean } | null
   openRestockItems?: number
 }
 

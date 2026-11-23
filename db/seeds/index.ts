@@ -1,4 +1,5 @@
-// Aufruf: npm run db:seed. Spielt die Stammdaten ein, auch im Container nach den Migrationen.
+// Aufruf: npm run db:seed. Spielt die Stammdaten samt Empfehlungsquelle ein, auch im Container nach
+// den Migrationen.
 import { connectDatabase } from '../../src/server/db/client'
 import { loadEnv } from '../../src/shared/config/env'
 import { createLogger } from '../../src/shared/lib/logger'

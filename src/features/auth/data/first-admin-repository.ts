@@ -1,15 +1,16 @@
-// Ersteinrichtung (#34, ONBOARDING §2.3): erster Admin, Haushalt, Einstellungen und Ziel in einer
-// Transaktion. Die Tabellensperre auf nutzer hält einen zweiten, gleichzeitigen Aufruf an, bis der
+// Ersteinrichtung (#34, ONBOARDING §2.3): erster Admin, Haushalt mit Standardquelle, Einstellungen
+// und Ziel in einer Transaktion. Die Tabellensperre auf nutzer hält einen zweiten, gleichzeitigen Aufruf an, bis der
 // erste fertig ist. Danach sieht er den neuen Nutzer und legt nichts an. SHARE ROW EXCLUSIVE sperrt
 // sich selbst und jedes INSERT, also auch Wege am Use-Case vorbei.
 // Der Nutzer entsteht am Username-Plugin vorbei, weil Better Auth keine fremde Transaktion kennt.
 // Spalten und technische E-Mail wie bei Better Auth (05_STATUS „Konto“), der Hash kommt fertig.
 import 'server-only'
-import { sql } from 'drizzle-orm'
+import { desc, eq, sql } from 'drizzle-orm'
 import type { Database } from '@/server/db/connection'
 import { accounts, users } from '@/server/db/schema/account'
 import { householdSettings, households } from '@/server/db/schema/household'
-import { goals } from '@/server/db/schema/recommendation'
+import { goals, sources, sourceVersions } from '@/server/db/schema/recommendation'
+import { DEFAULT_SOURCE_KEY } from '@/shared/config/constants'
 import { CREDENTIAL_PROVIDER } from './credential'
 
 // Schritt 1 der Einrichtung ist mit dem Konto erledigt, die übrigen folgen mit #40.
@@ -34,10 +35,24 @@ async function hasAnyUser(db: Database): Promise<boolean> {
   return row !== undefined
 }
 
+// Neueste Fassung der Standardquelle (M1-09). Ohne Seed gibt es sie nicht: Dann bleibt der
+// Haushalt ohne Quelle, bis `db:seed` (im Container „migrate“) sie anlegt und zuweist.
+async function latestDefaultSourceVersion(tx: Database): Promise<string | null> {
+  const [row] = await tx
+    .select({ id: sourceVersions.id })
+    .from(sourceVersions)
+    .innerJoin(sources, eq(sources.id, sourceVersions.sourceId))
+    .where(eq(sources.key, DEFAULT_SOURCE_KEY))
+    .orderBy(desc(sourceVersions.createdAt))
+    .limit(1)
+  return row?.id ?? null
+}
+
 async function insertHousehold(tx: Database, admin: NewFirstAdmin): Promise<string> {
+  const activeSourceVersionId = await latestDefaultSourceVersion(tx)
   const [household] = await tx
     .insert(households)
-    .values({ name: admin.householdName })
+    .values({ name: admin.householdName, activeSourceVersionId })
     .returning({ id: households.id })
   if (household === undefined) throw new Error('Haushalt wurde nicht angelegt')
   await tx.insert(householdSettings).values({ householdId: household.id, setupStep: ACCOUNT_STEP })

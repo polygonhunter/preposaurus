@@ -15,7 +15,7 @@ export type StockStatusFilter =
   'in-stock' | 'due-soon' | 'expired' | 'incomplete' | 'consumed' | 'discarded'
 
 export interface FilterableUnit extends Pick<StockUnit, 'status' | 'bestBefore' | 'checkedAt'> {
-  /** Das Produkt hat fehlende, nur geschätzte oder unbestätigte Nährwerte (`nutritionGapOf`) */
+  /** Dem Produkt fehlen kcal ganz, oder eine KI-Schätzung ist unbestätigt (`countsAsIncomplete`) */
   hasNutritionGap: boolean
 }
 

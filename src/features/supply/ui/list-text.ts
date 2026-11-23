@@ -11,6 +11,7 @@ import type {
   OverviewRestock,
 } from '../schemas'
 import { formatDate, formatDays } from './head-text'
+import { UNVERIFIED_SOURCE_NOTE } from './source-text'
 
 type DueGroup = OverviewDueEntry['group']
 type StatusTone = 'red' | 'orange' | 'yellow'
@@ -81,6 +82,9 @@ export function householdTitle({ members }: OverviewHousehold, goal: OverviewGoa
   return `${people} · Ziel ${formatDays(goal.days)}${until}`
 }
 
+/** „BBK/BLE, Stand 2024“, bei ungeprüften Werten mit dezentem Hinweis */
 export function sourceText({ source }: OverviewHousehold): string {
-  return source === null ? 'Noch keine Empfehlung gewählt' : `${source.name}, Stand ${source.asOf}`
+  if (source === null) return 'Noch keine Empfehlung hinterlegt'
+  const text = `${source.name}, Stand ${source.asOf}`
+  return source.isVerified ? text : `${text} · ${UNVERIFIED_SOURCE_NOTE}`
 }

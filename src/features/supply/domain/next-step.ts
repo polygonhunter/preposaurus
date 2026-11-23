@@ -5,6 +5,9 @@ import type { SupplyDays } from './supply-days'
 // weiter? Die Fehlmenge des Engpasses bis zum Ziel, als ml Wasser bzw. kcal. Liegt auch der andere
 // Wert unter dem Ziel, kommt seine Fehlmenge dazu: Sonst brächte z. B. viel Wasser nur wenige Tage,
 // weil danach das Essen begrenzt.
+// Gerechnet wird mit dem ungerundeten Bestand (Bedarf bis zum Ziel minus Bestand), nicht mit den
+// abgerundeten Tagen: Sonst verlangte die App mehr, als zum Ziel fehlt (#214). Gerundet wird erst
+// in der Anzeige.
 
 type Resource = SupplyDays['bottleneck']
 
@@ -20,7 +23,8 @@ export interface NextStep extends Shortfall {
 }
 
 interface NextStepInput {
-  today: Pick<SupplyDays, 'energyDays' | 'waterDays' | 'bottleneck'>
+  /** Bestand am Stichtag: kcal und ml Wasser, dazu der Engpass */
+  today: Pick<SupplyDays, 'kcal' | 'waterMl' | 'bottleneck'>
   goalDays: number
   need: Pick<DailyNeed, 'kcalPerDay' | 'waterMlPerDay'>
 }
@@ -28,17 +32,17 @@ interface NextStepInput {
 const perDayOf = (resource: Resource, need: NextStepInput['need']) =>
   resource === 'water' ? need.waterMlPerDay : need.kcalPerDay
 
-const daysOf = (resource: Resource, today: NextStepInput['today']) =>
-  resource === 'water' ? today.waterDays : today.energyDays
+const stockOf = (resource: Resource, today: NextStepInput['today']) =>
+  resource === 'water' ? today.waterMl : today.kcal
 
 const otherOf = (resource: Resource): Resource => (resource === 'water' ? 'energy' : 'water')
 
-/** (Zieltage − Ist-Tage) × Tagesbedarf, null ohne Lücke oder ohne Bedarf. */
+/** Zieltage × Tagesbedarf − Bestand, null ohne Lücke oder ohne Bedarf. */
 function shortfallOf(resource: Resource, input: NextStepInput): Shortfall | null {
-  const shortfallDays = input.goalDays - daysOf(resource, input.today)
   const perDay = perDayOf(resource, input.need)
-  if (shortfallDays <= 0 || perDay <= 0) return null
-  return { resource, missing: shortfallDays * perDay }
+  if (perDay <= 0) return null
+  const missing = input.goalDays * perDay - stockOf(resource, input.today)
+  return missing > 0 ? { resource, missing } : null
 }
 
 /**

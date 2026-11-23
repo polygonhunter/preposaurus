@@ -50,6 +50,8 @@ async function expectEmptyOverview(page: Page) {
   await expect(
     page.getByRole('link', { name: /^Noch niemand eingetragen · Ziel 10 Tage/ }),
   ).toHaveAttribute('href', '/einstellungen')
+  // Die Einrichtung setzt die Quelle BBK/BLE aus dem Seed, noch ungeprüft (#20)
+  await expect(page.getByText(/^BBK\/BLE, Stand .* · Werte noch nicht geprüft$/)).toBeVisible()
   for (const colorScheme of ['light', 'dark'] as const) {
     // Neu laden statt umschalten: Farbübergänge würden axe sonst mitten im Wechsel treffen
     await page.emulateMedia({ colorScheme })

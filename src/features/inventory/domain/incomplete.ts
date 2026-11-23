@@ -27,6 +27,16 @@ export function nutritionGapOf(
   return isEstimateUnconfirmed(nutrition) ? 'unconfirmed' : null
 }
 
+/**
+ * Zählt die Lücke für den Filter „Unvollständig“? Nur, wenn wirklich etwas nachzutragen ist: kcal
+ * fehlen ganz, oder eine KI-Schätzung wartet auf Bestätigung. Fehlen nur die freiwilligen eigenen
+ * Werte und der Richtwert der Art springt ein (`no-label`), ist die Packung vollständig. Das steht
+ * am Produkt als „Nährwerte: Richtwert“ und an der Kernzahl als „ca.“ (UX-Konzept §4, #213).
+ */
+export function countsAsIncomplete(gap: NutritionGap | null): boolean {
+  return gap === 'missing' || gap === 'unconfirmed'
+}
+
 interface IncompleteInput<U, P> {
   units: readonly U[]
   products: readonly P[]
@@ -35,7 +45,7 @@ interface IncompleteInput<U, P> {
 interface IncompleteItems<U, P> {
   /** Packungen mit „Datum fehlt“ */
   units: U[]
-  /** Produkte mit fehlenden oder unbestätigten Nährwerten */
+  /** Produkte mit fehlenden kcal oder unbestätigter Schätzung (`countsAsIncomplete`) */
   products: { product: P; gap: NutritionGap }[]
 }
 
@@ -47,7 +57,7 @@ export function findIncomplete<
   const incompleteProducts: IncompleteItems<U, P>['products'] = []
   for (const product of products) {
     const gap = nutritionGapOf(product.nutrition, product.foodTypeReference)
-    if (gap !== null) incompleteProducts.push({ product, gap })
+    if (gap !== null && countsAsIncomplete(gap)) incompleteProducts.push({ product, gap })
   }
   return { units: units.filter(isInStockWithoutDate), products: incompleteProducts }
 }
