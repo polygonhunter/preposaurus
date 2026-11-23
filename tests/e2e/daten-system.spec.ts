@@ -2,8 +2,9 @@
 // JSON. Mitglieder sehen beides nicht und bekommen den Export auch per Direktaufruf nicht.
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 import { E2E_BACKUP_STATUS_DIR, E2E_MEMBER, signedOut, signInViaUi } from '../helpers/e2e-auth'
+import { expect, test } from '../helpers/e2e-test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 const HOUR_MS = 60 * 60 * 1000
