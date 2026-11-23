@@ -24,7 +24,7 @@ export interface ReminderRepository {
   loadAddedTimes: (householdId: string, unitIds: readonly string[]) => Promise<Map<string, Date>>
   /** Packungen im Vorrat ohne Datum (#116) */
   countMissingDates: (householdId: string) => Promise<number>
-  /** Gespeicherte Adressen der aktiven Nutzer, auch technische (die Mail überspringt sie) */
+  /** Freiwillige Adressen für Erinnerungen der aktiven Nutzer (#75), nie die technische */
   listAddresses: (householdId: string) => Promise<string[]>
   listCheckInRecipients: (cadence: CheckInCadence) => Promise<CheckInRecipient[]>
   markSent: (householdId: string, kinds: readonly ReminderKind[], at: Date) => Promise<void>

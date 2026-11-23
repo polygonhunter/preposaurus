@@ -36,6 +36,13 @@
       "when": 1795391845242,
       "tag": "0004_erinnerungen_merker",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795402454680,
+      "tag": "0005_nutzer_erinnerung_email",
+      "breakpoints": true
     }
   ]
 }

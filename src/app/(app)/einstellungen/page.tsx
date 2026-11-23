@@ -8,7 +8,7 @@ import { SignOutButton } from '@/features/auth/ui/SignOutButton'
 import { ROLE_LABELS } from '@/features/auth/ui/user-format'
 import { AdminSettingsGroups } from '@/features/settings/ui/AdminSettingsGroups'
 import { requirePageHousehold } from '@/server/auth/household'
-import { GOAL_PATH, MEMBERS_PATH, RULES_PATH } from '@/shared/config/settings-paths'
+import { ACCOUNT_PATH, GOAL_PATH, MEMBERS_PATH, RULES_PATH } from '@/shared/config/settings-paths'
 import { Group } from '@/shared/ui/Group'
 import { GroupFooter } from '@/shared/ui/GroupFooter'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
@@ -34,6 +34,7 @@ export default async function SettingsPage() {
       <Group labelledBy="konto">
         <Row title="Angemeldet als" trailing={username} />
         <Row title="Rolle" trailing={ROLE_LABELS[isAdmin ? 'admin' : 'mitglied']} />
+        <Row title="Profil, Passwort und Mails" action={{ href: ACCOUNT_PATH }} />
       </Group>
       <div className="pt-4">
         <SignOutButton />

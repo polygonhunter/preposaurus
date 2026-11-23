@@ -52,6 +52,10 @@ export const users = pgTable(
     // Eigene Spalte, weil Sitzungen gelöscht werden
     lastSignInAt: timestampTz('letzte_anmeldung_am'),
     aiNoticeConfirmedAt: timestampTz('ki_hinweis_bestaetigt_am'),
+    // Freiwillige Adresse für Erinnerungen (#75). Leer heißt: keine Mails. Bewusst nicht email,
+    // weil Better Auth dort eine eindeutige Adresse verlangt und sie für Anmeldung und
+    // Zurücksetzen per Mail nutzen würde. Zwei Personen dürfen sich eine Adresse teilen.
+    reminderEmail: text('erinnerung_email'),
     ...timestamps(),
   },
   (table) => [
