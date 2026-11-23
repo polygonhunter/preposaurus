@@ -139,6 +139,7 @@ describe('Ersetzen und Rückgängig gegen die Datenbank', () => {
       source: 'nachkauf' as const,
       productId: foreignProduct,
       isDone: false,
+      doneAt: null,
       createdAt: new Date('2026-11-21T10:00:00Z'),
     }
 
@@ -164,6 +165,7 @@ describe('Ersetzen und Rückgängig gegen die Datenbank', () => {
         source: 'manuell',
         productId: null,
         isDone: false,
+        doneAt: null,
         createdAt: added.createdAt,
       },
     })

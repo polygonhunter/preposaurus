@@ -1,4 +1,4 @@
-// Schemas der Nachkaufen-Liste (#72, #73, #200, #202): Eingaben der Actions und das DTO der Seite.
+// Schemas der Nachkaufen-Liste (#72, #73, #200, #201, #202): Eingaben der Actions und das DTO der Seite.
 // Lücken und Vorschläge kommen schon gerechnet, die Oberfläche formatiert nur noch.
 import { z } from 'zod'
 import { RESTOCK_SOURCES } from '@/shared/config/constants'
@@ -36,18 +36,39 @@ export const removedRestockItemSchema = z.object({
   source: z.enum(RESTOCK_SOURCES),
   productId: id.nullable(),
   isDone: z.boolean(),
+  doneAt: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),
 })
 export type RemovedRestockItem = z.infer<typeof removedRestockItemSchema>
 
+/** Schlüssel einer Warengruppe, z. B. „wasser“ */
+const groupKey = z.string().trim().min(1).max(40)
+
+/** Lücke abhaken oder ausblenden (#201); die Fehlmenge rechnet der Server selbst. */
+export const gapStatusSchema = z.object({
+  groupKey,
+  status: z.enum(['erledigt', 'ausgeblendet']),
+})
+export type GapStatusChange = z.infer<typeof gapStatusSchema>
+
+const missingSchema = z.object({ value: z.number().positive(), unit: z.enum(['g', 'ml']) })
+
 const gapSchema = z.object({
   groupKey: z.string(),
   name: z.string(),
-  missing: z.object({ value: z.number().positive(), unit: z.enum(['g', 'ml']) }),
+  missing: missingSchema,
   days: z.number().nonnegative(),
   goalDays: z.number().int().positive(),
   /** „z. B. Nudeln, Reis“ aus den Lebensmittelarten der Warengruppe */
   examples: z.array(z.string()),
+})
+
+/** Ausgeblendete Lücke, die gerade verdeckt ist; „Wieder zeigen“ entfernt ihren Eintrag. */
+const hiddenGapSchema = z.object({
+  entryId: id,
+  groupKey: z.string(),
+  name: z.string(),
+  missing: missingSchema,
 })
 
 const day = z.iso.date()
@@ -69,6 +90,8 @@ const itemSchema = z.object({
   isDone: z.boolean(),
   /** Vorbelegung für „Erfassen“ (#195): Lebensmittelart, ohne Art das Produkt, sonst null */
   captureTarget: z.object({ kind: z.enum(['food-type', 'product']), id }).nullable(),
+  /** Nur bei einer abgehakten Lücke: die Fehlmenge beim Abhaken */
+  amount: missingSchema.nullable(),
 })
 
 /** @internal Nur Tests prüfen das DTO gegen das Schema, die Seite nutzt die Typen. */
@@ -76,6 +99,9 @@ export const restockListSchema = z.object({
   /** false ohne Ziel oder Empfehlung: Dann rechnet die App keine Lücken */
   isGoalCalculable: z.boolean(),
   gaps: z.array(gapSchema),
+  hiddenGaps: z.array(hiddenGapSchema),
+  /** Alle Warengruppen unter dem Ziel, auch abgehakte und ausgeblendete, wie auf der Übersicht */
+  belowGoalCount: z.number().int().nonnegative(),
   replace: z.array(itemSchema),
   suggestions: z.array(suggestionSchema),
   own: z.array(itemSchema),
@@ -86,5 +112,6 @@ export const restockListSchema = z.object({
 
 export type RestockListDto = z.infer<typeof restockListSchema>
 export type RestockGapDto = z.infer<typeof gapSchema>
+export type HiddenGapDto = z.infer<typeof hiddenGapSchema>
 export type RestockItemDto = z.infer<typeof itemSchema>
 export type RestockSuggestionDto = z.infer<typeof suggestionSchema>

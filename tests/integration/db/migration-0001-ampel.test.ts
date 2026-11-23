@@ -1,34 +1,11 @@
 // Migration 0001 auf alten Daten (#135): Vor dem neuen Ampel-CHECK hebt sie Orange unter 7 Tagen
 // auf 7 an, Gelb bei Bedarf mit. Dafür nur 0000 einspielen, alte Werte einfügen, dann 0001.
-import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import path from 'node:path'
+import { rm } from 'node:fs/promises'
 import { asc, eq, sql } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { householdSettings, households } from '../../../src/server/db/schema/household'
+import { migrationsUntil } from '../../helpers/migration-folder'
 import { createEmptyTestDb, type TestDb } from '../../helpers/test-db'
-
-const MIGRATIONS = 'db/migrations'
-const BASE_TAG = '0000_basis'
-
-interface Journal {
-  entries: { tag: string }[]
-}
-
-/** Ordner, der nur die Basis-Migration enthält, damit sich der Stand vor 0001 herstellen lässt. */
-async function baseOnlyFolder(): Promise<string> {
-  const folder = await mkdtemp(path.join(tmpdir(), 'preposaurus-0000-'))
-  await mkdir(path.join(folder, 'meta'))
-  const journalText = await readFile(path.join(MIGRATIONS, 'meta', '_journal.json'), 'utf8')
-  const journal = JSON.parse(journalText) as Journal
-  const entries = journal.entries.filter((entry) => entry.tag === BASE_TAG)
-  await writeFile(
-    path.join(folder, 'meta', '_journal.json'),
-    JSON.stringify({ ...journal, entries }),
-  )
-  await copyFile(path.join(MIGRATIONS, `${BASE_TAG}.sql`), path.join(folder, `${BASE_TAG}.sql`))
-  return folder
-}
 
 // Orange/Gelb vor der Migration → erwartet danach
 const CASES = [
@@ -44,7 +21,7 @@ describe('Migration 0001: Ampel-Schwellen anheben', () => {
 
   beforeAll(async () => {
     testDb = await createEmptyTestDb()
-    folder = await baseOnlyFolder()
+    folder = await migrationsUntil('0000_basis')
     await testDb.migrate(folder)
     for (const { name, before } of CASES) {
       const [orange, yellow] = before
