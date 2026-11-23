@@ -12,10 +12,13 @@ import { isEmptyStock } from '@/features/inventory/ui/stock-format'
 import { CAPTURE_PATH, isHitMode, readStockParams } from '@/features/inventory/ui/stock-paths'
 import { requirePageHousehold } from '@/server/auth/household'
 import { EmptyState } from '@/shared/ui/EmptyState'
+import { OfflineNotice } from '@/shared/ui/OfflineNotice'
 import { PageHeader } from '@/shared/ui/PageHeader'
 
 // Vorrat Ebene 1 bzw. Treffermodus (UX-Konzept §8.3, #44). Suche und Filter stehen in der Adresse.
+// Ohne Verbindung zeigt der Service Worker den zuletzt geladenen Stand (M10-02).
 export default async function StockPage({ searchParams }: PageProps<'/vorrat'>) {
+  const offlineNotice = <OfflineNotice loadedAt={new Date().toISOString()} />
   const { householdId } = await requirePageHousehold()
   const parsed = stockFilterSchema.safeParse(readStockParams(await searchParams))
   const filter = parsed.success ? parsed.data : stockFilterSchema.parse({})
@@ -25,6 +28,7 @@ export default async function StockPage({ searchParams }: PageProps<'/vorrat'>) 
     return (
       <ConsumeProvider>
         <PageHeader title="Vorrat" />
+        {offlineNotice}
         <StockSearchBar filter={filter} options={search.options} />
         <StockStatusChips filter={filter} counts={search.counts} />
         <ActiveFilters filter={filter} options={search.options} />
@@ -40,6 +44,7 @@ export default async function StockPage({ searchParams }: PageProps<'/vorrat'>) 
     return (
       <>
         <PageHeader title="Vorrat" />
+        {offlineNotice}
         <EmptyState
           text="Noch ist nichts eingelagert. Mit dem ersten Produkt füllt sich die Liste."
           action={{ href: CAPTURE_PATH, label: 'Produkt erfassen' }}
@@ -50,6 +55,7 @@ export default async function StockPage({ searchParams }: PageProps<'/vorrat'>) 
   return (
     <>
       <PageHeader title="Vorrat" />
+      {offlineNotice}
       <StockSearchBar filter={filter} options={options} />
       <StockStatusChips filter={filter} />
       <GroupList groups={overview.groups} />

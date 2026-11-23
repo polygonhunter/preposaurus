@@ -8,11 +8,14 @@
     "node": ">=24"
   },
   "scripts": {
+    "predev": "node scripts/build-sw.ts",
     "dev": "next dev",
+    "prebuild": "node scripts/build-sw.ts",
     "build": "next build",
     "start": "next start",
     "start:standalone": "node scripts/start-standalone.ts",
     "build:cli": "node scripts/build-cli.ts",
+    "icons": "node scripts/build-icons.ts",
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "next typegen && eslint . --max-warnings=0",
     "lint:budget": "eslint src --rule \"max-lines: [warn, {max: 200, skipBlankLines: true, skipComments: true}]\"",

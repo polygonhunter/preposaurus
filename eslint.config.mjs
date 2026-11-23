@@ -79,5 +79,7 @@ export default defineConfig([
     'db/migrations/**',
     'prototypes/**',
     'tests/lint/fixtures/**',
+    // Erzeugt aus src/shared/sw (scripts/build-sw.ts)
+    'public/sw.js',
   ]),
 ])

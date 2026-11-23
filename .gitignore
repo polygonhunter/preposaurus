@@ -20,6 +20,9 @@ dist/
 # Von Next erzeugt
 next-env.d.ts
 
+# Service Worker, erzeugt von scripts/build-sw.ts
+public/sw.js
+
 # Testberichte
 coverage/
 playwright-report/

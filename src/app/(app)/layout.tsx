@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { requireUser } from '@/server/auth/guards'
+import { OfflineWriteGuard } from '@/shared/ui/OfflineWriteGuard'
 import { Sidebar } from '@/shared/ui/Sidebar'
 import { SkipLink } from '@/shared/ui/SkipLink'
 import { TabBar } from '@/shared/ui/TabBar'
@@ -27,6 +28,7 @@ export default async function AppLayout({ children }: AppLayoutProps) {
         {children}
       </main>
       <TabBar />
+      <OfflineWriteGuard />
     </div>
   )
 }
