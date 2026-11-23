@@ -2,8 +2,9 @@
 // haushalt_id (#133): Eigene Arten und Lagerorte nur aus dem eigenen Haushalt, System-Arten und
 // Behälter (System-Stammdaten) für alle. Ausgeblendetes steht nicht zur Wahl (#126, #142).
 import 'server-only'
-import { and, asc, desc, eq, isNull, or } from 'drizzle-orm'
+import { and, asc, desc, eq } from 'drizzle-orm'
 import type { Database } from '@/server/db/connection'
+import { loadOwnSearchTerms } from '@/server/db/queries/own-search-terms'
 import { categories, containers, storageLocations } from '@/server/db/schema/catalog'
 import { captures } from '@/server/db/schema/confirmed-captures'
 import { foodTypes } from '@/server/db/schema/food-types'
@@ -16,6 +17,7 @@ import type {
   NamedChoice,
 } from '../domain/capture-options'
 import { loadKnownProducts } from './known-products'
+import { isSelectableFoodType } from './visible-food-types'
 
 /** So viele Erfassungen reichen für „Zuletzt genutzt“ und den letzten Lagerort. */
 const RECENT_CAPTURES = 20
@@ -34,17 +36,13 @@ async function loadFoodTypes(db: Database, householdId: string): Promise<FoodTyp
     .from(foodTypes)
     .innerJoin(categories, eq(categories.id, foodTypes.categoryId))
     .innerJoin(productGroups, eq(productGroups.id, categories.productGroupId))
-    .where(
-      and(
-        or(isNull(foodTypes.householdId), eq(foodTypes.householdId, householdId)),
-        eq(foodTypes.isHidden, false),
-        eq(categories.isHidden, false),
-      ),
-    )
+    .where(isSelectableFoodType(db, householdId))
     .orderBy(asc(productGroups.sortOrder), asc(foodTypes.name))
+  const searchTerms = await loadOwnSearchTerms(db, householdId)
   return rows.map((row) => ({
     ...row,
     kcalPer100: row.kcalPer100 === null ? null : Number(row.kcalPer100),
+    searchTerms: searchTerms.get(row.id) ?? [],
   }))
 }
 

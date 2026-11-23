@@ -13,6 +13,7 @@ import { SystemSettingsGroup } from '@/features/settings/ui/SystemSettingsGroup'
 import { requirePageHousehold } from '@/server/auth/household'
 import {
   ACCOUNT_PATH,
+  CATEGORIES_PATH,
   GOAL_PATH,
   MEMBERS_PATH,
   RULES_PATH,
@@ -70,6 +71,7 @@ export default async function SettingsPage() {
           trailing={locationCount(visibleLocations.length)}
           action={{ href: STORAGE_LOCATIONS_PATH }}
         />
+        <Row title="Kategorien und Lebensmittelarten" action={{ href: CATEGORIES_PATH }} />
         <Row
           title="Vorrat und Regeln"
           trailing={household.rules.stillGoodCounts ? '„Noch gut“ zählt' : undefined}

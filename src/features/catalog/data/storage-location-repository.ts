@@ -7,8 +7,7 @@ import type { StorageLocation } from '@/features/catalog/domain/storage-location
 import type { Database } from '@/server/db/connection'
 import { storageLocations } from '@/server/db/schema/catalog'
 import { products } from '@/server/db/schema/inventory'
-
-type RemoveOutcome = 'removed' | 'in-use' | 'not-found'
+import type { RemoveOutcome } from './remove-outcome'
 
 export interface StorageLocationRepository {
   /** Sichtbare und ausgeblendete Orte in ihrer Reihenfolge, mit Zahl der Produkte */

@@ -1,4 +1,5 @@
-// Stammdaten als Admin (#77, #78): Lagerorte und Ampel-Schwellen. Alle Projekte teilen sich einen
+// Stammdaten als Admin (#77, #78, #76, #126): Lagerorte, Ampel-Schwellen, Kategorien und
+// Lebensmittelarten. Alle Projekte teilen sich einen
 // Haushalt, deshalb ändert nur das Projekt „desktop“ etwas und stellt es danach wieder her.
 import { expect, test, type Page } from '@playwright/test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
@@ -108,4 +109,98 @@ test('Ampel-Schwellen speichern', async ({ page }, info) => {
   await expect(ampel.getByText('Gespeichert.')).toBeVisible()
   await page.reload()
   await expect(page.getByLabel('Orange, dringend: Tage vor dem MHD')).toHaveValue('28')
+})
+
+const captureSearch = (page: Page) =>
+  page.getByRole('searchbox', { name: 'Lebensmittelart suchen' })
+
+test('eigene Kategorie und Art anlegen, beim Erfassen finden, ausblenden und löschen', async ({
+  page,
+}, info) => {
+  onlyOnDesktop(info.project.name)
+  await page.goto('/einstellungen')
+  await page.getByRole('link', { name: /Kategorien und Lebensmittelarten/ }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Kategorien' })).toBeVisible()
+  await expectAccessibleLayout(page)
+
+  await page.getByRole('link', { name: 'Neue Kategorie' }).click()
+  await page.getByLabel('Name der Kategorie').fill('Testvorräte')
+  await page.getByText('Sonstiges', { exact: true }).click()
+  await page.getByRole('button', { name: 'Anlegen' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Testvorräte' })).toBeVisible()
+  await expectAccessibleLayout(page)
+
+  // Ohne Kategorie: Fehler an der Wahl, der Fokus springt hin
+  await page.goto('/einstellungen/lebensmittelarten/neu')
+  await page.getByLabel('Name der Lebensmittelart').fill('Dinkelpops')
+  await page.getByRole('button', { name: 'Anlegen' }).click()
+  const picker = page.getByRole('button', { name: /^Kategorie/ })
+  await expect(picker).toHaveAccessibleDescription('Bitte eine Kategorie wählen.')
+  await expect(picker).toBeFocused()
+
+  await picker.click()
+  const sheet = page.getByRole('dialog', { name: 'Kategorie wählen' })
+  await sheet.getByRole('searchbox', { name: 'Kategorie suchen' }).fill('testvor')
+  await expectAccessibleLayout(page)
+  await sheet.getByRole('button', { name: /Testvorräte/ }).click()
+  await expect(picker).toContainText('Sonstiges › Testvorräte')
+  await page.getByLabel('Suchwörter (freiwillig)').fill('Frühstücksknusper, Pops')
+  await page.getByRole('button', { name: 'Anlegen' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Dinkelpops' })).toBeVisible()
+  await expectAccessibleLayout(page)
+
+  await page.goto('/neu/manuell')
+  await captureSearch(page).fill('knusper')
+  await expect(page.getByRole('button', { name: /^Dinkelpops/ })).toBeVisible()
+
+  await page.goto('/einstellungen/lebensmittelarten?suche=dinkelpops')
+  await page
+    .getByRole('link', { name: /Dinkelpops/ })
+    .first()
+    .click()
+  await page.getByRole('button', { name: 'Ausblenden' }).click()
+  await expect(page.getByRole('button', { name: 'Wieder einblenden' })).toBeVisible()
+  await page.goto('/neu/manuell')
+  await captureSearch(page).fill('knusper')
+  await expect(page.getByRole('button', { name: /^Dinkelpops/ })).toHaveCount(0)
+
+  await page.goto('/einstellungen/lebensmittelarten?suche=dinkelpops')
+  await page
+    .getByRole('link', { name: /Dinkelpops/ })
+    .first()
+    .click()
+  await page.getByRole('button', { name: 'Lebensmittelart löschen' }).click()
+  await page
+    .getByRole('dialog', { name: '„Dinkelpops“ löschen?' })
+    .getByRole('button', { name: 'Löschen' })
+    .click()
+  await expect(page).toHaveURL(/\/einstellungen\/lebensmittelarten$/)
+
+  await page.goto('/einstellungen/kategorien')
+  await page.getByRole('link', { name: /Testvorräte/ }).click()
+  await page.getByRole('button', { name: 'Kategorie löschen' }).click()
+  await page
+    .getByRole('dialog', { name: '„Testvorräte“ löschen?' })
+    .getByRole('button', { name: 'Löschen' })
+    .click()
+  await expect(page).toHaveURL(/\/einstellungen\/kategorien$/)
+  await expect(page.getByRole('link', { name: /Testvorräte/ })).toHaveCount(0)
+})
+
+test('Arten der Startliste lassen sich suchen und nur ausblenden', async ({ page }) => {
+  await page.goto('/einstellungen/lebensmittelarten')
+  await page.getByRole('searchbox', { name: 'Lebensmittelart suchen' }).fill('Hirse')
+  await page.getByRole('searchbox', { name: 'Lebensmittelart suchen' }).press('Enter')
+  await expect(page).toHaveURL(/suche=Hirse/)
+  await expectAccessibleLayout(page)
+  await page
+    .getByRole('list', { name: 'Treffer' })
+    .getByRole('link', { name: /^Hirse/ })
+    .click()
+
+  await expect(page.getByText('Arten der Startliste lassen sich nur ausblenden.')).toBeVisible()
+  await expect(page.getByLabel('Name der Lebensmittelart')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Ausblenden' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Lebensmittelart löschen' })).toHaveCount(0)
+  await expectAccessibleLayout(page)
 })

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { normalizeSearchText, searchFoodTypes } from './food-type-search'
+import { searchFoodTypes } from './food-type-search'
 
 const foodType = (
   key: string,
@@ -35,19 +35,6 @@ const LIST = [
 
 const names = (query: string, recentIds: readonly string[] = []) =>
   searchFoodTypes(LIST, query, { recentIds }).map((type) => type.name)
-
-describe('normalizeSearchText', () => {
-  it('ignoriert Groß- und Kleinschreibung, Umlaute, ß und Leerraum', () => {
-    expect(normalizeSearchText('  Äpfel ')).toBe('apfel')
-    expect(normalizeSearchText('Weißkohl')).toBe('weisskohl')
-  })
-
-  it('liest ae, oe und ue wie Umlaute', () => {
-    expect(normalizeSearchText('Knaecke')).toBe(normalizeSearchText('Knäcke'))
-    expect(normalizeSearchText('Oel')).toBe(normalizeSearchText('Öl'))
-    expect(normalizeSearchText('Gemuese')).toBe(normalizeSearchText('Gemüse'))
-  })
-})
 
 describe('searchFoodTypes', () => {
   it('liefert ohne Suchtext nichts', () => {
@@ -115,5 +102,18 @@ describe('searchFoodTypes', () => {
 
   it('liefert nichts, wenn nichts passt', () => {
     expect(names('xylophon')).toEqual([])
+  })
+})
+
+describe('eigene Suchwörter (#126)', () => {
+  it('findet eine eigene Art über ihr Suchwort', () => {
+    const own = {
+      ...foodType('eigen_dinkelpops', 'Dinkelpops'),
+      searchTerms: ['Frühstücksknusper'],
+    }
+
+    expect(searchFoodTypes([...LIST, own], 'knusper').map((type) => type.key)).toEqual([
+      'eigen_dinkelpops',
+    ])
   })
 })

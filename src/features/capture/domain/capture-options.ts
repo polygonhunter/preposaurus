@@ -14,6 +14,8 @@ export interface FoodTypeChoice {
   productGroupName: string
   /** Richtwert je 100 g bzw. ml, gilt ohne eigene Nährwerte als „ca.“ (E-5) */
   kcalPer100: number | null
+  /** Eigene Suchwörter (nur eigene Arten, #126) */
+  searchTerms: string[]
 }
 
 export interface NamedChoice {
