@@ -6,8 +6,10 @@ import {
 } from '../../../../tests/helpers/fake-reminder-repository'
 import { createFakeStockReader, product, unit } from '../../../../tests/helpers/fake-stock-reader'
 import { createMemoryLogger } from '../../../../tests/helpers/memory-logger'
+import { toCalendarDay } from '@/shared/lib/dates'
 import type { ReminderMessage } from '../domain/message'
 import { noPush, type ReminderPush } from './reminder-push'
+import type { ReminderGoalFacts } from './reminder-stock'
 import { sendDueReminders } from './send-due-reminders'
 
 const householdId = 'haushalt-a'
@@ -21,13 +23,20 @@ interface SetUpOptions {
   addresses?: string[]
   urgentSentAt?: Date
   addedAt?: Date
+  units?: ReturnType<typeof unit>[]
+  goals?: ReminderGoalFacts
+}
+
+const noGoal: ReminderGoalFacts = {
+  loadGoalStatus: () => Promise.resolve(null),
+  countOpenRestockItems: () => Promise.resolve(0),
 }
 
 function setUp(options: SetUpOptions = {}) {
   const reader = createFakeStockReader({
     householdId,
     products: [product({ id: 'nudeln' })],
-    units: [dueSoon, unit('nudeln', null)],
+    units: options.units ?? [dueSoon, unit('nudeln', null)],
   })
   const loadUnits = vi.spyOn(reader, 'loadUnits')
   const repository = createFakeReminderRepository([
@@ -45,6 +54,7 @@ function setUp(options: SetUpOptions = {}) {
   const deps = {
     reader,
     repository,
+    goals: options.goals ?? noGoal,
     push: options.push ?? noPush,
     mail,
     appUrl: 'https://haushalt.beispiel.ts.net',
@@ -142,5 +152,35 @@ describe('sendDueReminders', () => {
     expect(mail.sent).toEqual([])
     expect(repository.marks).toEqual([])
     expect(memory.messages()).toEqual(['Erinnerung hatte keinen Empfänger'])
+  })
+
+  it('schickt die Wochenübersicht auch ohne fällige Packungen, wenn das Ziel offen ist (#186)', async () => {
+    const { push, sent } = pushTo(1)
+    const asked: string[] = []
+    const goals: ReminderGoalFacts = {
+      loadGoalStatus: ({ householdId: id }) => {
+        asked.push(id)
+        return Promise.resolve({
+          suppliedDays: 6.4,
+          targetDays: 10,
+          targetDate: toCalendarDay('2027-03-01'),
+        })
+      },
+      countOpenRestockItems: (id) => {
+        asked.push(id)
+        return Promise.resolve(3)
+      },
+    }
+    const { deps } = setUp({ push, units: [], goals })
+
+    await sendDueReminders(deps, saturdayAfterTen)
+
+    expect(sent.map((message) => message.kind)).toEqual(['weekly-summary'])
+    expect(sent[0]?.lines).toEqual([
+      'Nachkaufen: 3 Einträge offen.',
+      'Ziel 01.03.2027: 6 von 10 Tagen.',
+      'Bei 1 Packung fehlt noch das Datum.',
+    ])
+    expect(asked).toEqual([householdId, householdId])
   })
 })

@@ -9,7 +9,7 @@ type RestockHintProps = Readonly<{ restock: OverviewRestock }>
 
 const HEADING_ID = 'nachkaufen'
 
-// Nachkaufen nur als kurzer Hinweis und nur, wenn es etwas gibt (#70). Die Liste selbst kommt mit M8.
+// Nachkaufen nur als kurzer Hinweis und nur, wenn es etwas gibt (#70), die Liste steht auf /nachkaufen.
 export function RestockHint({ restock }: RestockHintProps) {
   const text = restockText(restock)
   if (text === null) return null
