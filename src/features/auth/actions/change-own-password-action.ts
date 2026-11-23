@@ -6,19 +6,33 @@ import { headers } from 'next/headers'
 import { z } from 'zod'
 import { requireUser } from '@/server/auth/guards'
 import { firstMessages, readFormText } from '@/shared/lib/form-data'
-import { changeOwnPassword, type ChangePasswordError } from '../application/manage-profile'
+import { changeOwnPassword, type ChangePasswordError } from '../application/change-own-password'
 import { profileServices } from '../application/profile-services'
 import { changePasswordSchema } from '../schemas'
 import { SIGNED_OUT, type ProfileActionState } from './profile-action-state'
 import { PASSWORD_PROBLEM_MESSAGES } from './user-action-messages'
 
-function errorState(error: ChangePasswordError): ProfileActionState {
-  const errors =
-    error.kind === 'wrong-password'
-      ? { currentPassword: 'Das bisherige Passwort stimmt nicht.' }
-      : { newPassword: PASSWORD_PROBLEM_MESSAGES[error.problem] }
-  return { status: 'error', message: null, errors }
+const minutesText = (minutes: number) =>
+  `${String(minutes)} ${minutes === 1 ? 'Minute' : 'Minuten'}`
+
+function fieldErrors(error: ChangePasswordError): NonNullable<ProfileActionState['errors']> {
+  switch (error.kind) {
+    case 'wrong-password':
+      return { currentPassword: 'Das bisherige Passwort stimmt nicht.' }
+    case 'throttled':
+      return {
+        currentPassword: `Zu viele Versuche. Bitte in ${minutesText(error.minutes)} noch einmal.`,
+      }
+    case 'weak-password':
+      return { newPassword: PASSWORD_PROBLEM_MESSAGES[error.problem] }
+  }
 }
+
+const errorState = (error: ChangePasswordError): ProfileActionState => ({
+  status: 'error',
+  message: null,
+  errors: fieldErrors(error),
+})
 
 export async function changeOwnPasswordAction(
   _previous: ProfileActionState,

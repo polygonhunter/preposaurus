@@ -1,12 +1,13 @@
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { changeOwnPassword } from '../../../src/features/auth/application/change-own-password'
 import {
-  changeOwnPassword,
   getOwnProfile,
   saveOwnCheckIn,
   updateOwnProfile,
 } from '../../../src/features/auth/application/manage-profile'
 import type { ProfileServices } from '../../../src/features/auth/application/profile-services'
+import { createSignInLockRepository } from '../../../src/features/auth/data/sign-in-lock-repository'
 import { profileSchema } from '../../../src/features/auth/schemas'
 import type { Auth } from '../../../src/server/auth/auth'
 import { readSession } from '../../../src/server/auth/session'
@@ -31,6 +32,7 @@ describe('Mein Konto (#75, #89)', () => {
   const services = (isMailConfigured = true): ProfileServices => ({
     db: testDb.db,
     auth,
+    locks: createSignInLockRepository(testDb.db),
     isMailConfigured,
     now: () => NOW,
   })
@@ -93,6 +95,24 @@ describe('Mein Konto (#75, #89)', () => {
     const result = await changeOwnPassword(services(), { userId, headers: requestHeaders, input })
 
     expect(result).toEqual({ ok: false, error: { kind: 'wrong-password' } })
+    await expect(signIn()).resolves.toBeDefined()
+  })
+
+  it('bremst nach fünf falschen bisherigen Passwörtern, auch das richtige', async () => {
+    const { requestHeaders } = await signIn()
+    const attempt = (currentPassword: string) =>
+      changeOwnPassword(services(), {
+        userId,
+        headers: requestHeaders,
+        input: { currentPassword, newPassword: NEW_PASSWORD, endOtherSessions: false },
+      })
+
+    for (let count = 0; count < 5; count += 1) await attempt('falsch-falsch')
+
+    expect(await attempt(OLD_PASSWORD)).toEqual({
+      ok: false,
+      error: { kind: 'throttled', minutes: 1 },
+    })
     await expect(signIn()).resolves.toBeDefined()
   })
 
