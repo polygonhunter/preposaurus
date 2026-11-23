@@ -4,7 +4,7 @@ import { addMonths, daysBetween, type CalendarDay } from '@/shared/lib/dates'
 /** Sicherheit, die die KI zu ihrem Vorschlag angibt (Schema C). */
 export type Confidence = 'high' | 'medium' | 'low'
 
-type ReviewReason = 'in-past' | 'far-from-typical' | 'too-far-ahead' | 'low-confidence'
+export type ReviewReason = 'in-past' | 'far-from-typical' | 'too-far-ahead' | 'low-confidence'
 
 /** Ein MHD-Chip: nicht lesbar (gelb, kein Datum), passt, oder „bitte prüfen“ mit Gründen. */
 export type BestBeforeSuggestion =

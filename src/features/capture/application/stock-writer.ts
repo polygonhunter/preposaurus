@@ -3,6 +3,7 @@
 import 'server-only'
 import type {
   CaptureLookup,
+  DraftAdoption,
   FoodTypeRef,
   NewCapture,
   NewProductRow,
@@ -23,6 +24,11 @@ export interface StockTransaction {
   /** Gibt die neue Produkt-ID zurück */
   insertProduct: (product: NewProductRow) => Promise<string>
   insertUnits: (rows: NewUnitRows) => Promise<void>
+  /**
+   * Entwurfsfotos werden fest und hängen am Produkt, danach ist der Entwurf weg. Nur ein Entwurf
+   * des Nutzers zählt, ein fremder oder schon verbrauchter ändert nichts.
+   */
+  adoptDraft: (adoption: DraftAdoption) => Promise<void>
 }
 
 export interface StockWriter {

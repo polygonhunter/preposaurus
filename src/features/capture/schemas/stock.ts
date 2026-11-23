@@ -63,6 +63,8 @@ export const createStockSchema = z.object({
   /** Idempotenz-Schlüssel: einmal je Erfassung auf dem Gerät erzeugt */
   captureId: z.uuid(),
   method: z.enum(['photo', 'manual']),
+  /** Foto-Weg (#66): Die Fotos dieses Entwurfs werden fest, danach ist der Entwurf weg. */
+  draftId: z.uuid().nullable().default(null),
   product: z.discriminatedUnion('kind', [
     z.object({ kind: z.literal('existing'), productId: z.uuid() }),
     newProductSchema,

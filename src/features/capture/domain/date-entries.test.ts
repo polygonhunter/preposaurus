@@ -68,3 +68,13 @@ describe('changeDateCount', () => {
     expect(changed).toEqual([{ bestBefore: september, count: 2 }])
   })
 })
+
+describe('Schätzung auf Wahl (#124)', () => {
+  it('sagt „geschätzt“ dazu und zählt nicht mit einem gelesenen Datum zusammen', () => {
+    const estimated = { ...september, isEstimated: true }
+
+    const entries = addDateEntry(addDateEntry([], september), estimated)
+
+    expect(entries.map(dateEntryLabel)).toEqual(['09/2027', '09/2027 (geschätzt)'])
+  })
+})

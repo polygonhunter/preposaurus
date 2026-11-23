@@ -5,6 +5,8 @@
 /** Lebensmittelart mit Pfad. Kategorie und Warengruppe werden nur angezeigt, nie gewählt (#110). */
 export interface FoodTypeChoice {
   id: string
+  /** Schlüssel, unter dem die KI eine Art vorschlägt (#110) */
+  key: string
   name: string
   categoryName: string
   productGroupName: string
@@ -17,9 +19,14 @@ export interface NamedChoice {
   name: string
 }
 
+/** Behälter mit Schlüssel, unter dem die KI ihn vorschlägt (Schema A) */
+export interface ContainerChoice extends NamedChoice {
+  key: string
+}
+
 export interface CaptureOptions {
   foodTypes: FoodTypeChoice[]
-  containers: NamedChoice[]
+  containers: ContainerChoice[]
   storageLocations: NamedChoice[]
   /** Lagerort der letzten Erfassung des Nutzers, nur wenn er noch auswählbar ist */
   lastStorageLocationId: string | null

@@ -46,6 +46,8 @@ export interface StockDraft {
   /** Idempotenz-Schlüssel, wird zur id der Erfassung */
   captureId: string
   method: CaptureMethod
+  /** Entwurf des Foto-Wegs, dessen Fotos beim Speichern zum Produkt gehören (#66), sonst null */
+  draftId: string | null
   product: ProductChoice
   units: readonly UnitEntry[]
 }

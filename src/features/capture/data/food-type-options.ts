@@ -32,3 +32,16 @@ export async function loadFoodTypeOptions(
     )
     .orderBy(asc(foodTypes.sortOrder), asc(foodTypes.name))
 }
+
+/** Eine Art des Haushalts als Grundlage einer Schätzung (#124), sonst null. */
+export async function findFoodTypeOption(
+  db: Database,
+  householdId: string,
+  foodTypeId: string,
+): Promise<FoodTypeOption | null> {
+  const [row] = await db
+    .select({ key: foodTypes.key, name: foodTypes.name })
+    .from(foodTypes)
+    .where(and(eq(foodTypes.id, foodTypeId), ownOrSystem(foodTypes.householdId, householdId)))
+  return row ?? null
+}

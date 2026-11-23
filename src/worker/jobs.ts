@@ -1,14 +1,18 @@
 // Alle Jobs des Workers mit ihren Zeitplänen (Europe/Berlin). Jeder Job ruft einen Use-Case auf,
 // eigene Logik steht hier nicht.
 import { z } from 'zod'
+import { cleanUpCaptures } from '@/features/capture/application/clean-up-captures'
 import { reminderStores } from '@/features/reminders/application/reminder-services'
 import type { ReminderPush } from '@/features/reminders/application/reminder-push'
 import type { CheckInCadence } from '@/features/reminders/application/reminder-repository'
 import { sendCheckInMails } from '@/features/reminders/application/send-check-in-mails'
 import { sendDueReminders } from '@/features/reminders/application/send-due-reminders'
+import { getDb } from '@/server/db/get-db'
 import { defineJob, type Job } from '@/server/jobs/job-definition'
 import type { MailSender } from '@/server/notify/mail-sender'
+import { createPhotoStorage } from '@/server/storage/create-photo-storage'
 import { CHECK_IN_CADENCES } from '@/shared/config/constants'
+import { loadEnv } from '@/shared/config/env'
 
 export interface WorkerDeps {
   mail: MailSender
@@ -31,15 +35,18 @@ const CHECK_IN_CRON = {
 // Ein gescheiterter Lauf wird nicht wiederholt, der nächste kommt ohnehin in 10 Minuten.
 const NO_RETRY = { limit: 0, delaySeconds: 0 }
 
-/** Tägliches Aufräumen alter Entwürfe und verwaister Fotos (M6-12). */
+/**
+ * Tägliches Aufräumen alter Entwürfe und verwaister Fotos (M6-12, #66). Ohne Bildverarbeitung
+ * (sharp): Aufräumen braucht nur DB und Foto-Speicher.
+ */
 const captureCleanup = defineJob({
   name: 'capture-cleanup',
   schema: noPayload,
   schedule: { cron: NIGHTLY_CLEANUP, payload: {} },
-  // TODO(#66): Use-Case zum Aufräumen aufrufen, sobald es ihn gibt. Bis dahin nur der Zeitplan.
-  run: (_payload, { logger }) => {
-    logger.debug('Aufräumen ist noch nicht eingebaut (#66)')
-    return Promise.resolve()
+  run: async (_payload, { logger }) => {
+    const deps = { db: await getDb(), storage: createPhotoStorage(loadEnv()) }
+    const result = await cleanUpCaptures(deps, new Date())
+    logger.info('Erfassung aufgeräumt', { ...result })
   },
 })
 

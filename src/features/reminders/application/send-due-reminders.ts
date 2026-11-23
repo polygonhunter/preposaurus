@@ -12,10 +12,15 @@ import type { Logger } from '@/shared/lib/logger'
 import { dueReminderKind, planReminder, type ReminderPlan } from '../domain/plan-reminder'
 import type { HouseholdReminderState, ReminderRepository } from './reminder-repository'
 import type { ReminderPush } from './reminder-push'
-import { loadReminderStock, type ReminderStockDeps } from './reminder-stock'
+import {
+  loadWeeklySummaryInput,
+  type ReminderGoalFacts,
+  type ReminderStockDeps,
+} from './reminder-stock'
 
 export interface ReminderDeps extends ReminderStockDeps {
   repository: ReminderRepository
+  goals: ReminderGoalFacts
   push: ReminderPush
   mail: MailSender
   /** Adresse der App für den Link in der Mail (APP_URL), ohne sie kein Link */
@@ -51,7 +56,7 @@ async function remindHousehold(deps: ReminderDeps, state: HouseholdReminderState
   const { householdId } = state
   const timing = { ...state, now }
   if (dueReminderKind(timing) === null) return
-  const stock = await loadReminderStock(deps, householdId, todayInBerlin(now))
+  const stock = await loadWeeklySummaryInput(deps, householdId, todayInBerlin(now))
   const plan = planReminder({ ...timing, stock })
   if (plan === null) return
   const delivery = await deliver(deps, householdId, plan)

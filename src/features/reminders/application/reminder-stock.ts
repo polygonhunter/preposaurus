@@ -1,6 +1,7 @@
 // Der Vorrat eines Haushalts, so wie die Erinnerungen ihn brauchen: Einträge von Bald fällig
 // (getDueUnits) mit dem Erfassungszeitpunkt der neuesten Packung und die Zahl „Datum fehlt“.
 import 'server-only'
+import type { GoalStatus } from '@/features/supply/application/get-goal-status'
 import { getDueUnits } from '@/features/inventory/application/get-due-units'
 import type { StockReader } from '@/features/inventory/application/stock-reader'
 import type { DueGroup } from '@/features/inventory/domain/due-bundles'
@@ -13,6 +14,12 @@ import type { ReminderRepository } from './reminder-repository'
 export interface ReminderStockDeps {
   reader: StockReader
   repository: Pick<ReminderRepository, 'loadAddedTimes' | 'countMissingDates'>
+}
+
+/** Ziel und Nachkaufen für die Wochenübersicht, aus den Use-Cases von supply und restock. */
+export interface ReminderGoalFacts {
+  loadGoalStatus: (input: { householdId: string; today: CalendarDay }) => Promise<GoalStatus | null>
+  countOpenRestockItems: (householdId: string) => Promise<number>
 }
 
 // „In 3 Monaten“ ist noch weit weg und kommt in keiner Erinnerung vor.
@@ -51,18 +58,34 @@ async function loadDueItems(deps: ReminderStockDeps, householdId: string, today:
   )
 }
 
-/**
- * Grundlage für Wochenübersicht und „Dringend“. Ziel und Nachkaufen fehlen noch: Die Übersicht
- * (M7) und die Nachkaufen-Liste (M8) liefern sie, sobald es ihre Use-Cases gibt (#186).
- */
+type ReminderStock = Pick<WeeklySummaryInput, 'dueItems' | 'missingDateCount'>
+
+/** Bald fällig und „Datum fehlt“, Grundlage für „Dringend“ und die Check-in-Mail. */
 export async function loadReminderStock(
   deps: ReminderStockDeps,
   householdId: string,
   today: CalendarDay,
-): Promise<WeeklySummaryInput> {
+): Promise<ReminderStock> {
   const [dueItems, missingDateCount] = await Promise.all([
     loadDueItems(deps, householdId, today),
     deps.repository.countMissingDates(householdId),
   ])
-  return { dueItems, missingDateCount, goal: null, openRestockCount: 0 }
+  return { dueItems, missingDateCount }
+}
+
+/**
+ * Grundlage der Wochenübersicht: der Vorrat plus Stand des Ziels (wie die Übersicht, M7) und offene
+ * Einträge der Nachkaufen-Liste (M8, #186).
+ */
+export async function loadWeeklySummaryInput(
+  deps: ReminderStockDeps & { goals: ReminderGoalFacts },
+  householdId: string,
+  today: CalendarDay,
+): Promise<WeeklySummaryInput> {
+  const [stock, goal, openRestockCount] = await Promise.all([
+    loadReminderStock(deps, householdId, today),
+    deps.goals.loadGoalStatus({ householdId, today }),
+    deps.goals.countOpenRestockItems(householdId),
+  ])
+  return { ...stock, goal, openRestockCount }
 }
