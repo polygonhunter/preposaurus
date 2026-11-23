@@ -83,6 +83,14 @@
   }
 }
 
+/* Sehr niedrig, z. B. Duo außen quer (368 px hoch): kleinere Kopfzeile, das Dock bleibt (M12-01). */
+@media (height < 500px) and (width < 900px) {
+  :root {
+    --text-title: 28px;
+    --text-title--line-height: 34px;
+  }
+}
+
 @layer base {
   :root {
     color-scheme: light dark;

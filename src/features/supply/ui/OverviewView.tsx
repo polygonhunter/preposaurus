@@ -16,7 +16,9 @@ const EMPTY_STOCK = {
 }
 
 // Übersicht (DESIGN_SYSTEM §7, UX-Konzept §8.1) in der Reihenfolge der Priorität: Heute versorgt mit
-// Ziel und nächstem Schritt, Bald fällig, Nachkaufen, Warengruppen, Haushalt. Ab „weit“ zweispaltig.
+// Ziel und nächstem Schritt, Bald fällig, Nachkaufen, Warengruppen, Haushalt. Ab „breit“ eine Spalte
+// mit begrenzter Breite, damit Balken und Zeilen lesbar bleiben. Ab „weit“ zweispaltig (#91): links
+// Lage und Bald fällig, rechts Nachkaufen, Warengruppen und Haushalt, zusammen höchstens 1240 px.
 export function OverviewView({ overview }: OverviewViewProps) {
   if (!overview.hasStock) {
     return (
@@ -27,7 +29,7 @@ export function OverviewView({ overview }: OverviewViewProps) {
     )
   }
   return (
-    <div className="weit:grid weit:grid-cols-2 weit:items-start">
+    <div className="breit:max-w-[760px] weit:grid weit:max-w-[1240px] weit:grid-cols-2 weit:items-start">
       <div>
         <SupplyBlock overview={overview} />
         <DueSection due={overview.due} />
