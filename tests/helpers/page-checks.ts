@@ -15,7 +15,17 @@ async function waitForSettledAnimations(page: Page): Promise<void> {
   })
 }
 
+// Feste bzw. klebende Leisten (Tab-Leiste, „1 entnehmen“ im Detail) liegen weiter oben über dem
+// Inhalt. axe zählt die halb verdeckte Zeile darunter als zu kleines Ziel (target-size), je nachdem,
+// welche Zeile gerade dort steht. Am Seitenende stehen die Leisten an ihrem Platz (#49).
+async function scrollToEnd(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    window.scrollTo(0, document.documentElement.scrollHeight)
+  })
+}
+
 async function expectNoAxeViolations(page: Page): Promise<void> {
+  await scrollToEnd(page)
   await waitForSettledAnimations(page)
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze()
 

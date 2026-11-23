@@ -41,18 +41,6 @@ async function openDetail(page: Page, food: Food) {
   })
 }
 
-/**
- * axe auf der Detailseite erst am Seitenende: Dort steht „1 entnehmen“ (sticky) an seinem Platz.
- * Weiter oben liegt der Knopf über der Liste, und axe zählt die halb verdeckte Zeile darunter als
- * zu kleines Ziel, je nachdem, welche Zeile gerade dort steht.
- */
-async function expectAccessibleDetail(page: Page) {
-  await page.evaluate(() => {
-    window.scrollTo(0, document.documentElement.scrollHeight)
-  })
-  await expectAccessibleLayout(page)
-}
-
 /** Aufräumen: Der Admin löscht das Produkt endgültig, danach findet die Suche nichts mehr. */
 async function deleteProduct(page: Page, food: Food) {
   await openDetail(page, food)
@@ -71,7 +59,7 @@ test('Packungen hinzufügen, Datum nachtragen, bearbeiten und löschen', async (
   const food = { name: 'Spargel (Konserve)', search: 'spargel' }
   await captureWithoutDate(page, food)
   await openDetail(page, food)
-  await expectAccessibleDetail(page)
+  await expectAccessibleLayout(page)
 
   // Packungen hinzufügen: Produkt vorgewählt, der Fokus steht gleich im MHD (#195, UX §8.4)
   await page.getByRole('link', { name: 'Packungen hinzufügen' }).click()
