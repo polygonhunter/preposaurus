@@ -1,6 +1,54 @@
+// Schemas des Vorrats: Formular des Ziels und DTO der Übersicht (weiter unten).
+// Ziel (ZIEL-03, ZIEL-04): Das Formular schickt die gewählte Dauer („3“, „10“, „14“ oder
+// „eigen“), bei „eigen“ den eigenen Wert und ein freiwilliges Datum (JJJJ-MM-TT aus dem Datumsfeld).
+import { z } from 'zod'
+import { GOAL_DAY_PRESETS, MAX_GOAL_DAYS } from '@/shared/config/constants'
+import { parseCalendarDay } from '@/shared/lib/dates'
+
+export const CUSTOM_GOAL_CHOICE = 'eigen'
+
+const DAYS_MESSAGE = `Bitte eine Zahl von 1 bis ${String(MAX_GOAL_DAYS)} eintragen.`
+const PRESET_CHOICES = GOAL_DAY_PRESETS.map(String)
+
+const customDaysSchema = z.coerce
+  .number({ error: DAYS_MESSAGE })
+  .int({ error: DAYS_MESSAGE })
+  .min(1, { error: DAYS_MESSAGE })
+  .max(MAX_GOAL_DAYS, { error: DAYS_MESSAGE })
+
+const targetDateSchema = z
+  .string()
+  .trim()
+  .transform((text, context) => {
+    if (text === '') return null
+    const day = parseCalendarDay(text)
+    if (day === null)
+      context.addIssue({ code: 'custom', message: 'Bitte ein gültiges Datum wählen.' })
+    return day
+  })
+
+const choiceSchema = z
+  .string()
+  .refine((choice) => choice === CUSTOM_GOAL_CHOICE || PRESET_CHOICES.includes(choice), {
+    error: 'Bitte eine Dauer wählen.',
+  })
+
+export const goalSchema = z
+  .object({ choice: choiceSchema, customDays: z.string(), targetDate: targetDateSchema })
+  .transform((form, context) => {
+    if (form.choice !== CUSTOM_GOAL_CHOICE) {
+      return { days: Number(form.choice), targetDate: form.targetDate }
+    }
+    const custom = customDaysSchema.safeParse(form.customDays)
+    if (custom.success) return { days: custom.data, targetDate: form.targetDate }
+    context.addIssue({ code: 'custom', path: ['customDays'], message: DAYS_MESSAGE })
+    return z.NEVER
+  })
+
+export type GoalInput = z.infer<typeof goalSchema>
+
 // DTO der Übersicht (#67, UX-Konzept §8.1): schmal, ohne DB-Zeilen, alle Zahlen schon gerechnet.
 // Die Oberfläche formatiert nur noch. Datumswerte als ISO-Text (JJJJ-MM-TT).
-import { z } from 'zod'
 
 const isoDay = z.iso.date()
 const days = z.number().nonnegative()
@@ -29,7 +77,7 @@ const outlookSchema = z.discriminatedUnion('kind', [
   }),
 ])
 
-const goalSchema = z.object({
+const overviewGoalSchema = z.object({
   days: z.number().int().positive(),
   date: isoDay.nullable(),
   outlook: outlookSchema.nullable(),
@@ -92,7 +140,7 @@ export const overviewSchema = z.object({
   /** Gibt es überhaupt Packungen im Vorrat? Sonst zeigt die Übersicht den Leerzustand */
   hasStock: z.boolean(),
   supply: supplySchema.nullable(),
-  goal: goalSchema.nullable(),
+  goal: overviewGoalSchema.nullable(),
   nextStep: nextStepSchema.nullable(),
   due: dueSchema,
   groups: z.array(groupCoverageSchema),
@@ -102,7 +150,7 @@ export const overviewSchema = z.object({
 
 export type Overview = z.infer<typeof overviewSchema>
 export type OverviewSupply = z.infer<typeof supplySchema>
-export type OverviewGoal = z.infer<typeof goalSchema>
+export type OverviewGoal = z.infer<typeof overviewGoalSchema>
 export type OverviewNextStep = z.infer<typeof nextStepSchema>
 export type OverviewDue = z.infer<typeof dueSchema>
 export type OverviewDueEntry = z.infer<typeof dueEntrySchema>
