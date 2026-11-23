@@ -4,6 +4,8 @@ import {
   STOCK_STATUS_FILTERS,
   coverageSchema,
   groupRef,
+  inStockCountsSchema,
+  incompleteReasonSchema,
   namedRef,
   nodeTotalsSchema,
   stockRowSchema,
@@ -21,6 +23,8 @@ export const stockOverviewSchema = z.object({
     }),
   ),
   goalDays: z.number().int().nullable(),
+  /** Zähler der Zustands-Chips über den ganzen Vorrat (#221) */
+  counts: inStockCountsSchema,
 })
 
 // ---------- 2 · Lebensmittelarten einer Warengruppe (Ebene 2) ----------
@@ -50,7 +54,15 @@ export const stockSearchSchema = z.object({
   counts: z.record(z.enum(STOCK_STATUS_FILTERS), z.number().int()),
   groups: z.array(
     groupRef.extend({
-      rows: z.array(stockRowSchema.extend({ matchingPackages: z.number().int() })),
+      rows: z.array(
+        stockRowSchema.extend({
+          matchingPackages: z.number().int(),
+          /** Was nachzutragen ist, nach Gewicht, je Grund in Packungen (#221). Vollständig: leer */
+          incomplete: z.array(
+            z.object({ reason: incompleteReasonSchema, packages: z.number().int() }),
+          ),
+        }),
+      ),
     }),
   ),
   options: z.object({ containers: z.array(namedRef), storageLocations: z.array(namedRef) }),
@@ -60,3 +72,4 @@ export type StockOverview = z.infer<typeof stockOverviewSchema>
 export type FoodTypeLevel = z.infer<typeof foodTypeLevelSchema>
 export type StockTree = z.infer<typeof stockTreeSchema>
 export type StockSearch = z.infer<typeof stockSearchSchema>
+export type StockSearchRow = StockSearch['groups'][number]['rows'][number]

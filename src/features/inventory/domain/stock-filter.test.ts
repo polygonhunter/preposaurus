@@ -7,6 +7,7 @@ import {
   mostUrgentState,
   type FilterableUnit,
 } from './stock-filter'
+import type { NutritionGap } from './incomplete'
 import { DEFAULT_AMPEL_THRESHOLDS } from './unit-state'
 import type { UnitStatus } from './unit'
 
@@ -15,7 +16,7 @@ const context = { today: toCalendarDay('2026-11-22'), thresholds: DEFAULT_AMPEL_
 interface Options {
   status?: UnitStatus
   checkedAt?: string
-  hasNutritionGap?: boolean
+  nutritionGap?: NutritionGap
 }
 
 function unit(bestBefore: string | null, options: Options = {}): FilterableUnit {
@@ -26,7 +27,7 @@ function unit(bestBefore: string | null, options: Options = {}): FilterableUnit 
         ? null
         : { date: toCalendarDay(bestBefore), precision: 'day', isEstimated: false },
     checkedAt: options.checkedAt === undefined ? null : toCalendarDay(options.checkedAt),
-    hasNutritionGap: options.hasNutritionGap ?? false,
+    nutritionGap: options.nutritionGap ?? null,
   }
 }
 
@@ -36,7 +37,7 @@ const urgent = unit('2026-12-01')
 const expired = unit('2026-11-20')
 const stillGood = unit('2026-11-20', { checkedAt: '2026-11-21' })
 const withoutDate = unit(null)
-const withGap = unit('2028-01-31', { hasNutritionGap: true })
+const withGap = unit('2028-01-31', { nutritionGap: 'missing' })
 const consumed = unit('2027-01-31', { status: 'consumed' })
 const discarded = unit('2026-11-01', { status: 'discarded' })
 
@@ -63,7 +64,7 @@ describe('matchesStatusFilter', () => {
   })
 
   it('sammelt „Datum fehlt“ und Nährwert-Lücken unter „Unvollständig“, nur im Vorrat', () => {
-    const gapConsumed = unit(null, { status: 'consumed', hasNutritionGap: true })
+    const gapConsumed = unit(null, { status: 'consumed', nutritionGap: 'unconfirmed' })
     const matches = [withoutDate, withGap, good, gapConsumed].map((entry) =>
       matchesStatusFilter(entry, 'incomplete', context),
     )
@@ -80,7 +81,8 @@ describe('matchesStatusFilter', () => {
 })
 
 describe('countByStatusFilter', () => {
-  it('zählt jede Packung in jedem passenden Filter', () => {
+  it('zählt jede Packung im Vorrat in jedem passenden Chip-Filter', () => {
+    const richtwert = unit('2028-01-31', { nutritionGap: 'no-label' })
     const units = [
       good,
       soon,
@@ -89,17 +91,25 @@ describe('countByStatusFilter', () => {
       stillGood,
       withoutDate,
       withGap,
+      richtwert,
       consumed,
       discarded,
     ]
 
     expect(countByStatusFilter(units, context)).toEqual({
-      'in-stock': 7,
+      'in-stock': 8,
       'due-soon': 2,
       expired: 1,
       incomplete: 2,
-      consumed: 1,
-      discarded: 1,
+    })
+  })
+
+  it('zählt bei leerem Vorrat überall 0', () => {
+    expect(countByStatusFilter([], context)).toEqual({
+      'in-stock': 0,
+      'due-soon': 0,
+      expired: 0,
+      incomplete: 0,
     })
   })
 })
