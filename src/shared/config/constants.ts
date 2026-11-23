@@ -28,9 +28,13 @@ export const ACTIVITY_LEVELS = ['wenig', 'normal', 'viel'] as const
 
 export const MEMBER_CONDITIONS = ['schwanger', 'stillend'] as const
 
-// Zieldauer der Ersteinrichtung (ONBOARDING §2.2, L2): Standard der BBK/BLE-Empfehlung. Sobald die
-// Quellen im Seed stehen (M1-09), kommt der Wert aus quelle_version.standard_tage.
+// Zieldauer der Ersteinrichtung (ONBOARDING §2.2, L2): Standard der BBK/BLE-Empfehlung. Hat der
+// Haushalt eine Quelle, gilt deren quelle_version.standard_tage.
 export const DEFAULT_GOAL_DAYS = 10
+
+// Schlüssel der Empfehlungsquelle, die neue Haushalte bei der Ersteinrichtung bekommen (M1-09).
+// Der Seed legt sie an (db/seeds/quellen/bbk-ble.ts).
+export const DEFAULT_SOURCE_KEY = 'bbk-ble'
 
 // Zieldauer zur Auswahl (ZIEL-03, 02_HAUSHALT_ZIEL §3), daneben ein eigener Wert bis MAX_GOAL_DAYS
 export const GOAL_DAY_PRESETS = [3, 10, 14] as const

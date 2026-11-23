@@ -1,8 +1,8 @@
-// Erfundene Empfehlungsquelle für den Beispielhaushalt (Entwicklung, Integrationstests, E2E der
-// Übersicht). Keine geprüften Werte: Die echte Quelle samt Stand und Link kommt mit M1-09. Ohne
-// aktive Quelle gäbe es keinen Bedarf und damit keine Tage auf der Übersicht.
-// Nie im Betrieb: Aufrufer sind nur Tests, `npm run db:seed:demo` (von Hand, nicht im Container)
-// und die E2E-Route `/api/e2e/beispielvorrat`, die env.ts im Produktionsbuild außerhalb der CI sperrt.
+// Erfundene Empfehlungsquelle für den Beispielhaushalt (Entwicklung und Integrationstests der
+// Übersicht). Feste Testzahlen, unabhängig von der echten Quelle BBK/BLE (quellen/bbk-ble.ts), die
+// sich mit der Prüfung durch den Maintainer noch ändern kann.
+// Nie im Betrieb: Aufrufer sind nur Integrationstests und `npm run db:seed:demo` (von Hand, nicht im
+// Container). Die E2E-Tests nutzen die echte Quelle BBK/BLE aus dem regulären Seed.
 import { eq } from 'drizzle-orm'
 import type { Database } from '../../src/server/db/connection'
 import { households } from '../../src/server/db/schema/household'

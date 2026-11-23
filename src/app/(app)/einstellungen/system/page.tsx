@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { requirePageHouseholdAdmin } from '@/server/auth/household'
+import { requirePageHousehold } from '@/server/auth/household'
 import { GOAL_PATH, SETTINGS_PATH } from '@/shared/config/settings-paths'
 import { Group } from '@/shared/ui/Group'
 import { GroupFooter } from '@/shared/ui/GroupFooter'
@@ -11,9 +11,11 @@ export const metadata: Metadata = { title: 'Daten & System · Preposaurus' }
 
 const SOURCE_CODE_URL = 'https://github.com/polygonhunter/preposaurus'
 
-// Daten & System (#37), nur für den Admin. Im MVP Lizenz und Quellen (SYS-06), Export folgt (SYS-01).
+// Daten & System (#37). Lizenz und Quellen (SYS-06) lesen alle Angemeldeten, denn die AGPL verlangt
+// den Quelltext-Hinweis für jede Person, die die App nutzt (#217). Der Export (SYS-01) folgt und
+// prüft dann die Admin-Rolle selbst.
 export default async function SystemPage() {
-  await requirePageHouseholdAdmin()
+  await requirePageHousehold()
   return (
     <>
       <PageHeader title="Daten & System" back={{ href: SETTINGS_PATH, label: 'Einstellungen' }} />

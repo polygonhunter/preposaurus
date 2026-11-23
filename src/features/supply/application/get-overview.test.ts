@@ -56,7 +56,12 @@ const stockUnits = () => [
 ]
 
 const goal = { days: 10, targetDay: toCalendarDay('2027-03-01') }
-const source = { name: 'Beispielquelle', asOf: '2026', link: 'https://example.org/quelle' }
+const source = {
+  name: 'Beispielquelle',
+  asOf: '2026',
+  link: 'https://example.org/quelle',
+  isVerified: false,
+}
 
 function ports(options: { basis?: SupplyBasis; units?: ReturnType<typeof stockUnits> } = {}) {
   return {
@@ -107,7 +112,8 @@ describe('getOverview', () => {
     const { nextStep } = await getOverview(ports(), { householdId, today })
 
     expect(nextStep?.resource).toBe('energy')
-    expect(nextStep?.missing).toBeCloseTo((10 - 4.4) * 2000)
+    // Bedarf bis zum Ziel minus Bestand, nicht aus abgerundeten 4,4 Tagen (#214)
+    expect(nextStep?.missing).toBe(10 * 2000 - 8975)
     expect(nextStep?.alsoMissing?.resource).toBe('water')
   })
 

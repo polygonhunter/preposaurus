@@ -13,6 +13,8 @@ interface ActiveSource {
   name: string
   asOf: string
   link: string
+  /** false, solange niemand die Werte gegen das Original geprüft hat (M1-09) */
+  isVerified: boolean
 }
 
 export interface HouseholdFactsReader {

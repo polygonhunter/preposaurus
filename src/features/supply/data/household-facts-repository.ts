@@ -22,7 +22,12 @@ async function loadGoal(db: Database, householdId: string) {
 
 async function loadActiveSource(db: Database, householdId: string) {
   const [row] = await db
-    .select({ name: sources.name, asOf: sourceVersions.asOf, link: sourceVersions.link })
+    .select({
+      name: sources.name,
+      asOf: sourceVersions.asOf,
+      link: sourceVersions.link,
+      isVerified: sourceVersions.isVerified,
+    })
     .from(households)
     .innerJoin(sourceVersions, eq(sourceVersions.id, households.activeSourceVersionId))
     .innerJoin(sources, eq(sources.id, sourceVersions.sourceId))

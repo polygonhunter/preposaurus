@@ -4,7 +4,7 @@
 // (berechnet, nie gespeichert) die Fachlogik.
 import 'server-only'
 import type { CalendarDay } from '@/shared/lib/dates'
-import { nutritionGapOf } from '../domain/incomplete'
+import { countsAsIncomplete, nutritionGapOf } from '../domain/incomplete'
 import {
   countByStatusFilter,
   matchesStatusFilter,
@@ -32,7 +32,9 @@ const TAKEN_OUT: Partial<Record<StockStatusFilter, UnitStatus>> = {
 
 const toFilterable = ({ unit, product }: JoinedUnit): FilterableUnit => ({
   ...unit,
-  hasNutritionGap: nutritionGapOf(product.nutrition, product.foodType?.reference ?? null) !== null,
+  hasNutritionGap: countsAsIncomplete(
+    nutritionGapOf(product.nutrition, product.foodType?.reference ?? null),
+  ),
 })
 
 /** Packungen, die zum Zustand passen. Verbraucht und Entsorgt werden eigens nachgeladen. */

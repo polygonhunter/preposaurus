@@ -45,7 +45,12 @@ describe('Übersicht gegen die Datenbank', () => {
     )
     expect(overview.household).toEqual({
       members: 3,
-      source: { name: DEMO_SOURCE.name, asOf: DEMO_SOURCE.asOf, link: DEMO_SOURCE.link },
+      source: {
+        name: DEMO_SOURCE.name,
+        asOf: DEMO_SOURCE.asOf,
+        link: DEMO_SOURCE.link,
+        isVerified: false,
+      },
     })
   })
 

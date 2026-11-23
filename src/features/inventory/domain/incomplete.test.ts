@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
-import { findIncomplete, nutritionGapOf } from './incomplete'
+import { countsAsIncomplete, findIncomplete, nutritionGapOf } from './incomplete'
 import {
   isEstimateUnconfirmed,
   type ProductNutrition,
@@ -81,6 +81,15 @@ describe('nutritionGapOf', () => {
   })
 })
 
+describe('countsAsIncomplete', () => {
+  it('zählt fehlende kcal und unbestätigte Schätzungen, nicht den Richtwert (#213)', () => {
+    expect(countsAsIncomplete('missing')).toBe(true)
+    expect(countsAsIncomplete('unconfirmed')).toBe(true)
+    expect(countsAsIncomplete('no-label')).toBe(false)
+    expect(countsAsIncomplete(null)).toBe(false)
+  })
+})
+
 describe('findIncomplete', () => {
   it('sammelt Packungen ohne Datum und Produkte mit Lücken in Eingabereihenfolge', () => {
     const units = [
@@ -104,7 +113,6 @@ describe('findIncomplete', () => {
     expect(result.units.map((entry) => entry.id)).toEqual(['a', 'c'])
     expect(result.products.map(({ product, gap }) => [product.id, gap])).toEqual([
       ['schaetzung', 'unconfirmed'],
-      ['richtwert', 'no-label'],
       ['ohne-kcal', 'missing'],
     ])
   })

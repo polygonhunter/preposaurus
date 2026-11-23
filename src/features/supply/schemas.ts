@@ -132,7 +132,9 @@ const restockSchema = z.object({
 
 const householdSchema = z.object({
   members: count,
-  source: z.object({ name: z.string(), asOf: z.string(), link: z.string() }).nullable(),
+  source: z
+    .object({ name: z.string(), asOf: z.string(), link: z.string(), isVerified: z.boolean() })
+    .nullable(),
 })
 
 /** @internal Nur Tests prüfen das DTO gegen das Schema, die Seite nutzt die Typen. */

@@ -6,9 +6,13 @@ import { useSyncExternalStore } from 'react'
 
 const HEALTH_URL = '/api/health'
 const RETRY_INTERVAL_MS = 10_000
+// Der Browser meldet „online“ oft, bevor das Netz wirklich trägt; die erste Nachfrage scheitert dann.
+// Zwei kurze Nachfragen danach, bevor die App wieder sperrt, statt 10 s bis zum nächsten Intervall.
+const ONLINE_RECHECK_DELAYS_MS = [500, 1_500] as const
 
 let isOnline = true
 let retryTimer: ReturnType<typeof setInterval> | undefined
+let latestProbeId = 0
 const listeners = new Set<() => void>()
 
 function syncRetry(): void {
@@ -31,25 +35,44 @@ function setOnline(next: boolean): void {
   for (const listener of listeners) listener()
 }
 
-async function probe(): Promise<void> {
+async function isHealthReachable(): Promise<boolean> {
   try {
     const response = await fetch(HEALTH_URL, { cache: 'no-store' })
     // Eine Antwort, die vor dem Wegfall des Netzes losging, zählt nicht mehr.
-    setOnline(response.ok && navigator.onLine)
+    return response.ok && navigator.onLine
   } catch {
     // Kein Netz oder NAS nicht erreichbar: genau das soll der Hinweis zeigen.
-    setOnline(false)
+    return false
   }
 }
 
+const wait = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms)
+  })
+
+async function probe(recheckDelaysMs: readonly number[] = []): Promise<void> {
+  const probeId = ++latestProbeId
+  let reachable = await isHealthReachable()
+  for (const delayMs of recheckDelaysMs) {
+    if (reachable || probeId !== latestProbeId) break
+    await wait(delayMs)
+    reachable = await isHealthReachable()
+  }
+  // Nur die jüngste Nachfrage zählt: Ein Fehlschlag von vor dem Wiederverbinden sperrte sonst die
+  // App, bis die nächste Nachfrage durch ist.
+  if (probeId === latestProbeId) setOnline(reachable)
+}
+
 const goOffline = () => {
+  latestProbeId += 1
   setOnline(false)
 }
 // WLAN zurück heißt nicht NAS erreichbar (Tailscale aus): gleich freigeben, aber nachfragen. Ist
-// das NAS nicht da, sperrt die Antwort wieder.
+// das NAS auch nach den kurzen Nachfragen nicht da, sperrt die Antwort wieder.
 const goOnline = () => {
   setOnline(true)
-  void probe()
+  void probe(ONLINE_RECHECK_DELAYS_MS)
 }
 const recheckWhenVisible = () => {
   if (document.visibilityState === 'visible') void probe()

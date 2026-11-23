@@ -16,6 +16,7 @@ import {
   restockText,
   sourceText,
 } from './list-text'
+import { noNeedState } from './source-text'
 
 // TESTDATEN: frei gewählte Werte
 const supply: OverviewSupply = {
@@ -86,6 +87,17 @@ describe('Kopf der Übersicht', () => {
     const energy = { resource: 'energy', missing: 22_340, alsoMissing: null } as const
     expect(nextStepSentence(energy)).toBe('Etwa 22.400 kcal Essen bringen euch ans Ziel.')
   })
+
+  it('rundet erst in der Anzeige: genau 37 l bleiben 37 l (#214)', () => {
+    const step = {
+      resource: 'water',
+      missing: 37_000,
+      alsoMissing: { resource: 'energy', missing: 28_035 },
+    } as const
+    expect(nextStepSentence(step)).toBe(
+      'Bis zum Ziel fehlen noch 37 l Wasser und etwa 28.100 kcal Essen.',
+    )
+  })
 })
 
 describe('Listen der Übersicht', () => {
@@ -125,10 +137,26 @@ describe('Listen der Übersicht', () => {
   })
 
   it('fasst den Haushalt knapp zusammen', () => {
-    const household = { members: 3, source: { name: 'Quelle', asOf: '2026', link: 'x' } }
+    const household = {
+      members: 3,
+      source: { name: 'Quelle', asOf: '2026', link: 'x', isVerified: true },
+    }
     expect(householdTitle(household, goal(null))).toBe('3 Personen · Ziel 10 Tage bis 01.03.2027')
     expect(householdTitle({ members: 0, source: null }, null)).toBe('Noch niemand eingetragen')
     expect(sourceText(household)).toBe('Quelle, Stand 2026')
-    expect(sourceText({ members: 1, source: null })).toBe('Noch keine Empfehlung gewählt')
+    expect(sourceText({ members: 1, source: null })).toBe('Noch keine Empfehlung hinterlegt')
+    const unverified = { members: 3, source: { ...household.source, isVerified: false } }
+    expect(sourceText(unverified)).toBe('Quelle, Stand 2026 · Werte noch nicht geprüft')
+  })
+
+  it('nennt den Grund, warum die Übersicht keine Tage zeigt (#206)', () => {
+    const source = { name: 'Quelle', asOf: '2026', link: 'x', isVerified: false }
+    expect(noNeedState({ members: 3, source: null })).toEqual({
+      text: 'Es fehlt noch eine Empfehlung für Essen und Wasser. Bis sie hinterlegt ist, zeigt Preposaurus keine Tage.',
+      action: { href: '/einstellungen/ziel', label: 'Ziel und Empfehlung' },
+    })
+    expect(noNeedState({ members: 0, source }).action.label).toBe('Mitglieder eintragen')
+    expect(noNeedState({ members: 0, source }).text).toMatch(/^Tragt ein, wer/)
+    expect(noNeedState({ members: 1, source }).text).toMatch(/^Babys zählen/)
   })
 })
