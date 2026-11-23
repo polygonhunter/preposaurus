@@ -20,7 +20,10 @@ import {
 
 type Need = FoodTypeDetail['need']
 
-/** Ein Getränk ohne kcal, das nicht zur Warengruppe Wasser gehört (z. B. ungesüßter Tee, #260). */
+/**
+ * Ein Getränk mit 0 kcal außerhalb der Warengruppe Wasser (z. B. ungesüßter Tee, #260). Fehlende
+ * kcal zählen ebenfalls mit 0, deshalb sagt der Text „zählt mit 0 kcal“ statt „hat keine kcal“.
+ */
 const isCalorieFreeDrink = (totals: NodeTotalsDto) =>
   !countsAsWater(totals) && totals.amounts.ml > 0 && totals.kcal === 0
 
@@ -50,8 +53,10 @@ export function notCountedTexts({ uncountedPackages, withoutDate }: NodeTotalsDt
 
 /** Wie die kcal entstehen, bei Wasser der Hinweis, dass es in Litern zählt. */
 export function kcalText(totals: NodeTotalsDto): string {
-  if (countsAsWater(totals)) return 'Wasser hat keine kcal. Es zählt in Litern, als Wasser.'
-  if (isCalorieFreeDrink(totals)) return 'Dieses Getränk hat keine kcal.'
+  if (countsAsWater(totals) && totals.kcal === 0) {
+    return 'Wasser hat keine kcal. Es zählt in Litern, als Wasser.'
+  }
+  if (isCalorieFreeDrink(totals)) return 'Dieses Getränk zählt mit 0 kcal.'
   const total = formatKcal(totals.kcal, totals.isApproximate)
   return `Je Packung: Inhalt × kcal je 100 g bzw. ml ÷ 100. Zusammen ${total}.`
 }
