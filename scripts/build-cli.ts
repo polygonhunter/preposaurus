@@ -20,7 +20,7 @@ await build({
   splitting: true,
   platform: 'node',
   format: 'esm',
-  target: 'node24',
+  target: 'node26',
   // server-only liefert unter react-server eine leere Datei, wie in den npm-Skripten.
   conditions: ['react-server'],
   // PGlite lädt WASM-Dateien neben sich und gehört nicht ins Image (dort läuft PostgreSQL).
