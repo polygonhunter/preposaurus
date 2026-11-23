@@ -1,9 +1,11 @@
 'use server'
 // Formular „Anmelden“ (UX §8.6, ONBOARDING O-08). Nach Erfolg geht es zurück auf die Seite, die
-// ohne Anmeldung aufgerufen wurde (Feld weiter, geprüft in safeReturnPath).
+// ohne Anmeldung aufgerufen wurde (Feld weiter, geprüft in safeReturnPath). Ist die Einrichtung
+// noch offen, führt sie den Admin, der eingerichtet hat, zum offenen Schritt (#40).
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { signInFromRequest } from '../application/sign-in-request'
+import { openSetupPath } from '../application/setup-step-request'
 import type { SignInError } from '../application/sign-in'
 import { safeReturnPath } from '../domain/return-path'
 import { signInSchema } from '../schemas'
@@ -44,5 +46,6 @@ export async function signInAction(
   if (!parsed.success) return { message: WRONG_CREDENTIALS, username }
   const result = await signInFromRequest(parsed.data, await headers())
   if (!result.ok) return { message: messageFor(result.error), username }
-  redirect(safeReturnPath(formData.get('weiter')))
+  const setupPath = await openSetupPath(result.value.userId)
+  redirect(setupPath ?? safeReturnPath(formData.get('weiter')))
 }

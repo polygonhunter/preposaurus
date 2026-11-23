@@ -7,6 +7,9 @@ import { parseCalendarDay } from '@/shared/lib/dates'
 
 export const CUSTOM_GOAL_CHOICE = 'eigen'
 
+/** Wo das Ziel-Formular steht: Einstellungen oder Schritt „Ziel“ der Einrichtung (#40) */
+export type GoalFormPlace = 'einstellungen' | 'einrichtung'
+
 const DAYS_MESSAGE = `Bitte eine Zahl von 1 bis ${String(MAX_GOAL_DAYS)} eintragen.`
 const PRESET_CHOICES = GOAL_DAY_PRESETS.map(String)
 

@@ -16,7 +16,8 @@ function readDismissed(): boolean {
   }
 }
 
-function isStandalone(): boolean {
+/** Läuft die Seite als installierte App vom Home-Bildschirm? Nur im Browser aufrufen. */
+export function isStandaloneDisplay(): boolean {
   const isIosHomeScreenApp = (navigator as { standalone?: boolean }).standalone === true
   return isIosHomeScreenApp || window.matchMedia('(display-mode: standalone)').matches
 }
@@ -24,7 +25,7 @@ function isStandalone(): boolean {
 function isVisibleNow(): boolean {
   return shouldShowInstallHint({
     userAgent: navigator.userAgent,
-    isStandalone: isStandalone(),
+    isStandalone: isStandaloneDisplay(),
     isDismissed: readDismissed(),
   })
 }

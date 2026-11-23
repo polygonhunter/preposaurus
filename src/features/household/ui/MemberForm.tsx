@@ -7,6 +7,7 @@ import { LiveMessage } from '@/shared/ui/LiveMessage'
 import { RadioChips } from '@/shared/ui/RadioChips'
 import { Segmented } from '@/shared/ui/Segmented'
 import { saveMemberAction, type MemberFormState } from '../actions/save-member-action'
+import type { MemberReturn } from '../schemas'
 import { DIET_LABELS, MEMBER_TYPE_LABELS, optionsOf } from './member-labels'
 import type { MemberFormValues } from './member-form-values'
 import { MemberMoreFields } from './MemberMoreFields'
@@ -16,6 +17,8 @@ type MemberFormProps = Readonly<{
   initialValues: MemberFormValues
   /** „Alles“, „Vegetarisch“ … für die Wahl „Wie Haushalt“ */
   householdDietLabel: string
+  /** Wohin es nach dem Speichern geht: Mitgliederliste oder Schritt der Einrichtung (#40) */
+  returnTo?: MemberReturn
 }>
 
 const INITIAL_STATE: MemberFormState = { errors: {}, message: null, values: null }
@@ -25,7 +28,12 @@ const firstError = ({ errors, message }: MemberFormState) =>
 
 // Person anlegen oder bearbeiten (#38). Pflicht sind Name, Typ und Geburtsjahr, bei Babys der
 // Monat. Die übrigen Angaben aus HH-02 stehen eingeklappt darunter.
-export function MemberForm({ memberId, initialValues, householdDietLabel }: MemberFormProps) {
+export function MemberForm({
+  memberId,
+  initialValues,
+  householdDietLabel,
+  returnTo = 'einstellungen',
+}: MemberFormProps) {
   const [state, formAction, isPending] = useActionState(saveMemberAction, INITIAL_STATE)
   const values = state.values ?? initialValues
   const [type, setType] = useState(values.type)
@@ -35,6 +43,7 @@ export function MemberForm({ memberId, initialValues, householdDietLabel }: Memb
   return (
     <form ref={formRef} action={formAction} className="mx-4 flex flex-col gap-4 pt-6 breit:mx-6">
       <input type="hidden" name="id" value={memberId ?? ''} />
+      <input type="hidden" name="zurueck" value={returnTo} />
       <Field label="Name" name="name" required defaultValue={values.name} error={errors.name} />
       <RadioChips
         legend="Wer ist das?"

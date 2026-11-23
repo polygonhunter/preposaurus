@@ -58,10 +58,19 @@ async function loadMasterDataIds(db: Database) {
   }
 }
 
+// Personen, die es im Haushalt schon gibt (gleicher Name), bleiben: Die E2E-Einrichtung trägt im
+// Schritt „Mitglieder“ (#40) schon „Alex“ ein, der Beispielvorrat ergänzt nur Sam und Kim.
 async function insertMembers(db: Database, householdId: string): Promise<Map<string, string>> {
-  const memberRows = DEMO_MEMBERS.map((member) => buildMember({ householdId, ...member }))
-  await db.insert(members).values(memberRows)
-  return new Map(memberRows.map((row) => [row.name, row.id]))
+  const existing = await db
+    .select({ name: members.name, id: members.id })
+    .from(members)
+    .where(eq(members.householdId, householdId))
+  const existingIds = new Map(existing.map((row) => [row.name, row.id]))
+  const memberRows = DEMO_MEMBERS.filter((member) => !existingIds.has(member.name)).map((member) =>
+    buildMember({ householdId, ...member }),
+  )
+  if (memberRows.length > 0) await db.insert(members).values(memberRows)
+  return new Map([...existingIds, ...memberRows.map((row) => [row.name, row.id] as const)])
 }
 
 async function insertUsers(db: Database, householdId: string, memberIds: Map<string, string>) {

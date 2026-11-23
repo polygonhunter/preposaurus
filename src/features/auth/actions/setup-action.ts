@@ -1,16 +1,17 @@
 'use server'
 // Ersteinrichtung, Schritt „Willkommen und Konto“ (#34, ONBOARDING §2.2). Nach dem Anlegen meldet
-// die Action den neuen Admin gleich an („Angemeldet bleiben“ an) und führt zur Übersicht. Kommt ein
-// zweiter Aufruf zu spät, geht es zur Anmeldung: Dann hat jemand anderes schon eingerichtet.
+// die Action den neuen Admin gleich an („Angemeldet bleiben“ an) und führt zum nächsten Schritt
+// „Mitglieder“ (#40). Kommt ein zweiter Aufruf zu spät, geht es zur Anmeldung: Dann hat jemand
+// anderes schon eingerichtet.
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { setupFromRequest } from '../application/setup-request'
 import { signInFromRequest } from '../application/sign-in-request'
 import { findPasswordProblem, type PasswordProblem } from '../domain/password-rules'
-import { DEFAULT_RETURN_PATH } from '../domain/return-path'
 import { setupSchema, type SetupInput } from '../schemas'
 import { DEFAULT_HOUSEHOLD_NAME } from '@/shared/config/constants'
+import { SETUP_MEMBERS_PATH } from '@/shared/config/setup-paths'
 import { firstMessages, readFormText } from '@/shared/lib/form-data'
 
 type SetupField = keyof SetupInput
@@ -56,5 +57,5 @@ export async function setupAction(_previous: SetupState, formData: FormData): Pr
     { username: input.username, password: input.password, rememberMe: true },
     await headers(),
   )
-  redirect(signIn.ok ? DEFAULT_RETURN_PATH : '/anmelden')
+  redirect(signIn.ok ? SETUP_MEMBERS_PATH : '/anmelden')
 }
