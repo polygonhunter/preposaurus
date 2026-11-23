@@ -1,5 +1,5 @@
-// Bündelt die Befehle des Images (UMSETZUNG M13-01) nach dist/cli: Migrationen, Stammdaten und
-// die Notfall-Befehle aus EINSTELLUNGEN_NUTZER §3.4. Aufruf: npm run build:cli
+// Bündelt die Befehle des Images (UMSETZUNG M13-01) nach dist/cli: Migrationen, Stammdaten, die
+// Notfall-Befehle aus EINSTELLUNGEN_NUTZER §3.4 und den Worker (M11-01). Aufruf: npm run build:cli
 // Warum bündeln: Der Standalone-Build von Next enthält nur, was der Webserver braucht. tsx ist
 // eine reine Entwicklungsabhängigkeit, und Node löst weder den Pfad-Alias @/ noch Importe ohne
 // Dateiendung auf. esbuild macht daraus reines JavaScript, das im Image mit node läuft.
@@ -10,6 +10,7 @@ await build({
     migrate: 'src/server/db/migrate.ts',
     seed: 'db/seeds/index.ts',
     admin: 'scripts/admin.ts',
+    worker: 'src/worker/main.ts',
   },
   outdir: 'dist/cli',
   outExtension: { '.js': '.mjs' },

@@ -3,7 +3,8 @@
 // stattdessen steht am Feld eine freundliche Bitte um ein neues.
 import { refresh } from 'next/cache'
 import { z } from 'zod'
-import { requireHouseholdAdmin, type AccessError } from '@/server/auth/guards'
+import { adminAccessMessage } from '@/server/auth/admin-access-message'
+import { requireHouseholdAdmin } from '@/server/auth/guards'
 import { firstMessages, readFormText } from '@/shared/lib/form-data'
 import { goalServices } from '../application/goal-services'
 import { saveGoal } from '../application/goal-settings'
@@ -22,10 +23,6 @@ export type GoalFormState = Readonly<{
 
 const PAST_DATE = 'Dieses Datum ist schon vorbei. Magst du ein neues wählen?'
 
-function accessMessage(error: AccessError): string {
-  return error.kind === 'unauthenticated' ? 'Bitte melde dich erneut an.' : 'Das ändert ein Admin.'
-}
-
 function readForm(formData: FormData): GoalTexts {
   return {
     choice: readFormText(formData, 'dauer'),
@@ -43,7 +40,7 @@ export async function saveGoalAction(
 ): Promise<GoalFormState> {
   const values = readForm(formData)
   const admin = await requireHouseholdAdmin()
-  if (!admin.ok) return failed(values, {}, accessMessage(admin.error))
+  if (!admin.ok) return failed(values, {}, adminAccessMessage(admin.error))
   const parsed = goalSchema.safeParse(values)
   if (!parsed.success) {
     return failed(values, firstMessages(z.flattenError(parsed.error).fieldErrors), null)

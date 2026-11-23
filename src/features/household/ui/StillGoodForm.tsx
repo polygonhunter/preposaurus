@@ -4,7 +4,7 @@ import { Button } from '@/shared/ui/Button'
 import { GroupFooter } from '@/shared/ui/GroupFooter'
 import { Toggle } from '@/shared/ui/Toggle'
 import { SETTING_IDLE } from '../actions/action-messages'
-import { saveStillGoodAction } from '../actions/save-household-rules-action'
+import { saveStillGoodAction } from '../actions/save-still-good-action'
 import { SaveStatus } from '@/shared/ui/SaveStatus'
 
 type StillGoodFormProps = Readonly<{ isOn: boolean }>

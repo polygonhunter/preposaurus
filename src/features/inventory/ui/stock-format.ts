@@ -70,15 +70,6 @@ export function stockLine(packagesInStock: number, totals: NodeTotalsDto): strin
   return amounts === null ? packages : `${packages} · ${amounts}`
 }
 
-/** Tage bis zum Datum: „heute“, „morgen“, „in 12 Tagen“, „seit gestern“, „seit 3 Tagen“. */
-export function formatDaysLeft(daysLeft: number): string {
-  if (daysLeft === 0) return 'heute'
-  if (daysLeft === 1) return 'morgen'
-  if (daysLeft === -1) return 'seit gestern'
-  if (daysLeft < 0) return `seit ${String(-daysLeft)} Tagen`
-  return `in ${String(daysLeft)} Tagen`
-}
-
 /** Meldung in der UndoBar: „Nudeln: 1 Packung verbraucht (11/2027)“. */
 export function formatTakenMessage(name: string, dateLabel: string | null): string {
   const date = dateLabel === null ? '' : ` (${dateLabel})`

@@ -39,11 +39,33 @@ async function setUpViaUi(page: Page) {
   await page.getByRole('button', { name: 'Weiter' }).click()
 }
 
+// Übersicht ohne Vorrat und ohne Mitglieder (#67, UX-Konzept §7): ein Satz, eine Handlung.
+async function expectEmptyOverview(page: Page) {
+  await expect(page.getByText(/^Noch nichts im Vorrat\./)).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Erstes Produkt erfassen' })).toHaveAttribute(
+    'href',
+    '/neu',
+  )
+  await expect(page.getByRole('region', { name: 'Bald fällig' })).toHaveCount(0)
+  await expect(
+    page.getByRole('link', { name: /^Noch niemand eingetragen · Ziel 10 Tage/ }),
+  ).toHaveAttribute('href', '/einstellungen')
+  for (const colorScheme of ['light', 'dark'] as const) {
+    // Neu laden statt umschalten: Farbübergänge würden axe sonst mitten im Wechsel treffen
+    await page.emulateMedia({ colorScheme })
+    await page.reload()
+    await expect(page.getByRole('link', { name: 'Erstes Produkt erfassen' })).toBeVisible()
+    await expectAccessibleLayout(page)
+  }
+  await page.emulateMedia({ colorScheme: null })
+}
+
 setup('Ersteinrichtung bis zur Übersicht', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveURL(/\/(einrichten|anmelden)/)
 
-  if (page.url().includes('/einrichten')) {
+  const isFreshInstall = page.url().includes('/einrichten')
+  if (isFreshInstall) {
     await setUpViaUi(page)
   } else {
     await submitSignIn(page)
@@ -51,5 +73,7 @@ setup('Ersteinrichtung bis zur Übersicht', async ({ page }) => {
 
   await expect(page).toHaveURL(/\/uebersicht$/)
   await expect(page.getByRole('heading', { level: 1, name: 'Übersicht' })).toBeVisible()
+  // Nur direkt nach der Einrichtung ist der Haushalt leer, danach legt „beispielvorrat“ Vorrat an
+  if (isFreshInstall) await expectEmptyOverview(page)
   await page.context().storageState({ path: ADMIN_STORAGE_STATE })
 })
