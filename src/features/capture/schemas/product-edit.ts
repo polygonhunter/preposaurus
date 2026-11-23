@@ -11,7 +11,12 @@ export const updateProductSchema = z.object({
   productId: id,
   foodTypeId: id,
   /** Leer: Es gilt der Name der Lebensmittelart */
-  name: z.string().trim().max(MAX_NAME_LENGTH).nullable(),
+  name: z
+    .string()
+    .trim()
+    .max(MAX_NAME_LENGTH)
+    .transform((name) => (name === '' ? null : name))
+    .nullable(),
   content: contentSchema,
   containerId: id.nullable(),
   storageLocationId: id.nullable(),
