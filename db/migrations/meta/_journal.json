@@ -29,6 +29,13 @@
       "when": 1795380997190,
       "tag": "0003_ki_rolle_mhd_schaetzen",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795391845242,
+      "tag": "0004_erinnerungen_merker",
+      "breakpoints": true
     }
   ]
 }

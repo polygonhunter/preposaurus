@@ -46,17 +46,31 @@ function planUrgent({ now, lastSent, stock }: ReminderInput): ReminderPlan | nul
   return message === null ? null : { message, marks: ['urgent'] }
 }
 
-/** null: jetzt ist nichts zu senden. */
-export function planReminder(input: ReminderInput): ReminderPlan | null {
-  const { now, settings, lastSent } = input
+export type ReminderTiming = Omit<ReminderInput, 'stock'>
+
+/**
+ * Welche Art jetzt an der Reihe ist, noch ohne Blick in den Vorrat. So muss der Worker den Vorrat
+ * nur laden, wenn überhaupt etwas hinausgehen darf. null: jetzt nichts.
+ */
+export function dueReminderKind({ now, settings, lastSent }: ReminderTiming): ReminderKind | null {
   const weekly = { now, schedule: settings.weeklySummary, lastSentAt: lastSent['weekly-summary'] }
-  if (isWeeklySummaryPending(weekly)) {
-    return isWeeklySummaryDue(weekly) ? planWeeklySummary(input) : null
-  }
+  if (isWeeklySummaryPending(weekly)) return isWeeklySummaryDue(weekly) ? 'weekly-summary' : null
   const urgentDue = isUrgentDue({
     now,
     isEnabled: settings.isUrgentEnabled,
     lastSentAt: lastSent.urgent,
   })
-  return urgentDue ? planUrgent(input) : null
+  return urgentDue ? 'urgent' : null
+}
+
+/** null: jetzt ist nichts zu senden. */
+export function planReminder(input: ReminderInput): ReminderPlan | null {
+  switch (dueReminderKind(input)) {
+    case 'weekly-summary':
+      return planWeeklySummary(input)
+    case 'urgent':
+      return planUrgent(input)
+    case null:
+      return null
+  }
 }

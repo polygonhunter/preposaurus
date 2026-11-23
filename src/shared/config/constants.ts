@@ -76,6 +76,10 @@ export const RESTOCK_UNITS = ['g', 'ml', 'stueck'] as const
 // ERI-02 Wochenübersicht, ERI-03 Dringend, ERI-06 Check-in-Mail. Etappe und Inventur kommen später.
 export const NOTIFICATION_KINDS = ['wochenuebersicht', 'dringend', 'checkin_mail'] as const
 
+// Rhythmus der Check-in-Mail (ERI-06), steht in benachrichtigung_einstellung.zeitplan. Ohne Zeile,
+// mit aktiv = false oder einem anderen Wert ist sie aus.
+export const CHECK_IN_CADENCES = ['woechentlich', 'monatlich'] as const
+
 // Anbieter einer KI-Verbindung (Issue #108). Weitere (z. B. openai, lokal) brauchen nur einen
 // weiteren Wert, eine Migration und einen Adapter.
 export const AI_PROVIDERS = ['anthropic'] as const

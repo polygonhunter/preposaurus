@@ -23,6 +23,14 @@ x-app: &app
     AI_PROVIDER: ${AI_PROVIDER:-anthropic}
     ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     PHOTO_STORAGE_DIR: /data/fotos
+    # Mail ist optional: ohne SMTP_HOST keine Mails (#87). APP_URL nur für den Link in Mails.
+    SMTP_HOST: ${SMTP_HOST:-}
+    SMTP_PORT: ${SMTP_PORT:-}
+    SMTP_SECURE: ${SMTP_SECURE:-}
+    SMTP_USER: ${SMTP_USER:-}
+    SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+    SMTP_FROM: ${SMTP_FROM:-}
+    APP_URL: ${APP_URL:-}
   volumes:
     - ./fotos:/data/fotos
   # Die App braucht keine Linux-Capabilities und darf sich keine Rechte verschaffen.
