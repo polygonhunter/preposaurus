@@ -1,5 +1,6 @@
 // Warteschlange mit echtem pg-boss (UMSETZUNG M11-01): lokal auf PGlite, in der CI zusätzlich auf
 // PostgreSQL 18 (Job test-pg).
+import { PgBoss } from 'pg-boss'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 import { defineJob } from '../../../src/server/jobs/job-definition'
@@ -93,5 +94,54 @@ describe('startJobQueue', () => {
     await queue.stop()
     queue = await startWith([defineJob({ ...definition, schedule: null })])
     expect(await testDb.queryRows('select name from pgboss.schedule')).toEqual([])
+  })
+
+  it('übernimmt geänderte Versuche beim nächsten Start', async () => {
+    const definition = { name: 'tuned', schema, schedule: null, run: () => Promise.resolve() }
+    queue = await startWith([defineJob({ ...definition, retry })])
+    await queue.stop()
+
+    queue = await startWith([defineJob({ ...definition, retry: { limit: 5, delaySeconds: 10 } })])
+
+    expect(
+      await testDb.queryRows(
+        "select retry_limit, retry_delay from pgboss.queue where name = 'tuned'",
+      ),
+    ).toEqual([{ retry_limit: 5, retry_delay: 10 }])
+  })
+
+  it('stellt einen Job mit Zeitplan nicht doppelt ein, solange einer wartet oder läuft', async () => {
+    let release: () => void = () => undefined
+    const running = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    const job = defineJob({
+      name: 'single',
+      schema,
+      schedule: { cron: '30 4 * * *', payload: { value: 'nachts' } },
+      retry,
+      run: () => running,
+    })
+    queue = await startWith([job])
+
+    expect(await queue.send('single', { value: 'eins' })).not.toBeNull()
+    expect(await queue.send('single', { value: 'zwei' })).toBeNull()
+    release()
+  })
+
+  it('schließt die Warteschlange wieder, wenn der Start scheitert', async () => {
+    const stop = vi.spyOn(PgBoss.prototype, 'stop')
+    const broken = defineJob({
+      name: 'broken',
+      schema,
+      schedule: { cron: 'kein cron', payload: { value: 'x' } },
+      retry,
+      run: () => Promise.resolve(),
+    })
+
+    await expect(startWith([broken])).rejects.toThrow()
+
+    expect(stop).toHaveBeenCalledWith({ graceful: false })
+    stop.mockRestore()
   })
 })
