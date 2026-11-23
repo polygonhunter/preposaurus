@@ -12,7 +12,7 @@ updates:
         dependency-type: development
         update-types: [minor, patch]
     ignore:
-      # Laufzeit ist Node 24 (docker/Dockerfile), die Typen bleiben auf derselben Hauptversion.
+      # Laufzeit ist Node 26 (docker/Dockerfile, CI), die Typen bleiben auf derselben Hauptversion.
       - dependency-name: '@types/node'
         update-types: [version-update:semver-major]
       # Hauptversionen von TypeScript und ESLint brauchen passende Plugins (z. B. jsx-a11y)
@@ -36,7 +36,8 @@ updates:
     schedule:
       interval: weekly
     ignore:
-      # Node-Hauptversion zusammen mit @types/node und der CI anheben, nicht nur im Image (#187).
+      # Node-Hauptversion (derzeit 26) zusammen mit @types/node und der CI anheben, nicht nur im
+      # Image (wie in #187), deshalb kommt sie gezielt als eigenes Issue.
       - dependency-name: node
         update-types: [version-update:semver-major]
 
