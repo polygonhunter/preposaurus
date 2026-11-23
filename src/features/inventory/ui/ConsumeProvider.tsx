@@ -3,6 +3,7 @@
 import { useState, useTransition, type ReactNode } from 'react'
 import { useIsOnline } from '@/shared/hooks/use-is-online'
 import { NoticeBar } from '@/shared/ui/NoticeBar'
+import { OFFLINE_WRITE_MESSAGE } from '@/shared/ui/OfflineWriteGuard'
 import { UndoBar } from '@/shared/ui/UndoBar'
 import { consumeAction } from '../actions/consume-action'
 import { undoConsumeAction } from '../actions/undo-consume-action'
@@ -44,6 +45,11 @@ export function ConsumeProvider({ children }: ConsumeProviderProps) {
   }
 
   const undo = (unitId: string) => {
+    // „Rückgängig“ steht fünf Sekunden da, die Verbindung kann in der Zeit wegfallen.
+    if (!isOnline) {
+      setNotice({ kind: 'error', message: OFFLINE_WRITE_MESSAGE })
+      return
+    }
     setNotice(null)
     startTransition(async () => {
       const result = await undoConsumeAction(unitId)

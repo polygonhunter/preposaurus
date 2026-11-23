@@ -1,6 +1,7 @@
 // Verbindung zum NAS (M10-02, #82). navigator.onLine allein reicht nicht: Ist Tailscale aus, hat
 // das Handy WLAN, erreicht das NAS aber nicht. Darum fragt der Hook beim Start /api/health ab und
-// wiederholt das ohne Verbindung alle paar Sekunden. Meldet der Browser „online“, gilt das sofort.
+// wiederholt das ohne Verbindung alle paar Sekunden. Meldet der Browser „online“ oder kommt die App
+// wieder nach vorn, fragt er sofort nach, statt dem Browser blind zu glauben.
 import { useSyncExternalStore } from 'react'
 
 const HEALTH_URL = '/api/health'
@@ -21,9 +22,12 @@ function syncRetry(): void {
 }
 
 function setOnline(next: boolean): void {
-  if (next === isOnline) return
+  const hasChanged = next !== isOnline
   isOnline = next
+  // Auch ohne Wechsel: Nach einem Neustart des Hooks (alle Abonnenten weg und wieder da) muss das
+  // Nachfragen ohne Verbindung wieder laufen.
   syncRetry()
+  if (!hasChanged) return
   for (const listener of listeners) listener()
 }
 
@@ -41,13 +45,18 @@ async function probe(): Promise<void> {
 const goOffline = () => {
   setOnline(false)
 }
+// WLAN zurück heißt nicht NAS erreichbar (Tailscale aus): erst nachfragen, dann freigeben.
 const goOnline = () => {
-  setOnline(true)
+  void probe()
+}
+const recheckWhenVisible = () => {
+  if (document.visibilityState === 'visible') void probe()
 }
 
 function start(): void {
   window.addEventListener('offline', goOffline)
   window.addEventListener('online', goOnline)
+  document.addEventListener('visibilitychange', recheckWhenVisible)
   if (navigator.onLine) void probe()
   else setOnline(false)
 }
@@ -55,6 +64,7 @@ function start(): void {
 function stop(): void {
   window.removeEventListener('offline', goOffline)
   window.removeEventListener('online', goOnline)
+  document.removeEventListener('visibilitychange', recheckWhenVisible)
   clearInterval(retryTimer)
   retryTimer = undefined
 }

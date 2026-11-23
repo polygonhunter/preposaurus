@@ -22,7 +22,7 @@ export function InstallHint() {
         Tippt in Safari auf „Teilen“ und dann auf „Zum Home-Bildschirm“. Dann startet Preposaurus
         wie eine App, und Erinnerungen per Push sind möglich.
       </p>
-      <Button variant="plain" onClick={dismiss}>
+      <Button variant="plain" onClick={dismiss} className="-ml-1">
         Ausblenden
       </Button>
     </section>
