@@ -190,12 +190,4 @@ describe('Bearbeiten und Löschen im Vorrat (#49, #50)', () => {
       expect(await unitRow(foreignStock.unitIds[0] ?? '')).toBeDefined()
     })
   })
-
-  it('lehnt das Löschen einer Erfassung mit Packungen ab (Migration 0006)', async () => {
-    await expect(
-      testDb.db.delete(captures).where(eq(captures.id, stock.captureId)),
-    ).rejects.toThrow()
-    expect(await exists(captures, stock.captureId)).toBe(true)
-    expect(await unitRow(stock.unitIds[0] ?? '')).toBeDefined()
-  })
 })

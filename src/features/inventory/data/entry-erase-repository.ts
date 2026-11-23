@@ -1,8 +1,8 @@
 // Endgültiges Löschen einer Fehlerfassung (#50) in einer Transaktion. Jede Abfrage filtert auf den
 // Haushalt (#133). Produkt löschen nimmt per CASCADE seine Einheiten (auch verbrauchte und
 // entsorgte, also den Verlauf) und seine Fotozeilen mit. Die Fotos werden vorher gelesen, weil
-// ihre Dateien danach noch weg müssen. Leer gewordene Erfassungen verschwinden zuletzt; eine
-// Erfassung mit Packungen lehnt die DB ab (NO ACTION DEFERRABLE, Migration 0006).
+// ihre Dateien danach noch weg müssen. Zuletzt verschwinden nur Erfassungen, an denen keine
+// Packung mehr hängt (NOT EXISTS), so nimmt ihr CASCADE nie still einen Verlauf mit.
 import 'server-only'
 import { and, count, eq, inArray, notExists } from 'drizzle-orm'
 import type { Database } from '@/server/db/connection'
