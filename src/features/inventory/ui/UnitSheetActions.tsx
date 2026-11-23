@@ -1,5 +1,6 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { Button } from '@/shared/ui/Button'
 import { useConsume } from './consume-context'
 
@@ -12,6 +13,8 @@ type UnitSheetActionsProps = Readonly<{
   name: string
   dateLabel: string
   onDone: () => void
+  // Weitere Knöpfe vor „Abbrechen“, z. B. „Datum ändern“
+  extra?: ReactNode
 }>
 
 // Aktionen im Blatt „Einheit“ (UX-Konzept §8.4, #47): Verbraucht · Entsorgt · Noch gut. Jede
@@ -22,6 +25,7 @@ export function UnitSheetActions({
   name,
   dateLabel,
   onDone,
+  extra,
 }: UnitSheetActionsProps) {
   const { consume, discard, markStillGood, isLocked } = useConsume()
   const label = { name, dateLabel }
@@ -59,6 +63,7 @@ export function UnitSheetActions({
           Noch gut
         </Button>
       )}
+      {extra}
       <Button variant="plain" onClick={onDone}>
         Abbrechen
       </Button>

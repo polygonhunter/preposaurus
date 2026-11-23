@@ -4,7 +4,6 @@ import type { RestockItem, RestockSource } from '../../src/features/restock/doma
 
 interface StoredItem extends RestockItem {
   householdId: string
-  productId: string | null
 }
 
 interface ConsumedUnit {
@@ -29,6 +28,7 @@ export function storedItem(
     source: 'manuell' as RestockSource,
     isDone: false,
     productId: null,
+    foodTypeId: null,
     createdAt: NOW,
     changedAt: NOW,
     ...overrides,

@@ -120,7 +120,10 @@ describe('Nachkaufen-Liste gegen die Datenbank', () => {
     expect(first.ok && first.value.label).toBe(label)
     expect(first.ok && first.value.addedItemId).toBeTypeOf('string')
     expect(second).toEqual({ ok: true, value: { label, addedItemId: null } })
-    expect((await load()).replace.map((item) => item.label)).toEqual([label])
+    const { replace } = await load()
+    expect(replace.map((item) => item.label)).toEqual([label])
+    // „Erfassen“ öffnet die Erfassung mit dieser Lebensmittelart (#195)
+    expect(replace[0]?.captureTarget?.kind).toBe('food-type')
   })
 
   it('legt bei zwei gleichzeitigen Tipps auf „Nachkaufen“ nur einen Eintrag an', async () => {

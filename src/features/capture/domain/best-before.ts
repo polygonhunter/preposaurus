@@ -3,8 +3,7 @@ import {
   addMonths,
   calendarDayFrom,
   dayParts,
-  endOfMonth,
-  endOfYear,
+  normalizeToPrecision,
   type CalendarDay,
 } from '@/shared/lib/dates'
 import { err, ok, type Result } from '@/shared/lib/result'
@@ -79,16 +78,6 @@ function build(numbers: DateNumbers, precision: BestBeforePrecision): ParseResul
 const buildDay = (year: number, month: number, day: number) => build({ year, month, day }, 'day')
 const buildMonth = (year: number, month: number) => build({ year, month, day: 1 }, 'month')
 const buildYear = (year: number) => build({ year, month: 1, day: 1 }, 'year')
-
-/** Nur Monat oder Jahr bekannt: Es gilt das Monats- bzw. Jahresende. */
-export function normalizeToPrecision(
-  date: CalendarDay,
-  precision: BestBeforePrecision,
-): CalendarDay {
-  if (precision === 'month') return endOfMonth(date)
-  if (precision === 'year') return endOfYear(date)
-  return date
-}
 
 function withPrecision(date: CalendarDay, precision: BestBeforePrecision): BestBefore {
   return { date: normalizeToPrecision(date, precision), precision, isEstimated: false }

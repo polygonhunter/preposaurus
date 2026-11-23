@@ -3,7 +3,7 @@
 import 'server-only'
 import type { GoalGaps } from '@/features/supply/application/get-goal-gaps'
 import type { HouseholdDay } from '@/features/supply/application/stock-snapshot'
-import { buildRestockList, type RestockItem } from '../domain/restock-list'
+import { buildRestockList, captureTargetOf, type RestockItem } from '../domain/restock-list'
 import type { RestockItemDto, RestockListDto } from '../schemas'
 import type { RestockRepository } from './restock-repository'
 
@@ -12,11 +12,12 @@ export interface RestockListPorts {
   loadGoalGaps: (input: HouseholdDay) => Promise<GoalGaps>
 }
 
-const toItemDto = ({ id, label, source, isDone }: RestockItem): RestockItemDto => ({
-  id,
-  label,
-  source,
-  isDone,
+const toItemDto = (item: RestockItem): RestockItemDto => ({
+  id: item.id,
+  label: item.label,
+  source: item.source,
+  isDone: item.isDone,
+  captureTarget: captureTargetOf(item),
 })
 
 export async function getRestockList(

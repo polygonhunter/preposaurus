@@ -1,3 +1,4 @@
+import { prefilledCapturePath } from '@/shared/config/stock-paths'
 import { EmptyState } from '@/shared/ui/EmptyState'
 import { PageHeader } from '@/shared/ui/PageHeader'
 import { StatTiles } from '@/shared/ui/StatTiles'
@@ -9,18 +10,23 @@ import { PathLine } from './PathLine'
 import { ProductSection } from './ProductSection'
 import { ShelfLifeChart } from './ShelfLifeChart'
 import { detailTiles, shelfLifeHint, uncountedNote } from './stock-format'
-import { CAPTURE_PATH, groupPath } from './stock-paths'
+import { groupPath } from './stock-paths'
 import { TakeFifoBar } from './TakeFifoBar'
 
 type FoodTypeDetailViewProps = Readonly<{
   detail: FoodTypeDetail
   history: readonly HistoryEntry[]
+  // Nur der Admin sieht „Fehlerfassung löschen“ (#50)
+  isAdmin: boolean
 }>
 
 // Detail einer Lebensmittelart (UX-Konzept §8.4, #45): Pfadzeile, Large Title, Kennwerte,
 // Säulen je MHD, Abschnitte je Produkt mit Zeilen je Datum, Verlauf (#48), unten fest
 // „1 entnehmen · MHD“.
-export function FoodTypeDetailView({ detail, history }: FoodTypeDetailViewProps) {
+export function FoodTypeDetailView({ detail, history, isAdmin }: FoodTypeDetailViewProps) {
+  const back = groupPath(detail.path.group.key)
+  // Verschwindet das einzige Produkt, gibt es die Seite nicht mehr: dann zurück zur Warengruppe
+  const leaveHref = detail.products.length > 1 ? null : back
   const fifoGroup = fifoGroupOf(detail.products, detail.fifoUnitId)
   const columns = shelfLifeColumns(detail.products)
   const hint = shelfLifeHint(detail.typicalShelfLifeMonths)
@@ -29,7 +35,7 @@ export function FoodTypeDetailView({ detail, history }: FoodTypeDetailViewProps)
     <ConsumeProvider>
       <PageHeader
         title={detail.name}
-        back={{ href: groupPath(detail.path.group.key), label: 'Zurück' }}
+        back={{ href: back, label: 'Zurück' }}
         eyebrow={<PathLine path={detail.path} />}
       />
       <div className="pt-3">
@@ -41,7 +47,7 @@ export function FoodTypeDetailView({ detail, history }: FoodTypeDetailViewProps)
       {columns.length === 0 ? (
         <EmptyState
           text="Aktuell nichts im Vorrat."
-          action={{ href: CAPTURE_PATH, label: 'Packungen hinzufügen' }}
+          action={{ href: prefilledCapturePath(detail.target), label: 'Packungen hinzufügen' }}
         />
       ) : (
         <ShelfLifeChart columns={columns} />
@@ -53,6 +59,8 @@ export function FoodTypeDetailView({ detail, history }: FoodTypeDetailViewProps)
           name={detail.name}
           fifoUnitId={detail.fifoUnitId}
           hasOwnHeading={detail.products.length > 1}
+          isAdmin={isAdmin}
+          leaveHref={leaveHref}
         />
       ))}
       {hint === null ? null : (

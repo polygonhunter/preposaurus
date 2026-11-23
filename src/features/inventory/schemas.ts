@@ -56,6 +56,18 @@ export const undoStillGoodSchema = z.object({
   checkedAt: isoDay,
 })
 
+/** „Datum ändern“ bzw. „Datum nachtragen“ (#49, #116): ein eingegebenes MHD, nie geschätzt. */
+export const changeUnitDatesSchema = z.object({
+  unitIds: z.array(id).min(1).max(MAX_UNITS_PER_REQUEST),
+  bestBefore: z.object({ date: isoDay, precision: z.enum(['day', 'month', 'year']) }),
+})
+
+/** Fehlerfassung endgültig löschen (#50): ein ganzes Produkt oder eine einzelne Packung. */
+export const deleteEntrySchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('product'), productId: id }),
+  z.object({ kind: z.literal('unit'), unitId: id }),
+])
+
 // ---------- Bausteine ----------
 
 const unitStateSchema = z.enum(['good', 'soon', 'urgent', 'expired', 'no-date'])
@@ -200,6 +212,18 @@ export const historyEntrySchema = z.object({
   bestBefore: bestBeforeSchema.nullable(),
 })
 
+/** Datumszeile für „Datum ändern“ (#49): alle Packungen eines Produkts mit diesem Datum. */
+export const unitDateGroupSchema = z.object({
+  target: stockTargetSchema,
+  name: z.string(),
+  productName: z.string(),
+  bestBefore: bestBeforeSchema.nullable(),
+  kind: z.enum(['best-before', 'use-by']),
+  unitIds: z.array(id).min(1),
+  /** Packungen der Zeile mit „Noch gut“, das mit einem neuen Datum entfällt */
+  checkedCount: z.number().int(),
+})
+
 // ---------- 4 · Bald fällig ----------
 
 const dueGroupSchema = z.enum(['expired', 'this-week', 'this-month', 'next-three-months'])
@@ -239,6 +263,8 @@ export const stockSearchSchema = z.object({
 })
 
 export type StockTarget = z.infer<typeof stockTargetSchema>
+export type DeleteEntryRequest = z.infer<typeof deleteEntrySchema>
+export type UnitDateGroup = z.infer<typeof unitDateGroupSchema>
 export type StockFilter = z.infer<typeof stockFilterSchema>
 export type DueSort = z.infer<typeof dueSortSchema>
 export type ConsumeRequest = z.infer<typeof consumeRequestSchema>

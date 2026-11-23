@@ -26,6 +26,9 @@ export function photoKeysFor(ids: PhotoIds): PhotoKeys {
 }
 
 /** Löscht beide Dateien. Fehlt eine, passiert nichts (Port-Vertrag). */
-export async function deletePhotoFiles(storage: PhotoStorage, keys: PhotoKeys): Promise<void> {
+export async function deletePhotoFiles(
+  storage: Pick<PhotoStorage, 'delete'>,
+  keys: PhotoKeys,
+): Promise<void> {
   await Promise.all([storage.delete(keys.full), storage.delete(keys.thumbnail)])
 }
