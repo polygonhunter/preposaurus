@@ -9,6 +9,7 @@ const foodType = (id: string): FoodTypeChoice => ({
   categoryName: 'Kategorie',
   productGroupName: 'Warengruppe',
   kcalPer100: null,
+  searchTerms: [],
 })
 
 const product = (id: string, foodTypeId: string | null): KnownProduct => ({
