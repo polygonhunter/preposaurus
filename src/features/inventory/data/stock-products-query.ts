@@ -13,6 +13,7 @@ import { products } from '@/server/db/schema/inventory'
 import { productGroups } from '@/server/db/schema/recommendation'
 import { toNumberOrNull, toNutritionSource } from './db-values'
 import { isAnyOf } from './id-list'
+import { productGroupShortName } from '@/shared/config/product-groups'
 
 const ownOrSystem = (column: AnyPgColumn, householdId: string) =>
   or(isNull(column), eq(column, householdId))
@@ -143,7 +144,11 @@ function toStockProduct(row: ProductRow): StockProduct {
     },
     foodType: toFoodType(row),
     category: { id: row.categoryId, name: row.categoryName, pictogram: row.categoryPictogram },
-    group: { key: row.groupKey, name: row.groupName },
+    group: {
+      key: row.groupKey,
+      name: row.groupName,
+      shortName: productGroupShortName(row.groupKey, row.groupName),
+    },
     container: refOrNull(row.containerId, row.containerName),
     storageLocation: refOrNull(row.locationId, row.locationName),
   }

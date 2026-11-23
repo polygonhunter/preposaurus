@@ -39,7 +39,7 @@ const water = product({
   },
   foodType: null,
   category: { id: 'kat-wasser', name: 'Wasser', pictogram: null },
-  group: { key: 'wasser', name: 'Wasser' },
+  group: { key: 'wasser', name: 'Wasser', shortName: 'Wasser' },
 })
 
 // 4 × Nudeln 500 g à 359 kcal/100 g = 7.180 kcal (3,5 Tage), 3 × 6 l Wasser = 18 l (9 Tage)
@@ -94,6 +94,17 @@ describe('getOverview', () => {
       waterDays: 9,
       bottleneck: 'energy',
       isApproximate: false,
+      explanation: {
+        kcal: 8975,
+        waterMl: 18000,
+        kcalPerDay: 2000,
+        waterMlPerDay: 2000,
+        needLines: [{ type: 'adult', count: 1, kcalPerDay: 2000, waterMlPerDay: 2000 }],
+        uncountedMembers: 0,
+        estimatedShare: 0,
+        packages: { expired: 1, stillGood: 0, missingDate: 1 },
+        stillGoodCounts: false,
+      },
     })
   })
 
@@ -140,7 +151,14 @@ describe('getOverview', () => {
 
     // 5 haltbare Packungen à 500 g gegen 150 g × 10 Tage
     expect(groups).toEqual([
-      { key: 'getreide', name: 'Getreide', days: 16.6, goalDays: 10, isTightest: true },
+      {
+        key: 'getreide',
+        name: 'Getreide',
+        shortName: 'Getreide',
+        days: 16.6,
+        goalDays: 10,
+        isTightest: true,
+      },
     ])
   })
 

@@ -18,7 +18,7 @@ export function ConsumeButton({ unitId, name, dateLabel }: ConsumeButtonProps) {
     <Button
       variant="tinted"
       aria-label={`1 Packung ${name} verbraucht`}
-      disabled={isLocked}
+      aria-disabled={isLocked}
       onClick={() => {
         consume({ kind: 'unit', unitId }, { name, dateLabel })
       }}

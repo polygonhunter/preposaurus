@@ -44,9 +44,10 @@ export async function getStockOverview(
     stillGoodCounts: context.stillGoodCounts,
   })
   return {
-    groups: groups.map(({ key, name }) => ({
+    groups: groups.map(({ key, name, shortName }) => ({
       key,
       name,
+      shortName,
       totals: totalsOf(totals, { level: 'group', key }),
       coverage: coverageFor(coverage, key),
     })),

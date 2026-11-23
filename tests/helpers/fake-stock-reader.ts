@@ -14,9 +14,9 @@ import type { SupplyBasis } from '@/features/supply/domain/supply-basis'
 import { toCalendarDay } from '@/shared/lib/dates'
 
 export const GROUPS = [
-  { key: 'getreide', name: 'Getreide' },
-  { key: 'wasser', name: 'Wasser' },
-  { key: 'sonstiges', name: 'Sonstiges' },
+  { key: 'getreide', name: 'Getreide', shortName: 'Getreide' },
+  { key: 'wasser', name: 'Wasser', shortName: 'Wasser' },
+  { key: 'sonstiges', name: 'Sonstiges', shortName: 'Sonstiges' },
 ]
 
 const NO_BASIS: SupplyBasis = {
@@ -109,7 +109,7 @@ export function createFakeStockReader(data: FakeData) {
 
 // ---------- Testdaten-Bausteine ----------
 
-const getreide = { key: 'getreide', name: 'Getreide' }
+const getreide = { key: 'getreide', name: 'Getreide', shortName: 'Getreide' }
 const nudelnCategory = { id: 'kat-nudeln', name: 'Nudeln', pictogram: '🍝' }
 export const reisCategory = { id: 'kat-reis', name: 'Reis', pictogram: '🍚' }
 

@@ -86,7 +86,15 @@ test('Erfassen ist erreichbar, auch wenn die Beschriftung nur für Screenreader 
 
 test('Einstellungen sind von der Übersicht aus erreichbar', async ({ page }) => {
   await page.goto('/uebersicht')
-  await page.getByRole('main').getByRole('link', { name: 'Einstellungen' }).click()
+  // Ab „breit“ führt nur die Seitenleiste hin, das Zahnrad wäre ein zweites Ziel (#218).
+  const isWide = (page.viewportSize()?.width ?? 0) >= 900
+  const gear = page.getByRole('main').getByRole('link', { name: 'Einstellungen' })
+  if (isWide) {
+    await expect(gear).toHaveCount(0)
+    await mainNav(page).getByRole('link', { name: 'Einstellungen' }).click()
+  } else {
+    await gear.click()
+  }
 
   await expect(page.getByRole('heading', { level: 1, name: 'Einstellungen' })).toBeVisible()
 })
