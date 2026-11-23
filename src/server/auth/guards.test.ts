@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { requireAdmin, requireHouseholdUser, requireUser } from './guards'
+import { requireAdmin, requireHouseholdAdmin, requireHouseholdUser, requireUser } from './guards'
 import { readSession, type SessionUser } from './session'
 
 vi.mock('next/headers', () => ({ headers: () => Promise.resolve(new Headers()) }))
@@ -51,5 +51,22 @@ describe('Guards', () => {
     signedInAs({ ...member, role: 'admin', householdId: null })
 
     expect(await requireHouseholdUser()).toEqual({ ok: false, error: { kind: 'forbidden' } })
+  })
+
+  it('requireHouseholdAdmin verlangt Admin und Haushalt', async () => {
+    signedInAs(member)
+    expect(await requireHouseholdAdmin()).toEqual({ ok: false, error: { kind: 'forbidden' } })
+
+    signedInAs({ ...member, role: 'admin', householdId: null })
+    expect(await requireHouseholdAdmin()).toEqual({ ok: false, error: { kind: 'forbidden' } })
+
+    signedInAs(null)
+    expect(await requireHouseholdAdmin()).toEqual({
+      ok: false,
+      error: { kind: 'unauthenticated' },
+    })
+
+    signedInAs({ ...member, role: 'admin' })
+    expect(await requireHouseholdAdmin()).toEqual({ ok: true, value: { ...member, role: 'admin' } })
   })
 })

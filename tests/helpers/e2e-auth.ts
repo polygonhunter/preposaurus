@@ -14,6 +14,9 @@ export const E2E_ADMIN = {
 
 export const ADMIN_STORAGE_STATE = '.data/e2e-auth/admin.json'
 
+/** Login mit der Rolle Mitglied, legt das Projekt „beispielvorrat“ an (db/seeds/demo-e2e.ts) */
+export { E2E_MEMBER_LOGIN as E2E_MEMBER } from '../../db/seeds/demo-data'
+
 /** Für test.use(): ohne gespeicherte Sitzung starten */
 export const signedOut = { storageState: { cookies: [], origins: [] } }
 
