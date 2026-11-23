@@ -1,13 +1,15 @@
 // Use-Case 1 · Vorrat Ebene 1 (UX-Konzept §8.3, DATENKATALOG `getGroupLevel`): je Warengruppe
 // die Summen aus `calculateNodeTotals` und die Abdeckung „X von Y Tagen“. Leere Warengruppen
-// bleiben stehen, denn die Lücke ist eine Information.
+// bleiben stehen, denn die Lücke ist eine Information. Dazu die Zähler der Zustands-Chips aus
+// denselben Packungen (#221).
 import 'server-only'
 import { coverageOf, type GroupCoverage } from '@/features/supply/application/stock-figures'
 import type { CalendarDay } from '@/shared/lib/dates'
+import { countByStatusFilter } from '../domain/stock-filter'
 import type { StockOverview } from '../schemas/stock'
 import { loadReadContext, totalsByNode, totalsOf } from './read-context'
 import type { StockReader } from './stock-reader'
-import { joinUnits, toGroupUnit } from './stock-model'
+import { joinUnits, toFilterableUnit, toGroupUnit } from './stock-model'
 
 interface OverviewInput {
   householdId: string
@@ -52,5 +54,6 @@ export async function getStockOverview(
       coverage: coverageFor(coverage, key),
     })),
     goalDays: context.basis.goalDays,
+    counts: countByStatusFilter(units.map(toFilterableUnit), context),
   }
 }

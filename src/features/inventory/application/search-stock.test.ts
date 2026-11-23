@@ -1,7 +1,9 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
-import type { StockStatusFilter } from '../domain/stock-filter'
+import type { IncompleteReason } from '../domain/incomplete'
+import type { InStockStatusFilter, StockStatusFilter } from '../domain/stock-filter'
 import { type StockFilter, stockFilterSchema } from '../schemas/requests'
+import type { InStockCounts, IncompleteReasonDto } from '../schemas/shared'
 import {
   createFakeStockReader,
   product,
@@ -55,6 +57,8 @@ const search = (filter: Record<string, string>, household = householdId) =>
 describe('searchStock', () => {
   it('spiegelt die Zustands-Filter des Schemas genau im Domain-Typ', () => {
     expectTypeOf<StockFilter['status']>().toEqualTypeOf<StockStatusFilter>()
+    expectTypeOf<keyof InStockCounts>().toEqualTypeOf<InStockStatusFilter>()
+    expectTypeOf<IncompleteReasonDto>().toEqualTypeOf<IncompleteReason>()
   })
 
   it('zählt jeden Zustand in Packungen, auch Verbraucht und Entsorgt', async () => {
@@ -89,6 +93,12 @@ describe('searchStock', () => {
     expect(incomplete.groups.flatMap((group) => group.rows.map((row) => row.name))).toEqual([
       'Spaghetti',
       'Ravioli',
+    ])
+    expect(
+      incomplete.groups.flatMap((group) => group.rows.map((row) => [row.name, row.incomplete])),
+    ).toEqual([
+      ['Spaghetti', [{ reason: 'date-missing', packages: 1 }]],
+      ['Ravioli', [{ reason: 'estimate-unconfirmed', packages: 1 }]],
     ])
     expect(consumed.groups[0]?.rows[0]).toMatchObject({
       name: 'Spaghetti',

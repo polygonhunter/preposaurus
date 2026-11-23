@@ -108,5 +108,18 @@ describe('getStockOverview', () => {
     expect(overview.groups.every((group) => group.totals.packages === 0)).toBe(true)
     expect(overview.groups.every((group) => group.coverage === null)).toBe(true)
     expect(overview.goalDays).toBeNull()
+    expect(overview.counts['in-stock']).toBe(0)
+  })
+
+  it('zählt die Zustands-Chips aus denselben Packungen im Vorrat (#221)', async () => {
+    const overview = await getStockOverview(setup(), { householdId, today })
+
+    // Die „Noch gut“ geprüfte Packung ist entschieden und steht nicht unter „Abgelaufen“
+    expect(overview.counts).toEqual({
+      'in-stock': 5,
+      'due-soon': 0,
+      expired: 0,
+      incomplete: 0,
+    })
   })
 })
