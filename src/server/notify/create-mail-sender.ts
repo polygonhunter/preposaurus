@@ -13,7 +13,10 @@ type SmtpEnv = Pick<
 
 const IMPLICIT_TLS_PORT = 465
 
-/** null, wenn SMTP nicht eingerichtet ist. Vollständigkeit prüft schon env.ts. */
+/**
+ * null, wenn SMTP nicht eingerichtet ist. Vollständigkeit prüft schon env.ts.
+ * @internal Nur für Tests exportiert, im Code nur in dieser Datei genutzt.
+ */
 export function smtpConfigFrom(env: SmtpEnv): SmtpConfig | null {
   if (env.SMTP_HOST === undefined || env.SMTP_FROM === undefined) return null
   const auth =

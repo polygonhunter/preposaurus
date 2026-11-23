@@ -36,8 +36,6 @@ export const stockFilterSchema = z.object({
   storageLocationId: id.optional(),
 })
 
-export const dueSortSchema = z.enum(['date', 'location']).default('date')
-
 /** „Verbraucht“: eine bestimmte Packung oder die nächste nach MHD aus einer Zeile („−1“, #46). */
 export const consumeRequestSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('unit'), unitId: id }),
@@ -122,6 +120,7 @@ const coverageSchema = z.object({
 
 // ---------- 1 · Vorrat-Übersicht (Ebene 1) ----------
 
+/** @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen. */
 export const stockOverviewSchema = z.object({
   groups: z.array(
     groupRef.extend({
@@ -135,6 +134,7 @@ export const stockOverviewSchema = z.object({
 
 // ---------- 2 · Lebensmittelarten einer Warengruppe (Ebene 2) ----------
 
+/** @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen. */
 export const foodTypeLevelSchema = z.object({
   group: groupRef.extend({ totals: nodeTotalsSchema }),
   categories: z.array(
@@ -184,6 +184,7 @@ const bestBeforeGroupSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('no-date'), units: z.array(detailUnitSchema) }),
 ])
 
+/** @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen. */
 export const foodTypeDetailSchema = z.object({
   target: stockTargetSchema,
   name: z.string(),
@@ -207,7 +208,10 @@ export const foodTypeDetailSchema = z.object({
   ),
 })
 
-/** Eintrag im Verlauf einer Lebensmittelart (#48). Bei „Noch gut“ ist die Person unbekannt. */
+/**
+ * Eintrag im Verlauf einer Lebensmittelart (#48). Bei „Noch gut“ ist die Person unbekannt.
+ * @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen.
+ */
 export const historyEntrySchema = z.object({
   kind: z.enum(['consumed', 'discarded', 'still-good']),
   day: isoDay,
@@ -215,7 +219,10 @@ export const historyEntrySchema = z.object({
   bestBefore: bestBeforeSchema.nullable(),
 })
 
-/** Datumszeile für „Datum ändern“ (#49): alle Packungen eines Produkts mit diesem Datum. */
+/**
+ * Datumszeile für „Datum ändern“ (#49): alle Packungen eines Produkts mit diesem Datum.
+ * @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen.
+ */
 export const unitDateGroupSchema = z.object({
   target: stockTargetSchema,
   name: z.string(),
@@ -245,6 +252,7 @@ const dueEntrySchema = z.object({
   canConfirmStillGood: z.boolean(),
 })
 
+/** @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen. */
 export const dueUnitsSchema = z.object({
   thresholds: z.object({ soonDays: z.number().int(), urgentDays: z.number().int() }),
   counts: z.record(dueGroupSchema, z.number().int()),
@@ -253,6 +261,7 @@ export const dueUnitsSchema = z.object({
 
 // ---------- 5 · Filter und Suche (Treffermodus) ----------
 
+/** @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen. */
 export const stockSearchSchema = z.object({
   counts: z.record(z.enum(STOCK_STATUS_FILTERS), z.number().int()),
   groups: z.array(
@@ -267,7 +276,8 @@ export type StockTarget = z.infer<typeof stockTargetSchema>
 export type DeleteEntryRequest = z.infer<typeof deleteEntrySchema>
 export type UnitDateGroup = z.infer<typeof unitDateGroupSchema>
 export type StockFilter = z.infer<typeof stockFilterSchema>
-export type DueSort = z.infer<typeof dueSortSchema>
+/** Sortierung von „Bald fällig“. Die Seite liest sie über readDueSort aus der Adresse. */
+export type DueSort = 'date' | 'location'
 export type ConsumeRequest = z.infer<typeof consumeRequestSchema>
 export type BestBeforeDto = z.infer<typeof bestBeforeSchema>
 export type UnitStateDto = z.infer<typeof unitStateSchema>

@@ -13,7 +13,10 @@ import type {
   VisionRecognizer,
 } from './vision-recognizer'
 
-/** Eine Zeile in ki_aufruf. Nie mit Schlüssel oder Bildinhalt. */
+/**
+ * Eine Zeile in ki_aufruf. Nie mit Schlüssel oder Bildinhalt.
+ * @internal Nur für Tests exportiert, im Code nur in dieser Datei genutzt.
+ */
 export interface AiCallEntry extends AiCallRecord {
   householdId: string
   photoId: string | null
