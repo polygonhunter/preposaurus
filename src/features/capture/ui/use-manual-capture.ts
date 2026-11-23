@@ -4,7 +4,7 @@
 // ein neues Formular beginnt: Ein doppeltes Tippen speichert also nur einmal.
 import { useActionState, useState, startTransition } from 'react'
 import { createStockAction, type CreateStockState } from '../actions/create-stock-action'
-import { manualCaptureSchema } from '../schemas'
+import { manualCaptureSchema } from '../schemas/manual-capture'
 import {
   captureErrorsOf,
   clearErrorsFor,

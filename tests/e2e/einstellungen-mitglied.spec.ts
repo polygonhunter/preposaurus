@@ -41,6 +41,7 @@ test('Admin-Seiten antworten auch per Direktaufruf mit „nicht gefunden“', as
   for (const path of [
     '/einstellungen/nutzer',
     '/einstellungen/system',
+    '/einstellungen/nutzer/neu',
     '/einstellungen/mitglieder/neu',
   ]) {
     const response = await page.goto(path)

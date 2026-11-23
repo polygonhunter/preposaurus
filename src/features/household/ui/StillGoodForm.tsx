@@ -5,7 +5,7 @@ import { GroupFooter } from '@/shared/ui/GroupFooter'
 import { Toggle } from '@/shared/ui/Toggle'
 import { SETTING_IDLE } from '../actions/action-messages'
 import { saveStillGoodAction } from '../actions/save-still-good-action'
-import { SettingStatus } from './SettingStatus'
+import { SaveStatus } from '@/shared/ui/SaveStatus'
 
 type StillGoodFormProps = Readonly<{ isOn: boolean }>
 
@@ -23,7 +23,7 @@ export function StillGoodForm({ isOn }: StillGoodFormProps) {
         „Heute versorgt“. Fürs Zieldatum zählen sie nie mit.
       </GroupFooter>
       <div className="mx-4 flex items-center justify-between gap-3 breit:mx-6">
-        <SettingStatus state={state} />
+        <SaveStatus state={state} />
         <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Speichert …' : undefined}>
           Speichern
         </Button>

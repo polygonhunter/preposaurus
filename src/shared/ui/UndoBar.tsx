@@ -12,7 +12,7 @@ type UndoBarProps = Readonly<{
   onUndo: () => void
   // Wird nach fünf Sekunden aufgerufen; dann blendet der Aufrufer die Zeile aus
   onDismiss: () => void
-  // Optionale zweite Handlung, z. B. „Auf Einkaufsliste“
+  // Optionale zweite Handlung, z. B. „Nachkaufen“ oder „Jetzt erfassen“
   secondary?: BarAction
 }>
 

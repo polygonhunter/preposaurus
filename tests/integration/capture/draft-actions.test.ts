@@ -132,7 +132,7 @@ describe('Entwurf sichern, fortsetzen, verwerfen', () => {
 
     expect(result).toEqual({
       ok: false,
-      message: 'Der Stand ließ sich nicht sichern. Bitte prüfe die Eingaben.',
+      message: 'Der Stand ließ sich nicht sichern. Bitte prüft die Eingaben.',
     })
     expect(await testDb.db.select().from(captureDrafts)).toHaveLength(0)
   })

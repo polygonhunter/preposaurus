@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto'
 import type { PlannedUnit } from '../../src/features/capture/domain/stock-draft'
 import type {
   CaptureLookup,
+  DraftAdoption,
   FoodTypeRef,
   NewCapture,
   NewProductRow,
@@ -21,6 +22,7 @@ interface FakeState {
   captures: NewCapture[]
   products: (NewProductRow & { id: string })[]
   units: StoredUnit[]
+  adoptedDrafts: DraftAdoption[]
 }
 
 type ByHousehold<T> = Readonly<Record<string, readonly T[]>>
@@ -33,12 +35,13 @@ interface FakeMasterData {
   candidates?: ByHousehold<ProductCandidate>
 }
 
-const emptyState = (): FakeState => ({ captures: [], products: [], units: [] })
+const emptyState = (): FakeState => ({ captures: [], products: [], units: [], adoptedDrafts: [] })
 
 const copy = (state: FakeState): FakeState => ({
   captures: [...state.captures],
   products: [...state.products],
   units: [...state.units],
+  adoptedDrafts: [...state.adoptedDrafts],
 })
 
 function lookup(state: FakeState, householdId: string, captureId: string): CaptureLookup {
@@ -90,6 +93,10 @@ export function createFakeStockWriter(master: FakeMasterData = {}) {
     claimCapture: (capture: NewCapture) => Promise.resolve(claim(draft, capture)),
     insertProduct: (product: NewProductRow) => Promise.resolve(addProduct(draft, product)),
     insertUnits: (rows: NewUnitRows) => insertUnits(draft, rows),
+    adoptDraft: (adoption: DraftAdoption) => {
+      draft.adoptedDrafts.push(adoption)
+      return Promise.resolve()
+    },
   })
   return {
     get state(): FakeState {

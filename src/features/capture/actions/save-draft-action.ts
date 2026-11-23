@@ -4,12 +4,12 @@
 import { requireCaptureActor } from '../application/capture-actor'
 import { loadCaptureDeps } from '../application/capture-deps'
 import { saveDraft } from '../application/save-draft'
-import { saveDraftInputSchema } from '../schemas'
+import { saveDraftInputSchema } from '../schemas/draft'
 import { accessMessage, DRAFT_GONE, failure, type DraftActionState } from './action-messages'
 
 export type SaveDraftState = DraftActionState<{ draftId: string }>
 
-const INVALID = 'Der Stand ließ sich nicht sichern. Bitte prüfe die Eingaben.'
+const INVALID = 'Der Stand ließ sich nicht sichern. Bitte prüft die Eingaben.'
 
 export async function saveDraftAction(input: unknown): Promise<SaveDraftState> {
   const actor = await requireCaptureActor()

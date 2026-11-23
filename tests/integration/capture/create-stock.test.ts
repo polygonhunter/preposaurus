@@ -5,7 +5,7 @@ import { createStock } from '../../../src/features/capture/application/create-st
 import { findMatchingProducts } from '../../../src/features/capture/application/find-matching-products'
 import type { StockWriter } from '../../../src/features/capture/application/stock-writer'
 import { createStockWriteRepository } from '../../../src/features/capture/data/stock-write-repository'
-import { createStockSchema } from '../../../src/features/capture/schemas'
+import { createStockSchema } from '../../../src/features/capture/schemas/stock'
 import { captures } from '../../../src/server/db/schema/confirmed-captures'
 import { products, units } from '../../../src/server/db/schema/inventory'
 import { createTestDb, type TestDb } from '../../helpers/test-db'

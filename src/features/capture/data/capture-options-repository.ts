@@ -9,7 +9,12 @@ import { captures } from '@/server/db/schema/confirmed-captures'
 import { foodTypes } from '@/server/db/schema/food-types'
 import { products, units } from '@/server/db/schema/inventory'
 import { productGroups } from '@/server/db/schema/recommendation'
-import type { FoodTypeChoice, LastUsed, NamedChoice } from '../domain/capture-options'
+import type {
+  ContainerChoice,
+  FoodTypeChoice,
+  LastUsed,
+  NamedChoice,
+} from '../domain/capture-options'
 
 /** So viele Erfassungen reichen für „Zuletzt genutzt“ und den letzten Lagerort. */
 const RECENT_CAPTURES = 20
@@ -19,6 +24,7 @@ async function loadFoodTypes(db: Database, householdId: string): Promise<FoodTyp
   const rows = await db
     .select({
       id: foodTypes.id,
+      key: foodTypes.key,
       name: foodTypes.name,
       categoryName: categories.name,
       productGroupName: productGroups.name,
@@ -41,9 +47,9 @@ async function loadFoodTypes(db: Database, householdId: string): Promise<FoodTyp
   }))
 }
 
-async function loadContainers(db: Database): Promise<NamedChoice[]> {
+async function loadContainers(db: Database): Promise<ContainerChoice[]> {
   return db
-    .select({ id: containers.id, name: containers.name })
+    .select({ id: containers.id, key: containers.key, name: containers.name })
     .from(containers)
     .orderBy(asc(containers.sortOrder), asc(containers.name))
 }

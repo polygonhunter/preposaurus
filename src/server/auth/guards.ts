@@ -20,7 +20,7 @@ function checkAdmin(user: SessionUser): Result<SessionUser, AccessError> {
   return user.role === 'admin' ? ok(user) : err({ kind: 'forbidden' })
 }
 
-type HouseholdUser = SessionUser & { householdId: string }
+export type HouseholdUser = SessionUser & { householdId: string }
 
 /** Für alles, was Vorrat liest oder schreibt: angemeldet und einem Haushalt zugeordnet. */
 export async function requireHouseholdUser(): Promise<Result<HouseholdUser, AccessError>> {

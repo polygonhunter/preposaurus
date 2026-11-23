@@ -1,5 +1,5 @@
-// Liste der Nutzerverwaltung (#41): Rolle, Status, letzte Anmeldung und verknüpfte Person. Nur für
-// den Admin, die Seite prüft das vorher.
+// Liste der Nutzerverwaltung (#41): Rolle, Status, letzte Anmeldung und verknüpfte
+// Person. Nur für den Admin, die Seite prüft das vorher.
 import 'server-only'
 import { getDb } from '@/server/db/get-db'
 import {

@@ -2,7 +2,7 @@
 // prüft auf dem Gerät, createStockSchema darin auch auf dem Server.
 import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
-import { manualCaptureSchema } from '../schemas'
+import { manualCaptureSchema } from '../schemas/manual-capture'
 import {
   captureErrorsOf,
   clearErrorsFor,
@@ -96,9 +96,9 @@ describe('manualCaptureSchema', () => {
     const errors = errorsOf({ ...emptyDraft(null) })
 
     expect(errors).toEqual({
-      foodTypeId: 'Bitte wähle eine Lebensmittelart.',
-      content: 'Bitte gib den Inhalt einer Packung an, z. B. 500 g.',
-      units: 'Bitte gib ein MHD ein oder wähle „Datum fehlt“.',
+      foodTypeId: 'Bitte wählt eine Lebensmittelart.',
+      content: 'Bitte gebt den Inhalt einer Packung an, z. B. 500 g.',
+      units: 'Bitte gebt ein MHD ein oder wählt „Datum fehlt“.',
     })
     expect(firstInvalidField(errors)).toBe('foodTypeId')
   })

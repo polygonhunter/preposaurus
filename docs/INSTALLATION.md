@@ -295,7 +295,11 @@ Im kostenlosen Tarif sind bis zu 6 Nutzer möglich. Danach legt der Admin für j
 3. Unten auf das **Teilen**-Symbol tippen (Quadrat mit Pfeil nach oben).
 4. **Zum Home-Bildschirm** wählen, Namen bestätigen, **Hinzufügen**.
 
-Erwartet: Preposaurus liegt als eigenes Symbol auf dem Home-Bildschirm und öffnet sich ohne Adressleiste. Benachrichtigungen gehen auf dem iPhone nur aus dieser Home-Bildschirm-App heraus. *Noch nicht am Gerät geprüft:* Kamera in der Home-Bildschirm-App, Verhalten bei ausgeschaltetem Tailscale.
+Erwartet: Preposaurus liegt als eigenes Symbol (drei gestapelte Kisten auf Blau) auf dem Home-Bildschirm, öffnet sich ohne Adressleiste und startet auf der Übersicht. Benachrichtigungen gehen auf dem iPhone nur aus dieser Home-Bildschirm-App heraus. Solange Preposaurus in Safari läuft, erinnert ein Hinweis auf der Übersicht an diesen Schritt. Er lässt sich mit **Ausblenden** schließen und bleibt dann auf diesem Gerät weg.
+
+**Ohne Verbindung** (Tailscale aus, kein Netz, NAS aus): Übersicht und Vorrat zeigen den zuletzt geladenen Stand mit dem Hinweis „Ohne Verbindung – Stand von …“. Erfassen, Entnehmen und alle Formulare sind dann gesperrt. Andere Seiten zeigen nur „Ohne Verbindung“. Gespeichert wird der Stand nur im Browser des Geräts, und nur für den angemeldeten Nutzer: Beim Abmelden und auf der Anmeldeseite wird er gelöscht. Das klappt nur über HTTPS (Tailscale Serve), über `http://` mit IP-Adresse gibt es keinen Offline-Stand.
+
+*Noch nicht am Gerät geprüft:* Kamera in der Home-Bildschirm-App, Offline-Stand bei ausgeschaltetem Tailscale auf einem echten iPhone.
 
 Auf Android geht es in Chrome über das Menü (⋮) → **Zum Startbildschirm hinzufügen**. Am PC reicht ein Lesezeichen.
 

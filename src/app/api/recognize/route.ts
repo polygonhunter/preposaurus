@@ -5,7 +5,7 @@
 import { requireCaptureActor } from '@/features/capture/application/capture-actor'
 import { loadCaptureDeps } from '@/features/capture/application/capture-deps'
 import { recognizePhoto } from '@/features/capture/application/recognize-photo'
-import { recognizeRequestSchema } from '@/features/capture/schemas'
+import { recognizeRequestSchema } from '@/features/capture/schemas/photos'
 import { errorResponse, isCrossSiteRequest, noStoreJson, readJsonBody } from '@/shared/lib/http'
 import { accessErrorResponse } from '../photos/access-error-response'
 import { recognizeErrorResponse } from './recognize-error-response'

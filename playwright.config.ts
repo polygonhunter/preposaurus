@@ -15,6 +15,11 @@ const touch = { isMobile: true, hasTouch: true }
 const signedIn = { storageState: ADMIN_STORAGE_STATE }
 const afterSetup = ['beispielvorrat']
 
+// Die Foto-Erfassung arbeitet mit dem einen Entwurf des gemeinsamen Admins. Deshalb läuft sie nur
+// in einem eigenen Projekt und dort nacheinander (tests/e2e/erfassen-foto.spec.ts). Andere Tests
+// meiden die Frage „Fortsetzen oder verwerfen?“, indem sie /neu/manuell direkt öffnen.
+const PHOTO_SPEC = /erfassen-foto\.spec\.ts$/
+
 // Jeder Lauf beginnt mit einer leeren, migrierten Datenbank mit Stammdaten (wie im Container), damit
 // die Ersteinrichtung testbar ist.
 const E2E_DATA_DIR = '.data/e2e'
@@ -23,10 +28,13 @@ const startServer = isCi ? 'npm run start:standalone' : `npm run dev -- -p ${Str
 
 export default defineConfig({
   testDir: 'tests/e2e',
+  testIgnore: PHOTO_SPEC,
   fullyParallel: true,
   forbidOnly: isCi,
   retries: isCi ? 1 : 0,
   reporter: isCi ? [['github'], ['html', { open: 'never' }]] : 'list',
+  // Der Service Worker läuft nur im Produktionsbuild (tests/e2e/pwa.spec.ts).
+  metadata: { productionServer: isCi },
   use: {
     baseURL: `http://localhost:${String(PORT)}`,
     locale: 'de-DE',
@@ -83,6 +91,19 @@ export default defineConfig({
     {
       name: 'desktop',
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 }, ...signedIn },
+      dependencies: afterSetup,
+    },
+    {
+      name: 'foto',
+      testMatch: PHOTO_SPEC,
+      testIgnore: [],
+      fullyParallel: false,
+      use: {
+        browserName: 'chromium',
+        viewport: { width: 375, height: 812 },
+        ...touch,
+        ...signedIn,
+      },
       dependencies: afterSetup,
     },
   ],

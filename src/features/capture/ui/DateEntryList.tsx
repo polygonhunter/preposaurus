@@ -1,7 +1,7 @@
 import { Group } from '@/shared/ui/Group'
 import { Row } from '@/shared/ui/Row'
 import { dateEntryKey, dateEntryLabel, type DateEntry } from '../domain/date-entries'
-import { MAX_COUNT_PER_DATE } from '../schemas'
+import { MAX_COUNT_PER_DATE } from '../schemas/stock'
 import { CountStepper } from './CountStepper'
 
 type DateEntryListProps = Readonly<{

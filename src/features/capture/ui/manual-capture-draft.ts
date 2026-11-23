@@ -1,5 +1,5 @@
 // Zustand des manuellen Formulars (#52) und seine Fehler je Feld. Die Prüfung selbst steht in
-// capture/schemas.ts (manualCaptureSchema), hier wird nur übersetzt, wo eine Meldung hingehört.
+// capture/schemas/manual-capture.ts (manualCaptureSchema), hier wird nur übersetzt, wo eine Meldung hingehört.
 import type { z } from 'zod'
 import { createUuid } from '@/shared/lib/uuid'
 import type { DateEntry } from '../domain/date-entries'
@@ -17,6 +17,8 @@ export interface ManualCaptureDraft {
   existingProductId: string | null
   nutrition: Record<NutritionField, string>
   units: DateEntry[]
+  /** Foto-Weg: Die Nährwerte sind eine KI-Schätzung, die Zusammenfassung zeigt „ca.“ (#115) */
+  isKcalEstimate?: boolean
 }
 
 export function emptyDraft(storageLocationId: string | null): ManualCaptureDraft {
@@ -61,7 +63,7 @@ export function captureErrorsOf(error: z.ZodError): CaptureErrors {
   const errors: CaptureErrors = {}
   for (const issue of error.issues) {
     const field = fieldOf(issue.path)
-    errors[field] ??= field === 'form' ? 'Bitte prüfe die Angaben.' : issue.message
+    errors[field] ??= field === 'form' ? 'Bitte prüft die Angaben.' : issue.message
   }
   return errors
 }

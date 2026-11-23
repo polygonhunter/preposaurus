@@ -8,7 +8,7 @@ import {
   nutritionAnswerSchema,
   nutritionEstimateAnswerSchema,
   packagingAnswerSchema,
-} from '@/features/capture/schemas'
+} from '@/features/capture/schemas/ai-answers'
 import { err, ok, type Result } from '@/shared/lib/result'
 import type { AiFailure, RecognitionRequest, RoleAnswers, RoleContexts } from './vision-recognizer'
 

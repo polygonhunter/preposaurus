@@ -7,7 +7,7 @@ import { createStock } from '../../../src/features/capture/application/create-st
 import { getCaptureOptions } from '../../../src/features/capture/application/get-capture-options'
 import { createCaptureOptionsRepository } from '../../../src/features/capture/data/capture-options-repository'
 import { createStockWriteRepository } from '../../../src/features/capture/data/stock-write-repository'
-import { createStockSchema } from '../../../src/features/capture/schemas'
+import { createStockSchema } from '../../../src/features/capture/schemas/stock'
 import { storageLocations } from '../../../src/server/db/schema/catalog'
 import { foodTypes } from '../../../src/server/db/schema/food-types'
 import { createTestDb, type TestDb } from '../../helpers/test-db'

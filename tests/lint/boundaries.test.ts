@@ -18,6 +18,8 @@ const modules: Record<string, string> = {
   'shared/config': 'src/shared/config/settings.ts',
   schemas: 'src/features/alpha/schemas.ts',
   'beta/schemas': 'src/features/beta/schemas.ts',
+  'schemas/part': 'src/features/alpha/schemas/part.ts',
+  'beta/schemas/part': 'src/features/beta/schemas/part.ts',
   barrel: 'src/features/alpha/index.ts',
   'lib/unknown': 'src/lib/unknown.ts',
   instrumentation: 'src/instrumentation.ts',
@@ -127,6 +129,17 @@ const cases: readonly ImportCase[] = [
   ['schemas', 'react', 'value', true],
   ['schemas', 'domain', 'value', false],
   ['schemas', 'data', 'value', false],
+  // Ordner schemas/ (#175): dieselbe Schicht wie schemas.ts
+  ['ui', 'schemas/part', 'value', true],
+  ['application', 'beta/schemas/part', 'value', true],
+  ['domain', 'schemas/part', 'value', false],
+  ['data', 'schemas/part', 'value', false],
+  ['schemas/part', 'schemas/part', 'value', true],
+  ['schemas/part', 'schemas', 'value', true],
+  ['schemas/part', 'beta/schemas/part', 'value', false],
+  ['schemas', 'beta/schemas', 'value', false],
+  ['schemas/part', 'shared/lib', 'value', true],
+  ['schemas/part', 'domain', 'value', false],
   ['worker', 'application', 'value', true],
   ['worker', 'server/db', 'value', true],
   ['worker', 'ui', 'value', false],
@@ -162,7 +175,7 @@ describe('Umwege über Dateien außerhalb der Schichten', () => {
     expect(messages.map((message) => message.ruleId)).toContain(ruleId)
   })
 
-  it.each(['app', 'schemas', 'instrumentation', 'ui', 'shared/lib'])(
+  it.each(['app', 'schemas', 'schemas/part', 'instrumentation', 'ui', 'shared/lib'])(
     'kennt %s als Datei einer Schicht',
     async (from) => {
       const code = importCode(from, 'shared/config', 'value')

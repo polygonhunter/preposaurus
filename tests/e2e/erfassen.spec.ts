@@ -29,11 +29,15 @@ async function addDate(page: Page, text: string) {
   await bestBefore(page).press('Enter')
 }
 
-test('Erfassen öffnet das Formular, die Lebensmittelart hat sofort den Fokus', async ({ page }) => {
-  await page.goto('/neu')
+test('Das Formular hat den Umschalter, die Lebensmittelart hat sofort den Fokus', async ({
+  page,
+}) => {
+  // /neu öffnet den zuletzt genutzten Weg, im Beispielvorrat mal Foto, mal manuell. Der Weg
+  // selbst ist im Integrationstest von chooseCaptureWay geprüft.
+  await page.goto('/neu/manuell')
 
-  await expect(page).toHaveURL(/\/neu\/manuell$/)
   await expect(page.getByRole('heading', { level: 1, name: 'Erfassen' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Manuell' })).toHaveAttribute('aria-current', 'page')
   await expect(search(page)).toBeFocused()
   await expectAccessibleLayout(page)
 })
@@ -42,12 +46,12 @@ test('Fehler stehen am Feld, der Fokus springt zum ersten', async ({ page }) => 
   await page.goto('/neu/manuell')
   await page.getByRole('button', { name: 'Speichern' }).click()
 
-  await expect(search(page)).toHaveAccessibleDescription('Bitte wähle eine Lebensmittelart.')
+  await expect(search(page)).toHaveAccessibleDescription('Bitte wählt eine Lebensmittelart.')
   await expect(search(page)).toBeFocused()
   await expect(content(page)).toHaveAccessibleDescription(
-    /Bitte gib den Inhalt einer Packung an, z\. B\. 500 g\./,
+    /Bitte gebt den Inhalt einer Packung an, z\. B\. 500 g\./,
   )
-  await expect(bestBefore(page)).toHaveAccessibleDescription(/Bitte gib ein MHD ein oder wähle/)
+  await expect(bestBefore(page)).toHaveAccessibleDescription(/Bitte gebt ein MHD ein oder wählt/)
   await expectAccessibleLayout(page)
 
   // Eingetippt, aber nicht hinzugefügt: Die Meldung sagt, was fehlt.
