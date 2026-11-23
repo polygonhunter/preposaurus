@@ -6,6 +6,7 @@ import {
   type CaptureOptions,
   type ContainerChoice,
   type FoodTypeChoice,
+  type KnownProduct,
   type LastUsed,
   type NamedChoice,
 } from '../domain/capture-options'
@@ -16,6 +17,8 @@ export interface CaptureOptionsReader {
   loadContainers: () => Promise<ContainerChoice[]>
   /** Nur eigene, nicht ausgeblendete Lagerorte */
   loadStorageLocations: (householdId: string) => Promise<NamedChoice[]>
+  /** Eigene Produkte mit Lebensmittelart fürs Wiedererkennen (#207) */
+  loadKnownProducts: (householdId: string) => Promise<KnownProduct[]>
   loadLastUsed: (householdId: string, userId: string) => Promise<LastUsed>
   hasStock: (householdId: string) => Promise<boolean>
 }
@@ -29,17 +32,20 @@ export async function getCaptureOptions(
   reader: CaptureOptionsReader,
   { householdId, userId }: CaptureOptionsRequest,
 ): Promise<CaptureOptions> {
-  const [foodTypes, containers, storageLocations, lastUsed, hasStock] = await Promise.all([
-    reader.loadFoodTypes(householdId),
-    reader.loadContainers(),
-    reader.loadStorageLocations(householdId),
-    reader.loadLastUsed(householdId, userId),
-    reader.hasStock(householdId),
-  ])
+  const [foodTypes, containers, storageLocations, knownProducts, lastUsed, hasStock] =
+    await Promise.all([
+      reader.loadFoodTypes(householdId),
+      reader.loadContainers(),
+      reader.loadStorageLocations(householdId),
+      reader.loadKnownProducts(householdId),
+      reader.loadLastUsed(householdId, userId),
+      reader.hasStock(householdId),
+    ])
   return {
     foodTypes,
     containers,
     storageLocations,
+    knownProducts,
     ...applyLastUsed(lastUsed, { foodTypes, storageLocations }),
     isStockEmpty: !hasStock,
   }

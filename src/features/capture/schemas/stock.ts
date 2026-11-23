@@ -71,12 +71,3 @@ export const createStockSchema = z.object({
   ]),
   units: z.array(unitEntrySchema).min(1).max(MAX_DATES_PER_CAPTURE),
 })
-
-/** Suche nach einem passenden Produkt für „Zu Spaghetti 500 g hinzufügen?“ */
-export const productMatchQuerySchema = z.object({
-  foodTypeId: z.uuid(),
-  content: contentSchema,
-  containerId: optionalId,
-})
-
-export type ProductMatchQuery = z.infer<typeof productMatchQuerySchema>

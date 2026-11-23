@@ -14,7 +14,8 @@ type CaptureSavedProps = Readonly<{
 const packages = (count: number) => (count === 1 ? '1 Packung' : `${String(count)} Packungen`)
 
 // Bestätigung nach dem Speichern (#54) mit den beiden Wegen „Noch eins“ und „Zum Vorrat“. Der Fokus
-// springt auf die Meldung, damit auch ein Screenreader das Ergebnis ansagt.
+// springt auf die Meldung, damit auch ein Screenreader das Ergebnis ansagt. „Hinzugefügt“ statt
+// „sind jetzt im Vorrat“, weil beim Nachschub schon mehr Packungen da sind (#207).
 export function CaptureSaved({ unitCount, productName, isFirst, onAnother }: CaptureSavedProps) {
   const headingRef = useRef<HTMLHeadingElement>(null)
 
@@ -30,7 +31,7 @@ export function CaptureSaved({ unitCount, productName, isFirst, onAnother }: Cap
           Gespeichert
         </h2>
         <p className="max-w-sm text-body text-fg2">
-          {packages(unitCount)} {productName} {unitCount === 1 ? 'ist' : 'sind'} jetzt im Vorrat.
+          {packages(unitCount)} {productName} hinzugefügt.
           {isFirst ? ' Der Anfang ist gemacht.' : ''}
         </p>
       </div>

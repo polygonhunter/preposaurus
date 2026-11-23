@@ -18,8 +18,6 @@ type FoodTypePickerProps = Readonly<{
   error: string | undefined
 }>
 
-const MAX_RESULTS = 8
-
 function hitMessage(hits: readonly unknown[] | null): string | null {
   if (hits === null) return null
   if (hits.length === 0) return 'Keine Lebensmittelart gefunden.'
@@ -45,7 +43,7 @@ export function FoodTypePicker(props: FoodTypePickerProps) {
     onSelect(foodTypeId)
   }
 
-  const hits = query.trim() === '' ? null : searchFoodTypes(foodTypes, query, MAX_RESULTS)
+  const hits = query.trim() === '' ? null : searchFoodTypes(foodTypes, query, { recentIds })
   const recent = recentIds.flatMap((id) => foodTypes.filter((foodType) => foodType.id === id))
   return (
     <section aria-labelledby={headerId}>
@@ -72,7 +70,7 @@ export function FoodTypePicker(props: FoodTypePickerProps) {
               {error}
             </p>
           ) : null}
-          <FoodTypeResults hits={hits} recent={recent} onChoose={choose} />
+          <FoodTypeResults key={query} hits={hits} recent={recent} onChoose={choose} />
         </div>
       ) : (
         <Group labelledBy={headerId}>

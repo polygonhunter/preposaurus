@@ -1,6 +1,8 @@
-// Auswahllisten des Erfassens (#52): Lebensmittelarten mit abgeleitetem Pfad, Behälter und
-// Lagerorte. Dazu die Vorbelegung aus der letzten Erfassung des Nutzers (UX §1: Lagerort „zuletzt
-// genutzt“, Lebensmittelarten „Zuletzt genutzt“) und ob der Vorrat noch leer ist (erster Start).
+// Auswahllisten des Erfassens (#52): Lebensmittelarten mit abgeleitetem Pfad, Behälter, Lagerorte
+// und die vorhandenen Produkte fürs Wiedererkennen (#207). Dazu die Vorbelegung aus der letzten
+// Erfassung des Nutzers (UX §1: Lagerort „zuletzt genutzt“, Lebensmittelarten „Zuletzt genutzt“)
+// und ob der Vorrat noch leer ist (erster Start).
+import type { ProductIdentity } from './product-match'
 
 /** Lebensmittelart mit Pfad. Kategorie und Warengruppe werden nur angezeigt, nie gewählt (#110). */
 export interface FoodTypeChoice {
@@ -24,10 +26,23 @@ export interface ContainerChoice extends NamedChoice {
   key: string
 }
 
+/**
+ * Vorhandenes Produkt des Haushalts fürs Wiedererkennen (UX §1, #207). Die Liste kommt mit den
+ * Optionen, damit das Angebot schon im selben Tipp wie die Wahl der Art steht (Fokus, F2).
+ */
+export interface KnownProduct extends ProductIdentity {
+  id: string
+  name: string
+  containerName: string | null
+  storageLocationName: string | null
+}
+
 export interface CaptureOptions {
   foodTypes: FoodTypeChoice[]
   containers: ContainerChoice[]
   storageLocations: NamedChoice[]
+  /** Eigene Produkte mit Lebensmittelart, auch ohne Packung im Vorrat (Nachschub) */
+  knownProducts: KnownProduct[]
   /** Lagerort der letzten Erfassung des Nutzers, nur wenn er noch auswählbar ist */
   lastStorageLocationId: string | null
   /** Zuletzt erfasste Arten des Nutzers, neueste zuerst, nur auswählbare */

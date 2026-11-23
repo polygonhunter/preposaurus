@@ -8,7 +8,8 @@ import type { ProductMatch } from './use-product-matches'
 
 type ProductMatchOfferProps = Readonly<{
   matches: readonly ProductMatch[]
-  chosenId: string | null
+  /** Gewähltes vorhandenes Produkt, auch wenn es inzwischen nicht mehr in `matches` steht */
+  chosen: ProductMatch | null
   onChoose: (productId: string | null) => void
 }>
 
@@ -19,12 +20,12 @@ function detailsOf(match: ProductMatch): string | undefined {
   return parts.length > 0 ? parts.join(' · ') : undefined
 }
 
-// Wiedererkennen (UX §1): „Zu Nudeln 500 g hinzufügen?“. Es bleibt ein Angebot, ohne Wahl entsteht
-// ein neues Produkt. Gibt es dasselbe Produkt an zwei Lagerorten, stehen beide da.
-export function ProductMatchOffer({ matches, chosenId, onChoose }: ProductMatchOfferProps) {
+// Wiedererkennen (UX §1, #207): „Zu Nudeln 500 g hinzufügen?“. Genau ein passendes Produkt ist
+// vorgewählt und lässt sich mit „Neu anlegen“ abwählen. Gibt es dasselbe Produkt an zwei
+// Lagerorten, stehen beide da.
+export function ProductMatchOffer({ matches, chosen, onChoose }: ProductMatchOfferProps) {
   const headerId = useId()
-  const chosen = matches.find((match) => match.id === chosenId)
-  if (matches.length === 0) return null
+  if (chosen === null && matches.length === 0) return null
   return (
     <section aria-labelledby={headerId}>
       <GroupHeader id={headerId}>Schon im Vorrat</GroupHeader>

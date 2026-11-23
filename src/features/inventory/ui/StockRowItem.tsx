@@ -16,7 +16,11 @@ type StockRowItemProps = Readonly<{
 export function StockRowItem({ row, note }: StockRowItemProps) {
   const badge = row.state === null ? null : STATE_BADGE[row.state]
   const next = row.totals.nextBestBefore
-  const line = stockLine(row.packagesInStock, row.totals)
+  const line = stockLine(row.totals)
+  // Das Datum gehört zur nächsten gültigen Packung. Ist das Zustandswort „abgelaufen“, gehört es zu
+  // einer anderen Packung, deshalb steht das Datum dann als „nächstes MHD“ da (#208).
+  const nextLabel =
+    next === null ? null : `${row.state === 'expired' ? 'nächstes MHD ' : ''}${formatDate(next)}`
   return (
     <Row
       title={row.name}
@@ -26,7 +30,7 @@ export function StockRowItem({ row, note }: StockRowItemProps) {
           {badge === null ? null : (
             <span className="flex flex-wrap items-center gap-x-1.5">
               <StatusBadge tone={badge.tone} label={badge.label} />
-              {next === null ? null : <span>{formatDate(next)}</span>}
+              {nextLabel === null ? null : <span>{nextLabel}</span>}
             </span>
           )}
         </>

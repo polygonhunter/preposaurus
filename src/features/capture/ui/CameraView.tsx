@@ -4,6 +4,7 @@ import { Icon } from '@/shared/ui/Icon'
 import { CameraDateChips } from './CameraDateChips'
 import { CameraStepAction } from './CameraStepAction'
 import { CameraFallback } from './CameraFallback'
+import { CameraNotice } from './CameraNotice'
 import type { CaptureStep, DateShot, PhotoDateEntry } from './photo-capture-state'
 import { Shutter } from './Shutter'
 import { StepBar } from './StepBar'
@@ -15,6 +16,8 @@ type CameraViewProps = Readonly<{
   /** Kamera zu, weiter im Schritt Prüfen (auch „Von Hand“) */
   onClose: () => void
   onSkipTable: () => void
+  /** Erkennung aus (#210): gleich zu Beginn sagen, dass nichts gelesen wird */
+  notice: string | null
   dates: Readonly<{ units: readonly PhotoDateEntry[]; shots: readonly DateShot[] }>
 }>
 
@@ -62,6 +65,7 @@ export function CameraView(props: CameraViewProps) {
           <Icon name="close" size={20} />
         </button>
       </div>
+      {props.notice === null ? null : <CameraNotice text={props.notice} onManual={onClose} />}
       <div className="relative mx-4 mt-3 flex-1 overflow-hidden rounded-group bg-surface">
         <video
           ref={videoRef}

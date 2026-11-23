@@ -15,6 +15,7 @@ import type {
   LastUsed,
   NamedChoice,
 } from '../domain/capture-options'
+import { loadKnownProducts } from './known-products'
 
 /** So viele Erfassungen reichen für „Zuletzt genutzt“ und den letzten Lagerort. */
 const RECENT_CAPTURES = 20
@@ -102,6 +103,7 @@ export function createCaptureOptionsRepository(db: Database) {
     loadFoodTypes: (householdId: string) => loadFoodTypes(db, householdId),
     loadContainers: () => loadContainers(db),
     loadStorageLocations: (householdId: string) => loadStorageLocations(db, householdId),
+    loadKnownProducts: (householdId: string) => loadKnownProducts(db, householdId),
     loadLastUsed: (householdId: string, userId: string) => loadLastUsed(db, householdId, userId),
     hasStock: (householdId: string) => hasStock(db, householdId),
   }

@@ -6,7 +6,8 @@ export interface ShotHandlers {
   resolve: (resolution: ShotResolution) => void
   /** Datumsfeld fokussieren, das Foto gilt dann als „eingetippt“ */
   typeIn: () => void
-  readAgain: () => void
+  /** null, wenn die Erkennung aus ist (#210) */
+  readAgain: (() => void) | null
   estimate: () => void
 }
 
@@ -29,7 +30,7 @@ export function OpenShotActions({ issue, handlers }: OpenShotActionsProps) {
           Stimmt
         </Button>
       ) : null}
-      {issue === 'not-read' ? (
+      {issue === 'not-read' && readAgain !== null ? (
         <Button variant="tinted" onClick={readAgain}>
           Nochmal lesen
         </Button>

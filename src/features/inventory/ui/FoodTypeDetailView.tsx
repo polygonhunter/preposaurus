@@ -7,7 +7,7 @@ import { fifoGroupOf, groupLabel, shelfLifeColumns } from './detail-view'
 import { PathLine } from './PathLine'
 import { ProductSection } from './ProductSection'
 import { ShelfLifeChart } from './ShelfLifeChart'
-import { detailTiles, shelfLifeHint } from './stock-format'
+import { detailTiles, shelfLifeHint, uncountedNote } from './stock-format'
 import { CAPTURE_PATH, groupPath } from './stock-paths'
 import { TakeFifoBar } from './TakeFifoBar'
 
@@ -19,6 +19,7 @@ export function FoodTypeDetailView({ detail }: FoodTypeDetailViewProps) {
   const fifoGroup = fifoGroupOf(detail.products, detail.fifoUnitId)
   const columns = shelfLifeColumns(detail.products)
   const hint = shelfLifeHint(detail.typicalShelfLifeMonths)
+  const uncounted = uncountedNote(detail.totals)
   return (
     <ConsumeProvider>
       <PageHeader
@@ -28,6 +29,9 @@ export function FoodTypeDetailView({ detail }: FoodTypeDetailViewProps) {
       />
       <div className="pt-3">
         <StatTiles tiles={detailTiles(detail)} />
+        {uncounted === null ? null : (
+          <p className="px-8 pt-1.5 text-footnote text-fg2 breit:px-10">{uncounted}</p>
+        )}
       </div>
       {columns.length === 0 ? (
         <EmptyState

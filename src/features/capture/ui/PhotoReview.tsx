@@ -34,10 +34,8 @@ export function PhotoReview(props: PhotoReviewProps) {
       <PhotoPackagingSection {...{ options, state, view, editor, errors }} />
       <ProductMatchOffer
         matches={matches}
-        chosenId={state.existingProductId}
-        onChoose={(existingProductId) => {
-          editor.edit({ existingProductId })
-        }}
+        chosen={view.chosenMatch}
+        onChoose={editor.chooseProduct}
       />
       {isRestock ? null : (
         <>

@@ -3,7 +3,7 @@ import { Group } from '@/shared/ui/Group'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { Row } from '@/shared/ui/Row'
 import type { StockOverview } from '../schemas'
-import { groupCoverageText, stockLine } from './stock-format'
+import { groupCoverageText, hasStock, stockLine } from './stock-format'
 import { groupPath } from './stock-paths'
 
 type GroupListProps = Readonly<{ groups: StockOverview['groups'] }>
@@ -18,18 +18,15 @@ export function GroupList({ groups }: GroupListProps) {
     <>
       <GroupHeader id={headingId}>Warengruppen</GroupHeader>
       <Group labelledBy={headingId}>
-        {groups.map((group) => {
-          const packages = group.totals.packages + group.totals.uncountedPackages
-          return (
-            <Row
-              key={group.key}
-              title={group.name}
-              subtitle={packages === 0 ? EMPTY_GROUP : stockLine(packages, group.totals)}
-              trailing={groupCoverageText(group)}
-              action={{ href: groupPath(group.key) }}
-            />
-          )
-        })}
+        {groups.map((group) => (
+          <Row
+            key={group.key}
+            title={group.name}
+            subtitle={hasStock(group.totals) ? stockLine(group.totals) : EMPTY_GROUP}
+            trailing={groupCoverageText(group)}
+            action={{ href: groupPath(group.key) }}
+          />
+        ))}
       </Group>
     </>
   )

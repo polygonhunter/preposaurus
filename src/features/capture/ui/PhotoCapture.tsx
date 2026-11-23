@@ -9,11 +9,13 @@ type PhotoCaptureProps = Readonly<{
   options: CaptureOptions
   /** Fortgesetzter Entwurf oder ein frischer Stand */
   initial: PhotoCaptureState
+  /** Satz, warum die Erkennung aus ist, sonst null (#210) */
+  recognitionOff: string | null
 }>
 
 // Foto-Erfassung (#61 bis #66): Kamera, Prüfen, Speichern. „Noch eins“ und „Verwerfen“ beginnen
 // mit einem frischen Stand, die Vorbelegung kommt dann neu vom Server.
-export function PhotoCapture({ options, initial }: PhotoCaptureProps) {
+export function PhotoCapture({ options, initial, recognitionOff }: PhotoCaptureProps) {
   const router = useRouter()
   const [run, setRun] = useState({ generation: 0, initial })
   return (
@@ -21,6 +23,7 @@ export function PhotoCapture({ options, initial }: PhotoCaptureProps) {
       key={run.generation}
       options={options}
       initial={run.initial}
+      recognitionOff={recognitionOff}
       onRestart={() => {
         setRun((previous) => ({
           generation: previous.generation + 1,

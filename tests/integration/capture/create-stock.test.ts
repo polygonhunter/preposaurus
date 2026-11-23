@@ -2,7 +2,6 @@ import { randomUUID } from 'node:crypto'
 import { count, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createStock } from '../../../src/features/capture/application/create-stock'
-import { findMatchingProducts } from '../../../src/features/capture/application/find-matching-products'
 import type { StockWriter } from '../../../src/features/capture/application/stock-writer'
 import { createStockWriteRepository } from '../../../src/features/capture/data/stock-write-repository'
 import { createStockSchema } from '../../../src/features/capture/schemas/stock'
@@ -139,7 +138,7 @@ describe('Speichern einer Erfassung gegen die DB (#51)', () => {
     expect(await countRows()).toEqual(before)
   })
 
-  it('fügt Nachschub hinzu und erkennt das Produkt wieder', async () => {
+  it('fügt Nachschub zum vorhandenen Produkt hinzu', async () => {
     const first = await save(
       newDraft({ name: 'Nachschub-Nudeln', content: { value: 750, unit: 'g' } }),
     )
@@ -152,17 +151,8 @@ describe('Speichern einer Erfassung gegen die DB (#51)', () => {
     })
 
     const result = await save(refill)
-    const matches = await findMatchingProducts(writer, {
-      householdId: setup.householdId,
-      query: {
-        foodTypeId: setup.noodlesId,
-        content: { value: 750, unit: 'g' },
-        containerId: setup.packageId,
-      },
-    })
 
     expect(result).toMatchObject({ ok: true, value: { productId, unitCount: 5 } })
-    expect(matches.map((match) => match.id)).toEqual([productId])
   })
 
   it.each([
