@@ -7,7 +7,7 @@ import type { SupplyBasis } from '@/features/supply/domain/supply-basis'
 import type { CalendarDay } from '@/shared/lib/dates'
 import type { StateContext } from '../domain/stock-filter'
 import { unitStateFor } from '../domain/unit-state'
-import type { NodeTotalsDto } from '../schemas'
+import type { NodeTotalsDto } from '../schemas/shared'
 import type { StockReader } from './stock-reader'
 import { toNodeUnit, type JoinedUnit } from './stock-model'
 

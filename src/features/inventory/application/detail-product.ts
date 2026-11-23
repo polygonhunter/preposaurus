@@ -6,7 +6,7 @@ import { isEstimateUnconfirmed } from '../domain/nutrition-source'
 import { hasEstimatedKcal } from '../domain/resolve-nutrition'
 import { displayStateOf, type StateContext } from '../domain/stock-filter'
 import type { StockProduct, StockProductUnit } from '../domain/stock-entry'
-import type { BestBeforeGroupDto, NutritionDto } from '../schemas'
+import type { BestBeforeGroupDto, NutritionDto } from '../schemas/detail'
 import { perPackage, resolvedNutritionOf } from './stock-model'
 import { groupByKey } from './stock-rows'
 

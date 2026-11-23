@@ -1,7 +1,8 @@
 // Adressen der Vorrat-Seiten (UX-Konzept §6: jeder Screen hat eine Adresse, auch Filter stehen
 // dort). Die Parameter heißen deutsch, die Werte der Fachlogik bleiben englisch. Die Prüfung
 // übernimmt `stockFilterSchema`.
-import type { DueSort, StockFilter } from '../schemas'
+import type { DueSort } from '../schemas/due'
+import type { StockFilter } from '../schemas/requests'
 
 type StockStatus = StockFilter['status']
 type SearchParams = Readonly<Record<string, string | string[] | undefined>>

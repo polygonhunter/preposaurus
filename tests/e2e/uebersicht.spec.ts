@@ -131,6 +131,81 @@ test('Erklär-Blatt öffnet beim Tippen auf Kernzahl und Balken', async ({ page 
   await openBy(today.getByRole('meter', { name: 'Wasser' }))
 })
 
+const GRAIN = 'Getreide und Kartoffeln'
+const groupSheet = (page: Page) => page.getByRole('dialog', { name: GRAIN })
+const groupTrigger = (page: Page) => page.getByRole('button', { name: `Rechnung zu ${GRAIN}` })
+
+test('Erklär-Blatt einer Warengruppe öffnet per Tastatur und nennt dieselben Tage (#230)', async ({
+  page,
+}) => {
+  await page.goto('/uebersicht')
+  const meter = page.getByRole('list', { name: 'Warengruppen' }).getByRole('meter', { name: GRAIN })
+  const coverage = /^([\d,]+) von 10 Tagen/.exec((await meter.getAttribute('aria-valuetext')) ?? '')
+  const days = coverage?.[1] ?? 'fehlt'
+  const sheet = groupSheet(page)
+
+  // Erst nach der Hydrierung reagiert der Knopf, deshalb mit Wiederholung
+  await expect(async () => {
+    await groupTrigger(page).focus()
+    await page.keyboard.press('Enter')
+    await expect(sheet).toBeVisible({ timeout: 1000 })
+  }).toPass()
+  await expect(
+    sheet.getByText(new RegExp(`^[\\d,.]+ k?g ÷ [\\d,.]+ k?g am Tag = ${days} Tage?$`)),
+  ).toBeVisible()
+  await expect(sheet.getByText(/nicht wie lange das Essen reicht/)).toBeVisible()
+  await expect(sheet.getByText(/Beitrag zum Essen/)).toBeVisible()
+  await expect(sheet.getByRole('link', { name: 'Zur Quelle' })).toHaveAttribute('href', /^https:/)
+
+  await page.keyboard.press('Escape')
+  await expect(sheet).toBeHidden()
+  await expect(groupTrigger(page)).toBeFocused()
+})
+
+test('Tipp auf „X von 10 Tagen“ öffnet das Blatt, Tipp auf den Namen den Vorrat (#230)', async ({
+  page,
+}) => {
+  await page.goto('/uebersicht')
+  const groups = page.getByRole('list', { name: 'Warengruppen' })
+  const value = groups
+    .getByRole('listitem')
+    .filter({ has: page.getByRole('link', { name: GRAIN }) })
+    .getByText(/von 10 Tagen$/)
+  const sheet = groupSheet(page)
+
+  // Die Warengruppen stehen auf dem Handy unterhalb des sichtbaren Bereichs
+  await value.scrollIntoViewIfNeeded()
+  await expect(async () => {
+    const box = await value.boundingBox()
+    if (box === null) throw new Error('nicht sichtbar')
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+    await expect(sheet).toBeVisible({ timeout: 1000 })
+  }).toPass()
+  await sheet.getByRole('button', { name: 'Schließen' }).click()
+  await expect(sheet).toBeHidden()
+
+  // Der Balken selbst gehört noch zur Fläche des Links
+  const bar = groups.getByRole('meter', { name: GRAIN })
+  await bar.scrollIntoViewIfNeeded()
+  const box = await bar.boundingBox()
+  if (box === null) throw new Error('nicht sichtbar')
+  await page.mouse.click(box.x + 8, box.y + box.height / 2)
+  await expect(page).toHaveURL(/\/vorrat\/getreide$/)
+})
+
+for (const colorScheme of ['light', 'dark'] as const) {
+  test(`Erklär-Blatt einer Warengruppe ist barrierefrei (${colorScheme})`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme })
+    await page.goto('/uebersicht')
+    await expect(async () => {
+      await groupTrigger(page).click()
+      await expect(groupSheet(page)).toBeVisible({ timeout: 1000 })
+    }).toPass()
+
+    await expectAccessibleLayout(page)
+  })
+}
+
 for (const colorScheme of ['light', 'dark'] as const) {
   test(`Erklär-Blatt ist barrierefrei (${colorScheme})`, async ({ page }) => {
     await page.emulateMedia({ colorScheme })

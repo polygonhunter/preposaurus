@@ -5,7 +5,7 @@
 import { z } from 'zod'
 import { changeUnitDates } from '@/features/inventory/application/change-unit-dates'
 import { unitDateEditor } from '@/features/inventory/application/edit-services'
-import { changeUnitDatesSchema } from '@/features/inventory/schemas'
+import { changeUnitDatesSchema } from '@/features/inventory/schemas/requests'
 import { requireHouseholdUser } from '@/server/auth/guards'
 import { toCalendarDay } from '@/shared/lib/dates'
 import { failure, SESSION_MESSAGE, type EditActionState } from './edit-messages'

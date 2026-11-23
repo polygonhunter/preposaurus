@@ -12,7 +12,10 @@ export interface GroupProgress {
   groupKey: string
   unit: 'g' | 'ml'
   stock: number
+  /** Zielmenge für alle Zieltage */
   target: number
+  /** Zielmenge je Tag für den ganzen Haushalt, Grundlage der Tage im Erklär-Blatt (#230) */
+  targetPerDay: number
   days: number
   goalDays: number
   /** Über 100 heißt übererfüllt */
@@ -52,6 +55,7 @@ export function calculateGroupProgress(input: GroupProgressInput): GroupProgress
         unit,
         stock: current,
         target,
+        targetPerDay: target / input.goalDays,
         days: roundDownDays((current / target) * input.goalDays),
         goalDays: input.goalDays,
         percent: Math.floor((current / target) * PERCENT),

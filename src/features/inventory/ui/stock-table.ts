@@ -1,7 +1,8 @@
 // Zellen und Gruppen der Vorrat-Tabelle ab „weit“ (DESIGN_SYSTEM §6, M12-04) und die Auswahl der
 // Liste neben dem Detail (M12-03). Rein, damit Tabelle und Liste gleich sprechen und es Tests gibt.
 import { formatGermanNumber } from '@/shared/lib/quantities'
-import type { FoodTypeLevel, StockRowDto, StockTarget } from '../schemas'
+import type { StockRowDto, StockTarget } from '../schemas/shared'
+import type { FoodTypeLevel } from '../schemas/stock'
 import { formatAmounts, formatDate, supplyDaysOf } from './stock-format'
 
 /** Platzhalter für leere Zellen, Screenreader lesen „Strich“ statt nichts */

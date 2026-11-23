@@ -3,13 +3,9 @@
 // sprechen und es Tests gibt.
 import { formatDayWithPrecision, toCalendarDay } from '@/shared/lib/dates'
 import { formatGermanNumber, formatQuantity } from '@/shared/lib/quantities'
-import type {
-  BestBeforeDto,
-  FoodTypeDetail,
-  NodeTotalsDto,
-  StockOverview,
-  UnitStateDto,
-} from '../schemas'
+import type { FoodTypeDetail } from '../schemas/detail'
+import type { BestBeforeDto, NodeTotalsDto, UnitStateDto } from '../schemas/shared'
+import type { StockOverview } from '../schemas/stock'
 
 type StatusTone = 'red' | 'orange' | 'yellow' | 'green' | 'neutral'
 
@@ -35,12 +31,12 @@ export function formatAmounts({ g, ml }: NodeTotalsDto['amounts']): string | nul
   return parts.length === 0 ? null : parts.join(' · ')
 }
 
-function formatKcal(kcal: number, isApproximate: boolean): string {
+export function formatKcal(kcal: number, isApproximate: boolean): string {
   const value = `${formatGermanNumber(Math.round(kcal))} kcal`
   return isApproximate ? `ca. ${value}` : value
 }
 
-function formatDays(days: number): string {
+export function formatDays(days: number): string {
   const rounded = Math.round(days * 10) / 10
   return rounded === 1 ? '1 Tag' : `${formatGermanNumber(rounded)} Tage`
 }

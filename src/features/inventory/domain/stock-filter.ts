@@ -8,7 +8,7 @@ import type { StockUnit } from './unit'
 // Umbau. Die Oberfläche zeigt davon, was sie braucht.
 
 /**
- * Gespiegelt in `stockFilterSchema` (inventory/schemas.ts). Ein Typtest in search-stock.test.ts
+ * Gespiegelt in `stockFilterSchema` (inventory/schemas/requests.ts). Ein Typtest in search-stock.test.ts
  * hält beide deckungsgleich (CODE_PRINZIPIEN §7).
  */
 export type StockStatusFilter =

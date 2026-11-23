@@ -1,6 +1,7 @@
 import type { StockUnit } from '@/features/inventory/domain/unit'
 import { err, ok, type Result } from '@/shared/lib/result'
-import { estimatedKcalShare, isApproximate } from './approximation'
+import { isApproximate } from '@/shared/lib/approximation'
+import { estimatedKcalShare } from './approximation'
 import type { DailyNeed } from './daily-need'
 import { isCountedOn, roundDownDays, type ReferenceDay } from './supply-rules'
 

@@ -5,14 +5,14 @@ import { getStockOverview } from '../../../src/features/inventory/application/ge
 import { getStockTree } from '../../../src/features/inventory/application/get-stock-tree'
 import { searchStock } from '../../../src/features/inventory/application/search-stock'
 import type { StockReader } from '../../../src/features/inventory/application/stock-reader'
+import { foodTypeDetailSchema } from '../../../src/features/inventory/schemas/detail'
+import { stockFilterSchema } from '../../../src/features/inventory/schemas/requests'
 import {
-  foodTypeDetailSchema,
   foodTypeLevelSchema,
-  stockFilterSchema,
   stockOverviewSchema,
   stockSearchSchema,
   stockTreeSchema,
-} from '../../../src/features/inventory/schemas'
+} from '../../../src/features/inventory/schemas/stock'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
 import { setupStockRead, today } from './stock-read-fixtures'
 

@@ -1,7 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation'
 import { useId, useState, useTransition } from 'react'
-import type { UnitDateGroup } from '@/features/inventory/schemas'
+import type { UnitDateGroup } from '@/features/inventory/schemas/detail'
 import { todayInBerlin } from '@/shared/lib/dates'
 import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'

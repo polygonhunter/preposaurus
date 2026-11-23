@@ -3,7 +3,7 @@
 // supply/domain, hier wird nur gekürzt und ins DTO übertragen.
 import 'server-only'
 import { WATER_GROUP_KEY } from '@/features/inventory/application/stock-model'
-import type { DueUnits } from '@/features/inventory/schemas'
+import type { DueUnits } from '@/features/inventory/schemas/due'
 import { calculateGoalGap } from '../domain/goal-gap'
 import { findTightestGroup, type GroupProgress } from '../domain/group-progress'
 import type { OverviewDue, OverviewDueEntry, OverviewGroup } from '../schemas'
@@ -51,13 +51,16 @@ export function groupCoverage(
   const shown = progress.filter((entry) => entry.groupKey !== WATER_GROUP_KEY)
   const tightest = findTightestGroup(shown)
   const byKey = new Map(groups.map((group) => [group.key, group]))
-  return shown.map(({ groupKey, days, goalDays }) => ({
+  return shown.map(({ groupKey, days, goalDays, unit, stock, targetPerDay }) => ({
     key: groupKey,
     name: byKey.get(groupKey)?.name ?? groupKey,
     shortName: byKey.get(groupKey)?.shortName ?? groupKey,
     days,
     goalDays,
     isTightest: groupKey === tightest?.groupKey,
+    unit,
+    stock,
+    targetPerDay,
   }))
 }
 

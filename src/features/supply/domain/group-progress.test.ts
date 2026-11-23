@@ -64,6 +64,10 @@ describe('calculateGroupProgress', () => {
     expect(progress[0]).toMatchObject({ stock: 3600, target: 3000, percent: 120 })
   })
 
+  it('nennt die Zielmenge je Tag, aus der die Tage entstehen', () => {
+    expect(progress[0]).toMatchObject({ target: 3000, targetPerDay: 300, days: 12 })
+  })
+
   it('lässt Gruppen ohne Ziel weg', () => {
     expect(progress.map((group) => group.groupKey)).not.toContain('fleisch')
   })

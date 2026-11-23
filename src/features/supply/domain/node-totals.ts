@@ -2,7 +2,8 @@ import type { BestBefore } from '@/features/inventory/domain/unit'
 import type { CalendarDay } from '@/shared/lib/dates'
 import type { ContentQuantity, ContentUnit } from '@/shared/lib/quantities'
 import { isInStockWithoutDate } from '@/shared/lib/stock-unit'
-import { estimatedKcalShare, isApproximate } from './approximation'
+import { isApproximate } from '@/shared/lib/approximation'
+import { estimatedKcalShare } from './approximation'
 import { sumMacros, type Macros, type PackageMacros } from './node-macros'
 import type { SupplyInput, SupplyUnit } from './supply-days'
 import { daysOrNull, isCountedOn, isFreshOn } from './supply-rules'
@@ -35,6 +36,8 @@ export interface NodeTotals {
   uncountedPackages: number
   amounts: Record<ContentUnit, number>
   kcal: number
+  /** Wasser in ml, das in die Wasser-Tage zählt (andere Getränke nicht), für das Erklär-Blatt (#230) */
+  waterMl: number
   /** Summe der bekannten Makros der gezählten Packungen */
   macros: Macros
   /** Gezählte Produkte mit fehlendem Makro: Hinweis „ohne N Produkte“ statt stiller Null */
@@ -89,19 +92,18 @@ export function calculateNodeTotals(input: NodeTotalsInput): NodeTotals {
   const inStock = inNode.filter((unit) => unit.status === 'stock')
   const share = estimatedKcalShare(counted)
   const kcal = sumOf(counted, (unit) => unit.kcal)
+  const waterMl = sumOf(counted, (unit) => unit.waterMl)
   const { productsWithoutMacros, ...macros } = sumMacros(counted)
   return {
     packages: counted.length,
     uncountedPackages: inStock.length - counted.length,
     amounts: sumContent(counted),
     kcal,
+    waterMl,
     macros,
     productsWithoutMacros,
     energyDays: daysOrNull(kcal, input.need.kcalPerDay),
-    waterDays: daysOrNull(
-      sumOf(counted, (unit) => unit.waterMl),
-      input.need.waterMlPerDay,
-    ),
+    waterDays: daysOrNull(waterMl, input.need.waterMlPerDay),
     nextBestBefore: earliestBestBefore(counted, input.reference.day),
     withoutDate: inNode.filter(isInStockWithoutDate).length,
     estimatedKcalShare: share,

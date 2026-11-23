@@ -1,7 +1,8 @@
 // Ableitungen für die Detailseite (UX-Konzept §8.4) aus dem DTO von `getFoodTypeDetail`: Säulen
 // je MHD, die Datumszeile für „1 entnehmen“ und die Nährwertzeile mit Herkunft.
 import { formatGermanNumber, formatQuantity } from '@/shared/lib/quantities'
-import type { BestBeforeGroupDto, FoodTypeDetail, NutritionDto, UnitStateDto } from '../schemas'
+import type { BestBeforeGroupDto, FoodTypeDetail, NutritionDto } from '../schemas/detail'
+import type { UnitStateDto } from '../schemas/shared'
 import { STATE_BADGE, formatDate, formatPackages, stillGoodLabel } from './stock-format'
 
 type DetailProduct = FoodTypeDetail['products'][number]

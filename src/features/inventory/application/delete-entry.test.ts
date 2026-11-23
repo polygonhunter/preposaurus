@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { PhotoKey } from '@/server/storage/photo-key'
-import type { DeleteEntryRequest } from '../schemas'
+import type { DeleteEntryRequest } from '../schemas/requests'
 import { deleteEntry } from './delete-entry'
 import type { EntryEraser } from './entry-eraser'
 

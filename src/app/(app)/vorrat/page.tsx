@@ -2,7 +2,7 @@ import { getStockOverview } from '@/features/inventory/application/get-stock-ove
 import { getStockTree } from '@/features/inventory/application/get-stock-tree'
 import { searchStock } from '@/features/inventory/application/search-stock'
 import { stockServices } from '@/features/inventory/application/stock-services'
-import { stockFilterSchema } from '@/features/inventory/schemas'
+import { stockFilterSchema } from '@/features/inventory/schemas/requests'
 import { ActiveFilters } from '@/features/inventory/ui/ActiveFilters'
 import { ConsumeProvider } from '@/features/inventory/ui/ConsumeProvider'
 import { GroupList } from '@/features/inventory/ui/GroupList'

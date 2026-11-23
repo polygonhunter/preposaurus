@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
 import { unit } from '../../../../tests/helpers/fake-stock-reader'
 import { createFakeUnitDateEditor } from '../../../../tests/helpers/fake-unit-date-editor'
-import { unitDateGroupSchema } from '../schemas'
+import { unitDateGroupSchema } from '../schemas/detail'
 import { changeUnitDates } from './change-unit-dates'
 import { getUnitDateGroup } from './get-unit-date-group'
 

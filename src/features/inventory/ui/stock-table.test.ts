@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { FoodTypeLevel, StockRowDto } from '../schemas'
+import type { StockRowDto } from '../schemas/shared'
+import type { FoodTypeLevel } from '../schemas/stock'
 import { isSameTarget, tableCells, tableGroupsOf } from './stock-table'
 
 const totals: StockRowDto['totals'] = {
@@ -7,6 +8,7 @@ const totals: StockRowDto['totals'] = {
   uncountedPackages: 0,
   amounts: { g: 1500, ml: 0 },
   kcal: 5385,
+  waterMl: 0,
   macros: { protein: 0, carbs: 0, fat: 0 },
   productsWithoutMacros: 0,
   energyDays: 1.26,

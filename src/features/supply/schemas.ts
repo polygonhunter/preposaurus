@@ -154,6 +154,10 @@ const groupCoverageSchema = z.object({
   days,
   goalDays: z.number().int().positive(),
   isTightest: z.boolean(),
+  /** Rechenweg für das Erklär-Blatt (#230): Bestand ÷ Zielmenge je Tag = Tage */
+  unit: z.enum(['g', 'ml']),
+  stock: amount,
+  targetPerDay: z.number().positive(),
 })
 
 const restockSchema = z.object({

@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import type { FoodTypeLevel, StockTarget } from '../schemas'
+import type { StockTarget } from '../schemas/shared'
+import type { FoodTypeLevel } from '../schemas/stock'
 import { FoodTypeLevelList } from './FoodTypeLevelList'
 import { groupSubtitle } from './stock-format'
 import { groupPath } from './stock-paths'

@@ -1,6 +1,7 @@
 import { Chip } from '@/shared/ui/Chip'
 import { ChipRow } from '@/shared/ui/ChipRow'
-import type { StockFilter, StockSearch } from '../schemas'
+import type { StockFilter } from '../schemas/requests'
+import type { StockSearch } from '../schemas/stock'
 import { stockHref } from './stock-paths'
 
 type StockStatusChipsProps = Readonly<{

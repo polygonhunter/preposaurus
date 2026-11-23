@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@/shared/ui/Button'
-import type { StockTarget } from '../schemas'
+import type { StockTarget } from '../schemas/shared'
 import { useConsume } from './consume-context'
 
 type TakeOneButtonProps = Readonly<{ target: StockTarget; name: string }>

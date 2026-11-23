@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { DueEntry } from '../schemas'
+import type { DueEntry } from '../schemas/due'
 import { dueCounterLabel, dueEntryLine, dueEntryTitle, dueGroupTitle } from './due-labels'
 
 const standard = { soonDays: 90, urgentDays: 28 }

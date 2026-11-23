@@ -4,7 +4,7 @@ import { productEditPath } from '@/shared/config/stock-paths'
 import { Group } from '@/shared/ui/Group'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { Row } from '@/shared/ui/Row'
-import type { FoodTypeDetail } from '../schemas'
+import type { FoodTypeDetail } from '../schemas/detail'
 import { DeleteEntryButton } from './DeleteEntryButton'
 import { nutritionLine, nutritionOrigin, packagingOf } from './detail-view'
 
