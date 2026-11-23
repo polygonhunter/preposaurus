@@ -3,16 +3,20 @@
 // Datumswerte als ISO-Text (JJJJ-MM-TT).
 import { z } from 'zod'
 
-// Zustands-Filter im Vorrat, Quelle der Werte für URL und Zähler (#43). Gespiegelt als Typ
-// `StockStatusFilter` in inventory/domain/stock-filter.ts.
-export const STOCK_STATUS_FILTERS = [
-  'in-stock',
-  'due-soon',
-  'expired',
-  'incomplete',
-  'consumed',
-  'discarded',
-] as const
+// Zustands-Filter im Vorrat, Quelle der Werte für URL und Zähler (#43). Gespiegelt als Typen
+// `InStockStatusFilter` und `StockStatusFilter` in inventory/domain/stock-filter.ts.
+const IN_STOCK_STATUS_FILTERS = ['in-stock', 'due-soon', 'expired', 'incomplete'] as const
+export const STOCK_STATUS_FILTERS = [...IN_STOCK_STATUS_FILTERS, 'consumed', 'discarded'] as const
+
+/** Zähler der Zustands-Chips in Packungen, auf jeder Seite mit Chips (#221) */
+export const inStockCountsSchema = z.record(z.enum(IN_STOCK_STATUS_FILTERS), z.number().int())
+
+/** Gründe im Filter „Unvollständig“ (#221), gespiegelt als `IncompleteReason` (domain/incomplete.ts) */
+export const incompleteReasonSchema = z.enum([
+  'nutrition-missing',
+  'date-missing',
+  'estimate-unconfirmed',
+])
 
 export const isoDay = z.iso.date()
 export const id = z.uuid()
@@ -78,3 +82,5 @@ export type BestBeforeDto = z.infer<typeof bestBeforeSchema>
 export type UnitStateDto = z.infer<typeof unitStateSchema>
 export type NodeTotalsDto = z.infer<typeof nodeTotalsSchema>
 export type StockRowDto = z.infer<typeof stockRowSchema>
+export type InStockCounts = z.infer<typeof inStockCountsSchema>
+export type IncompleteReasonDto = z.infer<typeof incompleteReasonSchema>

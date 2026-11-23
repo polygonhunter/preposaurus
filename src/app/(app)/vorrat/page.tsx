@@ -62,7 +62,7 @@ export default async function StockPage({ searchParams }: PageProps<'/vorrat'>) 
       <PageHeader title="Vorrat" />
       {offlineNotice}
       <StockSearchBar filter={filter} options={options} />
-      <StockStatusChips filter={filter} />
+      <StockStatusChips filter={filter} counts={overview.counts} />
       <div className="weit:hidden">
         <GroupList groups={overview.groups} />
       </div>
