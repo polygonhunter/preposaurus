@@ -2,7 +2,7 @@
 // Gemeinsamer Zugang zu „Verbraucht“, „−1“, „Entsorgt“ und „Noch gut“ für alle Knöpfe einer Seite.
 // Die UndoBar gibt es je Seite nur einmal (ConsumeProvider), egal welche Zeile gehandelt hat.
 import { createContext, useContext } from 'react'
-import type { ConsumeRequest } from '../schemas'
+import type { ConsumeRequest } from '../schemas/requests'
 
 /** Was die UndoBar nennt: „Nudeln: 1 Packung verbraucht (11/2027)“ */
 export interface TakenLabel {

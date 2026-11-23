@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { estimatedKcalShare, isApproximate } from './approximation'
+import { isApproximate } from '@/shared/lib/approximation'
+import { estimatedKcalShare } from './approximation'
 
 describe('estimatedKcalShare', () => {
   it('teilt die kcal aus Richtwerten durch alle kcal', () => {
@@ -36,17 +37,5 @@ describe('isApproximate mit echten Anteilen', () => {
       { kcal: 99, isKcalEstimated: true },
     ])
     expect(isApproximate(share)).toBe(false)
-  })
-})
-
-describe('isApproximate', () => {
-  it.each([
-    [0, false],
-    [0.0999, false],
-    [0.1, true],
-    [0.5, true],
-    [1, true],
-  ])('Anteil %d ergibt „ca.“ = %s', (share, expected) => {
-    expect(isApproximate(share)).toBe(expected)
   })
 })

@@ -1,6 +1,6 @@
 import { Group } from '@/shared/ui/Group'
 import { Row } from '@/shared/ui/Row'
-import { UNVERIFIED_SOURCE_NOTE } from './source-text'
+import { UNVERIFIED_SOURCE_NOTE } from '@/shared/config/recommendation-source'
 
 type SourceView = Readonly<{ name: string; asOf: string; link: string; isVerified: boolean }>
 

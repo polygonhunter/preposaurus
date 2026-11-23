@@ -9,7 +9,7 @@ import { loadEnv } from '@/shared/config/env'
 import { createLogger } from '@/shared/lib/logger'
 import { deleteEntry, type DeletedEntry } from '../application/delete-entry'
 import { deleteEntryDeps } from '../application/edit-services'
-import { deleteEntrySchema } from '../schemas'
+import { deleteEntrySchema } from '../schemas/requests'
 import type { ActionFailure } from './action-messages'
 
 export type DeleteEntryActionResult =

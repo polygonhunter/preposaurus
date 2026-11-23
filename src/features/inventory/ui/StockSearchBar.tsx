@@ -1,7 +1,8 @@
 import Form from 'next/form'
 import { SHORTCUT_KEYS } from '@/shared/lib/keyboard-shortcuts'
 import { SearchField } from '@/shared/ui/SearchField'
-import type { StockFilter, StockSearch } from '../schemas'
+import type { StockFilter } from '../schemas/requests'
+import type { StockSearch } from '../schemas/stock'
 import { FilterSheet } from './FilterSheet'
 import { STOCK_PARAMS, STOCK_PATH, statusSlug } from './stock-paths'
 

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import type { FoodTypeDetail } from '../schemas'
+import type { FoodTypeDetail } from '../schemas/detail'
 import { categoryAnchor, groupPath } from './stock-paths'
 
 type PathLineProps = Readonly<{ path: FoodTypeDetail['path'] }>

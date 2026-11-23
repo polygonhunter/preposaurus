@@ -10,7 +10,7 @@ import {
   type ResolvedNutrition,
 } from '../domain/resolve-nutrition'
 import type { ProductFilter, StockProduct, StockProductUnit } from '../domain/stock-entry'
-import type { StockTarget } from '../schemas'
+import type { StockTarget } from '../schemas/shared'
 
 export interface JoinedUnit {
   unit: StockProductUnit

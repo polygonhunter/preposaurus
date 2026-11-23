@@ -51,7 +51,7 @@ export function PhotoCaptureFlow(props: PhotoCaptureFlowProps) {
   if (saving.saved !== null) {
     return (
       <CaptureSaved
-        unitCount={saving.saved.unitCount}
+        saved={saving.saved}
         productName={view.productName}
         isFirst={options.isStockEmpty}
         onAnother={onRestart}

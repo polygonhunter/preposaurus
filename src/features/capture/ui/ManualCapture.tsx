@@ -68,10 +68,10 @@ export function ManualCapture({ options, prefill }: ManualCaptureProps) {
     if (input instanceof HTMLElement) input.focus()
   }, [prefilledField])
 
-  if (capture.savedUnits !== null) {
+  if (capture.saved !== null) {
     return (
       <CaptureSaved
-        unitCount={capture.savedUnits}
+        saved={capture.saved}
         productName={view.productName}
         isFirst={options.isStockEmpty}
         onAnother={() => {

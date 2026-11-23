@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 type ExplainPartProps = Readonly<{ title: string; children: ReactNode }>
 
-// Ein Abschnitt im Erklär-Blatt (#219): Überschrift wie ein Gruppenkopf, darunter der Text.
+// Ein Abschnitt im Erklär-Blatt (#219, #230): Überschrift wie ein Gruppenkopf, darunter der Text.
 export function ExplainPart({ title, children }: ExplainPartProps) {
   return (
     <section className="flex flex-col gap-1">

@@ -2,7 +2,7 @@
 // `createEntryEraseRepository` in inventory/data, in Tests von einem Fake. Alles, was in der DB
 // verschwindet, verschwindet in einer Transaktion. Die Dateien löscht danach der Use-Case.
 import 'server-only'
-import type { DeleteEntryRequest } from '../schemas'
+import type { DeleteEntryRequest } from '../schemas/requests'
 
 /** Foto, dessen DB-Zeile gelöscht ist und dessen Dateien noch weg müssen. */
 export interface ErasedPhoto {

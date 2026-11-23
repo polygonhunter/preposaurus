@@ -4,7 +4,8 @@
 import 'server-only'
 import { bestBeforeKeyOf } from '../domain/group-units'
 import { err, ok, type Result } from '@/shared/lib/result'
-import { unitIdSchema, type UnitDateGroup } from '../schemas'
+import type { UnitDateGroup } from '../schemas/detail'
+import { unitIdSchema } from '../schemas/requests'
 import type { NotFound } from './read-context'
 import type { UnitDateEditor, UnitDateSource } from './unit-date-editor'
 
