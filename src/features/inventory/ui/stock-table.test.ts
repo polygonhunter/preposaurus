@@ -60,6 +60,7 @@ describe('tableCells', () => {
           ...totals,
           amounts: { g: 0, ml: 9000 },
           kcal: 0,
+          waterMl: 9000,
           energyDays: null,
           waterDays: 1.5,
           nextBestBefore: null,

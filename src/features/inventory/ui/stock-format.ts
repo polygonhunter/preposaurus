@@ -41,10 +41,15 @@ export function formatDays(days: number): string {
   return rounded === 1 ? '1 Tag' : `${formatGermanNumber(rounded)} Tage`
 }
 
+/**
+ * Zählt der Knoten als Wasser? Nur Packungen der Warengruppe Wasser tragen `waterMl` (stock-model),
+ * ein anderes Getränk ohne kcal (z. B. ungesüßter Tee) also nicht (UX-Konzept A10, #260).
+ */
+export const countsAsWater = (totals: NodeTotalsDto) => totals.waterMl > 0
+
 /** Beitrag in Tagen: Wasser zählt in Wasser-Tagen, alles andere in Essen-Tagen. */
 export function supplyDaysOf(totals: NodeTotalsDto): number | null {
-  if (totals.amounts.ml > 0 && totals.kcal === 0) return totals.waterDays
-  return totals.energyDays
+  return countsAsWater(totals) ? totals.waterDays : totals.energyDays
 }
 
 type GroupFigures = Pick<StockOverview['groups'][number], 'totals' | 'coverage'>

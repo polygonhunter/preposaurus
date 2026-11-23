@@ -76,9 +76,21 @@ describe('Kennwerte als Text', () => {
   })
 
   it('rechnet Wasser in Wasser-Tagen', () => {
-    const water = totals({ amounts: { g: 0, ml: 9000 }, kcal: 0, energyDays: 0, waterDays: 3 })
+    const water = totals({
+      amounts: { g: 0, ml: 9000 },
+      kcal: 0,
+      waterMl: 9000,
+      energyDays: 0,
+      waterDays: 3,
+    })
 
     expect(groupSubtitle(water)).toBe('3 Packungen · 9 l · 3 Tage')
+  })
+
+  it('rechnet ein Getränk ohne kcal nicht in Wasser-Tagen (#260)', () => {
+    const tea = totals({ amounts: { g: 0, ml: 6000 }, kcal: 0, energyDays: 0, waterDays: 2 })
+
+    expect(groupSubtitle(tea)).toBe('3 Packungen · 6 l · 0 Tage')
   })
 
   it('zeigt auf Ebene 1 die Abdeckung mit Ziel, sonst die Tage, sonst nichts', () => {

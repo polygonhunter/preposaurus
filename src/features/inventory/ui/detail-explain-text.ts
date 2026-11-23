@@ -6,15 +6,23 @@ import {
   APPROXIMATE_THRESHOLD_PERCENT,
   estimatedSharePercentText,
 } from '@/shared/lib/approximation'
-import { formatGermanNumber, formatQuantity } from '@/shared/lib/quantities'
+import { formatQuantity } from '@/shared/lib/quantities'
 import type { FoodTypeDetail } from '../schemas/detail'
 import type { NodeTotalsDto } from '../schemas/shared'
-import { formatAmounts, formatDays, formatKcal, formatPackages, supplyDaysOf } from './stock-format'
+import {
+  countsAsWater,
+  formatAmounts,
+  formatDays,
+  formatKcal,
+  formatPackages,
+  supplyDaysOf,
+} from './stock-format'
 
 type Need = FoodTypeDetail['need']
 
-/** Zählt diese Lebensmittelart in Wasser-Tagen statt in Essen-Tagen? Wie supplyDaysOf. */
-const isWater = (totals: NodeTotalsDto) => totals.amounts.ml > 0 && totals.kcal === 0
+/** Ein Getränk ohne kcal, das nicht zur Warengruppe Wasser gehört (z. B. ungesüßter Tee, #260). */
+const isCalorieFreeDrink = (totals: NodeTotalsDto) =>
+  !countsAsWater(totals) && totals.amounts.ml > 0 && totals.kcal === 0
 
 /** „8 Packungen mit zusammen 4 kg zählen heute mit.“ */
 export function countedText(totals: NodeTotalsDto): string {
@@ -42,7 +50,8 @@ export function notCountedTexts({ uncountedPackages, withoutDate }: NodeTotalsDt
 
 /** Wie die kcal entstehen, bei Wasser der Hinweis, dass es in Litern zählt. */
 export function kcalText(totals: NodeTotalsDto): string {
-  if (isWater(totals)) return 'Wasser hat keine kcal. Es zählt in Litern, als Wasser.'
+  if (countsAsWater(totals)) return 'Wasser hat keine kcal. Es zählt in Litern, als Wasser.'
+  if (isCalorieFreeDrink(totals)) return 'Dieses Getränk hat keine kcal.'
   const total = formatKcal(totals.kcal, totals.isApproximate)
   return `Je Packung: Inhalt × kcal je 100 g bzw. ml ÷ 100. Zusammen ${total}.`
 }
@@ -59,13 +68,13 @@ export function kcalOriginText({ kcal, estimatedKcalShare }: NodeTotalsDto): str
 export function daysCalculation(totals: NodeTotalsDto, need: Need): string | null {
   const days = supplyDaysOf(totals)
   if (days === null) return null
-  if (isWater(totals)) {
+  if (countsAsWater(totals)) {
     const water = formatQuantity({ value: totals.waterMl, unit: 'ml' })
     const perDay = formatQuantity({ value: need.waterMlPerDay, unit: 'ml' })
     return `${water} ÷ ${perDay} am Tag = ${formatDays(days)}`
   }
-  const kcal = `${formatGermanNumber(Math.round(totals.kcal), 0)} kcal`
-  const perDay = `${formatGermanNumber(Math.round(need.kcalPerDay), 0)} kcal`
+  const kcal = formatKcal(totals.kcal, totals.isApproximate)
+  const perDay = formatKcal(need.kcalPerDay, false)
   return `${kcal} ÷ ${perDay} am Tag = ${formatDays(days)}`
 }
 
@@ -74,8 +83,14 @@ export function daysMeaningTexts(totals: NodeTotalsDto): string[] {
   if (supplyDaysOf(totals) === null) {
     return ['Tage zeigt Preposaurus erst, wenn Mitglieder und eine Empfehlung eingetragen sind.']
   }
-  if (isWater(totals)) {
+  if (countsAsWater(totals)) {
     return ['So lange reicht dieses Wasser allein für euren ganzen Haushalt.']
+  }
+  if (isCalorieFreeDrink(totals)) {
+    return [
+      'Ohne kcal trägt dieses Getränk nichts zu den Tagen bei.',
+      'In die Wasser-Tage zählt nur die Warengruppe Wasser. Andere Getränke stehen daneben, damit der Wasservorrat nicht größer wirkt, als er ist.',
+    ]
   }
   return [
     'So lange reichen die kcal dieser Lebensmittelart allein für euren ganzen Haushalt.',
