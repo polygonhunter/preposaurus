@@ -1,9 +1,8 @@
 'use client'
 import { useActionState } from 'react'
-import { useFocusFirstInvalid } from '@/shared/hooks/use-focus-first-invalid'
+import { ActionForm } from '@/shared/ui/ActionForm'
 import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
-import { LiveMessage } from '@/shared/ui/LiveMessage'
 import { Toggle } from '@/shared/ui/Toggle'
 import { signInAction, type SignInState } from '../actions/sign-in-action'
 
@@ -12,15 +11,20 @@ type SignInFormProps = Readonly<{
   returnTo: string
 }>
 
-const INITIAL_STATE: SignInState = { message: null, username: '' }
+const INITIAL_STATE: SignInState = { errors: {}, username: '' }
 
-// Anmelden (ONBOARDING O-08). Die Meldung steht am Passwort, verrät aber nicht, welches Feld
-// falsch war (EINSTELLUNGEN §4.3).
+// Anmelden (ONBOARDING O-08). Die Meldung nach falschen Angaben steht am Passwort, verrät aber
+// nicht, welches Feld falsch war (EINSTELLUNGEN §4.3). Ein leeres Feld steht an sich selbst.
 export function SignInForm({ returnTo }: SignInFormProps) {
   const [state, formAction, isPending] = useActionState(signInAction, INITIAL_STATE)
-  const formRef = useFocusFirstInvalid(state)
+  const { errors } = state
   return (
-    <form ref={formRef} action={formAction} className="mx-4 flex flex-col gap-4 pt-6 breit:mx-6">
+    <ActionForm
+      action={formAction}
+      result={state}
+      announcement={errors.username ?? errors.password}
+      className="mx-4 flex flex-col gap-4 pt-6 breit:mx-6"
+    >
       <input type="hidden" name="weiter" value={returnTo} />
       <Field
         label="Benutzername"
@@ -31,6 +35,7 @@ export function SignInForm({ returnTo }: SignInFormProps) {
         spellCheck={false}
         required
         defaultValue={state.username}
+        error={errors.username}
       />
       <Field
         label="Passwort"
@@ -38,18 +43,17 @@ export function SignInForm({ returnTo }: SignInFormProps) {
         type="password"
         autoComplete="current-password"
         required
-        error={state.message ?? undefined}
+        error={errors.password}
       />
       <div className="rounded-group bg-surface px-4">
         <Toggle label="Angemeldet bleiben" name="angemeldetBleiben" defaultChecked />
       </div>
-      <LiveMessage message={state.message} />
       <Button type="submit" pendingLabel={isPending ? 'Meldet an …' : undefined}>
         Anmelden
       </Button>
       <p className="px-4 text-footnote text-fg2">
         Passwort vergessen? Ein Admin kann es zurücksetzen.
       </p>
-    </form>
+    </ActionForm>
   )
 }

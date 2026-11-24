@@ -1,6 +1,6 @@
 'use client'
 import { useActionState } from 'react'
-import { useFocusFirstInvalid } from '@/shared/hooks/use-focus-first-invalid'
+import { ActionForm } from '@/shared/ui/ActionForm'
 import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import { SaveStatus } from '@/shared/ui/SaveStatus'
@@ -12,13 +12,11 @@ type ProfileFormProps = Readonly<{ displayName: string; reminderEmail: string | 
 // Anzeigename und freiwillige Adresse für Erinnerungen (#75). Leer heißt: keine Mails.
 export function ProfileForm({ displayName, reminderEmail }: ProfileFormProps) {
   const [state, formAction, isPending] = useActionState(saveProfileAction, PROFILE_ACTION_IDLE)
-  const formRef = useFocusFirstInvalid(state)
   return (
-    // noValidate: Fehler stehen ruhig am Feld statt in der Sprechblase des Browsers
-    <form
-      ref={formRef}
+    <ActionForm
+      result={state}
+      announcement={state.errors?.displayName ?? state.errors?.reminderEmail}
       action={formAction}
-      noValidate
       className="mx-4 flex flex-col gap-4 breit:mx-6"
     >
       <Field
@@ -45,6 +43,6 @@ export function ProfileForm({ displayName, reminderEmail }: ProfileFormProps) {
           Speichern
         </Button>
       </div>
-    </form>
+    </ActionForm>
   )
 }

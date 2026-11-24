@@ -1,6 +1,6 @@
 'use client'
 import { useActionState } from 'react'
-import { useFocusFirstInvalid } from '@/shared/hooks/use-focus-first-invalid'
+import { ActionForm } from '@/shared/ui/ActionForm'
 import { Button } from '@/shared/ui/Button'
 import { PasswordField } from '@/shared/ui/PasswordField'
 import { SaveStatus } from '@/shared/ui/SaveStatus'
@@ -18,9 +18,13 @@ export function ChangePasswordForm() {
     changeOwnPasswordAction,
     PROFILE_ACTION_IDLE,
   )
-  const formRef = useFocusFirstInvalid(state)
   return (
-    <form ref={formRef} action={formAction} className="mx-4 flex flex-col gap-4 breit:mx-6">
+    <ActionForm
+      result={state}
+      announcement={state.errors?.currentPassword ?? state.errors?.newPassword}
+      action={formAction}
+      className="mx-4 flex flex-col gap-4 breit:mx-6"
+    >
       <PasswordField
         label="Bisheriges Passwort"
         name="altes-passwort"
@@ -45,6 +49,6 @@ export function ChangePasswordForm() {
           Passwort ändern
         </Button>
       </div>
-    </form>
+    </ActionForm>
   )
 }

@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
+import { expectRequiredFieldError } from '../helpers/field-errors'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Foto-Erkennung in den Einstellungen (#108, #79). Die E2E-Tests laufen mit AI_PROVIDER=fake: Der
@@ -57,6 +58,17 @@ test('Verbindung anlegen, testen, Modell wählen und entfernen', async ({ page }
   await expect(section).toContainText('noch nicht getestet')
   expect(await page.content()).not.toContain(INVENTED_KEY)
   await expectAccessibleLayout(page)
+
+  // Leer ersetzen: Fehler am Feld im Blatt, keine Sprechblase des Browsers (#286)
+  await section.getByRole('button', { name: 'Schlüssel ersetzen' }).click()
+  const replaceSheet = page.getByRole('dialog', { name: `Schlüssel für ${name} ersetzen` })
+  await replaceSheet.getByRole('button', { name: 'Ersetzen' }).click()
+  await expectRequiredFieldError(
+    replaceSheet.getByLabel('Neuer API-Schlüssel'),
+    'Bitte den Schlüssel einfügen.',
+  )
+  await replaceSheet.getByRole('button', { name: 'Abbrechen' }).click()
+  await expect(replaceSheet).toBeHidden()
 
   await section.getByRole('button', { name: 'Verbindung testen' }).click()
   await expect(section.getByText('Die Verbindung funktioniert.')).toBeVisible()

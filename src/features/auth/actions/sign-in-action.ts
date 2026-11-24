@@ -4,16 +4,19 @@
 // noch offen, führt sie den Admin, der eingerichtet hat, zum offenen Schritt (#40).
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { z } from 'zod'
 import { signInFromRequest } from '../application/sign-in-request'
 import { openSetupPath } from '../application/setup-step-request'
 import type { SignInError } from '../application/sign-in'
 import { safeReturnPath } from '../domain/return-path'
-import { signInSchema } from '../schemas'
-import { readFormText } from '@/shared/lib/form-data'
+import { SIGN_IN_FAILED, signInSchema, type SignInInput } from '../schemas'
+import { firstMessages, readFormText } from '@/shared/lib/form-data'
 
-export type SignInState = Readonly<{ message: string | null; username: string }>
-
-const WRONG_CREDENTIALS = 'Benutzername oder Passwort stimmt nicht.'
+// Fehler je Feld: ein leeres Feld an sich selbst, eine falsche Anmeldung neutral am Passwort.
+export type SignInState = Readonly<{
+  errors: Partial<Record<keyof SignInInput, string>>
+  username: string
+}>
 
 const minutesText = (minutes: number) =>
   `${String(minutes)} ${minutes === 1 ? 'Minute' : 'Minuten'}`
@@ -21,7 +24,7 @@ const minutesText = (minutes: number) =>
 function messageFor(error: SignInError): string {
   switch (error.kind) {
     case 'invalid-credentials':
-      return WRONG_CREDENTIALS
+      return SIGN_IN_FAILED
     case 'throttled':
       return `Zu viele Versuche. Bitte in ${minutesText(error.minutes)} noch einmal. Die kurze Pause schützt euer Konto vor Durchprobieren.`
   }
@@ -43,9 +46,11 @@ export async function signInAction(
   // Das Passwort geht nie zurück ans Formular, der Name schon, damit er nicht neu getippt wird.
   const username = readFormText(formData, 'benutzername')
   const parsed = readForm(formData)
-  if (!parsed.success) return { message: WRONG_CREDENTIALS, username }
+  if (!parsed.success) {
+    return { errors: firstMessages(z.flattenError(parsed.error).fieldErrors), username }
+  }
   const result = await signInFromRequest(parsed.data, await headers())
-  if (!result.ok) return { message: messageFor(result.error), username }
+  if (!result.ok) return { errors: { password: messageFor(result.error) }, username }
   const setupPath = await openSetupPath(result.value.userId)
   redirect(setupPath ?? safeReturnPath(formData.get('weiter')))
 }

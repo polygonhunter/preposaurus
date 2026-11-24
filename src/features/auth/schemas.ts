@@ -17,11 +17,23 @@ export const usernameSchema = z.string().trim().toLowerCase().regex(USERNAME_PAT
   error: 'Der Benutzername hat 3 bis 30 Zeichen: Buchstaben, Ziffern, Punkt oder Unterstrich.',
 })
 
+/** Neutraler Satz nach einer falschen Anmeldung, verrät nicht, welches Feld falsch war */
+export const SIGN_IN_FAILED = 'Benutzername oder Passwort stimmt nicht.'
+
 // Beim Anmelden wird das Muster bewusst nicht geprüft: Jeder eingegebene Name zählt für die
-// Bremse, und die Antwort verrät nicht, ob es ihn geben könnte (EINSTELLUNGEN §4.3).
+// Bremse, und die Antwort verrät nicht, ob es ihn geben könnte (EINSTELLUNGEN §4.3). Nur ein
+// leeres Feld steht am Feld selbst (#286), das verrät nichts.
 export const signInSchema = z.object({
-  username: z.string().trim().toLowerCase().min(1).max(USERNAME_MAX_LENGTH),
-  password: z.string().min(1).max(PASSWORD_MAX_LENGTH),
+  username: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .min(1, { error: 'Bitte deinen Benutzernamen eintragen.' })
+    .max(USERNAME_MAX_LENGTH, { error: SIGN_IN_FAILED }),
+  password: z
+    .string()
+    .min(1, { error: 'Bitte dein Passwort eintragen.' })
+    .max(PASSWORD_MAX_LENGTH, { error: SIGN_IN_FAILED }),
   rememberMe: z.boolean(),
 })
 

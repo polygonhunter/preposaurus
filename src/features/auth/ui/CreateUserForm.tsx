@@ -1,11 +1,10 @@
 'use client'
 import { useActionState, useState } from 'react'
 import { USERS_PATH } from '@/shared/config/settings-paths'
-import { useFocusFirstInvalid } from '@/shared/hooks/use-focus-first-invalid'
+import { ActionForm } from '@/shared/ui/ActionForm'
 import { Button } from '@/shared/ui/Button'
 import { ButtonLink } from '@/shared/ui/ButtonLink'
 import { Field } from '@/shared/ui/Field'
-import { LiveMessage } from '@/shared/ui/LiveMessage'
 import { PasswordField } from '@/shared/ui/PasswordField'
 import { Segmented } from '@/shared/ui/Segmented'
 import { createUserAction, type CreateUserState } from '../actions/create-user-action'
@@ -34,7 +33,6 @@ export function CreateUserForm({ members }: CreateUserFormProps) {
   const values = state.values ?? EMPTY_VALUES
   const [displayName, setDisplayName] = useState(values.displayName)
   const [ownUsername, setOwnUsername] = useState<string | null>(values.username || null)
-  const formRef = useFocusFirstInvalid(state)
   if (state.created !== null) {
     return (
       <div className="flex flex-col gap-4 pt-6">
@@ -47,7 +45,12 @@ export function CreateUserForm({ members }: CreateUserFormProps) {
   }
   const { errors } = state
   return (
-    <form ref={formRef} action={formAction} className="mx-4 flex flex-col gap-4 pt-6 breit:mx-6">
+    <ActionForm
+      result={state}
+      announcement={firstError(state)}
+      action={formAction}
+      className="mx-4 flex flex-col gap-4 pt-6 breit:mx-6"
+    >
       <Field
         label="Anzeigename"
         name="anzeigename"
@@ -88,10 +91,9 @@ export function CreateUserForm({ members }: CreateUserFormProps) {
         error={errors.password}
       />
       {state.message ? <p className="px-4 text-footnote text-red">{state.message}</p> : null}
-      <LiveMessage message={firstError(state)} />
       <Button type="submit" pendingLabel={isPending ? 'Legt an …' : undefined}>
         Anlegen
       </Button>
-    </form>
+    </ActionForm>
   )
 }

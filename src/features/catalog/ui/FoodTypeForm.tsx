@@ -1,9 +1,8 @@
 'use client'
 import { useActionState } from 'react'
-import { useFocusFirstInvalid } from '@/shared/hooks/use-focus-first-invalid'
+import { ActionForm } from '@/shared/ui/ActionForm'
 import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
-import { LiveMessage } from '@/shared/ui/LiveMessage'
 import { SaveStatus } from '@/shared/ui/SaveStatus'
 import { entryFormIdle } from '../actions/entry-form-state'
 import { saveFoodTypeAction, type FoodTypeFormState } from '../actions/save-food-type-action'
@@ -24,11 +23,15 @@ const INITIAL_STATE: FoodTypeFormState = entryFormIdle()
 // Suchwörter und Richtwerte (kcal, Makros, übliche Haltbarkeit) freiwillig.
 export function FoodTypeForm({ categories, initialValues, foodTypeId }: FoodTypeFormProps) {
   const [state, formAction, isPending] = useActionState(saveFoodTypeAction, INITIAL_STATE)
-  const formRef = useFocusFirstInvalid(state)
   const values = state.values ?? initialValues
   const { errors } = state
   return (
-    <form ref={formRef} action={formAction} className="mx-4 flex flex-col gap-4 breit:mx-6">
+    <ActionForm
+      result={state}
+      announcement={Object.values(errors)[0]}
+      action={formAction}
+      className="mx-4 flex flex-col gap-4 breit:mx-6"
+    >
       <input type="hidden" name="id" value={foodTypeId ?? ''} />
       <Field
         label="Name der Lebensmittelart"
@@ -53,13 +56,12 @@ export function FoodTypeForm({ categories, initialValues, foodTypeId }: FoodType
         error={errors.searchTerms}
       />
       <FoodTypeReferenceFields values={values} errors={errors} />
-      <LiveMessage message={Object.values(errors)[0]} />
       <div className="flex items-center justify-between gap-3">
         <SaveStatus state={state} />
         <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Speichert …' : undefined}>
           {foodTypeId === undefined ? 'Anlegen' : 'Speichern'}
         </Button>
       </div>
-    </form>
+    </ActionForm>
   )
 }

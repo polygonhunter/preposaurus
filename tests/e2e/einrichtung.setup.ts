@@ -8,11 +8,19 @@
 import type { Page } from '@playwright/test'
 import { expect, test as setup } from '../helpers/e2e-test'
 import { ADMIN_STORAGE_STATE, E2E_ADMIN, submitSignIn } from '../helpers/e2e-auth'
+import { expectRequiredFieldError } from '../helpers/field-errors'
+import { waitForHydration } from '../helpers/hydration'
 import { expectSetupStep } from '../helpers/setup-steps'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 async function setUpViaUi(page: Page) {
   await expect(page.getByRole('heading', { level: 1, name: 'Willkommen' })).toBeVisible()
+  await expectAccessibleLayout(page)
+
+  // Leer abgeschickt: Fehler am Feld statt der Sprechblase des Browsers (#286)
+  await waitForHydration(page)
+  await page.getByRole('button', { name: 'Weiter' }).click()
+  await expectRequiredFieldError(page.getByLabel('Anzeigename'), 'Bitte einen Namen eintragen.')
   await expectAccessibleLayout(page)
 
   // Der Benutzername folgt dem Anzeigenamen, bis er selbst geändert wird (ONBOARDING §2.2)
