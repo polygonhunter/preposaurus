@@ -67,8 +67,13 @@ docker rm -f "$OLD_DB" > /dev/null
 # Ohne Schritt 2 startet die neue Datenbank nicht, mit der Meldung aus der Fehlersuche (§14).
 docker compose up -d --wait --wait-timeout 30 db > /dev/null 2>&1 &&
   fail "Die neue Datenbank darf neben Daten von $OLD_MAJOR nicht starten"
-docker compose logs db | grep -q "there appears to be PostgreSQL data in" ||
-  fail "Die Meldung zu den alten Daten fehlt im Log von db"
+# up --wait kann zurückkehren, bevor der Container seine Meldung geschrieben hat.
+for _ in $(seq 1 15); do
+  if docker compose logs db 2>&1 | grep -q "there appears to be PostgreSQL data in"; then break; fi
+  sleep 2
+done
+docker compose logs db 2>&1 | grep -q "there appears to be PostgreSQL data in" ||
+  { docker compose logs db; fail "Die Meldung zu den alten Daten fehlt im Log von db"; }
 docker compose down > /dev/null 2>&1
 
 # Schritt 2: Der alte Ordner db wandert beiseite.
