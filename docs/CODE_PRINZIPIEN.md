@@ -272,6 +272,7 @@ Das `jobs`-Format steht so in der lefthook-Doku [14]. `{staged_files}`, `piped` 
 
 - Semantisches HTML zuerst (`button`, `label`, `nav`, Überschriften-Hierarchie), `lang="de"`. ARIA nur, wo HTML nicht reicht.
 - Jedes Feld hat ein sichtbares Label. Fehler stehen am Feld und werden per `aria-live` angesagt.
+- Ein Live-Bereich ist immer im DOM, auch leer; nur sein Inhalt wechselt (`LiveMessage`, `NoticeAnnouncer`). Was sichtbar und angesagt wird, trägt die Live-Rolle nur einmal, sonst kommt die Ansage doppelt.
 - Kontrast ≥ 4,5 : 1 (Text) bzw. 3 : 1 (UI). Die Ampel nie nur über Farbe, immer mit Text oder Icon.
 - Touch-Ziele ≥ 44 × 44 px (WCAG fordert mindestens 24 × 24), sichtbarer Fokus, alles per Tastatur bedienbar.
 - `prefers-reduced-motion` gilt für alle Animationen. Foto-Flow immer mit manueller Alternative. Erzwungen durch `jsx-a11y` (strict) und axe-Checks in jedem E2E-Test [16].

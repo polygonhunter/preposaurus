@@ -1,6 +1,7 @@
 // Was nach einer Vorrat-Aktion unten steht (UX-Konzept §7): die Rückgängig-Zeile nach Verbraucht,
 // Entsorgt oder „Noch gut“ (#46, #47) oder ein Fehler am Ort der Aktion. Jede Funktion ruft eine
 // Action auf und übersetzt deren Antwort in genau eine solche Meldung.
+import type { BarAnnouncement } from '@/shared/ui/NoticeAnnouncer'
 import { addToRestockAction, takeBackFromRestockAction } from '../actions/add-to-restock-action'
 import { consumeAction } from '../actions/consume-action'
 import { discardAction } from '../actions/discard-action'
@@ -37,6 +38,13 @@ export const errorNotice = (message: string): Notice => ({ kind: 'error', messag
 /** Schlüssel der UndoBar: Eine neue Meldung startet die fünf Sekunden neu. */
 export const noticeKey = (notice: UndoNotice) =>
   notice.kind === 'take-out' ? notice.unitId : notice.unitIds.join(',')
+
+/** Ansage der Meldung (#274): Nach „Nachkaufen“ bleibt der Schlüssel, nur der Text wechselt. */
+export function announcementOf(notice: Notice | null): BarAnnouncement | null {
+  if (notice === null) return null
+  if (notice.kind === 'error') return { key: 'error', message: notice.message, isError: true }
+  return { key: noticeKey(notice), message: notice.message, isError: false }
+}
 
 const dateOf = (bestBefore: BestBeforeDto | null) =>
   bestBefore === null ? null : formatDate(bestBefore)
