@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { toCalendarDay } from '@/shared/lib/dates'
-import {
-  bestBeforeKeyOf,
-  formatBestBeforeGroup,
-  groupByBestBefore,
-  groupKeyOf,
-  type BestBeforeGroup,
-} from './group-units'
+import { formatDayWithPrecision, toCalendarDay } from '@/shared/lib/dates'
+import { bestBeforeKeyOf, groupByBestBefore, groupKeyOf, type BestBeforeGroup } from './group-units'
 import type { BestBefore, BestBeforePrecision } from './unit'
 
 function bestBefore(date: string, precision: BestBeforePrecision = 'month', isEstimated = false) {
@@ -14,6 +8,14 @@ function bestBefore(date: string, precision: BestBeforePrecision = 'month', isEs
 }
 
 const times = (count: number, entry: BestBefore) => Array.from({ length: count }, () => entry)
+
+/** Kurzform einer Gruppe für lesbare Erwartungen: „09/2027 (2×, geschätzt)“, „Datum fehlt (2×)“. */
+function formatBestBeforeGroup(group: BestBeforeGroup): string {
+  const count = `${String(group.count)}×`
+  if (group.kind === 'no-date') return `Datum fehlt (${count})`
+  const estimated = group.isEstimated ? ', geschätzt' : ''
+  return `${formatDayWithPrecision(group)} (${count}${estimated})`
+}
 
 describe('groupByBestBefore', () => {
   it('fasst gleiche Daten zusammen und sortiert nach Datum', () => {

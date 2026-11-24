@@ -1,11 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { addDays, toCalendarDay } from '@/shared/lib/dates'
-import {
-  canConfirmStillGood,
-  DEFAULT_AMPEL_THRESHOLDS,
-  unitStateFor,
-  validateAmpelThresholds,
-} from './unit-state'
+import { DEFAULT_AMPEL_THRESHOLDS } from '../../../../tests/helpers/ampel-thresholds'
+import { canConfirmStillGood, unitStateFor, validateAmpelThresholds } from './unit-state'
 
 const today = toCalendarDay('2026-11-22')
 const stateIn = (days: number, thresholds = DEFAULT_AMPEL_THRESHOLDS) =>

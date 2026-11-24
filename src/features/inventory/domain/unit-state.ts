@@ -15,9 +15,6 @@ export interface AmpelThresholds {
   urgentDays: number
 }
 
-/** Standard laut Konzept: bald fällig bis 3 Monate, dringend bis 4 Wochen. */
-export const DEFAULT_AMPEL_THRESHOLDS: AmpelThresholds = { soonDays: 90, urgentDays: 28 }
-
 /**
  * Die Zeitgruppe „Diese Woche“ auf der Seite Bald fällig umfasst fest 7 Tage (UX-Konzept F13).
  * Die Orange-Schwelle darf darunter nicht liegen, sonst überlappen „Diese Woche“ und

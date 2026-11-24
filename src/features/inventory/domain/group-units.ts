@@ -1,4 +1,4 @@
-import { formatDayWithPrecision, type CalendarDay } from '@/shared/lib/dates'
+import type { CalendarDay } from '@/shared/lib/dates'
 import type { BestBefore, BestBeforePrecision } from './unit'
 
 /** Einheiten mit gleichem Datum, gleicher Genauigkeit und gleichem Schätz-Kennzeichen. */
@@ -60,15 +60,4 @@ export function groupByBestBefore(entries: readonly (BestBefore | null)[]): Best
   }
   const dated: BestBeforeGroup[] = [...groups.values()].sort(compareGroups)
   return withoutDate > 0 ? [...dated, { kind: 'no-date', count: withoutDate }] : dated
-}
-
-/**
- * „09/2027 (6×)“, ein geschätztes Datum mit Vermerk: „09/2027 (2×, geschätzt)“, ohne Datum
- * „Datum fehlt (2×)“.
- */
-export function formatBestBeforeGroup(group: BestBeforeGroup): string {
-  const count = `${String(group.count)}×`
-  if (group.kind === 'no-date') return `${NO_DATE_LABEL} (${count})`
-  const estimated = group.isEstimated ? ', geschätzt' : ''
-  return `${formatDayWithPrecision(group)} (${count}${estimated})`
 }

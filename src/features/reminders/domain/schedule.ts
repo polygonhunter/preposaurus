@@ -19,6 +19,7 @@ export interface WeeklySchedule {
  */
 const URGENT_QUIET_HOURS = { fromMinutes: 21 * 60, untilMinutes: 8 * 60 } as const
 
+/** @internal Läuft nur in `isUrgentDue`, Tests prüfen die Grenzminuten direkt. */
 export function isInQuietHours(minutes: number): boolean {
   const { fromMinutes, untilMinutes } = URGENT_QUIET_HOURS
   return minutes >= fromMinutes || minutes < untilMinutes

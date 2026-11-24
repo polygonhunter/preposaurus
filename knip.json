@@ -11,8 +11,9 @@
   ],
   "project": [
     "src/**/*.{ts,tsx,css}!",
-    "!src/features/*/domain/**!",
-    "!src/shared/lib/{dates,slug,stock-unit}.ts!",
+    // Einzelausnahmen im --production-Lauf (#113): Statistik wartet auf #71, Mengenprüfung auf #295
+    "!src/features/supply/domain/stats.ts!",
+    "!src/features/capture/domain/quantity-plausibility.ts!",
     "db/**/*.ts!",
     "!db/seeds/{demo*,factories}.ts!",
     "tests/**/*.{ts,tsx}",

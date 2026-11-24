@@ -6,7 +6,6 @@ import {
   NAME_RULE,
   ipLockKey,
   minutesUntil,
-  nameLockDurationMs,
   nameLockKey,
 } from './sign-in-brake'
 
@@ -16,12 +15,12 @@ const later = (ms: number) => new Date(now.getTime() + ms)
 
 describe('Bremse je Benutzername', () => {
   it('sperrt erst ab dem fünften Versuch', () => {
-    expect(nameLockDurationMs(4)).toBe(0)
-    expect(nameLockDurationMs(5)).toBe(MINUTE)
+    expect(NAME_RULE.lockMsAfter(4)).toBe(0)
+    expect(NAME_RULE.lockMsAfter(5)).toBe(MINUTE)
   })
 
   it('verdoppelt die Wartezeit je Versuch bis höchstens 15 Minuten', () => {
-    expect([6, 7, 8, 9, 20].map(nameLockDurationMs)).toEqual([
+    expect([6, 7, 8, 9, 20].map(NAME_RULE.lockMsAfter)).toEqual([
       2 * MINUTE,
       4 * MINUTE,
       8 * MINUTE,
@@ -32,8 +31,6 @@ describe('Bremse je Benutzername', () => {
 
   it('zählt ohne Zeitfenster bis zum nächsten Erfolg', () => {
     expect(NAME_RULE.windowMs).toBeNull()
-    expect(NAME_RULE.lockMsAfter(4)).toBe(0)
-    expect(NAME_RULE.lockMsAfter(5)).toBe(MINUTE)
   })
 })
 

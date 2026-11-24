@@ -54,7 +54,10 @@ function hasGrown(gap: GapFacts, saved: ContentQuantity) {
   )
 }
 
-/** Verdeckt der gespeicherte Eintrag heute die Lücke? */
+/**
+ * Verdeckt der gespeicherte Eintrag heute die Lücke?
+ * @internal Läuft nur in `splitGaps`, Tests prüfen die Bedingungen direkt.
+ */
 export function coversGap(entry: GoalEntryFacts, gap: GapFacts, today: CalendarDay): boolean {
   if (entry.source !== 'ziel' || entry.groupKey !== gap.groupKey) return false
   if (entry.amount === null || !isGoalStatus(entry.status)) return false
