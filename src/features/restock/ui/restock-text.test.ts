@@ -49,8 +49,8 @@ describe('Texte der Seite', () => {
       goalDays: 10,
       examples: ['Nudeln', 'Reis'],
     }
-    expect(gapSubtitle(gap)).toBe('6 von 10 Tagen · z. B. Nudeln, Reis')
-    expect(gapSubtitle({ ...gap, examples: [] })).toBe('6 von 10 Tagen')
+    expect(gapSubtitle(gap)).toBe('Menge reicht 6 von 10 Tagen · z. B. Nudeln, Reis')
+    expect(gapSubtitle({ ...gap, examples: [] })).toBe('Menge reicht 6 von 10 Tagen')
   })
 
   it('nennt offene Einträge, Vorschläge und Lücken getrennt', () => {

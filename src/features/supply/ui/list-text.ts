@@ -10,7 +10,8 @@ import type {
   OverviewHousehold,
   OverviewRestock,
 } from '../schemas'
-import { formatDate, formatDays } from './head-text'
+import { formatDays, coverageValue } from '@/shared/lib/supply-terms'
+import { formatDate } from './head-text'
 import { UNVERIFIED_SOURCE_NOTE } from '@/shared/config/recommendation-source'
 
 type DueGroup = OverviewDueEntry['group']
@@ -70,9 +71,8 @@ export function restockText({ openItems, gapGroups }: OverviewRestock): string |
   return parts.length === 0 ? null : parts.join(' · ')
 }
 
-/** „3 von 10 Tagen“ am Balken einer Warengruppe */
-export const coverageText = ({ days, goalDays }: OverviewGroup) =>
-  `${formatGermanNumber(days)} von ${String(goalDays)} Tagen`
+/** „3 von 10 Tagen“ am Balken einer Warengruppe, der Name „Menge reicht“ steht darüber (#209) */
+export const coverageText = ({ days, goalDays }: OverviewGroup) => coverageValue(days, goalDays)
 
 /** Haushalt knapp: „3 Personen · Ziel 10 Tage bis 01.03.2027“ */
 export function householdTitle({ members }: OverviewHousehold, goal: OverviewGoal | null): string {

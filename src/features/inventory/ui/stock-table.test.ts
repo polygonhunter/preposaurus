@@ -33,13 +33,13 @@ const row = (overrides: Partial<StockRowDto> = {}): StockRowDto => ({
 const groupTotals = { ...totals }
 
 describe('tableCells', () => {
-  it('zeigt Zahlen ohne Einheit, die steht im Spaltenkopf', () => {
+  it('zeigt kcal ohne Einheit und Tage unter „Satt für“, beides steht im Spaltenkopf', () => {
     expect(tableCells(row())).toEqual({
       packages: '3',
       expiredNote: null,
       amount: '1,5 kg',
       kcal: '5.385',
-      days: '1,3',
+      days: '1,3 Tage',
       nextDate: '22.01.2027',
     })
   })
@@ -53,7 +53,7 @@ describe('tableCells', () => {
     expect(cells.kcal).toBe('ca. 5.385')
   })
 
-  it('setzt einen Strich, wo es nichts gibt, und zählt Wasser in Wasser-Tagen', () => {
+  it('setzt einen Strich, wo es nichts gibt, und nennt Wasser „Wasser für“ (#209)', () => {
     const water = tableCells(
       row({
         totals: {
@@ -68,7 +68,12 @@ describe('tableCells', () => {
       }),
     )
 
-    expect(water).toMatchObject({ amount: '9 l', kcal: '–', days: '1,5', nextDate: null })
+    expect(water).toMatchObject({
+      amount: '9 l',
+      kcal: '–',
+      days: { label: 'Wasser für', value: '1,5 Tage' },
+      nextDate: null,
+    })
     expect(
       tableCells(row({ totals: { ...totals, amounts: { g: 0, ml: 0 }, energyDays: null } })),
     ).toMatchObject({ amount: '–', days: '–' })
@@ -79,7 +84,13 @@ describe('tableGroupsOf', () => {
   it('reiht die Zeilen je Warengruppe ohne Kategorien, leere Gruppen bleiben stehen', () => {
     const levels: FoodTypeLevel[] = [
       {
-        group: { key: 'getreide', name: 'Getreide', shortName: 'Getreide', totals: groupTotals },
+        group: {
+          key: 'getreide',
+          name: 'Getreide',
+          shortName: 'Getreide',
+          totals: groupTotals,
+          coverage: null,
+        },
         categories: [
           { id: 'k1', name: 'Nudeln', pictogram: null, totals, rows: [row()] },
           {
@@ -92,7 +103,13 @@ describe('tableGroupsOf', () => {
         ],
       },
       {
-        group: { key: 'fette', name: 'Fette', shortName: 'Fette', totals: groupTotals },
+        group: {
+          key: 'fette',
+          name: 'Fette',
+          shortName: 'Fette',
+          totals: groupTotals,
+          coverage: null,
+        },
         categories: [],
       },
     ]

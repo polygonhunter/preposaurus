@@ -63,7 +63,8 @@ Regeln für die Anzeige:
 Gemeinsame Regeln für alle Rechnungen:
 - Gezählt werden nur Einheiten mit Status `vorrat`, die am Stichtag haltbar sind. Stichtag ist heute oder das Zieldatum.
 - kcal einer Einheit = Menge × kcal je 100 ÷ 100. Makros genauso.
-- Beitrag in Tagen = kcal ÷ Tagesbedarf des Haushalts.
+- Beitrag in Tagen = kcal ÷ Tagesbedarf des Haushalts. Angezeigt als **„Satt für X Tage“**, bei Wasser (keine kcal) als **„Wasser für X Tage“** (Liter ÷ Wasserbedarf).
+- Abdeckung nach Menge (A9) = Bestand ÷ empfohlene Menge je Tag. Angezeigt als **„Menge reicht X von Y Tagen“**. Beide Zahlen tragen überall diesen Namen, damit sie nicht verwechselt werden (#209, Begriffe in `shared/lib/supply-terms.ts`).
 - Alle Rechnungen sind reine Funktionen (M2), die Screens rechnen nichts selbst.
 
 | Nr. | Frage des Nutzers | Rechnung | Datenquelle | Wo angezeigt | Stand |

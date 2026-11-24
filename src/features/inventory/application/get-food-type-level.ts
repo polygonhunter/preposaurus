@@ -6,6 +6,7 @@ import type { CalendarDay } from '@/shared/lib/dates'
 import { err, ok, type Result } from '@/shared/lib/result'
 import type { StockGroup } from '../domain/stock-entry'
 import type { FoodTypeLevel } from '../schemas/stock'
+import { coverageFor, coverageToday } from './group-coverage'
 import { loadReadContext, totalsByNode, totalsOf, type NotFound } from './read-context'
 import { categoriesOf } from './stock-categories'
 import type { StockReader } from './stock-reader'
@@ -39,7 +40,11 @@ export async function getFoodTypeLevel(
   const rows = buildRows({ context, products, stockUnits: units })
   const groupTotals = totalsByNode(context, units, [{ level: 'group', key: groupKey }])
   return ok({
-    group: { ...group, totals: totalsOf(groupTotals, { level: 'group', key: groupKey }) },
+    group: {
+      ...group,
+      totals: totalsOf(groupTotals, { level: 'group', key: groupKey }),
+      coverage: coverageFor(coverageToday(context, units), groupKey),
+    },
     categories: categoriesOf(context, rows, units),
   })
 }

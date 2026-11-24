@@ -3,9 +3,9 @@
 // sprechen und es Tests gibt.
 import { formatDayWithPrecision, toCalendarDay } from '@/shared/lib/dates'
 import { formatGermanNumber, formatQuantity } from '@/shared/lib/quantities'
+import { amountDays, namedDaysText, supplyDays, type NamedDays } from '@/shared/lib/supply-terms'
 import type { FoodTypeDetail } from '../schemas/detail'
-import type { BestBeforeDto, NodeTotalsDto, UnitStateDto } from '../schemas/shared'
-import type { StockOverview } from '../schemas/stock'
+import type { BestBeforeDto, CoverageDto, NodeTotalsDto, UnitStateDto } from '../schemas/shared'
 
 type StatusTone = 'red' | 'orange' | 'yellow' | 'green' | 'neutral'
 
@@ -36,11 +36,6 @@ export function formatKcal(kcal: number, isApproximate: boolean): string {
   return isApproximate ? `ca. ${value}` : value
 }
 
-export function formatDays(days: number): string {
-  const rounded = Math.round(days * 10) / 10
-  return rounded === 1 ? '1 Tag' : `${formatGermanNumber(rounded)} Tage`
-}
-
 /**
  * Zählt der Knoten als Wasser? Nur Packungen der Warengruppe Wasser tragen `waterMl` (stock-model),
  * ein anderes Getränk ohne kcal (z. B. ungesüßter Tee) also nicht (UX-Konzept A10, #260).
@@ -52,16 +47,27 @@ export function supplyDaysOf(totals: NodeTotalsDto): number | null {
   return countsAsWater(totals) ? totals.waterDays : totals.energyDays
 }
 
-type GroupFigures = Pick<StockOverview['groups'][number], 'totals' | 'coverage'>
-
-/** Ebene 1: „12 von 40 Tagen“ mit Ziel und Quelle, sonst der Beitrag in Tagen. */
-export function groupCoverageText({ totals, coverage }: GroupFigures): string | null {
-  if (coverage !== null) {
-    const days = Math.round(coverage.days * 10) / 10
-    return `${formatGermanNumber(days)} von ${String(coverage.goalDays)} Tagen`
-  }
+/** Beitrag in Tagen mit Namen: „Satt für 4,1 Tage“, bei Wasser „Wasser für 3,2 Tage“ (#209). */
+export function namedSupplyDays(totals: NodeTotalsDto): NamedDays | null {
   const days = supplyDaysOf(totals)
-  return days === null ? null : formatDays(days)
+  if (days === null) return null
+  return supplyDays(countsAsWater(totals) ? 'water' : 'food', days)
+}
+
+type GroupFigures = Readonly<{
+  totals: NodeTotalsDto
+  coverage: Pick<CoverageDto, 'days' | 'goalDays'> | null
+}>
+
+const namedCoverage = (coverage: GroupFigures['coverage']) =>
+  coverage === null ? null : amountDays(coverage.days, coverage.goalDays)
+
+/**
+ * Ebene 1: je Warengruppe eine Zahl mit Namen. Mit Mengenempfehlung „Menge reicht 12 von 40 Tagen“,
+ * ohne (Sonstiges, Getränke, ohne Ziel) der Beitrag „Satt für 0,2 Tage“ bzw. „Wasser für …“ (#209).
+ */
+export function groupDays({ totals, coverage }: GroupFigures): NamedDays | null {
+  return namedCoverage(coverage) ?? namedSupplyDays(totals)
 }
 
 /**
@@ -129,11 +135,15 @@ export function isEmptyStock(groups: readonly Pick<GroupFigures, 'totals'>[]): b
   return groups.every(({ totals }) => !hasStock(totals))
 }
 
-/** Untertitel einer Warengruppe bzw. Lebensmittelart: „5 Packungen · 2,5 kg · 3,2 Tage“. */
-export function groupSubtitle(totals: NodeTotalsDto): string {
-  const days = supplyDaysOf(totals)
-  const line = stockLine(totals)
-  return days === null ? line : `${line} · ${formatDays(days)}`
+/**
+ * Kopf einer Warengruppe (Ebene 2): beide Tage-Zahlen mit Namen (#209), z. B. „5 Packungen · 2,5 kg ·
+ * Menge reicht 6,6 von 10 Tagen · Satt für 4,1 Tage“. Was fehlt (kein Ziel, kein Bedarf), entfällt.
+ */
+export function groupSubtitle({ totals, coverage }: GroupFigures): string {
+  return [stockLine(totals), namedCoverage(coverage), namedSupplyDays(totals)]
+    .filter((part) => part !== null)
+    .map((part) => (typeof part === 'string' ? part : namedDaysText(part)))
+    .join(' · ')
 }
 
 export const BEST_BEFORE_HINT = 'MHD ist kein Wegwerfdatum: anschauen, riechen, probieren.'
@@ -147,16 +157,18 @@ export function expiryHint(state: UnitStateDto, kind: 'best-before' | 'use-by'):
   return kind === 'use-by' ? USE_BY_HINT : BEST_BEFORE_HINT
 }
 
-/** Kennwerte im Detail: Packungen · Menge · kcal · Tage (UX-Konzept §2, P3). Ohne Bedarf keine Tage. */
+/**
+ * Kennwerte im Detail: Packungen · Menge · kcal · „Satt für“ bzw. „Wasser für“ (UX-Konzept §2, P3,
+ * #209). Ohne Bedarf keine Tage.
+ */
 export function detailTiles({ totals }: Pick<FoodTypeDetail, 'totals'>) {
-  const days = supplyDaysOf(totals)
+  const days = namedSupplyDays(totals)
   const tiles = [
     { label: 'Packungen', value: formatGermanNumber(totals.packages) },
     { label: 'Menge', value: formatAmounts(totals.amounts) ?? '–' },
     { label: 'kcal', value: formatKcal(totals.kcal, totals.isApproximate).replace(' kcal', '') },
   ]
-  if (days === null) return tiles
-  return [...tiles, { label: 'Tage', value: formatGermanNumber(Math.round(days * 10) / 10) }]
+  return days === null ? tiles : [...tiles, days]
 }
 
 /** Unter den Kennwerten: Abgelaufenes zählt nicht in Packungen, Menge, kcal und Tage (#208). */

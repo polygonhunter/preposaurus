@@ -1,9 +1,10 @@
 // Zellen und Gruppen der Vorrat-Tabelle ab „weit“ (DESIGN_SYSTEM §6, M12-04) und die Auswahl der
 // Liste neben dem Detail (M12-03). Rein, damit Tabelle und Liste gleich sprechen und es Tests gibt.
 import { formatGermanNumber } from '@/shared/lib/quantities'
+import type { NamedDays } from '@/shared/lib/supply-terms'
 import type { StockRowDto, StockTarget } from '../schemas/shared'
 import type { FoodTypeLevel } from '../schemas/stock'
-import { formatAmounts, nextDateLabel, supplyDaysOf } from './stock-format'
+import { countsAsWater, formatAmounts, namedSupplyDays, nextDateLabel } from './stock-format'
 
 /** Platzhalter für leere Zellen, Screenreader lesen „Strich“ statt nichts */
 const EMPTY_CELL = '–'
@@ -16,7 +17,8 @@ export type TableCells = Readonly<{
   expiredNote: string | null
   amount: string
   kcal: string
-  days: string
+  // Spalte „Satt für“: nur der Wert („4,1 Tage“), bei Wasser mit eigenem Namen darüber (#209)
+  days: string | NamedDays
   nextDate: string | null
 }>
 
@@ -47,12 +49,18 @@ function kcalCell({ kcal, isApproximate }: StockRowDto['totals']): string {
   return isApproximate ? `ca. ${value}` : value
 }
 
-function daysCell(totals: StockRowDto['totals']): string {
-  const days = supplyDaysOf(totals)
-  return days === null ? EMPTY_CELL : formatGermanNumber(Math.round(days * 10) / 10)
+/**
+ * Spalte „Satt für“ (#209): „4,1 Tage“. Wasser hat keine kcal und nennt sich selbst („Wasser für“
+ * klein über „3,2 Tage“), damit unter „Satt für“ keine Wasser-Tage ohne Namen stehen und die
+ * Spalte schmal bleibt.
+ */
+function daysCell(totals: StockRowDto['totals']): string | NamedDays {
+  const days = namedSupplyDays(totals)
+  if (days === null) return EMPTY_CELL
+  return countsAsWater(totals) ? days : days.value
 }
 
-/** Werte einer Zeile; die Einheiten (kcal, Tage) stehen im Spaltenkopf. */
+/** Werte einer Zeile; die Einheit kcal und der Name der Tage stehen im Spaltenkopf. */
 export function tableCells(row: StockRowDto): TableCells {
   const { totals } = row
   return {

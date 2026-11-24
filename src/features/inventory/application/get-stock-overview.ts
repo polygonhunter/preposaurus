@@ -3,13 +3,14 @@
 // bleiben stehen, denn die Lücke ist eine Information. Dazu die Zähler der Zustands-Chips aus
 // denselben Packungen (#221).
 import 'server-only'
-import { coverageOf, type GroupCoverage } from '@/features/supply/application/stock-figures'
+import type { GroupCoverage } from '@/features/supply/application/stock-figures'
 import type { CalendarDay } from '@/shared/lib/dates'
 import { countByStatusFilter } from '../domain/stock-filter'
 import type { StockOverview } from '../schemas/stock'
+import { coverageFor, coverageToday } from './group-coverage'
 import { loadReadContext, totalsByNode, totalsOf } from './read-context'
 import type { StockReader } from './stock-reader'
-import { joinUnits, toFilterableUnit, toGroupUnit } from './stock-model'
+import { joinUnits, toFilterableUnit } from './stock-model'
 
 interface OverviewInput {
   householdId: string
@@ -18,12 +19,11 @@ interface OverviewInput {
 
 type CoverageDto = StockOverview['groups'][number]['coverage']
 
-function coverageFor(coverage: GroupCoverage, groupKey: string): CoverageDto {
-  const progress = coverage.progress.find((entry) => entry.groupKey === groupKey)
-  if (progress === undefined) return null
-  const { unit, stock, target, days, goalDays, percent } = progress
-  const isTightest = coverage.tightestGroupKey === groupKey
-  return { unit, stock, target, days, goalDays, percent, isTightest }
+function withTightest(coverage: GroupCoverage, groupKey: string): CoverageDto {
+  const figures = coverageFor(coverage, groupKey)
+  return figures === null
+    ? null
+    : { ...figures, isTightest: coverage.tightestGroupKey === groupKey }
 }
 
 export async function getStockOverview(
@@ -39,19 +39,14 @@ export async function getStockOverview(
   const units = joinUnits(stock, products)
   const nodes = groups.map(({ key }) => ({ level: 'group' as const, key }))
   const totals = totalsByNode(context, units, nodes)
-  const coverage = coverageOf({
-    basis: context.basis,
-    units: units.map(toGroupUnit),
-    today,
-    stillGoodCounts: context.stillGoodCounts,
-  })
+  const coverage = coverageToday(context, units)
   return {
     groups: groups.map(({ key, name, shortName }) => ({
       key,
       name,
       shortName,
       totals: totalsOf(totals, { level: 'group', key }),
-      coverage: coverageFor(coverage, key),
+      coverage: withTightest(coverage, key),
     })),
     goalDays: context.basis.goalDays,
     counts: countByStatusFilter(units.map(toFilterableUnit), context),

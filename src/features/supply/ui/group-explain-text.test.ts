@@ -5,6 +5,8 @@ import {
   groupCalculation,
   groupResultText,
   groupTargetText,
+  satietyCalculation,
+  satietyResultText,
 } from './group-explain-text'
 import { coverageText } from './list-text'
 
@@ -19,6 +21,7 @@ const grain: OverviewGroup = {
   unit: 'g',
   stock: 7000,
   targetPerDay: 1050,
+  satiety: { kcal: 23450, isApproximate: false, kcalPerDay: 6000, days: 3.9 },
 }
 
 describe('Erklär-Blatt einer Warengruppe', () => {
@@ -46,8 +49,28 @@ describe('Erklär-Blatt einer Warengruppe', () => {
     expect(groupTargetText(grain)).toContain('zusammen 1,05 kg am Tag')
   })
 
-  it('unterscheidet die Abdeckung vom Beitrag in kcal (#209)', () => {
-    expect(GROUP_MEANING_TEXTS.join(' ')).toMatch(/nicht wie lange das Essen reicht/)
-    expect(GROUP_MEANING_TEXTS.join(' ')).toMatch(/Beitrag zum Essen/)
+  it('rechnet „Satt für“ mit kcal ÷ kcal-Tagesbedarf aus dem DTO (#209)', () => {
+    expect(satietyCalculation(grain)).toBe('23.450 kcal ÷ 6.000 kcal am Tag = 3,9 Tage')
+    expect(satietyResultText(grain)).toContain('allein euren ganzen Haushalt satt: 3,9 Tage')
+  })
+
+  it('setzt „ca.“ vor die kcal, wenn Richtwerte spürbar mitzählen', () => {
+    const approximate = {
+      ...grain,
+      satiety: { kcal: 23450, isApproximate: true, kcalPerDay: 6000, days: 3.9 },
+    }
+    expect(satietyCalculation(approximate)).toBe('ca. 23.450 kcal ÷ 6.000 kcal am Tag = 3,9 Tage')
+  })
+
+  it('zeigt ohne Bedarf keine kcal-Rechnung, sagt aber warum', () => {
+    const noNeed = { ...grain, satiety: null }
+    expect(satietyCalculation(noNeed)).toBeNull()
+    expect(satietyResultText(noNeed)).toContain('sobald Mitglieder eingetragen sind')
+  })
+
+  it('benennt beide Zahlen und was sie messen (#209)', () => {
+    const texts = GROUP_MEANING_TEXTS.join(' ')
+    expect(texts).toContain('„Menge reicht“ vergleicht die Menge mit der Empfehlung')
+    expect(texts).toContain('„Satt für“ rechnet mit den kcal')
   })
 })

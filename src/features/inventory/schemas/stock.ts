@@ -18,7 +18,7 @@ export const stockOverviewSchema = z.object({
     groupRef.extend({
       totals: nodeTotalsSchema,
       /** null ohne Ziel, ohne aktive Quelle oder ohne Zielmenge für diese Gruppe */
-      coverage: coverageSchema.nullable(),
+      coverage: coverageSchema.extend({ isTightest: z.boolean() }).nullable(),
     }),
   ),
   goalDays: z.number().int().nullable(),
@@ -30,7 +30,8 @@ export const stockOverviewSchema = z.object({
 
 /** @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen. */
 export const foodTypeLevelSchema = z.object({
-  group: groupRef.extend({ totals: nodeTotalsSchema }),
+  /** Im Kopf stehen beide Tage-Zahlen (#209): Abdeckung nach Menge und Beitrag nach kcal */
+  group: groupRef.extend({ totals: nodeTotalsSchema, coverage: coverageSchema.nullable() }),
   categories: z.array(
     namedRef.extend({
       pictogram: z.string().nullable(),

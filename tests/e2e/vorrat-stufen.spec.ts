@@ -108,7 +108,7 @@ test.describe('ab „weit“', () => {
       'Packungen',
       'Menge',
       'kcal',
-      'Tage',
+      'Satt für',
       'Nächstes MHD',
     ])
     await expect(table.getByRole('rowheader', { name: GRAIN })).toBeVisible()

@@ -150,7 +150,7 @@ describe('getOverview', () => {
   it('zeigt Warengruppen ohne Wasser und markiert die knappste der gezeigten', async () => {
     const { groups } = await getOverview(ports(), { householdId, today })
 
-    // 5 haltbare Packungen à 500 g gegen 150 g × 10 Tage
+    // 5 haltbare Packungen à 500 g gegen 150 g × 10 Tage; „Satt für“ wie der Kopf (#209)
     expect(groups).toEqual([
       {
         key: 'getreide',
@@ -162,6 +162,7 @@ describe('getOverview', () => {
         unit: 'g',
         stock: 2500,
         targetPerDay: 150,
+        satiety: { kcal: 8975, isApproximate: false, kcalPerDay: 2000, days: 4.4 },
       },
     ])
   })
