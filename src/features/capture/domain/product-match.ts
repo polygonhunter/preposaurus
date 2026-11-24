@@ -21,7 +21,10 @@ export interface ProductWish {
 // Mengen stehen als numeric(9,2) in der DB. Kleinere Abweichungen sind Rundung, kein anderes Produkt.
 const AMOUNT_TOLERANCE = 0.005
 
-/** Ohne Inhalt bietet die App nur an, solange es so wenige Produkte der Art gibt. */
+/**
+ * Ohne Inhalt bietet die App nur an, solange es so wenige Produkte der Art gibt.
+ * @internal Gilt nur in dieser Datei, der Test baut damit einen Fall knapp darüber.
+ */
 export const MAX_OFFERS_WITHOUT_CONTENT = 3
 
 const isSameContent = (a: ContentQuantity, b: ContentQuantity) =>
@@ -31,6 +34,7 @@ const isSameContent = (a: ContentQuantity, b: ContentQuantity) =>
 const isCompatibleContainer = (a: string | null, b: string | null) =>
   a === null || b === null || a === b
 
+/** @internal Läuft nur in dieser Datei, Tests prüfen die einzelnen Merkmale direkt. */
 export function fitsWish(candidate: ProductIdentity, wish: ProductWish): boolean {
   if (candidate.foodTypeId === null || candidate.foodTypeId !== wish.foodTypeId) return false
   if (wish.content !== null && !isSameContent(candidate.content, wish.content)) return false

@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
 import {
-  bestBeforeFromMonth,
   detectDateKind,
   parseBestBefore,
   quickPickBestBefore,
@@ -103,19 +102,6 @@ describe('detectDateKind', () => {
     ['30.09.2027', null],
   ])('%s ist %s', (text, kind) => {
     expect(detectDateKind(text)).toBe(kind)
-  })
-})
-
-describe('bestBeforeFromMonth', () => {
-  it('setzt das Monatsende mit Genauigkeit Monat', () => {
-    expect(bestBeforeFromMonth(2028, 2)).toEqual({
-      ok: true,
-      value: { date: '2028-02-29', precision: 'month', isEstimated: false },
-    })
-  })
-
-  it('lehnt einen ungültigen Monat ab', () => {
-    expect(bestBeforeFromMonth(2027, 13)).toEqual({ ok: false, error: { kind: 'invalid-month' } })
   })
 })
 

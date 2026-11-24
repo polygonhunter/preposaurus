@@ -17,7 +17,7 @@ interface DayParts {
 
 const pad = (value: number, length: number) => String(value).padStart(length, '0')
 
-export function daysInMonth(year: number, month: number): number {
+function daysInMonth(year: number, month: number): number {
   return new Date(Date.UTC(year, month, 0)).getUTCDate()
 }
 

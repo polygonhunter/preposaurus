@@ -46,7 +46,10 @@ export function resolveDiet(member: HouseholdMember, householdDiet: Diet): Diet 
   return member.diet ?? householdDiet
 }
 
-/** Mengen je Person und Tag nach Ernährungsform. Bei geprüften Verschiebungen bleibt die Menge je Einheit gleich. */
+/**
+ * Mengen je Person und Tag nach Ernährungsform. Bei geprüften Verschiebungen bleibt die Menge je Einheit gleich.
+ * @internal Läuft nur in dieser Datei, Tests prüfen die Verschiebung direkt.
+ */
 export function targetsForDiet(
   targets: readonly GroupTarget[],
   shifts: readonly DietShift[],

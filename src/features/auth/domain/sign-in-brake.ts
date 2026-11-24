@@ -25,7 +25,7 @@ const GLOBAL_MAX_ATTEMPTS = 100
 const GLOBAL_LOCK_MS = MINUTE_MS
 const UNKNOWN_IP = 'unbekannt'
 
-export function nameLockDurationMs(attempts: number): number {
+function nameLockDurationMs(attempts: number): number {
   if (attempts < NAME_THRESHOLD) return 0
   return Math.min(MINUTE_MS * 2 ** (attempts - NAME_THRESHOLD), NAME_MAX_MS)
 }

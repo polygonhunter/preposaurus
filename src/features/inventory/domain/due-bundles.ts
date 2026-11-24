@@ -41,6 +41,7 @@ interface DueContext {
 /**
  * Gruppe einer Packung auf Bald fällig. null: später fällig, ohne Datum, entschieden („Noch gut“)
  * oder nicht im Vorrat.
+ * @internal Läuft nur in `bundleDueUnits`, Tests prüfen die Gruppen je Packung direkt.
  */
 export function dueGroupOf(unit: DueUnit, { today, thresholds }: DueContext): DueGroup | null {
   const group = timeGroupFor(unit, today, thresholds)

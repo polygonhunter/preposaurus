@@ -12,6 +12,7 @@ const PER_100 = 100
 const isUsable = (value: number | null): value is number =>
   value !== null && Number.isFinite(value) && value >= 0
 
+/** @internal Läuft nur in `resolveKcal`, Tests prüfen den Faktor direkt. */
 export function kjToKcal(kj: number): number {
   return kj / KJ_PER_KCAL
 }
@@ -40,7 +41,10 @@ export function toPer100({
   return ok((value * PER_100) / portionSize)
 }
 
-/** Menge, auf die sich die Nährwerte beziehen: Das Abtropfgewicht hat Vorrang vor dem Inhalt. */
+/**
+ * Menge, auf die sich die Nährwerte beziehen: Das Abtropfgewicht hat Vorrang vor dem Inhalt.
+ * @internal Läuft nur in `amountPerUnit`, Tests prüfen den Vorrang direkt.
+ */
 export function nutritionBase(content: ContentQuantity, drainedWeightG: number | null): number {
   if (drainedWeightG !== null && drainedWeightG > 0) return drainedWeightG
   return content.value
