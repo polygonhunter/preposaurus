@@ -25,6 +25,7 @@ interface SetUpOptions {
   addedAt?: Date
   units?: ReturnType<typeof unit>[]
   goals?: ReminderGoalFacts
+  settings?: typeof DEFAULT_TIMING.settings
 }
 
 const noGoal: ReminderGoalFacts = {
@@ -43,6 +44,7 @@ function setUp(options: SetUpOptions = {}) {
     {
       householdId,
       ...DEFAULT_TIMING,
+      settings: options.settings ?? DEFAULT_TIMING.settings,
       lastSent: { 'weekly-summary': null, urgent: options.urgentSentAt ?? null },
       addresses: options.addresses ?? ['alex@example.org', 'id-1@nutzer.invalid'],
       addedTimes: { [dueSoon.id]: options.addedAt ?? addedAt },
@@ -182,5 +184,49 @@ describe('sendDueReminders', () => {
       'Bei 1 Packung fehlt noch das Datum.',
     ])
     expect(asked).toEqual([householdId, householdId])
+  })
+})
+
+// Der Worker hält sich an die Einstellungen des Haushalts (#89)
+describe('sendDueReminders mit eigenen Einstellungen', () => {
+  const tuesdayEvening = {
+    weeklySummary: { isEnabled: true, weekday: 2, time: '18:30:00' },
+    isUrgentEnabled: true,
+  }
+
+  it('schickt die Wochenübersicht am gewählten Tag ab der gewählten Uhrzeit', async () => {
+    const { push, sent } = pushTo(1)
+    const { deps } = setUp({ push, settings: tuesdayEvening })
+
+    await sendDueReminders(deps, new Date('2026-11-24T17:25:00Z')) // Di 18:25 Uhr
+    expect(sent).toEqual([])
+    await sendDueReminders(deps, new Date('2026-11-24T17:35:00Z')) // Di 18:35 Uhr
+    expect(sent.map((message) => message.kind)).toEqual(['weekly-summary'])
+  })
+
+  it('schickt am Samstag keine Wochenübersicht mehr, wenn ein anderer Tag gewählt ist', async () => {
+    const { push, sent } = pushTo(1)
+    const urgentOff = { ...tuesdayEvening, isUrgentEnabled: false }
+    const { deps, loadUnits } = setUp({ push, settings: urgentOff })
+
+    await sendDueReminders(deps, saturdayAfterTen)
+
+    expect(sent).toEqual([])
+    expect(loadUnits).not.toHaveBeenCalled()
+  })
+
+  it('schickt nichts, wenn Wochenübersicht und „Dringend“ aus sind', async () => {
+    const { push, sent } = pushTo(1)
+    const off = {
+      weeklySummary: { ...DEFAULT_TIMING.settings.weeklySummary, isEnabled: false },
+      isUrgentEnabled: false,
+    }
+    const { deps, mail } = setUp({ push, settings: off })
+
+    await sendDueReminders(deps, saturdayAfterTen)
+    await sendDueReminders(deps, tuesdayMorning)
+
+    expect(sent).toEqual([])
+    expect(mail.sent).toEqual([])
   })
 })
