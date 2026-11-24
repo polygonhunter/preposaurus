@@ -32,7 +32,7 @@ describe('estimateBestBefore (nur auf Wahl)', () => {
     const { bestBefore, recognizer } = run([
       {
         role: 'mhd_schaetzen',
-        answer: { haltbar_monate: 24, genauigkeit: 'monat', sicherheit: 'mittel' },
+        answer: { haltbar_monate: 24, sicherheit: 'mittel' },
       },
     ])
 

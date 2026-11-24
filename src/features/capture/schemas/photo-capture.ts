@@ -18,17 +18,6 @@ const drainedWeightText = z.string().transform((text, context) => {
   return z.NEVER
 })
 
-const photoUnitSchema = formUnitSchema.extend({
-  bestBefore: z
-    .object({
-      date: z.string(),
-      precision: z.enum(['day', 'month', 'year']),
-      /** Nur nach „Von der KI schätzen lassen“ (#124) */
-      isEstimated: z.boolean().default(false),
-    })
-    .nullable(),
-})
-
 const photoCaptureFormSchema = manualCaptureFormSchema.extend({
   draftId: z.uuid(),
   name: z.string().trim().max(MAX_NAME_LENGTH, 'Bitte kürzer, höchstens 120 Zeichen.'),
@@ -37,7 +26,7 @@ const photoCaptureFormSchema = manualCaptureFormSchema.extend({
   nutritionSource: z.enum(['label', 'manual', 'ai-estimate']),
   isEstimateConfirmed: z.boolean(),
   units: z
-    .array(photoUnitSchema)
+    .array(formUnitSchema)
     .min(1, 'Bitte fotografiert ein MHD, gebt eines ein oder wählt „Datum fehlt“.')
     .max(MAX_DATES_PER_CAPTURE, `Höchstens ${String(MAX_DATES_PER_CAPTURE)} Daten je Erfassung.`),
 })

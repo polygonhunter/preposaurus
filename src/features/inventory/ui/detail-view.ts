@@ -25,7 +25,7 @@ export function packagingOf(product: Pick<DetailProduct, 'content' | 'container'
   return product.container === null ? content : `${content} · ${product.container.name}`
 }
 
-/** Text einer Datumszeile: „11/2027“, „03/2028, geschätzt“ oder „Datum fehlt“. */
+/** Text einer Datumszeile: „11/2027“, „ca. 03/2028“ oder „Datum fehlt“. */
 export function groupLabel(group: BestBeforeGroupDto): string {
   return group.kind === 'no-date' ? NO_DATE_LABEL : formatDate(group)
 }

@@ -8,6 +8,7 @@ import {
   countPackages,
   dateEntryKey,
   dateEntryLabel,
+  isKindFixed,
   type DateEntry,
 } from './date-entries'
 
@@ -70,13 +71,38 @@ describe('changeDateCount', () => {
   })
 })
 
-describe('Schätzung auf Wahl (#124)', () => {
-  it('sagt „geschätzt“ dazu und zählt nicht mit einem gelesenen Datum zusammen', () => {
-    const estimated = { ...september, isEstimated: true }
+describe('Schätzung auf Wahl (#124, #180)', () => {
+  const estimated = { ...september, isEstimated: true }
 
+  it('steht mit „ca.“ da und zählt nicht mit einem gelesenen Datum zusammen', () => {
     const entries = addDateEntry(addDateEntry([], september), estimated)
 
-    expect(entries.map(dateEntryLabel)).toEqual(['09/2027', '09/2027 (geschätzt)'])
+    expect(entries.map(dateEntryLabel)).toEqual(['09/2027', 'ca. 09/2027'])
+  })
+
+  it('wird beim Hinzufügen nie ein Verbrauchsdatum', () => {
+    const entries = addDateEntry([], estimated, 'use-by')
+
+    expect(entries).toEqual([{ bestBefore: estimated, count: 1, kind: undefined }])
+    expect(isKindFixed(entries[0] ?? { bestBefore: null })).toBe(true)
+  })
+
+  it('bleibt beim Umschalten ein MHD', () => {
+    const entries = addDateEntry([], estimated)
+    const key = dateEntryKey(entries[0] ?? { bestBefore: null })
+
+    expect(changeDateKind(entries, { key, kind: 'use-by' })).toEqual(entries)
+  })
+
+  it('nennt ein Verbrauchsdatum aus einem älteren Entwurf weiter beim Namen', () => {
+    expect(dateEntryLabel({ bestBefore: estimated, kind: 'use-by' })).toBe(
+      'ca. 09/2027 (Verbrauchsdatum)',
+    )
+  })
+
+  it('lässt die Datumsart bei gelesenen Daten und „Datum fehlt“ offen', () => {
+    expect(isKindFixed({ bestBefore: september })).toBe(false)
+    expect(isKindFixed({ bestBefore: null })).toBe(false)
   })
 })
 
@@ -100,14 +126,6 @@ describe('Verbrauchsdatum (#294)', () => {
     const entries = addDateEntry(addDateEntry([], december), december, 'best-before')
 
     expect(entries).toEqual([{ bestBefore: december, count: 2 }])
-  })
-
-  it('nennt Schätzung und Verbrauchsdatum zusammen', () => {
-    const estimated = { ...september, isEstimated: true }
-
-    expect(dateEntryLabel({ bestBefore: estimated, kind: 'use-by' })).toBe(
-      '09/2027 (geschätzt, Verbrauchsdatum)',
-    )
   })
 })
 

@@ -145,11 +145,12 @@ describe('KI-Schemas', () => {
 
   it('nimmt bei der MHD-Schätzung kein Datum an, nur Monate', () => {
     const request = { role: 'mhd_schaetzen', context: CONTEXTS.mhd_schaetzen } as const
-    const valid = { haltbar_monate: 18, genauigkeit: 'monat', sicherheit: 'mittel' }
+    const valid = { haltbar_monate: 18, sicherheit: 'mittel' }
 
     expect(parseAnswer(request, valid).ok).toBe(true)
     expect(parseAnswer(request, { ...valid, datum: '2028-05-31' }).ok).toBe(false)
     expect(parseAnswer(request, { ...valid, genauigkeit: 'tag' }).ok).toBe(false)
+    expect(parseAnswer(request, { ...valid, genauigkeit: 'jahr' }).ok).toBe(false)
   })
 
   it('beschreibt einen Schema-Verstoß lesbar für das Protokoll', () => {

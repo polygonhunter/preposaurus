@@ -5,8 +5,6 @@ import {
   calendarDayFrom,
   dayParts,
   daysBetween,
-  endOfMonth,
-  endOfYear,
   formatDayWithPrecision,
   formatDaysLeft,
   normalizeToPrecision,
@@ -64,10 +62,10 @@ describe('dayParts und Monatslänge', () => {
   })
 
   it('kennt Schaltjahre', () => {
-    expect(endOfMonth(day('2028-02-01'))).toBe('2028-02-29')
-    expect(endOfMonth(day('2027-02-01'))).toBe('2027-02-28')
-    expect(endOfMonth(day('2000-02-01'))).toBe('2000-02-29')
-    expect(endOfMonth(day('2100-02-01'))).toBe('2100-02-28')
+    expect(normalizeToPrecision(day('2028-02-01'), 'month')).toBe('2028-02-29')
+    expect(normalizeToPrecision(day('2027-02-01'), 'month')).toBe('2027-02-28')
+    expect(normalizeToPrecision(day('2000-02-01'), 'month')).toBe('2000-02-29')
+    expect(normalizeToPrecision(day('2100-02-01'), 'month')).toBe('2100-02-28')
   })
 })
 
@@ -165,16 +163,16 @@ describe('addMonths', () => {
   })
 })
 
-describe('endOfMonth und endOfYear', () => {
+describe('Monats- und Jahresende', () => {
   it('liefert das Monatsende inklusive Schaltjahr', () => {
-    expect(endOfMonth(day('2027-02-01'))).toBe('2027-02-28')
-    expect(endOfMonth(day('2028-02-10'))).toBe('2028-02-29')
-    expect(endOfMonth(day('2027-04-30'))).toBe('2027-04-30')
-    expect(endOfMonth(day('2027-12-05'))).toBe('2027-12-31')
+    expect(normalizeToPrecision(day('2027-02-01'), 'month')).toBe('2027-02-28')
+    expect(normalizeToPrecision(day('2028-02-10'), 'month')).toBe('2028-02-29')
+    expect(normalizeToPrecision(day('2027-04-30'), 'month')).toBe('2027-04-30')
+    expect(normalizeToPrecision(day('2027-12-05'), 'month')).toBe('2027-12-31')
   })
 
   it('liefert den 31.12. des Jahres', () => {
-    expect(endOfYear(day('2027-01-01'))).toBe('2027-12-31')
+    expect(normalizeToPrecision(day('2027-01-01'), 'year')).toBe('2027-12-31')
   })
 })
 

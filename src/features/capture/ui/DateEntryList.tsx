@@ -8,10 +8,11 @@ import {
   changeDateKind,
   dateEntryKey,
   dateEntryLabel,
+  isKindFixed,
   type DateEntry,
 } from '../domain/date-entries'
 import { MAX_COUNT_PER_DATE } from '../schemas/stock'
-import { kindChangedNote } from './best-before-messages'
+import { ESTIMATE_ROW_NOTE, kindChangedNote } from './best-before-messages'
 import { CountStepper } from './CountStepper'
 import { DATE_KIND_EXPLANATION, DateKindChoice } from './DateKindChoice'
 
@@ -31,8 +32,9 @@ interface FocusTarget {
 }
 
 // Je Datum eine Zeile „09/2027 · − 2× +“, darunter der Umschalter MHD · Verbrauchsdatum (#294),
-// „Datum fehlt“ zuletzt. Die Art gehört zum Schlüssel der Zeile: Nach dem Umschalten entsteht sie
-// neu, darum holt die Liste den Fokus auf die gewählte Art in der neuen Zeile zurück.
+// „Datum fehlt“ zuletzt. Eine Schätzung ist immer ein MHD (#180), dort steht statt des Umschalters
+// „Geschätzt, kein Aufdruck“. Die Art gehört zum Schlüssel der Zeile: Nach dem Umschalten entsteht
+// sie neu, darum holt die Liste den Fokus auf die gewählte Art in der neuen Zeile zurück.
 export function DateEntryList({
   entries,
   labelledBy,
@@ -77,20 +79,24 @@ export function DateEntryList({
                 />
               }
               footer={
-                <div className="w-full max-w-xs">
-                  <DateKindChoice
-                    legend={`Datumsart für ${label}`}
-                    name={nameOf(key)}
-                    value={entry.kind ?? 'best-before'}
-                    onChange={(kind) => {
-                      const nextKey = dateEntryKey({ ...entry, kind })
-                      const next = changeDateKind(entries, { key, kind })
-                      focusAfterChange.current = { name: nameOf(nextKey), kind }
-                      onKindChange(kindChangedNote(next, nextKey, next.length < entries.length))
-                      onChange(next)
-                    }}
-                  />
-                </div>
+                isKindFixed(entry) ? (
+                  <p className="text-footnote text-fg2">{ESTIMATE_ROW_NOTE}</p>
+                ) : (
+                  <div className="w-full max-w-xs">
+                    <DateKindChoice
+                      legend={`Datumsart für ${label}`}
+                      name={nameOf(key)}
+                      value={entry.kind ?? 'best-before'}
+                      onChange={(kind) => {
+                        const nextKey = dateEntryKey({ ...entry, kind })
+                        const next = changeDateKind(entries, { key, kind })
+                        focusAfterChange.current = { name: nameOf(nextKey), kind }
+                        onKindChange(kindChangedNote(next, nextKey, next.length < entries.length))
+                        onChange(next)
+                      }}
+                    />
+                  </div>
+                )
               }
             />
           )

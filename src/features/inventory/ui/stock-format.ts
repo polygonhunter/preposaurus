@@ -112,10 +112,10 @@ export function formatStillGoodMessage(name: string, count: number, checkedAt: s
   return `${name}: ${formatPackages(count)} ${stillGoodLabel(checkedAt)}`
 }
 
-/** MHD wie aufgedruckt („30.09.2027“, „09/2027“, „2027“), geschätzt mit Vermerk. */
+/** MHD wie aufgedruckt („30.09.2027“, „09/2027“, „2027“), eine Schätzung mit „ca.“ (#180). */
 export function formatDate({ date, precision, isEstimated }: BestBeforeDto): string {
   const text = formatDayWithPrecision({ date: toCalendarDay(date), precision })
-  return isEstimated ? `${text}, geschätzt` : text
+  return isEstimated ? `ca. ${text}` : text
 }
 
 /**
