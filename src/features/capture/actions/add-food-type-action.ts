@@ -1,14 +1,14 @@
 'use server'
-// Neue Lebensmittelart aus der Erfassung (#142, #110), nur der Admin. Name und Kategorie prüft
-// dasselbe Schema wie in den Einstellungen. Die Antwort trägt die neue Art samt Pfad, damit das
+// Neue Lebensmittelart aus der Erfassung (#142, #110): Admin und Mitglied des Haushalts (#298).
+// Name und Pflicht-Kategorie prüft dasselbe Schema wie in den Einstellungen. Die Antwort trägt die neue Art samt Pfad, damit das
 // Formular sie ohne Neuladen wählen kann. Gibt es eine ähnliche Art schon, kommt sie als Angebot.
 import { z } from 'zod'
 import { foodTypeFormSchema } from '@/features/catalog/schemas'
-import { adminAccessMessage } from '@/server/auth/admin-access-message'
-import { requireHouseholdAdmin } from '@/server/auth/guards'
+import { requireHouseholdUser } from '@/server/auth/guards'
 import { firstMessages } from '@/shared/lib/form-data'
 import { addFoodTypeForHousehold, type AddFoodTypeError } from '../application/add-food-type'
 import type { FoodTypeChoice } from '../domain/capture-options'
+import { accessMessage } from './action-messages'
 
 type NewFoodTypeField = 'name' | 'categoryId'
 
@@ -54,14 +54,14 @@ export async function addFoodTypeAction(input: {
   name: string
   categoryId: string
 }): Promise<AddFoodTypeOutcome> {
-  const admin = await requireHouseholdAdmin()
-  if (!admin.ok) return failure({ message: adminAccessMessage(admin.error) })
+  const user = await requireHouseholdUser()
+  if (!user.ok) return failure({ message: accessMessage(user.error) })
   const parsed = inputSchema.safeParse(input)
   if (!parsed.success) {
     return failure({ errors: firstMessages(z.flattenError(parsed.error).fieldErrors) })
   }
   const result = await addFoodTypeForHousehold({
-    householdId: admin.value.householdId,
+    householdId: user.value.householdId,
     ...parsed.data,
   })
   return result.ok ? { ok: true, foodType: result.value } : problemOf(result.error)

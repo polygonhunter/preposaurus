@@ -338,20 +338,27 @@ test('Vorschlag einer neuen Lebensmittelart: ablehnen oder übernehmen (#142)', 
 test.describe('als Mitglied', () => {
   test.use(signedOut)
 
-  test('sieht den Vorschlag ohne „Übernehmen“ (#142)', async ({ page }) => {
+  test('übernimmt den Vorschlag einer neuen Lebensmittelart (#142, #298)', async ({
+    page,
+  }, testInfo) => {
+    const name = `Testkorn Mitglied ${String(attemptOf(testInfo))}`
     await signInViaUi(page, E2E_MEMBER)
-    await fakeRecognition(page, [proposalFor('Testkorn Mitglied')])
+    await fakeRecognition(page, [proposalFor(name)])
 
-    const offer = await readProposal(page, 'Testkorn Mitglied')
+    const offer = await readProposal(page, name)
 
-    await expect(offer).toContainText('Neue Arten legt ein Admin an')
-    await expect(offer.getByRole('button', { name: 'Übernehmen' })).toHaveCount(0)
-    await expect(offer.getByRole('button', { name: 'Ändern' })).toHaveCount(0)
-    await expect(page.getByRole('button', { name: /Neue Lebensmittelart/ })).toHaveCount(0)
+    // Dasselbe Angebot wie für den Admin, ohne Satz über Admin-Rechte
+    await expect(offer).toHaveText(/^Keine Lebensmittelart der Liste passt\. Neue .*Andere wählen$/)
+    await expect(offer.getByRole('button', { name: 'Ändern' })).toBeVisible()
     for (const colorScheme of ['light', 'dark'] as const) {
       await page.emulateMedia({ colorScheme })
       await expectAccessibleLayout(page)
     }
+    await offer.getByRole('button', { name: 'Übernehmen' }).click()
+    await expect(offer).toHaveCount(0)
+    const review = page.getByRole('form', { name: 'Foto-Erfassung prüfen' })
+    await expect(review).toContainText(name)
+    await expect(review).toContainText('› Nudeln, Reis und Getreide')
     // Aufräumen: Der Entwurf des Mitglieds bleibt nicht liegen
     await page.getByRole('link', { name: 'Abbrechen' }).click()
     await page

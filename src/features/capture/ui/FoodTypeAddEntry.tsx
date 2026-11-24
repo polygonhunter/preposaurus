@@ -5,9 +5,8 @@ import { Button } from '@/shared/ui/Button'
 import type { CategoryChoice, FoodTypeChoice } from '../domain/capture-options'
 import { NewFoodTypeSheet } from './NewFoodTypeSheet'
 
-/** Neue Arten anlegen beim Erfassen (#142, #110): nur der Admin, die anderen sehen einen Hinweis. */
+/** Neue Arten anlegen beim Erfassen (#142, #110): Admin und Mitglied (#298). */
 export interface FoodTypeAdding {
-  canAdd: boolean
   categories: readonly CategoryChoice[]
   onAdded: (foodType: FoodTypeChoice) => void
 }
@@ -17,23 +16,14 @@ type FoodTypeAddEntryProps = Readonly<{
   foodTypes: readonly FoodTypeChoice[]
   /** Eingabe im Suchfeld, wird zum Namen der neuen Art */
   query: string
-  hasNoHits: boolean
   onChosen: (foodTypeId: string) => void
 }>
 
-const MEMBER_HINT = 'Neue Lebensmittelarten legt ein Admin an.'
-
 // Unter den Treffern (UX §8.5): „+ Neue Lebensmittelart“, mit Suche „+ ‚Dinkelreis‘ als neue
-// Lebensmittelart anlegen“. Das Blatt legt an, ohne das Formular zu verlassen. Mitglieder sehen
-// ohne Treffer nur den Satz, wer neue Arten anlegt (UX „Keine Berechtigung“).
+// Lebensmittelart anlegen“. Das Blatt legt an, ohne das Formular zu verlassen.
 export function FoodTypeAddEntry(props: FoodTypeAddEntryProps) {
-  const { adding, foodTypes, query, hasNoHits, onChosen } = props
+  const { adding, foodTypes, query, onChosen } = props
   const [sheetName, setSheetName] = useState<string | null>(null)
-  if (!adding.canAdd) {
-    return hasNoHits ? (
-      <p className="px-8 text-footnote text-fg2 breit:px-10">{MEMBER_HINT}</p>
-    ) : null
-  }
   const name = query.trim()
   return (
     <div className="px-4 breit:px-6">
