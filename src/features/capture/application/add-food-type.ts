@@ -2,7 +2,7 @@
 // bestätigte Vorschlag der Erkennung. Angelegt wird über denselben Use-Case wie in den Einstellungen
 // (eigene Art `eigen_<slug>`, #126/#243), nur im Haushalt der Sitzung. Vorher prüft die App ähnliche
 // Namen gegen die sichtbaren Arten samt Suchwörtern: Gibt es die Art schon, kommt sie zurück statt
-// einer Dublette. Das Recht (nur Admin) prüft die Action.
+// einer Dublette. Das Recht (Admin oder Mitglied, #298) prüft die Action.
 import 'server-only'
 import {
   catalogServices,
