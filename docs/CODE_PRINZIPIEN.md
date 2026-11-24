@@ -255,7 +255,7 @@ Das `jobs`-Format steht so in der lefthook-Doku [14]. `{staged_files}`, `piped` 
 |---|---|---|---|
 | Unit | Vitest | `domain/`, `shared/lib` (Datum, Menge), Schemas, Mapping KI → Domain | viele, schnell |
 | Use-Case | Vitest + Fake-Adapter/Repos | `application/` ohne DB und Netz | mittel |
-| Integration | Vitest + PGlite lokal, PostgreSQL 18 in der CI (Dienst `postgres:18`) | Repositories, Migrationen laufen durch | wenige |
+| Integration | Vitest + PGlite lokal, PostgreSQL 19 in der CI (Dienst `postgres:19`, wie `compose.yaml`). PGlite 0.5.17 ist PostgreSQL 18.7 | Repositories, Migrationen laufen durch | wenige |
 | E2E | Playwright + `@axe-core/playwright` | Login, manuell erfassen, Foto-Flow mit Fake-KI, Entnahme, mobil | wenige Kernflows |
 
 - Tests prüfen Verhalten, nicht Implementierung. Namen als deutscher Satz („liefert null, wenn kein Datum erkennbar ist“). Abdeckung: `domain/` und `shared/lib` ≥ 90 % Zweige (Vitest-Threshold), sonst kein Prozentziel.

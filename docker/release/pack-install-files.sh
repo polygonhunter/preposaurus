@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Packt die Dateien für eine Installation (docs/INSTALLATION.md) in ein Archiv:
 #   preposaurus-<version>/compose.yaml, compose.tailscale.yaml, docker/tailscale/serve.json,
+#   docker/db/rollen.sh (Rollen beim ersten Start der Datenbank),
 #   env.beispiel (Vorlage für .env mit eingetragener Version)
 # Aufruf: docker/release/pack-install-files.sh <version> <zielordner>
 set -euo pipefail
@@ -13,9 +14,10 @@ target=${2:?Zielordner fehlt}
 
 staging=$(mktemp -d)
 bundle="$staging/preposaurus-$version"
-mkdir -p "$bundle/docker/tailscale"
+mkdir -p "$bundle/docker/tailscale" "$bundle/docker/db"
 cp compose.yaml compose.tailscale.yaml "$bundle/"
 cp docker/tailscale/serve.json "$bundle/docker/tailscale/"
+cp docker/db/rollen.sh "$bundle/docker/db/"
 sed "s/^PREPOSAURUS_VERSION=.*/PREPOSAURUS_VERSION=$version/" docker/compose.env.example > "$bundle/env.beispiel"
 grep -q "^PREPOSAURUS_VERSION=$version$" "$bundle/env.beispiel"
 
