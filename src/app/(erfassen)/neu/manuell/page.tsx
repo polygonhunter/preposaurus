@@ -29,7 +29,7 @@ export default async function ManualCapturePage({ searchParams }: PageProps<'/ne
   }
   const actor = { householdId: user.value.householdId, userId: user.value.id }
   const [options, replacedReason] = await Promise.all([
-    getCaptureOptionsForUser({ ...actor, isAdmin: user.value.role === 'admin' }),
+    getCaptureOptionsForUser(actor),
     findReplacedPhotoWayReason(await loadCaptureDeps(), actor),
   ])
   const prefill = resolvePrefill(options, readPrefillParams(await searchParams))

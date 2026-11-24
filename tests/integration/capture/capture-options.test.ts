@@ -27,7 +27,7 @@ describe('Auswahllisten des Erfassens gegen die DB (#52)', () => {
   })
 
   const optionsFor = (actor: { householdId: string; userId: string }) =>
-    getCaptureOptions(createCaptureOptionsRepository(testDb.db), { ...actor, isAdmin: false })
+    getCaptureOptions(createCaptureOptionsRepository(testDb.db), actor)
 
   async function saveNoodles(storageLocationId: string | null) {
     const draft = createStockSchema.parse({

@@ -1,7 +1,8 @@
-// Neue Lebensmittelart aus der Erfassung (#142, #110) gegen PGlite: nur als Admin, nur im Haushalt
-// der Sitzung, über denselben Use-Case wie die Einstellungen (`eigen_<slug>`). Ähnliche Namen und
-// Suchwörter ergeben die vorhandene Art statt einer Dublette. Danach steht die Art in der
-// Erfassen-Auswahl und im KI-Enum, aber nur im eigenen Haushalt.
+// Neue Lebensmittelart aus der Erfassung (#142, #110) gegen PGlite: als Mitglied oder Admin (#298),
+// nur im Haushalt der Sitzung und nur mit Kategorie. Die echten Guards laufen, nur die Sitzung ist
+// vorgegeben. Angelegt wird über denselben Use-Case wie in den Einstellungen (`eigen_<slug>`).
+// Ähnliche Namen und Suchwörter ergeben die vorhandene Art statt einer Dublette. Danach steht die
+// Art in der Erfassen-Auswahl und im KI-Enum, aber nur im eigenen Haushalt.
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { buildHousehold } from '../../../db/seeds/factories'
 import { createCaptureOptionsRepository } from '../../../src/features/capture/data/capture-options-repository'
@@ -9,23 +10,20 @@ import { loadCategoryOptions } from '../../../src/features/capture/data/category
 import { loadFoodTypeOptions } from '../../../src/features/capture/data/food-type-options'
 import { createCategoryRepository } from '../../../src/features/catalog/data/category-repository'
 import { createFoodTypeRepository } from '../../../src/features/catalog/data/food-type-repository'
-import type { AccessError } from '../../../src/server/auth/guards'
+import type { SessionUser } from '../../../src/server/auth/session'
 import type { Database } from '../../../src/server/db/connection'
 import { households } from '../../../src/server/db/schema/household'
-import type { Result } from '../../../src/shared/lib/result'
 import { insertBasics, type Basics } from '../../helpers/db-fixtures'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
 
-type Access = Result<{ householdId: string }, AccessError>
-
 const state = vi.hoisted(() => ({
-  access: null as Access | null,
+  user: null as SessionUser | null,
   db: null as Database | null,
 }))
 
-vi.mock('@/server/auth/guards', () => ({
-  requireHouseholdAdmin: () => Promise.resolve(state.access),
-}))
+vi.mock('next/headers', () => ({ headers: () => Promise.resolve(new Headers()) }))
+vi.mock('@/server/auth/get-auth', () => ({ getAuth: () => Promise.resolve({}) }))
+vi.mock('@/server/auth/session', () => ({ readSession: () => Promise.resolve(state.user) }))
 vi.mock('@/server/db/get-db', () => ({ getDb: () => Promise.resolve(state.db) }))
 
 const { addFoodTypeAction } =
@@ -45,8 +43,8 @@ describe('Neue Lebensmittelart aus der Erfassung', () => {
   let basics: Basics
   let otherId: string
 
-  const actAs = (householdId: string) => {
-    state.access = { ok: true, value: { householdId } }
+  const actAs = (householdId: string | null, role: SessionUser['role'] = 'mitglied') => {
+    state.user = { id: 'nutzer', name: 'Sam', username: 'sam', role, householdId }
   }
 
   const captureNames = async (householdId: string) =>
@@ -71,7 +69,7 @@ describe('Neue Lebensmittelart aus der Erfassung', () => {
     await testDb.close()
   })
 
-  it('legt als Admin im eigenen Haushalt an und liefert die Art samt Pfad', async () => {
+  it('legt als Mitglied im eigenen Haushalt an und liefert die Art samt Pfad', async () => {
     const outcome = await addFoodTypeAction({ name: ' Dinkelreis ', categoryId: basics.categoryId })
 
     expect(outcome).toMatchObject({
@@ -138,16 +136,39 @@ describe('Neue Lebensmittelart aus der Erfassung', () => {
     )
   })
 
-  it('lässt ein Mitglied nichts anlegen', async () => {
-    state.access = { ok: false, error: { kind: 'forbidden' } }
+  it('legt auch als Admin an', async () => {
+    actAs(basics.householdId, 'admin')
 
-    const outcome = await addFoodTypeAction({ name: 'Emmer', categoryId: basics.categoryId })
+    const outcome = await addFoodTypeAction({ name: 'Einkorn', categoryId: basics.categoryId })
 
-    expect(outcome).toEqual({
+    expect(outcome).toMatchObject({ ok: true, foodType: { key: 'eigen_einkorn' } })
+  })
+
+  it('lässt ohne Haushalt oder ohne Anmeldung nichts anlegen', async () => {
+    actAs(null, 'admin')
+    const withoutHousehold = await addFoodTypeAction({
+      name: 'Emmer',
+      categoryId: basics.categoryId,
+    })
+    state.user = null
+    const signedOut = await addFoodTypeAction({ name: 'Emmer', categoryId: basics.categoryId })
+
+    expect(withoutHousehold).toEqual({
       ok: false,
       errors: {},
-      message: 'Das ändert ein Admin.',
+      message: 'Dafür gehört dein Konto zu keinem Haushalt.',
       similar: null,
+    })
+    expect(signedOut).toMatchObject({ ok: false, message: 'Bitte melde dich an.' })
+    expect(await captureNames(basics.householdId)).not.toContain('Emmer')
+  })
+
+  it('legt ohne Kategorie nichts an', async () => {
+    const outcome = await addFoodTypeAction({ name: 'Emmer', categoryId: '' })
+
+    expect(outcome).toMatchObject({
+      ok: false,
+      errors: { categoryId: 'Bitte eine Kategorie wählen.' },
     })
     expect(await captureNames(basics.householdId)).not.toContain('Emmer')
   })
