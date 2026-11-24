@@ -1,8 +1,9 @@
 /* Design-Tokens „Systemnah“ (docs/konzept/DESIGN_SYSTEM.md §2–4). */
 @import 'tailwindcss';
 
-/* Stufen aus DESIGN_SYSTEM §6. Unter „mittel“ gilt „kompakt“. */
-@custom-variant mittel (@media (width >= 640px) and (height >= 700px));
+/* Stufen aus DESIGN_SYSTEM §6. Unter „mittel“ gilt „kompakt“. „mittel:“ heißt „ab mittel“ und gilt
+   auch auf „breit“ ohne die Mindesthöhe (Duo quer 951 × 585, #284). */
+@custom-variant mittel (@media ((width >= 640px) and (height >= 700px)) or (width >= 900px));
 @custom-variant breit (@media (width >= 900px));
 @custom-variant weit (@media (width >= 1280px));
 /* Nur „mittel“, nicht darüber: Liste oben, Detail unten im Vorrat (M12-05, Duo hochkant). */
