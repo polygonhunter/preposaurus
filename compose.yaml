@@ -47,8 +47,8 @@ services:
       POSTGRES_USER: preposaurus
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD fehlt in .env}
       POSTGRES_DB: preposaurus
-    # Ab PostgreSQL 18 liegt das Volume eine Ebene höher als bei 17 (Daten in 19/docker). Eine neue
-    # Hauptversion legt ihren Ordner daneben an, der alte bleibt für den Weg zurück (INSTALLATION §12.1).
+    # Ab PostgreSQL 18 liegt das Volume eine Ebene höher als bei 17 (Daten in 19/docker). Liegen dort
+    # Daten einer anderen Hauptversion, startet die Datenbank nicht (Umzug: INSTALLATION §12.1).
     volumes:
       - ./db:/var/lib/postgresql
     healthcheck:

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # CI-Test für den Umzug auf eine neue PostgreSQL-Hauptversion (#250), Schritt für Schritt wie in
 # docs/INSTALLATION.md §12.1: Eine alte Installation (PostgreSQL 18, Ordner db/18) sichert mit
-# pg_dump 18 nach vor-update/…. Danach startet die neue Version eine frische Datenbank daneben
-# (db/19), der Backup-Dienst spielt den Stand zurück, und die Zeilenzahlen müssen gleich sein.
+# pg_dump 18 nach vor-update/…. Der Ordner db wandert nach db-pg18, die neue Version startet eine
+# frische Datenbank (db/19), der Backup-Dienst spielt den Stand zurück, die Zeilenzahlen sind gleich.
 # Die alte Installation entspricht compose.yaml bis Version 0.1: Superuser preposaurus, Backup-Image
 # auf postgres:18. Aufruf aus dem Repo-Ordner, beide Images (…:ci) müssen gebaut sein.
 set -euo pipefail
@@ -63,12 +63,23 @@ stand=$(find backups/vor-update -mindepth 1 -maxdepth 1 -type d -name '20*' -pri
 [ -n "$stand" ] || fail "Kein Stand vor-update aus der alten Version"
 docker rm -f "$OLD_DB" > /dev/null
 
-# Schritte 2 bis 4: neue Version, nur die Datenbank starten. Sie legt db/<neu> neben db/<alt> an.
-docker compose up -d --wait db
+# Ohne Schritt 2 startet die neue Datenbank nicht, mit der Meldung aus der Fehlersuche (§14).
+docker compose up -d --wait --wait-timeout 30 db > /dev/null 2>&1 &&
+  fail "Die neue Datenbank darf neben Daten von $OLD_MAJOR nicht starten"
+docker compose logs db | grep -q "there appears to be PostgreSQL data in" ||
+  fail "Die Meldung zu den alten Daten fehlt im Log von db"
+docker compose down > /dev/null 2>&1
+
+# Schritt 2: Der alte Ordner db wandert beiseite.
+mv db "db-pg$OLD_MAJOR"
+mkdir db
+# Schritte 3 und 4: neue Version, nur die Datenbank starten.
+if ! docker compose up -d --wait db; then
+  docker compose logs db
+  fail "Die neue Datenbank startet nicht"
+fi
 [ -d "db/$NEW_MAJOR/docker" ] || fail "Die neue Datenbank liegt nicht unter db/$NEW_MAJOR"
-# Den Ordner darf nur der Nutzer postgres öffnen, deshalb die Probe im Container.
-docker compose exec -T db test -f "/var/lib/postgresql/$OLD_MAJOR/docker/PG_VERSION" ||
-  fail "Der alte Ordner db/$OLD_MAJOR ist nicht mehr da"
+[ -d "db-pg$OLD_MAJOR/$OLD_MAJOR/docker" ] || fail "Der alte Ordner db-pg$OLD_MAJOR ist nicht mehr da"
 [ "$(psql_value 'show server_version_num')" -ge "${NEW_MAJOR}0000" ] ||
   fail "Die Datenbank läuft nicht mit PostgreSQL $NEW_MAJOR"
 docker compose run --rm -T --entrypoint pg_restore backup -l "/backups/$stand/datenbank.dump" |

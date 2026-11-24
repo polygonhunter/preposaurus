@@ -423,14 +423,19 @@ Was zwischen Update und Rückweg erfasst wurde, ist danach weg (es steckt aber n
 
 Steht in den Änderungen eines Releases **„neue Hauptversion von PostgreSQL“** (z. B. von 18 auf 19), reicht `pull` und `up -d` nicht. Die Daten einer Hauptversion lassen sich mit der nächsten nicht einfach weiter öffnen. Der Umzug geht über eine Sicherung: Die alte Version sichert, die neue startet mit einer leeren Datenbank, dann spielst du die Sicherung zurück. Bei den paar Megabyte eines Haushalts dauert das Einspielen Sekunden.
 
-Der Ordner `db` hat je Hauptversion einen eigenen Unterordner (`db/18`, `db/19`). Die neue Version legt ihren neben den alten, **der alte bleibt unverändert liegen**. Das ist dein Weg zurück.
+Der Ordner `db` hat je Hauptversion einen eigenen Unterordner (`db/18`, `db/19`). Die neue Version startet nicht, solange Daten einer anderen Hauptversion im Ordner `db` liegen (Meldung `there appears to be PostgreSQL data in /var/lib/postgresql/18/docker`). Deshalb schiebst du den alten Ordner `db` beiseite. **Er bleibt unverändert liegen** und ist dein Weg zurück.
 
 1. **Mit der alten Version sichern**, solange sie noch läuft:
    ```bash
    docker compose run --rm backup jetzt vor-update
    ```
    Den Namen aus der Ausgabe merken, z. B. `vor-update/2026-11-22_100512`.
-2. **Alles anhalten:** `docker compose down`
+2. **Alles anhalten und den alten Ordner `db` beiseiteschieben:**
+   ```bash
+   docker compose down
+   mv db db-pg18
+   mkdir db
+   ```
 3. **Neue Version eintragen und die neuen Dateien entpacken** wie oben in Schritt 2 und 3. Dann `docker compose pull`.
 4. **Nur die Datenbank starten:**
    ```bash
@@ -444,13 +449,13 @@ Der Ordner `db` hat je Hauptversion einen eigenen Unterordner (`db/18`, `db/19`)
    Erwartet: `Wiederhergestellt. …`
 6. **Alles starten und prüfen:** `docker compose up -d`, dann `docker compose ps -a` wie in Abschnitt 6 und die App öffnen. Vorrat, Mitglieder und Fotos sind wie vorher.
 
-Warum nicht `pg_upgrade`? Das Werkzeug von PostgreSQL bräuchte beide Versionen in einem Container und hängt an Einstellungen des Dateisystems. Der Weg über die Sicherung nutzt nur das, was ohnehin jede Nacht läuft und in der CI getestet ist (`docker/test/pg-upgrade-test.sh`), und lässt die alten Daten unangetastet.
+Warum nicht `pg_upgrade`? Das Werkzeug von PostgreSQL bräuchte beide Versionen in einem Container und hängt an Einstellungen des Dateisystems. Der Weg über die Sicherung nutzt nur das, was ohnehin jede Nacht läuft und in der CI getestet ist (`docker/test/pg-upgrade-test.sh`), und lässt die alten Daten unangetastet. Ein Snapshot des NAS ersetzt die Sicherung hier nicht: Die Dateien von 18 kann 19 nicht öffnen.
 
-**Zurück zur alten Version:** `docker compose down`, alte Nummer in `PREPOSAURUS_VERSION`, die Dateien des alten Releases entpacken, `docker compose pull` und `docker compose up -d`. Die alte Datenbank startet wieder aus `db/18` mit dem Stand von vor dem Umzug. Was du danach erfasst hast, fehlt dort.
+**Zurück zur alten Version:** `docker compose down`, dann `mv db db-pg19` und `mv db-pg18 db`. Alte Nummer in `PREPOSAURUS_VERSION`, die Dateien des alten Releases entpacken, `docker compose pull` und `docker compose up -d`. Die alte Datenbank startet mit dem Stand von vor dem Umzug. Was du danach erfasst hast, fehlt dort.
 
-**Aufräumen:** Läuft die neue Version ein paar Wochen ohne Probleme, den alten Ordner löschen. Er gehört dem Nutzer der Datenbank, deshalb mit `sudo`:
+**Aufräumen:** Läuft die neue Version ein paar Wochen ohne Probleme, den alten Ordner löschen. Sein Inhalt gehört dem Nutzer der Datenbank, deshalb mit `sudo`:
 ```bash
-sudo rm -r db/18
+sudo rm -r db-pg18
 ```
 
 ## 13. Notfall-Befehle: Passwort vergessen, kein Admin, alle abmelden
@@ -535,7 +540,7 @@ docker compose logs tailscale        # Tailscale
 | `migrate` steht auf `Exited (1)` | `docker compose logs migrate` lesen. Oft ist die Datenbank nicht erreichbar oder `POSTGRES_PASSWORD` wurde nach dem ersten Start geändert. Altes Passwort wieder eintragen |
 | `db` meldet `password authentication failed` | `POSTGRES_PASSWORD` wurde nach dem ersten Start geändert. Die Datenbank behält das erste Passwort. Altes Passwort wieder eintragen |
 | `db` meldet etwas zu `/var/lib/postgresql/data` | Der Ordner `db` stammt von PostgreSQL 17 oder älter. Neu einrichten und ein Backup einspielen |
-| Nach einem Update ist die App leer und zeigt die Ersteinrichtung | Das Release hat eine neue Hauptversion von PostgreSQL, die Datenbank hat sich neu und leer eingerichtet. Die alten Daten liegen unverändert in `db/<alte Version>`. Nichts in der App einrichten. `docker compose stop web worker`, dann Abschnitt 12.1 ab Schritt 5. Ohne Stand `vor-update` nimm den letzten täglichen Stand von vor dem Update (`backup liste`) |
+| `db` startet nach einem Update nicht, im Log `there appears to be PostgreSQL data in /var/lib/postgresql/18/docker` | Das Release hat eine neue Hauptversion von PostgreSQL. Die alten Daten sind unverändert. Abschnitt 12.1 ab Schritt 2. Ohne Stand `vor-update` nimm den letzten täglichen Stand von vor dem Update (`backup liste`) |
 | Fotos lassen sich nicht speichern, im Log `EACCES` | Der Ordner `fotos` gehört nicht dem Nutzer aus `PREPOSAURUS_UID`. Abschnitt 4.3 |
 | Browser findet die Adresse nicht | Tailscale auf dem Gerät verbunden? MagicDNS an (Abschnitt 3.1)? Erscheint das Gerät unter **Machines**? |
 | Zertifikatsfehler oder langer erster Aufruf | HTTPS-Zertifikate im Admin-Bereich eingeschaltet? Der erste Aufruf holt das Zertifikat und dauert etwas. `docker compose logs tailscale` zeigt Fehler |
