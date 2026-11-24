@@ -12,6 +12,7 @@ import {
 } from '@/features/inventory/application/stock-model'
 import type { Overview } from '../schemas'
 import type { HouseholdFactsReader, HouseholdGoal } from './household-facts-reader'
+import { satietyByGroup } from './group-satiety'
 import { explanationBasisOf } from './overview-explanation'
 import { headFigures } from './overview-figures'
 import { countGapGroups, duePreview, groupCoverage } from './overview-lists'
@@ -54,12 +55,15 @@ export async function getOverview(ports: OverviewPorts, input: HouseholdDay): Pr
     loadStockSnapshot(ports.stock, input),
     loadFacts(ports, input),
   ])
-  const head = headFigures({
+  const figures = {
     units: units.map(toNodeUnit),
     need: dailyNeedOf(context.basis),
     today: input.today,
-    goal: facts.goal,
     stillGoodCounts: context.stillGoodCounts,
+  }
+  const head = headFigures({
+    ...figures,
+    goal: facts.goal,
     explanation: explanationBasisOf(
       context,
       units.map(({ unit }) => unit),
@@ -70,7 +74,14 @@ export async function getOverview(ports: OverviewPorts, input: HouseholdDay): Pr
     hasStock: units.length > 0,
     ...head,
     due: duePreview(facts.due),
-    groups: groupCoverage(coverage.today, groups),
+    groups: groupCoverage(
+      coverage.today,
+      groups,
+      satietyByGroup(
+        figures,
+        groups.map(({ key }) => key),
+      ),
+    ),
     restock: { openItems: facts.openItems, gapGroups: countGapGroups(coverage.atTarget) },
     household: { members: context.basis.members.length, source: facts.source },
   }

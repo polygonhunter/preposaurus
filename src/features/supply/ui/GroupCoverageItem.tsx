@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { RecommendationSource } from '@/shared/config/recommendation-source'
+import { DAYS_TERM } from '@/shared/lib/supply-terms'
 import { DayBar } from '@/shared/ui/DayBar'
 import { ExplainSheet } from '@/shared/ui/ExplainSheet'
 import type { OverviewGroup } from '../schemas'
@@ -17,7 +18,8 @@ type GroupCoverageItemProps = Readonly<{
 const SEPARATOR =
   'relative not-first:before:absolute not-first:before:top-0 not-first:before:right-0 not-first:before:left-4 not-first:before:hairline'
 
-// Fläche über der Zahl rechts („6,6 von 10 Tagen“), so breit wie deren Spalte samt Rand. Sie liegt
+// Fläche über der Zahl rechts („6,6 von 10 Tagen“, der Name „Menge reicht“ steht im Kopf der
+// Liste), so breit wie deren Spalte samt Rand. Sie liegt
 // über der Fläche des Links, ein Tipp auf die Zahl öffnet also das Blatt statt des Vorrats (#230).
 const EXPLAIN_AREA = 'absolute right-0 bottom-0 z-10 h-11 w-40 rounded-group'
 
@@ -46,6 +48,7 @@ export function GroupCoverageItem({ group, scaleDays, source }: GroupCoverageIte
           goalDays={group.goalDays}
           isLimiting={group.isTightest}
           valueText={coverageText(group)}
+          valueLabel={DAYS_TERM.amount}
           isLabelHidden
           valueWidth="coverage"
         />

@@ -3,6 +3,7 @@
 // gerundet und formuliert (ruhiger Ton, keine Ausrufezeichen, DESIGN_SYSTEM §9).
 import { formatDayWithPrecision, toCalendarDay } from '@/shared/lib/dates'
 import { formatGermanNumber } from '@/shared/lib/quantities'
+import { formatDays } from '@/shared/lib/supply-terms'
 import type { OverviewGoal, OverviewNextStep, OverviewSupply } from '../schemas'
 
 const ML_PER_LITER = 1000
@@ -13,11 +14,6 @@ const KCAL_STEP = 100
 const wholeDays = (days: number) => Math.floor(days)
 
 const dayWord = (count: number) => (count === 1 ? 'Tag' : 'Tage')
-
-/** „9,4 Tage“ an den Balken, „1 Tag“ */
-export function formatDays(days: number): string {
-  return `${formatGermanNumber(days)} ${dayWord(days)}`
-}
 
 export const formatDate = (iso: string) =>
   formatDayWithPrecision({ date: toCalendarDay(iso), precision: 'day' })

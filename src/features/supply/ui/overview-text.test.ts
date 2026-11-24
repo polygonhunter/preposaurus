@@ -1,13 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { OverviewDueEntry, OverviewGoal, OverviewSupply } from '../schemas'
-import {
-  formatDays,
-  goalLine,
-  headline,
-  limitingSentence,
-  nextStepSentence,
-  scaleFor,
-} from './head-text'
+import { formatDays } from '@/shared/lib/supply-terms'
+import { goalLine, headline, limitingSentence, nextStepSentence, scaleFor } from './head-text'
 import {
   dueSubtitle,
   dueTiles,

@@ -7,7 +7,7 @@ import {
   formatPackages,
   formatStillGoodMessage,
   formatTakenMessage,
-  groupCoverageText,
+  groupDays,
   groupSubtitle,
   isEmptyStock,
   nextDateLabel,
@@ -68,12 +68,27 @@ describe('Kennwerte als Text', () => {
     )
   })
 
-  it('nennt im Untertitel Abgelaufenes als Zusatz und die Tage, wenn es sie gibt', () => {
-    expect(groupSubtitle(totals({ uncountedPackages: 1 }))).toBe(
+  it('nennt im Untertitel Abgelaufenes als Zusatz und „Satt für“, wenn es Tage gibt', () => {
+    expect(groupSubtitle({ totals: totals({ uncountedPackages: 1 }), coverage: null })).toBe(
       '3 Packungen · 1,5 kg · dazu 1 abgelaufen',
     )
-    expect(groupSubtitle(totals({ energyDays: 2.64 }))).toBe('3 Packungen · 1,5 kg · 2,6 Tage')
-    expect(groupSubtitle(totals({ energyDays: 1 }))).toBe('3 Packungen · 1,5 kg · 1 Tag')
+    expect(groupSubtitle({ totals: totals({ energyDays: 2.64 }), coverage: null })).toBe(
+      '3 Packungen · 1,5 kg · Satt für 2,6 Tage',
+    )
+    expect(groupSubtitle({ totals: totals({ energyDays: 1 }), coverage: null })).toBe(
+      '3 Packungen · 1,5 kg · Satt für 1 Tag',
+    )
+  })
+
+  it('nennt im Kopf der Warengruppe beide Tage-Zahlen mit Namen (#209)', () => {
+    const coverage = { days: 6.6, goalDays: 10 }
+
+    expect(groupSubtitle({ totals: totals({ energyDays: 4.1 }), coverage })).toBe(
+      '3 Packungen · 1,5 kg · Menge reicht 6,6 von 10 Tagen · Satt für 4,1 Tage',
+    )
+    expect(groupSubtitle({ totals: totals(), coverage })).toBe(
+      '3 Packungen · 1,5 kg · Menge reicht 6,6 von 10 Tagen',
+    )
   })
 
   it('rechnet Wasser in Wasser-Tagen', () => {
@@ -85,29 +100,43 @@ describe('Kennwerte als Text', () => {
       waterDays: 3,
     })
 
-    expect(groupSubtitle(water)).toBe('3 Packungen · 9 l · 3 Tage')
+    expect(groupSubtitle({ totals: water, coverage: null })).toBe(
+      '3 Packungen · 9 l · Wasser für 3 Tage',
+    )
+    expect(groupSubtitle({ totals: water, coverage: { days: 2.8, goalDays: 10 } })).toBe(
+      '3 Packungen · 9 l · Menge reicht 2,8 von 10 Tagen · Wasser für 3 Tage',
+    )
   })
 
   it('rechnet ein Getränk ohne kcal nicht in Wasser-Tagen (#260)', () => {
     const tea = totals({ amounts: { g: 0, ml: 6000 }, kcal: 0, energyDays: 0, waterDays: 2 })
 
-    expect(groupSubtitle(tea)).toBe('3 Packungen · 6 l · 0 Tage')
+    expect(groupSubtitle({ totals: tea, coverage: null })).toBe(
+      '3 Packungen · 6 l · Satt für 0 Tage',
+    )
   })
 
-  it('zeigt auf Ebene 1 die Abdeckung mit Ziel, sonst die Tage, sonst nichts', () => {
-    const coverage = {
-      unit: 'g' as const,
-      stock: 1,
-      target: 2,
-      days: 12.34,
-      goalDays: 40,
-      percent: 31,
-      isTightest: false,
-    }
+  it('zeigt auf Ebene 1 „Menge reicht“ mit Ziel, sonst „Satt für“, sonst nichts (#209)', () => {
+    const coverage = { days: 12.34, goalDays: 40 }
 
-    expect(groupCoverageText({ totals: totals(), coverage })).toBe('12,3 von 40 Tagen')
-    expect(groupCoverageText({ totals: totals({ energyDays: 5 }), coverage: null })).toBe('5 Tage')
-    expect(groupCoverageText({ totals: totals(), coverage: null })).toBeNull()
+    expect(groupDays({ totals: totals({ energyDays: 3 }), coverage })).toEqual({
+      label: 'Menge reicht',
+      value: '12,3 von 40 Tagen',
+    })
+    expect(groupDays({ totals: totals({ energyDays: 0.2 }), coverage: null })).toEqual({
+      label: 'Satt für',
+      value: '0,2 Tage',
+    })
+    expect(groupDays({ totals: totals(), coverage: null })).toBeNull()
+  })
+
+  it('nennt Wasser ohne Ziel „Wasser für“, weil es keine kcal hat', () => {
+    const water = totals({ amounts: { g: 0, ml: 9000 }, kcal: 0, waterMl: 9000, waterDays: 3 })
+
+    expect(groupDays({ totals: water, coverage: null })).toEqual({
+      label: 'Wasser für',
+      value: '3 Tage',
+    })
   })
 
   it('erkennt einen leeren Vorrat, abgelaufene Packungen zählen mit', () => {
@@ -129,7 +158,7 @@ describe('Kennwerte als Text', () => {
     })
     const withDays = detailTiles({ totals: totals({ energyDays: 2.6, amounts: { g: 0, ml: 0 } }) })
     expect(withDays[1]).toEqual({ label: 'Menge', value: '–' })
-    expect(withDays[3]).toEqual({ label: 'Tage', value: '2,6' })
+    expect(withDays[3]).toEqual({ label: 'Satt für', value: '2,6 Tage' })
   })
 })
 

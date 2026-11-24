@@ -11,6 +11,9 @@ type DayBarProps = Readonly<{
   isLimiting?: boolean
   // Text rechts, z. B. „9,6 T“. Ohne Angabe die Zahl der Tage.
   valueText?: string
+  // Name der Zahl, wenn er nicht neben dem Balken steht (z. B. „Menge reicht“ im Kopf der Liste).
+  // Screenreader lesen ihn vor dem Wert, damit die Zahl nicht ohne Bedeutung bleibt (#209).
+  valueLabel?: string
   // Beschriftung steht schon darüber (z. B. lange Warengruppen-Namen): nur für Screenreader
   isLabelHidden?: boolean
   // Breite der Wert-Spalte, für alle Balken einer Liste gleich: „9,4 Tage“ oder „6,6 von 10 Tagen“.
@@ -26,6 +29,7 @@ export function DayBar(props: DayBarProps) {
   const { label, days, scaleDays, goalDays, isLimiting, valueText, isLabelHidden } = props
   const valueWidth = VALUE_WIDTH[props.valueWidth ?? 'days']
   const text = valueText ?? `${String(days)} Tage`
+  const spoken = props.valueLabel === undefined ? text : `${props.valueLabel} ${text}`
   return (
     <div
       className={cx(
@@ -40,7 +44,9 @@ export function DayBar(props: DayBarProps) {
         aria-valuemin={0}
         aria-valuemax={scaleDays}
         aria-valuenow={Math.min(days, scaleDays)}
-        aria-valuetext={goalDays === undefined ? text : `${text}, Ziel ${String(goalDays)} Tage`}
+        aria-valuetext={
+          goalDays === undefined ? spoken : `${spoken}, Ziel ${String(goalDays)} Tage`
+        }
         className="relative h-2.5 rounded-full bg-fill"
       >
         <div

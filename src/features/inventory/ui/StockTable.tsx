@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { DAYS_TERM } from '@/shared/lib/supply-terms'
 import type { StockTarget } from '../schemas/shared'
 import { groupPath } from './stock-paths'
 import { isSameTarget, type TableGroup } from './stock-table'
@@ -16,7 +17,7 @@ const HEAD =
 const HEAD_NUMBER = `${HEAD} text-right`
 
 // Vorrat als Tabelle ab „weit“ (DESIGN_SYSTEM §6, M12-04): echte Tabelle mit Spaltenköpfen, je
-// Warengruppe eine Zwischenzeile (Link auf Ebene 2), Spalten Packungen · Menge · kcal · Tage · nächstes MHD. Die
+// Warengruppe eine Zwischenzeile (Link auf Ebene 2), Spalten Packungen · Menge · kcal · Satt für · nächstes MHD. Die
 // Reihenfolge ist die des Baums (Warengruppe, Kategorie, Name) wie in der Liste.
 export function StockTable({ groups, selected = null, caption }: StockTableProps) {
   return (
@@ -37,7 +38,7 @@ export function StockTable({ groups, selected = null, caption }: StockTableProps
             kcal
           </th>
           <th scope="col" className={HEAD_NUMBER}>
-            Tage
+            {DAYS_TERM.food}
           </th>
           <th scope="col" className={`${HEAD} pr-6`}>
             Nächstes MHD

@@ -1,18 +1,18 @@
 // Texte des Erklär-Blatts zu den Kennwerten im Detail (#230, UX-Konzept §3 und §4): woraus Packungen,
 // Menge, kcal und Tage entstehen. Gerechnet ist alles im DTO (supply/domain/node-totals), hier wird
-// nur formuliert. Die Tage hier sind der Beitrag in kcal, nicht die Abdeckung der Warengruppe
-// („X von 10 Tagen“); das Blatt sagt das ausdrücklich (#209).
+// nur formuliert. Die Tage hier sind „Satt für“ (kcal) bzw. „Wasser für“ (Liter), nicht „Menge
+// reicht“ der Warengruppe; das Blatt sagt das ausdrücklich (#209).
 import {
   APPROXIMATE_THRESHOLD_PERCENT,
   estimatedSharePercentText,
 } from '@/shared/lib/approximation'
 import { formatQuantity } from '@/shared/lib/quantities'
+import { DAYS_TERM, formatDays } from '@/shared/lib/supply-terms'
 import type { FoodTypeDetail } from '../schemas/detail'
 import type { NodeTotalsDto } from '../schemas/shared'
 import {
   countsAsWater,
   formatAmounts,
-  formatDays,
   formatKcal,
   formatPackages,
   supplyDaysOf,
@@ -83,23 +83,32 @@ export function daysCalculation(totals: NodeTotalsDto, need: Need): string | nul
   return `${kcal} ÷ ${perDay} am Tag = ${formatDays(days)}`
 }
 
-/** Was die Tage bedeuten: Beitrag für den ganzen Haushalt, nicht die Abdeckung (#209). */
+/** Überschrift des Abschnitts, derselbe Name wie die Kachel: „Satt für“ bzw. „Wasser für“ (#209). */
+export const daysTitle = (totals: NodeTotalsDto) =>
+  countsAsWater(totals) ? DAYS_TERM.water : DAYS_TERM.food
+
+const AMOUNT_HINT = `„${DAYS_TERM.amount} … von … Tagen“`
+
+/** Was die Tage bedeuten: Beitrag für den ganzen Haushalt, nicht „Menge reicht“ (#209). */
 export function daysMeaningTexts(totals: NodeTotalsDto): string[] {
   if (supplyDaysOf(totals) === null) {
     return ['Tage zeigt Preposaurus erst, wenn Mitglieder und eine Empfehlung eingetragen sind.']
   }
   if (countsAsWater(totals)) {
-    return ['So lange reicht dieses Wasser allein für euren ganzen Haushalt.']
+    return [
+      `„${DAYS_TERM.water}“: So lange reicht dieses Wasser allein für euren ganzen Haushalt, gerechnet mit eurem Wasserbedarf je Person. Wasser hat keine kcal, deshalb steht hier nicht „${DAYS_TERM.food}“.`,
+      `An der Warengruppe Wasser steht außerdem ${AMOUNT_HINT}: Diese Zahl vergleicht die Liter mit der Zielmenge der Empfehlung. Weil der Bedarf je Person verschieden sein kann, liegen beide Zahlen manchmal etwas auseinander.`,
+    ]
   }
   if (isCalorieFreeDrink(totals)) {
     return [
-      'Ohne kcal trägt dieses Getränk nichts zu den Tagen bei.',
-      'In die Wasser-Tage zählt nur die Warengruppe Wasser. Andere Getränke stehen daneben, damit der Wasservorrat nicht größer wirkt, als er ist.',
+      `Ohne kcal trägt dieses Getränk nichts zu „${DAYS_TERM.food}“ bei.`,
+      `In „${DAYS_TERM.water}“ zählt nur die Warengruppe Wasser. Andere Getränke stehen daneben, damit der Wasservorrat nicht größer wirkt, als er ist.`,
     ]
   }
   return [
-    'So lange reichen die kcal dieser Lebensmittelart allein für euren ganzen Haushalt.',
-    'An der Warengruppe steht auf der Übersicht eine andere Zahl („X von 10 Tagen“): Sie vergleicht die Menge mit der Empfehlung für die ganze Warengruppe, nicht die kcal.',
+    `„${DAYS_TERM.food}“: So lange machen die kcal dieser Lebensmittelart allein euren ganzen Haushalt satt.`,
+    `An der Warengruppe steht außerdem ${AMOUNT_HINT}: Diese Zahl vergleicht die Menge der ganzen Warengruppe mit der Empfehlung, nicht die kcal. Für eine einzelne Lebensmittelart gibt es keine Mengenempfehlung.`,
   ]
 }
 

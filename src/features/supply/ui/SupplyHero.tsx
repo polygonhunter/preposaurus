@@ -1,6 +1,7 @@
 import { DayBar } from '@/shared/ui/DayBar'
 import type { OverviewHousehold, OverviewSupply } from '../schemas'
-import { formatDays, headline, limitingSentence, scaleFor } from './head-text'
+import { formatDays } from '@/shared/lib/supply-terms'
+import { headline, limitingSentence, scaleFor } from './head-text'
 import { ExplainSheet } from '@/shared/ui/ExplainSheet'
 import { SupplyExplanation } from './SupplyExplanation'
 
