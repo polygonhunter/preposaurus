@@ -10,7 +10,7 @@ import { createTestDb, type TestDb } from '../../helpers/test-db'
 import { insertForeignMasterData, SECRET } from './foreign-master-data'
 import { setupStockRead, today } from './stock-read-fixtures'
 
-const STATUSES = ['in-stock', 'due-soon', 'expired', 'incomplete', 'consumed', 'discarded']
+const STATUSES = ['in-stock', 'due-soon', 'expired', 'incomplete']
 
 describe('Mandantentrennung mit fremden eigenen Stammdaten (#133)', () => {
   let testDb: TestDb

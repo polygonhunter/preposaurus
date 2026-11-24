@@ -92,7 +92,7 @@ export function toDayOrNull(value: string | null): CalendarDay | null {
   return value === null ? null : toCalendarDay(value)
 }
 
-interface BestBeforeColumns {
+export interface BestBeforeColumns {
   bestBefore: string | null
   precision: DbValue<typeof BEST_BEFORE_PRECISIONS> | null
   isEstimated: boolean

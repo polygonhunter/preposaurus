@@ -12,7 +12,6 @@ import type {
   StockProductUnit,
   UnitQuery,
 } from '../domain/stock-entry'
-import type { UnitStatus } from '../domain/unit'
 
 export interface StockReader {
   loadSettings: (householdId: string) => Promise<ReadSettings>
@@ -21,8 +20,4 @@ export interface StockReader {
   loadFilterOptions: (householdId: string) => Promise<FilterOptions>
   loadProducts: (householdId: string, filter: ProductFilter) => Promise<StockProduct[]>
   loadUnits: (householdId: string, query: UnitQuery) => Promise<StockProductUnit[]>
-  countUnitsByStatus: (
-    householdId: string,
-    productIds: readonly string[],
-  ) => Promise<Record<UnitStatus, number>>
 }

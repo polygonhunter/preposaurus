@@ -3,6 +3,7 @@
 import { randomUUID } from 'node:crypto'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { StockReader } from '../../../src/features/inventory/application/stock-reader'
+import { createStockReadRepository } from '../../../src/features/inventory/data/stock-read-repository'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
 import { setupStockRead } from './stock-read-fixtures'
 
@@ -41,9 +42,10 @@ describe('Lese-Repository mit mehr IDs als Parametern', () => {
 
     expect(many).toEqual(own)
     expect(many.length).toBeGreaterThan(0)
-    expect(await reader.countUnitsByStatus(householdId, manyIds)).toEqual(
-      await reader.countUnitsByStatus(householdId, ownIds),
-    )
+    const repository = createStockReadRepository(testDb.db)
+    const count = (productIds: string[]) =>
+      repository.countUnitsByStatus(householdId, { productIds, takenFrom: null })
+    expect(await count(manyIds)).toEqual(await count(ownIds))
   })
 
   it('liefert für eine leere Liste nichts, ohne die Datenbank zu fragen', async () => {
