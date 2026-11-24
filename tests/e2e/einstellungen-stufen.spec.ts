@@ -73,7 +73,13 @@ test.describe('ab „breit“', () => {
 
   test('Liste und Bereich lassen die Mitte frei (Falz beim Duo quer)', async ({ page }) => {
     test.skip(widthOf(page) >= WEIT, 'Am PC gibt es keine Falz')
-    for (const path of ['/einstellungen', '/einstellungen/ziel', '/einstellungen/konto']) {
+    const paths = [
+      '/einstellungen',
+      '/einstellungen/ziel',
+      '/einstellungen/konto',
+      '/einstellungen/erinnerungen',
+    ]
+    for (const path of paths) {
       await page.goto(path)
       await expect(areaList(page)).toBeVisible()
       await expectNothingOnVerticalFold(page)

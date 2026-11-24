@@ -5,6 +5,7 @@ import {
   FOOD_TYPES_PATH,
   GOAL_PATH,
   MEMBERS_PATH,
+  REMINDERS_PATH,
   RULES_PATH,
   STORAGE_LOCATIONS_PATH,
 } from '@/shared/config/settings-paths'
@@ -24,6 +25,8 @@ export type SettingsSummary = Readonly<{
   goalSummary: string
   locationCount: number
   stillGoodCounts: boolean
+  /** Wochenübersicht des Haushalts, z. B. „Samstag, 10:00 Uhr“ (#89) */
+  reminderSummary: string
 }>
 
 type SettingsOverviewProps = Readonly<{
@@ -83,6 +86,7 @@ export function SettingsOverview({ summary, signOut }: SettingsOverviewProps) {
           {...valueOf(summary.stillGoodCounts ? '„Noch gut“ zählt' : undefined)}
           href={RULES_PATH}
         />
+        <NavRow title="Erinnerungen" {...valueOf(summary.reminderSummary)} href={REMINDERS_PATH} />
       </Group>
       {isAdmin ? null : (
         <GroupFooter>Ansehen kannst du alles, ändern kann es ein Admin.</GroupFooter>

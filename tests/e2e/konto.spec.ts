@@ -1,6 +1,7 @@
 import type { Browser, Page, TestInfo } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
 import { signedOut, submitSignIn } from '../helpers/e2e-auth'
+import { clickUntilPosted, waitForHydration } from '../helpers/hydration'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Mein Konto (#75, #89). Der Admin legt je Projekt einen eigenen Nutzer an, damit das Ändern des
@@ -16,6 +17,8 @@ const usernameFor = (info: TestInfo) => `konto_${info.project.name.replaceAll('-
 
 async function createUser(page: Page, info: TestInfo) {
   await page.goto('/einstellungen/nutzer/neu')
+  // Vor der Hydrierung ginge der erste Klick als Formular ohne JavaScript ab (#263)
+  await waitForHydration(page)
   await page.getByLabel('Anzeigename').fill(`Konto ${info.project.name}`)
   await page.getByLabel('Benutzername').fill(usernameFor(info))
   // Häufige Passwörter lehnt die Sperrliste ab, ruhig am Feld (#174)
@@ -24,7 +27,7 @@ async function createUser(page: Page, info: TestInfo) {
   await page.getByRole('button', { name: 'Anlegen' }).click()
   await expect(password).toHaveAccessibleDescription(/sehr verbreitet/)
   await password.fill(FIRST_PASSWORD)
-  await page.getByRole('button', { name: 'Anlegen' }).click()
+  await clickUntilPosted(page, page.getByRole('button', { name: 'Anlegen' }))
   await expect(
     page.getByRole('region', { name: 'Dieses Passwort wird nur jetzt angezeigt.' }),
   ).toBeVisible()

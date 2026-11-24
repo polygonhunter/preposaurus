@@ -116,6 +116,20 @@ async function expectEmptyOverview(page: Page) {
   await page.emulateMedia({ colorScheme: null })
 }
 
+// Brach ein Versuch mitten in der Einrichtung ab (Retry in der CI, #263), führt die Anmeldung zum
+// offenen Schritt statt zur Übersicht. Mit den Standardwerten weiter, bis die Übersicht kommt.
+async function finishOpenSetup(page: Page, remainingSteps = 3): Promise<void> {
+  await expect(page).toHaveURL(/\/(uebersicht|einrichten\/[a-z-]+)$/)
+  const openStep = page.url()
+  if (!openStep.includes('/einrichten/') || remainingSteps === 0) return
+  await page
+    .getByRole('button', { name: /^(Weiter|Überspringen)$/ })
+    .first()
+    .click()
+  await expect(page).not.toHaveURL(openStep)
+  await finishOpenSetup(page, remainingSteps - 1)
+}
+
 setup('erster Start bis zur Übersicht', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveURL(/\/(einrichten|anmelden)/)
@@ -128,6 +142,7 @@ setup('erster Start bis zur Übersicht', async ({ page }) => {
     await goalStep(page)
   } else {
     await submitSignIn(page)
+    await finishOpenSetup(page)
   }
 
   await expect(page).toHaveURL(/\/uebersicht$/)
