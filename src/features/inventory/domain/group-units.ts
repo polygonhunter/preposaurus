@@ -1,5 +1,5 @@
 import type { CalendarDay } from '@/shared/lib/dates'
-import type { BestBefore, BestBeforePrecision } from './unit'
+import type { BestBefore, BestBeforePrecision, DateKind } from './unit'
 
 /** Einheiten mit gleichem Datum, gleicher Genauigkeit und gleichem Schätz-Kennzeichen. */
 interface DatedGroup {
@@ -34,6 +34,13 @@ export const bestBeforeKeyOf = (entry: BestBefore | null) =>
 
 export const groupKeyOf = (group: BestBeforeGroup) =>
   bestBeforeKeyOf(group.kind === 'no-date' ? null : group)
+
+/**
+ * Datumsart einer Datumszeile (#294). Steht eine Packung mit Verbrauchsdatum darin, gilt die Zeile
+ * als Verbrauchsdatum: lieber einmal zu vorsichtig als ein beruhigender MHD-Hinweis.
+ */
+export const rowDateKindOf = (units: readonly Readonly<{ kind: DateKind }>[]): DateKind =>
+  units.some((unit) => unit.kind === 'use-by') ? 'use-by' : 'best-before'
 
 function compareGroups(a: DatedGroup, b: DatedGroup): number {
   if (a.date !== b.date) return a.date < b.date ? -1 : 1

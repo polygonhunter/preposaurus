@@ -78,3 +78,34 @@ describe('Schätzung auf Wahl (#124)', () => {
     expect(entries.map(dateEntryLabel)).toEqual(['09/2027', '09/2027 (geschätzt)'])
   })
 })
+
+describe('Verbrauchsdatum (#294)', () => {
+  const december = date('2026-12-03', 'day')
+
+  it('sagt „Verbrauchsdatum“ dazu und zählt nicht mit einem MHD am selben Tag zusammen', () => {
+    const entries = addDateEntry(addDateEntry([], december), december, 'use-by')
+
+    expect(entries.map(dateEntryLabel)).toEqual(['03.12.2026', '03.12.2026 (Verbrauchsdatum)'])
+    expect(entries[1]?.kind).toBe('use-by')
+  })
+
+  it('zählt ein weiteres Verbrauchsdatum am selben Tag hoch', () => {
+    const entries = addDateEntry(addDateEntry([], december, 'use-by'), december, 'use-by')
+
+    expect(entries).toEqual([{ bestBefore: december, count: 2, kind: 'use-by' }])
+  })
+
+  it('führt ein ausdrückliches MHD wie eines ohne Angabe', () => {
+    const entries = addDateEntry(addDateEntry([], december), december, 'best-before')
+
+    expect(entries).toEqual([{ bestBefore: december, count: 2 }])
+  })
+
+  it('nennt Schätzung und Verbrauchsdatum zusammen', () => {
+    const estimated = { ...september, isEstimated: true }
+
+    expect(dateEntryLabel({ bestBefore: estimated, kind: 'use-by' })).toBe(
+      '09/2027 (geschätzt, Verbrauchsdatum)',
+    )
+  })
+})

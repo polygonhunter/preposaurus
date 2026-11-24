@@ -2,6 +2,7 @@ import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import type { CaptureOptions } from '../domain/capture-options'
 import { ChoiceChips } from './ChoiceChips'
+import { ContentField } from './ContentField'
 import type { CaptureErrors } from './manual-capture-draft'
 import type { ManualCaptureView } from './manual-capture-view'
 import type { PhotoCaptureState } from './photo-capture-state'
@@ -49,19 +50,12 @@ export function PhotoPackagingSection(props: PhotoPackagingSectionProps) {
             editor.edit({ name: event.target.value })
           }}
         />
-        <Field
-          label="Inhalt je Packung"
-          name="inhalt"
-          autoComplete="off"
-          placeholder="z. B. 500 g"
-          hint="Mit Einheit: g, kg, ml oder l"
+        <ContentField
           value={state.content}
-          onChange={(event) => {
-            editor.edit({ content: event.target.value })
+          onChange={(text) => {
+            editor.edit({ content: text })
           }}
-          onBlur={(event) => {
-            editor.leaveContent(event.currentTarget.value)
-          }}
+          onLeave={editor.leaveContent}
           error={errors.content}
         />
         <Field

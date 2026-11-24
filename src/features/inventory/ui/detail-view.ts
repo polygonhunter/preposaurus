@@ -1,6 +1,7 @@
 // Ableitungen für die Detailseite (UX-Konzept §8.4) aus dem DTO von `getFoodTypeDetail`: Säulen
 // je MHD, die Datumszeile für „1 entnehmen“ und die Nährwertzeile mit Herkunft.
 import { formatGermanNumber, formatQuantity } from '@/shared/lib/quantities'
+import { rowDateKindOf } from '../domain/group-units'
 import type { BestBeforeGroupDto, FoodTypeDetail, NutritionDto } from '../schemas/detail'
 import type { UnitStateDto } from '../schemas/shared'
 import { STATE_BADGE, formatDate, formatPackages, stillGoodLabel } from './stock-format'
@@ -68,6 +69,9 @@ export function stillGoodCandidates(group: BestBeforeGroupDto): string[] {
     .filter((unit) => unit.kind === 'best-before' && unit.checkedAt === null)
     .map((unit) => unit.id)
 }
+
+/** Datumsart einer Zeile (#294), gemischt gilt als Verbrauchsdatum (`rowDateKindOf`). */
+export const groupDateKind = (group: BestBeforeGroupDto) => rowDateKindOf(group.units)
 
 /** Zustand einer Datumszeile als Ton und Wort. Alle geprüft: „noch gut (geprüft am …)“ (#47). */
 export function groupBadge(group: BestBeforeGroupDto) {

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { formatDayWithPrecision, toCalendarDay } from '@/shared/lib/dates'
-import { bestBeforeKeyOf, groupByBestBefore, groupKeyOf, type BestBeforeGroup } from './group-units'
+import {
+  bestBeforeKeyOf,
+  groupByBestBefore,
+  groupKeyOf,
+  rowDateKindOf,
+  type BestBeforeGroup,
+} from './group-units'
 import type { BestBefore, BestBeforePrecision } from './unit'
 
 function bestBefore(date: string, precision: BestBeforePrecision = 'month', isEstimated = false) {
@@ -108,5 +114,15 @@ describe('bestBeforeKeyOf und groupKeyOf', () => {
     expect(bestBeforeKeyOf(bestBefore('2027-09-30', 'month', true))).not.toBe(
       bestBeforeKeyOf(bestBefore('2027-09-30')),
     )
+  })
+})
+
+describe('rowDateKindOf (#294)', () => {
+  it('ist MHD, solange keine Packung ein Verbrauchsdatum hat', () => {
+    expect(rowDateKindOf([{ kind: 'best-before' }, { kind: 'best-before' }])).toBe('best-before')
+  })
+
+  it('nennt eine gemischte Zeile Verbrauchsdatum', () => {
+    expect(rowDateKindOf([{ kind: 'best-before' }, { kind: 'use-by' }])).toBe('use-by')
   })
 })

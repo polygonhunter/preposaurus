@@ -27,7 +27,6 @@ const photoUnitSchema = formUnitSchema.extend({
       isEstimated: z.boolean().default(false),
     })
     .nullable(),
-  kind: z.enum(['best-before', 'use-by']).default('best-before'),
 })
 
 const photoCaptureFormSchema = manualCaptureFormSchema.extend({

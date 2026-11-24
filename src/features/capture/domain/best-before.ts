@@ -131,10 +131,7 @@ export function parseBestBefore(text: string, today: CalendarDay): ParseResult {
   return err({ kind: 'no-date' })
 }
 
-/**
- * Erkennt am Aufdruck, ob ein MHD oder ein Verbrauchsdatum gemeint ist. Unklar ergibt null.
- * @internal Noch ohne Aufrufer, das manuelle Datumsfeld schließt sie an (#294).
- */
+/** Erkennt am Aufdruck, ob ein MHD oder ein Verbrauchsdatum gemeint ist. Unklar ergibt null. */
 export function detectDateKind(text: string): DateKind | null {
   if (USE_BY.test(text)) return 'use-by'
   if (BEST_BEFORE_LABEL.test(text)) return 'best-before'

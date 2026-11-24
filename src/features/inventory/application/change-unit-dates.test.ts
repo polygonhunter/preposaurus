@@ -111,6 +111,22 @@ describe('getUnitDateGroup', () => {
     })
   })
 
+  it('nennt eine gemischte Zeile Verbrauchsdatum, auch von einer MHD-Packung aus (#294)', async () => {
+    const units = [
+      unit('linsen', '2026-12-03'),
+      unit('linsen', '2026-12-03', { kind: 'use-by' }),
+    ].map((entry) => ({ ...entry, id: crypto.randomUUID() }))
+    const editor = createFakeUnitDateEditor({
+      householdId,
+      products: [{ id: 'linsen', name: 'Linsen 500 g', foodType: null }],
+      units,
+    })
+
+    const result = await getUnitDateGroup(editor, { householdId, unitId: idOf(units, 0) })
+
+    expect(result.ok && result.value.kind).toBe('use-by')
+  })
+
   it('findet die Zeile „Datum fehlt“', async () => {
     const { units, editor } = setup()
 
