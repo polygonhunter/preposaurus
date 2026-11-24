@@ -8,6 +8,7 @@ import type { Database } from '@/server/db/connection'
 import { storageLocations } from '@/server/db/schema/catalog'
 import { products } from '@/server/db/schema/inventory'
 import type { RemoveOutcome } from './remove-outcome'
+import { saveSortOrder } from './save-sort-order'
 
 export interface StorageLocationRepository {
   /** Sichtbare und ausgeblendete Orte in ihrer Reihenfolge, mit Zahl der Produkte */
@@ -87,14 +88,6 @@ async function remove(db: Database, householdId: string, id: string): Promise<Re
   return existing === undefined ? 'not-found' : 'in-use'
 }
 
-async function saveOrder(db: Database, householdId: string, ids: readonly string[]) {
-  await db.transaction(async (tx) => {
-    for (const [sortOrder, id] of ids.entries()) {
-      await tx.update(storageLocations).set({ sortOrder }).where(ownLocation(householdId, id))
-    }
-  })
-}
-
 export function createStorageLocationRepository(db: Database): StorageLocationRepository {
   return {
     list: (householdId) => list(db, householdId),
@@ -102,6 +95,6 @@ export function createStorageLocationRepository(db: Database): StorageLocationRe
     rename: (householdId, id, name) => update(db, { householdId, id }, { name }),
     setHidden: (householdId, id, isHidden) => update(db, { householdId, id }, { isHidden }),
     remove: (householdId, id) => remove(db, householdId, id),
-    saveOrder: (householdId, ids) => saveOrder(db, householdId, ids),
+    saveOrder: (householdId, ids) => saveSortOrder(db, storageLocations, { householdId, ids }),
   }
 }
