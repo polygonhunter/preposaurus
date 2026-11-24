@@ -4,15 +4,21 @@
 // Datenbank, deshalb nutzt jedes Projekt einen eigenen Inhalt (z. B. 412 g) bzw. eine eigene
 // Lebensmittelart und erkennt nur sein eigenes Produkt wieder.
 import type { Locator, Page, TestInfo } from '@playwright/test'
+import { attemptOf } from '../helpers/attempt'
 import { expect, test } from '../helpers/e2e-test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 const PROJECTS = ['iphone', 'duo-aussen', 'duo-hoch', 'duo-quer', 'desktop']
 
-/** Eigener Inhalt je Projekt und Test, damit parallele Läufe sich nicht wiedererkennen */
+/**
+ * Eigener Inhalt je Projekt, Test und Versuch, damit parallele Läufe sich nicht wiedererkennen.
+ * Auch ein Retry legt ein neues Produkt an, statt das des ersten Versuchs wiederzuerkennen (#272).
+ * Schritte zu 20 g bleiben unter 1 kg (sonst zeigt die Zusammenfassung „1,01 kg“) und treffen nie
+ * die Nudeln der Foto-Tests (487 g, 488 g plus 20 g je Versuch).
+ */
 function contentFor(testInfo: TestInfo, offset: number): string {
   const index = Math.max(PROJECTS.indexOf(testInfo.project.name), 0)
-  return `${String(400 + offset + index)} g`
+  return `${String(400 + offset + index + 20 * attemptOf(testInfo))} g`
 }
 
 /** Eigene Lebensmittelart je Projekt und Test (alle aus Getreide), sonst nicht im Beispielvorrat */
