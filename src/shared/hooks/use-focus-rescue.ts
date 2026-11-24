@@ -40,25 +40,33 @@ function rescue(state: WatchState): void {
 }
 
 function focusListeners(container: HTMLElement, state: WatchState) {
+  let voidCheck: ReturnType<typeof setTimeout> | undefined
   return {
+    // Am Dokument, nicht am Bereich: Geht der Fokus nach draußen (etwa per Klick in ein Feld oben),
+    // gibt es nichts mehr zu retten, auch wenn der alte Knopf schon weg war und kein focusout kam.
     focusin: (event: FocusEvent) => {
-      if (!(event.target instanceof HTMLElement)) return
-      const plan = candidatesFor(event.target, container, state)
+      const { target } = event
+      if (!(target instanceof HTMLElement) || !container.contains(target)) {
+        state.armed = null
+        return
+      }
+      const plan = candidatesFor(target, container, state)
       state.armed = plan?.candidates ?? null
       if (plan?.isRow === true) state.lastRow = plan.candidates
     },
-    // Wechselt der Fokus woandershin oder klickt jemand ins Leere, gibt es nichts zu retten. Nur
-    // ein Element, das weg oder gesperrt ist, hat den Fokus verloren.
+    // Klickt jemand ins Leere, gibt es nichts zu retten. Nur ein Element, das weg oder gesperrt
+    // ist, hat den Fokus verloren.
     focusout: ({ target, relatedTarget }: FocusEvent) => {
-      if (relatedTarget instanceof Node) {
-        if (!container.contains(relatedTarget)) state.armed = null
-        return
-      }
-      setTimeout(() => {
+      if (relatedTarget !== null) return
+      clearTimeout(voidCheck)
+      voidCheck = setTimeout(() => {
         if (target instanceof HTMLElement && canHoldFocus(target) && isFocusLost()) {
           state.armed = null
         }
       })
+    },
+    cancel: () => {
+      clearTimeout(voidCheck)
     },
   }
 }
@@ -73,7 +81,7 @@ const OBSERVED: MutationObserverInit = {
 
 function watchFocus(container: HTMLElement): FocusWatch {
   const state: WatchState = { isPending: false, armed: null, lastRow: [], acted: null }
-  const { focusin, focusout } = focusListeners(container, state)
+  const { focusin, focusout, cancel } = focusListeners(container, state)
   const onClick = (event: MouseEvent) => {
     state.acted = actedControl(event.target) ?? state.acted
   }
@@ -81,7 +89,7 @@ function watchFocus(container: HTMLElement): FocusWatch {
     rescue(state)
   })
   observer.observe(container, OBSERVED)
-  container.addEventListener('focusin', focusin)
+  document.addEventListener('focusin', focusin)
   container.addEventListener('focusout', focusout)
   container.addEventListener('click', onClick, { capture: true })
   return {
@@ -96,7 +104,8 @@ function watchFocus(container: HTMLElement): FocusWatch {
     },
     dispose: () => {
       observer.disconnect()
-      container.removeEventListener('focusin', focusin)
+      cancel()
+      document.removeEventListener('focusin', focusin)
       container.removeEventListener('focusout', focusout)
       container.removeEventListener('click', onClick, { capture: true })
     },
