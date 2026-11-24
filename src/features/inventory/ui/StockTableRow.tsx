@@ -9,7 +9,7 @@ import { tableCells } from './stock-table'
 
 type StockTableRowProps = Readonly<{ row: StockRowDto; isSelected: boolean }>
 
-const CELL = 'border-t border-line px-3 py-2.5 align-middle'
+const CELL = 'border-t border-line px-2 py-2.5 align-middle'
 const NUMBER = `${CELL} text-right whitespace-nowrap`
 
 // Zeile der Vorrat-Tabelle: Der Name ist der Link ins Detail, seine Trefferfläche deckt die ganze

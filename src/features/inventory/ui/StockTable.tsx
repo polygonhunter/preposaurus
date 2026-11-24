@@ -12,8 +12,10 @@ type StockTableProps = Readonly<{
   caption: string
 }>
 
-const HEAD =
-  'px-3 py-2 whitespace-nowrap text-left text-footnote font-normal tracking-wide text-fg2 uppercase'
+// Neben dem Detail hat die Tabelle ab 1280 px nur gut 630 px (#209): Spalten mit 16 px Abstand
+// (px-2), und „Nächstes MHD“ darf wie seine Zellen umbrechen, sonst rollt die Liste waagerecht.
+const HEAD_BASE = 'px-2 py-2 text-left text-footnote font-normal tracking-wide text-fg2 uppercase'
+const HEAD = `${HEAD_BASE} whitespace-nowrap`
 const HEAD_NUMBER = `${HEAD} text-right`
 
 // Vorrat als Tabelle ab „weit“ (DESIGN_SYSTEM §6, M12-04): echte Tabelle mit Spaltenköpfen, je
@@ -40,7 +42,7 @@ export function StockTable({ groups, selected = null, caption }: StockTableProps
           <th scope="col" className={HEAD_NUMBER}>
             {DAYS_TERM.food}
           </th>
-          <th scope="col" className={`${HEAD} pr-6`}>
+          <th scope="col" className={`${HEAD_BASE} pr-6`}>
             Nächstes MHD
           </th>
         </tr>
