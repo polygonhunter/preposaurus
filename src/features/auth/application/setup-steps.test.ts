@@ -46,7 +46,7 @@ describe('Folgeschritte der Einrichtung', () => {
     expect(await findOpenSetupStep(deps, onComputer)).toBe('mitglieder')
   })
 
-  it('Mitglieder und Ziel am PC, danach ist die Einrichtung abgeschlossen', async () => {
+  it('Mitglieder, Ziel und Foto-Erkennung am PC, danach ist die Einrichtung abgeschlossen', async () => {
     const { deps, current } = fakeDeps()
 
     expect(await completeSetupStep(deps, { ...onComputer, step: 'mitglieder' })).toEqual({
@@ -56,23 +56,28 @@ describe('Folgeschritte der Einrichtung', () => {
     expect(current()).toMatchObject({ lastDoneStep: 2, completedAt: null })
     expect(await completeSetupStep(deps, { ...onComputer, step: 'ziel' })).toEqual({
       ok: true,
+      value: 'foto-erkennung',
+    })
+    expect(current()).toMatchObject({ lastDoneStep: 3, completedAt: null })
+    expect(await completeSetupStep(deps, { ...onComputer, step: 'foto-erkennung' })).toEqual({
+      ok: true,
       value: null,
     })
-    expect(current()).toMatchObject({ lastDoneStep: 3, completedAt: NOW })
+    expect(current()).toMatchObject({ lastDoneStep: 4, completedAt: NOW })
     expect(await findOpenSetupStep(deps, onComputer)).toBeNull()
   })
 
-  it('im iPhone-Safari kommt nach dem Ziel der Home-Bildschirm, der abschließt', async () => {
-    const { deps, current } = fakeDeps({ lastDoneStep: 2 })
+  it('im iPhone-Safari kommt nach der Foto-Erkennung der Home-Bildschirm, der abschließt', async () => {
+    const { deps, current } = fakeDeps({ lastDoneStep: 3 })
 
-    expect(await completeSetupStep(deps, { ...onPhone, step: 'ziel' })).toEqual({
+    expect(await completeSetupStep(deps, { ...onPhone, step: 'foto-erkennung' })).toEqual({
       ok: true,
       value: 'home-bildschirm',
     })
     expect(current().completedAt).toBeNull()
     expect(await findOpenSetupStep(deps, onPhone)).toBe('home-bildschirm')
     await completeSetupStep(deps, { ...onPhone, step: 'home-bildschirm' })
-    expect(current()).toMatchObject({ lastDoneStep: 4, completedAt: NOW })
+    expect(current()).toMatchObject({ lastDoneStep: 5, completedAt: NOW })
   })
 
   it('wer abbricht, landet beim offenen Schritt, auch nach Zurückblättern', async () => {
@@ -100,7 +105,7 @@ describe('Folgeschritte der Einrichtung', () => {
   })
 
   it('nach dem Abschluss und bei Haushalten ohne Einrichtung ist nichts offen', async () => {
-    const done = fakeDeps({ completedAt: NOW, lastDoneStep: 3 })
+    const done = fakeDeps({ completedAt: NOW, lastDoneStep: 4 })
     const seeded = fakeDeps({ lastDoneStep: null })
 
     expect(await findOpenSetupStep(done.deps, onPhone)).toBeNull()
@@ -109,7 +114,7 @@ describe('Folgeschritte der Einrichtung', () => {
   })
 
   it('erlaubt die Seiten der Schritte, solange offen, mit dem offenen Schritt', async () => {
-    const { deps } = fakeDeps({ lastDoneStep: 3 })
+    const { deps } = fakeDeps({ lastDoneStep: 4 })
 
     expect(await readOpenSetup(deps, onPhone)).toEqual({
       ok: true,

@@ -1,7 +1,7 @@
 // Läuft vor allen anderen Projekten (playwright.config.ts) gegen die leere E2E-Datenbank:
 // kompletter erster Start über die Oberfläche (#34, #40): Konto, Mitglieder (einmal übersprungen,
-// dann „Alex“ eingetragen), Wiedereinstieg nach dem Abmelden beim offenen Schritt, Ziel, Übersicht.
-// Danach die Sitzung speichern. „Alex“ gehört auch zum Beispielvorrat, der ihn nicht doppelt anlegt,
+// dann „Alex“ eingetragen), Wiedereinstieg nach dem Abmelden beim offenen Schritt, Ziel,
+// Foto-Erkennung (#314) übersprungen, Übersicht. Danach die Sitzung speichern. „Alex“ gehört auch zum Beispielvorrat, der ihn nicht doppelt anlegt,
 // und das Ziel bleibt beim Standard (10 Tage, kein Datum). So laufen alle anderen Tests unverändert.
 // Läuft lokal noch ein Server mit schon eingerichteter DB (reuseExistingServer), meldet sich der
 // Test stattdessen an.
@@ -85,7 +85,7 @@ async function resumeAfterSignOut(page: Page) {
 }
 
 // Schritt „Ziel“ mit der Quelle samt Hinweis wie auf der Zielseite. Ein vergangenes Datum lehnt
-// das Formular ab, „Weiter“ speichert den Standard und schließt die Einrichtung am PC ab.
+// das Formular ab, „Weiter“ speichert den Standard und führt zur Foto-Erkennung.
 async function goalStep(page: Page) {
   await expect(page.getByText('Werte noch nicht geprüft')).toBeVisible()
   await expect(page.getByText('Rechenmodus')).toBeVisible()
@@ -97,6 +97,26 @@ async function goalStep(page: Page) {
 
   await date.fill('')
   await page.getByText('10 Tage', { exact: true }).click()
+  await page.getByRole('button', { name: 'Weiter' }).click()
+}
+
+// Schritt „Foto-Erkennung“ (#314): Der E2E-Server hat AI_PROVIDER=fake, also eine Verbindung aus der
+// Umgebung. Der Schritt nennt sie nur, ohne Schlüsselfeld, und „Weiter“ schaltet nichts ein, denn
+// die Foto-Erfassung verlässt sich auf eine ausgeschaltete Erkennung. Hell und dunkel mit axe,
+// danach schließt „Weiter“ die Einrichtung am PC ab.
+async function recognitionStep(page: Page) {
+  const step = { path: '/einrichten/foto-erkennung', title: 'Foto-Erkennung einrichten', step: 4 }
+  await expectSetupStep(page, step)
+  await expect(page.getByText('Fotos gehen an Anthropic')).toBeVisible()
+  await expect(page.getByText('Test-Anbieter ohne Netz', { exact: true })).toBeVisible()
+  await expect(page.getByText(/AI_PROVIDER=fake/)).toBeVisible()
+  await expect(page.getByLabel('API-Schlüssel von Anthropic')).toHaveCount(0)
+  for (const colorScheme of ['light', 'dark'] as const) {
+    await page.emulateMedia({ colorScheme })
+    await page.reload()
+    await expectSetupStep(page, step)
+  }
+  await page.emulateMedia({ colorScheme: null })
   await page.getByRole('button', { name: 'Weiter' }).click()
 }
 
@@ -126,12 +146,12 @@ async function expectEmptyOverview(page: Page) {
 
 // Brach ein Versuch mitten in der Einrichtung ab (Retry in der CI, #263), führt die Anmeldung zum
 // offenen Schritt statt zur Übersicht. Mit den Standardwerten weiter, bis die Übersicht kommt.
-async function finishOpenSetup(page: Page, remainingSteps = 3): Promise<void> {
+async function finishOpenSetup(page: Page, remainingSteps = 4): Promise<void> {
   await expect(page).toHaveURL(/\/(uebersicht|einrichten\/[a-z-]+)$/)
   const openStep = page.url()
   if (!openStep.includes('/einrichten/') || remainingSteps === 0) return
   await page
-    .getByRole('button', { name: /^(Weiter|Überspringen)$/ })
+    .getByRole('button', { name: /^(Weiter|Überspringen|Später in den Einstellungen)$/ })
     .first()
     .click()
   await expect(page).not.toHaveURL(openStep)
@@ -148,6 +168,7 @@ setup('erster Start bis zur Übersicht', async ({ page }) => {
     await membersStep(page)
     await resumeAfterSignOut(page)
     await goalStep(page)
+    await recognitionStep(page)
   } else {
     await submitSignIn(page)
     await finishOpenSetup(page)

@@ -64,18 +64,22 @@ describe('Folgeschritte der Einrichtung in der DB (#40)', () => {
     expect(await findOpenSetupStep(deps, query)).toBe('ziel')
 
     await completeSetupStep(deps, { ...query, step: 'ziel' })
+    expect(await settings()).toEqual({ step: 3, completedAt: null })
+    expect(await findOpenSetupStep(deps, query)).toBe('foto-erkennung')
 
-    expect(await settings()).toEqual({ step: 3, completedAt: NOW })
+    await completeSetupStep(deps, { ...query, step: 'foto-erkennung' })
+
+    expect(await settings()).toEqual({ step: 4, completedAt: NOW })
     expect(await findOpenSetupStep(deps, query)).toBeNull()
   })
 
   it('Zurückblättern senkt den Fortschritt nicht, nach dem Abschluss ändert sich nichts', async () => {
     const { adminId } = await setUp()
     const query = { userId: adminId, showsHomeStep: true }
-    await completeSetupStep(deps, { ...query, step: 'ziel' })
+    await completeSetupStep(deps, { ...query, step: 'foto-erkennung' })
 
     await completeSetupStep(deps, { ...query, step: 'mitglieder' })
-    expect(await settings()).toEqual({ step: 3, completedAt: null })
+    expect(await settings()).toEqual({ step: 4, completedAt: null })
     expect(await findOpenSetupStep(deps, query)).toBe('home-bildschirm')
 
     await completeSetupStep(deps, { ...query, step: 'home-bildschirm' })
@@ -84,7 +88,7 @@ describe('Folgeschritte der Einrichtung in der DB (#40)', () => {
       ok: false,
       error: { kind: 'setup-closed' },
     })
-    expect(await settings()).toEqual({ step: 4, completedAt: NOW })
+    expect(await settings()).toEqual({ step: 5, completedAt: NOW })
   })
 
   it('nur der Admin, der eingerichtet hat, sieht die Schritte, auch kein späterer Admin', async () => {

@@ -1,9 +1,10 @@
-// Folgeschritte der Ersteinrichtung (#40, ONBOARDING §2.2, §2.3): Nach dem Konto führen Mitglieder,
-// Ziel und, nur im iPhone-Safari, der Hinweis „Zum Home-Bildschirm“ durch. Jeder Schritt lässt sich
-// überspringen. Gespeichert wird die Nummer des zuletzt erledigten Schritts (einrichtung_schritt:
-// 1 Konto, 2 Mitglieder, 3 Ziel, 4 Home-Bildschirm) und der Abschluss. Reine Regeln, testbar.
+// Folgeschritte der Ersteinrichtung (#40, #314, ONBOARDING §2.2, §2.3): Nach dem Konto führen
+// Mitglieder, Ziel, Foto-Erkennung und, nur im iPhone-Safari, der Hinweis „Zum Home-Bildschirm“
+// durch. Jeder Schritt lässt sich überspringen. Gespeichert wird die Nummer des zuletzt erledigten
+// Schritts (einrichtung_schritt: 1 Konto, 2 Mitglieder, 3 Ziel, 4 Foto-Erkennung,
+// 5 Home-Bildschirm) und der Abschluss. Reine Regeln, testbar.
 
-const SETUP_STEPS = ['mitglieder', 'ziel', 'home-bildschirm'] as const
+const SETUP_STEPS = ['mitglieder', 'ziel', 'foto-erkennung', 'home-bildschirm'] as const
 
 export type SetupStep = (typeof SETUP_STEPS)[number]
 

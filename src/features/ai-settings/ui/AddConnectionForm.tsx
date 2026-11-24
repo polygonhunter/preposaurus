@@ -7,9 +7,8 @@ import { PasswordField } from '@/shared/ui/PasswordField'
 import { SaveStatus } from '@/shared/ui/SaveStatus'
 import { addAiConnectionAction } from '../actions/add-ai-connection-action'
 import { AI_ACTION_IDLE } from '../actions/ai-action-state'
-
-// Konsole des Anbieters, dort legt man unter „API Keys“ einen Schlüssel an.
-const ANTHROPIC_KEYS_URL = 'https://platform.claude.com/settings/keys'
+import { AnthropicKeyHint } from './AnthropicKeyHint'
+import { API_KEY_HINT, API_KEY_LABEL } from './ai-labels'
 
 type AddConnectionFormProps = Readonly<{ defaultName: string }>
 
@@ -33,25 +32,14 @@ export function AddConnectionForm({ defaultName }: AddConnectionFormProps) {
         required
       />
       <PasswordField
-        label="API-Schlüssel von Anthropic"
+        label={API_KEY_LABEL}
         name="schluessel"
         error={state.errors?.apiKey}
-        hint="Beginnt mit „sk-ant-“. Nach dem Speichern zeigt Preposaurus nur noch die letzten vier Zeichen."
+        hint={API_KEY_HINT}
         autoComplete="off"
         required
       />
-      <p className="px-4 text-footnote text-fg2">
-        Einen Schlüssel legt ihr in der{' '}
-        <a
-          href={ANTHROPIC_KEYS_URL}
-          target="_blank"
-          rel="noreferrer"
-          className="text-accent underline"
-        >
-          Konsole von Anthropic
-        </a>{' '}
-        unter „API Keys“ an. Die Abrechnung läuft direkt über euer Konto dort.
-      </p>
+      <AnthropicKeyHint />
       <div className="flex items-center justify-between gap-3">
         <SaveStatus state={state} />
         <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Speichert …' : undefined}>

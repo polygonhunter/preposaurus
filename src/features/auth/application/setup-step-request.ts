@@ -11,6 +11,7 @@ import {
   SETUP_GOAL_PATH,
   SETUP_HOME_SCREEN_PATH,
   SETUP_MEMBERS_PATH,
+  SETUP_RECOGNITION_PATH,
 } from '@/shared/config/setup-paths'
 import { shouldShowInstallHint } from '@/shared/lib/install-hint'
 import { createSetupProgressRepository } from '../data/setup-progress-repository'
@@ -32,6 +33,7 @@ import {
 const STEP_PATHS: Record<SetupStep, string> = {
   mitglieder: SETUP_MEMBERS_PATH,
   ziel: SETUP_GOAL_PATH,
+  'foto-erkennung': SETUP_RECOGNITION_PATH,
   'home-bildschirm': SETUP_HOME_SCREEN_PATH,
 }
 
