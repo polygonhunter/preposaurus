@@ -3,6 +3,7 @@ import { catalogServices } from '@/features/catalog/application/catalog-services
 import { getCategoryOverview } from '@/features/catalog/application/categories'
 import { catalogIdSchema } from '@/features/catalog/schemas'
 import { categoryChoices } from '@/features/catalog/ui/catalog-labels'
+import { emptyFoodTypeFormValues } from '@/features/catalog/ui/food-type-form-values'
 import { FoodTypeForm } from '@/features/catalog/ui/FoodTypeForm'
 import { requirePageHouseholdAdmin } from '@/server/auth/household'
 import { FOOD_TYPES_PATH } from '@/shared/config/settings-paths'
@@ -28,10 +29,7 @@ export default async function NewFoodTypePage({
         back={{ href: FOOD_TYPES_PATH, label: 'Lebensmittelarten' }}
       />
       <div className="pt-6">
-        <FoodTypeForm
-          categories={choices}
-          initialValues={{ name: '', categoryId, searchTerms: '', kcalPer100: '' }}
-        />
+        <FoodTypeForm categories={choices} initialValues={emptyFoodTypeFormValues(categoryId)} />
       </div>
     </>
   )

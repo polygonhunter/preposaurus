@@ -3,6 +3,7 @@ import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { hideFoodTypeAction } from '../actions/hide-food-type-action'
 import { removeFoodTypeAction } from '../actions/remove-food-type-action'
 import { canRemoveFoodType, type FoodTypeEntry } from '../domain/category'
+import { foodTypeFormValues } from './food-type-form-values'
 import { FoodTypeForm } from './FoodTypeForm'
 import { HideToggleForm } from './HideToggleForm'
 import { RemoveEntryButton } from './RemoveEntryButton'
@@ -38,12 +39,7 @@ export function FoodTypeEditSection({ foodType, categories }: FoodTypeEditSectio
           <FoodTypeForm
             foodTypeId={foodType.id}
             categories={categories}
-            initialValues={{
-              name: foodType.name,
-              categoryId: foodType.categoryId,
-              searchTerms: foodType.searchTerms.join(', '),
-              kcalPer100: foodType.kcalPer100 === null ? '' : String(foodType.kcalPer100),
-            }}
+            initialValues={foodTypeFormValues(foodType)}
           />
         </div>
       )}

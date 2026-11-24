@@ -98,7 +98,12 @@ export async function listGroupFoodTypes(
       .innerJoin(categories, eq(categories.id, foodTypes.categoryId))
       .innerJoin(productGroups, eq(productGroups.id, categories.productGroupId))
       .where(usableBy(householdId))
-      .orderBy(asc(categories.sortOrder), asc(foodTypes.sortOrder), asc(foodTypes.name)),
+      .orderBy(
+        asc(categories.sortOrder),
+        asc(foodTypes.isSystem),
+        asc(foodTypes.sortOrder),
+        asc(foodTypes.name),
+      ),
     listStockedFoodTypeIds(db, householdId),
   ])
   return rows.map(({ id, name, groupKey }) => ({ groupKey, name, isStocked: stocked.has(id) }))

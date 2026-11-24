@@ -1,5 +1,5 @@
 'use server'
-// Eigene Lebensmittelart anlegen oder ändern (#126), nur der Admin. Danach steht sie sofort in der
+// Eigene Lebensmittelart anlegen oder ändern (#126, #243), nur der Admin. Danach steht sie sofort in der
 // Erfassen-Suche, auch über ihre Suchwörter, und im Enum der Foto-Erkennung.
 import { redirect } from 'next/navigation'
 import { refresh } from 'next/cache'
@@ -10,10 +10,10 @@ import { foodTypePath } from '@/shared/config/settings-paths'
 import { firstMessages, readFormText } from '@/shared/lib/form-data'
 import { catalogServices } from '../application/catalog-services'
 import { saveFoodType, type FoodTypeError } from '../application/food-types'
-import { catalogIdSchema, foodTypeFormSchema } from '../schemas'
+import { catalogIdSchema, foodTypeFormSchema, type FoodTypeInput } from '../schemas'
 import { entryFormError, readFields, type EntryFormState } from './entry-form-state'
 
-type FoodTypeField = 'name' | 'categoryId' | 'searchTerms' | 'kcalPer100'
+export type FoodTypeField = keyof FoodTypeInput
 
 export type FoodTypeFormState = EntryFormState<FoodTypeField>
 
@@ -22,6 +22,10 @@ const FIELDS: Record<FoodTypeField, string> = {
   categoryId: 'kategorie',
   searchTerms: 'suchwoerter',
   kcalPer100: 'kcal',
+  proteinPer100: 'eiweiss',
+  carbsPer100: 'kohlenhydrate',
+  fatPer100: 'fett',
+  typicalShelfLifeMonths: 'haltbarkeit',
 }
 
 const GONE = 'Diese Lebensmittelart gibt es nicht mehr. Bitte lade die Seite neu.'

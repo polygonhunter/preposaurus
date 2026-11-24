@@ -11,12 +11,13 @@ import { requirePageHousehold } from '@/server/auth/household'
 import { CATEGORIES_PATH, newFoodTypeInCategoryPath } from '@/shared/config/settings-paths'
 import { ButtonLink } from '@/shared/ui/ButtonLink'
 import { EmptyState } from '@/shared/ui/EmptyState'
+import { GroupFooter } from '@/shared/ui/GroupFooter'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { PageHeader } from '@/shared/ui/PageHeader'
 
 export const metadata: Metadata = { title: 'Kategorie · Preposaurus' }
 
-// Eine Kategorie mit ihren Lebensmittelarten (#76, #126). Alle im Haushalt sehen sie, der Admin
+// Eine Kategorie mit ihren Lebensmittelarten (#76, #126, eigene sortierbar #243). Alle im Haushalt sehen sie, der Admin
 // ändert. Eine fremde eigene Kategorie findet nichts, weil das Repository auf den Haushalt filtert.
 export default async function CategoryPage({
   params,
@@ -32,6 +33,7 @@ export default async function CategoryPage({
   const category = categories.find((entry) => entry.id === parsed.data)
   if (category === undefined) notFound()
   const inCategory = foodTypes.filter((foodType) => foodType.categoryId === category.id)
+  const ownCount = inCategory.filter((foodType) => !foodType.isSystem).length
   return (
     <>
       <PageHeader
@@ -44,8 +46,13 @@ export default async function CategoryPage({
       {inCategory.length === 0 ? (
         <EmptyState text="In dieser Kategorie gibt es noch keine Lebensmittelart." />
       ) : (
-        <FoodTypeList foodTypes={inCategory} labelledBy="arten" canEdit={isAdmin} />
+        <FoodTypeList foodTypes={inCategory} labelledBy="arten" canEdit={isAdmin} isSortable />
       )}
+      {isAdmin && ownCount >= 2 ? (
+        <GroupFooter>
+          Eure eigenen Arten stehen vorn, in dieser Reihenfolge auch im Vorrat.
+        </GroupFooter>
+      ) : null}
       {isAdmin && !category.isHidden ? (
         <div className="mx-4 flex pt-4 breit:mx-6">
           <ButtonLink href={newFoodTypeInCategoryPath(category.id)} variant="tinted">

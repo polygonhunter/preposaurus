@@ -7,6 +7,10 @@ const NAME_MAX_LENGTH = 40
 const SEARCH_TERM_MAX_LENGTH = 40
 const MAX_SEARCH_TERMS = 20
 const MAX_KCAL_PER_100 = 900
+/** Mehr als 100 g Eiweiß, Kohlenhydrate oder Fett passen nicht in 100 g. */
+const MAX_MACRO_PER_100 = 100
+/** 30 Jahre, wie die Grenze der KI-Schätzung (`haltbar_monate`) */
+const MAX_SHELF_LIFE_MONTHS = 360
 
 export const catalogNameSchema = z
   .string()
@@ -35,7 +39,45 @@ function splitSearchTerms(text: string): string[] {
     })
 }
 
-const kcalMessage = { error: 'Bitte die kcal als Zahl von 0 bis 900 eintragen.' }
+type NumberBounds = Readonly<{ min: number; max: number; message: string; isWhole?: boolean }>
+
+/** Freiwillige Zahl aus einem Textfeld: leer heißt null, Komma oder Punkt als Dezimalzeichen. */
+function optionalNumberText({ min, max, message, isWhole = false }: NumberBounds) {
+  const error = { error: message }
+  const bounded = z.number(error).min(min, error).max(max, error)
+  return z.preprocess(
+    emptyToNull,
+    z
+      .string()
+      .transform((text) => Number(text.trim().replace(',', '.')))
+      .pipe(isWhole ? bounded.int(error) : bounded)
+      .nullable(),
+  )
+}
+
+const macroPer100Text = optionalNumberText({
+  min: 0,
+  max: MAX_MACRO_PER_100,
+  message: 'Bitte die Gramm als Zahl von 0 bis 100 eintragen.',
+})
+
+/** Richtwerte einer eigenen Art (#126, #243), dieselben Felder wie bei System-Arten. */
+const foodTypeReferenceFields = {
+  kcalPer100: optionalNumberText({
+    min: 0,
+    max: MAX_KCAL_PER_100,
+    message: 'Bitte die kcal als Zahl von 0 bis 900 eintragen.',
+  }),
+  proteinPer100: macroPer100Text,
+  carbsPer100: macroPer100Text,
+  fatPer100: macroPer100Text,
+  typicalShelfLifeMonths: optionalNumberText({
+    min: 1,
+    max: MAX_SHELF_LIFE_MONTHS,
+    message: 'Bitte die Monate als ganze Zahl von 1 bis 360 eintragen.',
+    isWhole: true,
+  }),
+}
 
 /** Eigene Kategorie (#76): Name und Warengruppe, die bestimmt, in welche Rechnung sie zählt. */
 export const categoryFormSchema = z.object({
@@ -45,7 +87,7 @@ export const categoryFormSchema = z.object({
 
 export type CategoryInput = z.infer<typeof categoryFormSchema>
 
-/** Eigene Lebensmittelart (#126): Name, Kategorie, freiwillig Suchwörter und ein kcal-Richtwert. */
+/** Eigene Lebensmittelart (#126, #243): Name, Kategorie, freiwillig Suchwörter und Richtwerte. */
 export const foodTypeFormSchema = z.object({
   name: catalogNameSchema,
   categoryId: z.uuid({ error: 'Bitte eine Kategorie wählen.' }),
@@ -61,14 +103,7 @@ export const foodTypeFormSchema = z.object({
         )
         .max(MAX_SEARCH_TERMS, { error: 'Bitte höchstens 20 Suchwörter.' }),
     ),
-  kcalPer100: z.preprocess(
-    emptyToNull,
-    z
-      .string()
-      .transform((text) => Number(text.trim().replace(',', '.')))
-      .pipe(z.number(kcalMessage).min(0, kcalMessage).max(MAX_KCAL_PER_100, kcalMessage))
-      .nullable(),
-  ),
+  ...foodTypeReferenceFields,
 })
 
 export type FoodTypeInput = z.infer<typeof foodTypeFormSchema>
