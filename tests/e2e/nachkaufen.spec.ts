@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 import { E2E_MEMBER, signedOut, signInViaUi } from '../helpers/e2e-auth'
 import { expect, test } from '../helpers/e2e-test'
+import { neighbourCheckboxName } from '../helpers/focus-rows'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Nachkaufen (#72 bis #74, #200 bis #202). Der Beispielhaushalt hat ein Ziel mit Datum, also Lücken
@@ -187,6 +188,19 @@ async function lastGapName(page: Page) {
   return name
 }
 
+// Ein abgebrochener erster Versuch lässt seine Lücke ausgeblendet; der Retry holt sie zurück (#272)
+async function showHiddenGaps(page: Page) {
+  const show = list(page, 'Ausgeblendet').getByRole('button', { name: /^Wieder zeigen/ })
+  while ((await show.count()) > 0) {
+    const count = await show.count()
+    await show.first().click()
+    await expect(show).toHaveCount(count - 1)
+  }
+}
+
+// Nur „… unter dem Ziel“: Die Zahl offener Einträge ändern parallele Tests (#272)
+const GOAL_PART = /\d+ Warengruppen? unter dem Ziel$/
+
 test('blendet eine Lücke aus und holt sie zurück, hakt sie ab und öffnet sie wieder', async ({
   page,
 }, info) => {
@@ -194,25 +208,29 @@ test('blendet eine Lücke aus und holt sie zurück, hakt sie ab und öffnet sie 
   // Viele Schritte nacheinander, jeder lädt die Liste neu
   test.slow()
   await page.goto('/nachkaufen')
-  const subtitle = await page.getByText(/unter dem Ziel$/).textContent()
+  await showHiddenGaps(page)
+  const goalPart = (await page.getByText(GOAL_PART).textContent())?.match(GOAL_PART)?.[0]
+  if (goalPart === undefined)
+    throw new Error('Der Untertitel nennt die Warengruppen unter dem Ziel')
   const name = await lastGapName(page)
   const gaps = list(page, 'Fehlt bis zum Ziel')
   const gap = gaps.getByRole('checkbox', { name })
-  // Die Lücke davor bekommt den Fokus, wenn die letzte geht (keine nächste Zeile, #269)
-  const before = gaps.getByRole('checkbox', {
-    name: (await gaps.getByRole('checkbox').nth(-2).getAttribute('aria-label')) ?? '',
-  })
+  // Die Lücke davor bekommt den Fokus, wenn die letzte geht (keine nächste Zeile, #269). Direkt
+  // vor der Handlung gelesen, Entnahmen in parallelen Tests ändern die Lücken.
+  const neighbour = async () =>
+    gaps.getByRole('checkbox', { name: await neighbourCheckboxName(gap), exact: true })
   const hide = page.getByRole('button', { name: new RegExp(`^Ausblenden\\s+${name}$`) })
   const show = page.getByRole('button', { name: new RegExp(`^Wieder zeigen\\s+${name}$`) })
 
+  const beforeHide = await neighbour()
   await hide.press('Enter')
   const hidden = undoBar(page, `${name} ausgeblendet.`)
   await expect(hidden).toBeVisible()
   await expect(gap).toHaveCount(0)
-  await expect(before).toBeFocused()
+  await expect(beforeHide).toBeFocused()
   await expect(list(page, 'Ausgeblendet').getByRole('listitem')).toContainText(name)
   // Unter dem Ziel bleibt die Warengruppe trotzdem, wie auf der Übersicht
-  await expect(page.getByText(/unter dem Ziel$/)).toHaveText(subtitle ?? '')
+  await expect(page.getByText(GOAL_PART)).toContainText(goalPart)
   await hidden.getByRole('button', { name: 'Rückgängig' }).press('Enter')
   await expect(gap).toBeVisible()
   await expect(hide).toBeFocused()
@@ -231,12 +249,13 @@ test('blendet eine Lücke aus und holt sie zurück, hakt sie ab und öffnet sie 
   await expect(show).toHaveCount(0)
   await expect(page.getByRole('heading', { level: 2 }).and(page.locator(':focus'))).toHaveCount(1)
 
+  const beforeCheck = await neighbour()
   await gap.press('Space')
   const checked = undoBar(page, `${name} abgehakt.`)
   const done = list(page, 'Erledigt').getByRole('checkbox', { name })
   await expect(done).toBeChecked()
   await expect(gap).toHaveCount(0)
-  await expect(before).toBeFocused()
+  await expect(beforeCheck).toBeFocused()
   await checked.getByRole('button', { name: 'Rückgängig' }).press('Enter')
   await expect(gap).toBeVisible()
   await expect(done).toHaveCount(0)
