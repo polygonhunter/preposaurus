@@ -13,12 +13,10 @@ type PhotoCaptureLayoutProps = Readonly<{
 
 // Ab „breit“ mit offener Kamera: Kamera links, Titel und wachsender Vorschlag rechts (UX §8.5 „Am
 // PC“). Ohne Falz zwei gleiche Hälften, mit Falz die Kamera links bis zur Falz (split-columns.ts).
-// Ab „weit“ bekommt das Formular 40 %, mindestens 420 px. Kompakt liegt die Kamera im Vollbild darüber. Die rechte Spalte bleibt beim
-// Öffnen und Schließen der Kamera dasselbe Element, so verliert das Formular nichts.
-const SPLIT = cx(
-  EVEN_SPLIT_COLUMNS,
-  'weit:grid-cols-[minmax(0,1fr)_minmax(420px,40%)] weit:gap-x-0',
-)
+// Ab „weit“ bekommt das Formular 40 %, mindestens 420 px. Kompakt liegt die Kamera im Vollbild
+// darüber. Die rechte Spalte bleibt beim Öffnen und Schließen der Kamera dasselbe Element, so
+// verliert das Formular nichts.
+const SPLIT = cx(EVEN_SPLIT_COLUMNS, 'weit:grid-cols-[minmax(0,1fr)_minmax(420px,40%)]')
 
 export function PhotoCaptureLayout({ header, camera, children }: PhotoCaptureLayoutProps) {
   const isSplit = camera !== null

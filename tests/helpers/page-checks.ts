@@ -100,6 +100,18 @@ export async function expectNothingOnVerticalFold(page: Page): Promise<void> {
   expect(crossing).toEqual([])
 }
 
+// Duo hochkant (Stufe mittel): Kein Knopf im Bereich reicht in den 24-px-Streifen um die waagrechte
+// Falz bei `foldY` (UX_KONZEPT §6, M12-05).
+export async function expectNoButtonOnHorizontalFold(area: Locator, foldY: number): Promise<void> {
+  const onFold = await area.evaluate((element, middle) => {
+    return [...element.querySelectorAll('button')].filter((button) => {
+      const rect = button.getBoundingClientRect()
+      return rect.height > 0 && rect.top < middle + 12 && rect.bottom > middle - 12
+    }).length
+  }, foldY)
+  expect(onFold).toBe(0)
+}
+
 // Bekommt ein Ziel den Fokus, scrollt der Browser es ins Bild. Feste Leisten unten (Tab-Leiste,
 // „1 entnehmen“) dürfen es dabei nicht verdecken (WCAG 2.4.11, scroll-padding in globals.css).
 // Geprüft wird vom Seitenanfang aus, wo die Leisten über dem Inhalt schweben.
