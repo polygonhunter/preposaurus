@@ -80,7 +80,7 @@ Alle Text-Kombinationen erfüllen WCAG AA (4,5 : 1). Der helle Akzent ist dafür
 | `Field` | Label über dem Feld, Feld auf `surface` mit Rand `line-strong`, Hinweis und Fehler darunter (`red`, mit `aria-describedby`) |
 | `Toggle` | Schalter wie iOS, Grün für „an“, „aus“ als Spur `fill` mit 1-px-Innenrand `line-strong` |
 | `Sheet` | Blatt von unten (`<dialog>`), Griff, Titel, Inhalt, Aktionen unten. Am PC als zentrierter Dialog |
-| `UndoBar` | Rückgängig-Zeile unten über der Tab-Leiste, 5 s, optional zweite Aktion („Auf Einkaufsliste“) |
+| `UndoBar` | Rückgängig-Zeile unten über der Tab-Leiste, 5 s (die Zeit steht, solange Zeiger oder Tastaturfokus in der Zeile sind, #272), optional zweite Aktion („Auf Einkaufsliste“) |
 | `NoticeBar` | Fehler-Leiste an derselben Stelle, bleibt bis „Schließen“ |
 | `NoticeAnnouncer` | Unsichtbare Ansage zu `UndoBar` und `NoticeBar`: `role="status"` bzw. `role="alert"`, immer im DOM, auch leer. Die Leisten selbst haben keine Live-Rolle; ihre gemeinsame Hülle `BottomBar` ist eine Gruppe, benannt nach dem sichtbaren Text (#274) |
 | `EmptyState` | Ein Satz, eine Handlung. Kein Bild |
