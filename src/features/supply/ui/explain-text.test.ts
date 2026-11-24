@@ -38,7 +38,7 @@ const supply: OverviewSupply = {
 describe('Bedarf', () => {
   it('nennt je Personengruppe Anzahl und Bedarf je Person', () => {
     expect(needLineText(adults)).toBe('2 Erwachsene: je 2.300 kcal und 2,5 l Wasser am Tag')
-    expect(needLineText(child)).toBe('1 Kind: je 1.400 kcal und 1 l Wasser am Tag')
+    expect(needLineText(child)).toBe('1 Kind: 1.400 kcal und 1 l Wasser am Tag')
   })
 
   it('nennt die Summe und Babys, die noch nicht mitzählen', () => {

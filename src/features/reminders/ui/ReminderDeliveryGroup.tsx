@@ -15,7 +15,7 @@ type ReminderDeliveryGroupProps = Readonly<{ delivery: ReminderDelivery }>
 export function ReminderDeliveryGroup({ delivery }: ReminderDeliveryGroupProps) {
   return (
     <>
-      <GroupHeader id="zustellung">So kommen sie an</GroupHeader>
+      <GroupHeader id="zustellung">Zustellung</GroupHeader>
       <Group labelledBy="zustellung">
         <Row title="Push" trailing="kommt später" />
         <Row title="Mail" trailing={formatMailDelivery(delivery)} />

@@ -3,7 +3,7 @@
 import { formatGermanNumber } from '@/shared/lib/quantities'
 import type { StockRowDto, StockTarget } from '../schemas/shared'
 import type { FoodTypeLevel } from '../schemas/stock'
-import { formatAmounts, formatDate, supplyDaysOf } from './stock-format'
+import { formatAmounts, nextDateLabel, supplyDaysOf } from './stock-format'
 
 /** Platzhalter für leere Zellen, Screenreader lesen „Strich“ statt nichts */
 const EMPTY_CELL = '–'
@@ -61,6 +61,6 @@ export function tableCells(row: StockRowDto): TableCells {
     amount: formatAmounts(totals.amounts) ?? EMPTY_CELL,
     kcal: kcalCell(totals),
     days: daysCell(totals),
-    nextDate: totals.nextBestBefore === null ? null : formatDate(totals.nextBestBefore),
+    nextDate: nextDateLabel(row.state, totals.nextBestBefore),
   }
 }
