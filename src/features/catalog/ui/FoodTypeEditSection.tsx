@@ -7,7 +7,7 @@ import { foodTypeFormValues } from './food-type-form-values'
 import { FoodTypeForm } from './FoodTypeForm'
 import { HideToggleForm } from './HideToggleForm'
 import { RemoveEntryButton } from './RemoveEntryButton'
-import type { CategoryChoice } from './CategoryPicker'
+import type { CategoryChoice } from '@/shared/ui/CategoryPicker'
 import { SystemFoodTypeFacts } from './SystemFoodTypeFacts'
 
 type FoodTypeEditSectionProps = Readonly<{

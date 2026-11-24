@@ -12,6 +12,8 @@ export interface AiPackagingAnswer {
   bezeichnung: string | null
   /** Schlüssel aus der zur Laufzeit übergebenen Liste des Haushalts (#110) */
   lebensmittelart: string | null
+  /** Neue Art, wenn keine der Liste passt (#142), Kategorie als Name aus der Liste */
+  neue_lebensmittelart_vorschlag: { name: string; kategorie: string } | null
   behaelter: ContainerKey | null
   inhalt: { wert: number | null; einheit: 'g' | 'ml' | null }
   abtropfgewicht_g: number | null

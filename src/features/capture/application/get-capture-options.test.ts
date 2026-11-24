@@ -21,6 +21,8 @@ const knownNoodles = {
   storageLocationName: 'Keller',
 }
 
+const CEREALS = { id: 'kat', name: 'Nudeln, Reis und Getreide', productGroupName: 'Getreide' }
+
 function fakeReader(change: Partial<CaptureOptionsReader> = {}): CaptureOptionsReader {
   return {
     loadFoodTypes: () => Promise.resolve([noodles]),
@@ -30,13 +32,18 @@ function fakeReader(change: Partial<CaptureOptionsReader> = {}): CaptureOptionsR
     loadLastUsed: () =>
       Promise.resolve({ storageLocationId: 'keller', foodTypeIds: ['nudeln', 'weg'] }),
     hasStock: () => Promise.resolve(true),
+    loadCategories: () => Promise.resolve([CEREALS]),
     ...change,
   }
 }
 
 describe('getCaptureOptions', () => {
   it('liefert Auswahllisten mit Vorbelegung aus der letzten Erfassung', async () => {
-    const options = await getCaptureOptions(fakeReader(), { householdId: 'h', userId: 'u' })
+    const options = await getCaptureOptions(fakeReader(), {
+      householdId: 'h',
+      userId: 'u',
+      isAdmin: true,
+    })
 
     expect(options).toEqual({
       foodTypes: [noodles],
@@ -46,6 +53,8 @@ describe('getCaptureOptions', () => {
       lastStorageLocationId: 'keller',
       recentFoodTypeIds: ['nudeln'],
       isStockEmpty: false,
+      categories: [CEREALS],
+      canAddFoodTypes: true,
     })
   })
 
@@ -60,7 +69,7 @@ describe('getCaptureOptions', () => {
         loadKnownProducts,
         hasStock: () => Promise.resolve(false),
       }),
-      { householdId: 'haushalt', userId: 'nutzer' },
+      { householdId: 'haushalt', userId: 'nutzer', isAdmin: false },
     )
 
     expect(loadLastUsed).toHaveBeenCalledWith('haushalt', 'nutzer')
@@ -68,5 +77,7 @@ describe('getCaptureOptions', () => {
     expect(loadKnownProducts).toHaveBeenCalledWith('haushalt')
     expect(options.isStockEmpty).toBe(true)
     expect(options.lastStorageLocationId).toBeNull()
+    // Mitglieder legen keine neuen Arten an (#142)
+    expect(options.canAddFoodTypes).toBe(false)
   })
 })

@@ -17,7 +17,11 @@ type SchemaBuilders = {
 }
 
 const SCHEMA_BUILDERS: SchemaBuilders = {
-  verpackung: ({ foodTypes }) => packagingAnswerSchema(foodTypes.map((foodType) => foodType.key)),
+  verpackung: ({ foodTypes, categories }) =>
+    packagingAnswerSchema({
+      foodTypeKeys: foodTypes.map((foodType) => foodType.key),
+      categoryNames: categories.map((category) => category.name),
+    }),
   naehrwerte: () => nutritionAnswerSchema,
   naehrwerte_schaetzen: () => nutritionEstimateAnswerSchema,
   mhd: () => bestBeforeAnswerSchema,

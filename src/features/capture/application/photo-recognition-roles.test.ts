@@ -7,6 +7,7 @@ import { runRecognitionTask } from './photo-recognition-roles'
 
 const image: AiImage = { data: new Uint8Array([1, 2, 3]), mimeType: 'image/jpeg' }
 const FOOD_TYPES = [{ key: 'linsen_getrocknet', name: 'Linsen, getrocknet' }]
+const CATEGORIES = [{ name: 'Hülsenfrüchte' }]
 
 function run(role: PhotoRole, answers: FakeAnswer[], withSecondAttempt = true) {
   const recognizer = createFakeVisionRecognizer(answers)
@@ -15,8 +16,12 @@ function run(role: PhotoRole, answers: FakeAnswer[], withSecondAttempt = true) {
     ? { ...firstAttemptOnly, mhd_zweitversuch: second }
     : firstAttemptOnly
   const prepared = { recognizer, models }
-  const loadFoodTypes = () => Promise.resolve(FOOD_TYPES)
-  return { recognizer, result: runRecognitionTask({ prepared, image, loadFoodTypes }, role) }
+  const loadPackagingChoices = () =>
+    Promise.resolve({ foodTypes: FOOD_TYPES, categories: CATEGORIES })
+  return {
+    recognizer,
+    result: runRecognitionTask({ prepared, image, loadPackagingChoices }, role),
+  }
 }
 
 describe('runRecognitionTask', () => {
@@ -24,6 +29,7 @@ describe('runRecognitionTask', () => {
     const answer = {
       bezeichnung: ' Linsen ',
       lebensmittelart: 'linsen_getrocknet',
+      neue_lebensmittelart_vorschlag: null,
       behaelter: 'packung',
       inhalt: { wert: 500, einheit: 'g' },
       abtropfgewicht_g: null,
@@ -38,7 +44,10 @@ describe('runRecognitionTask', () => {
         packaging: { name: 'Linsen', foodTypeKey: 'linsen_getrocknet', drainedWeightG: null },
       },
     })
-    expect(recognizer.requests[0]?.context).toEqual({ foodTypes: FOOD_TYPES })
+    expect(recognizer.requests[0]?.context).toEqual({
+      foodTypes: FOOD_TYPES,
+      categories: CATEGORIES,
+    })
   })
 
   it('liest eine Nährwerttabelle als „label“, nie als Schätzung', async () => {
@@ -83,10 +92,10 @@ describe('runRecognitionTask', () => {
   it('wirft, wenn für eine Pflichtrolle kein Modell vorbereitet ist', async () => {
     const recognizer = createFakeVisionRecognizer()
     const prepared = { recognizer, models: {} }
-    const loadFoodTypes = () => Promise.resolve([])
+    const loadPackagingChoices = () => Promise.resolve({ foodTypes: [], categories: [] })
 
     await expect(
-      runRecognitionTask({ prepared, image, loadFoodTypes }, 'naehrwerte'),
+      runRecognitionTask({ prepared, image, loadPackagingChoices }, 'naehrwerte'),
     ).rejects.toThrow('Kein Modell')
   })
 })

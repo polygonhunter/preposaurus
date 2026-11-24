@@ -7,7 +7,10 @@ import { promptForRole } from './prompts'
 import type { RoleContexts } from './vision-recognizer'
 
 const CONTEXTS: RoleContexts = {
-  verpackung: { foodTypes: [{ key: 'linsen', name: 'Linsen' }] },
+  verpackung: {
+    foodTypes: [{ key: 'linsen', name: 'Linsen' }],
+    categories: [{ name: 'Hülsenfrüchte' }],
+  },
   naehrwerte: {},
   naehrwerte_schaetzen: {
     foodType: { key: 'linsen', name: 'Linsen' },
@@ -61,9 +64,24 @@ describe('promptForRole', () => {
   })
 
   it('sagt ohne Lebensmittelarten, dass nur null bleibt', () => {
-    const prompt = promptForRole({ role: 'verpackung', context: { foodTypes: [] } })
+    const prompt = promptForRole({
+      role: 'verpackung',
+      context: { foodTypes: [], categories: [] },
+    })
 
     expect(prompt.instruction).toContain('setze lebensmittelart auf null')
+    expect(prompt.instruction).toContain('Setze neue_lebensmittelart_vorschlag auf null')
+  })
+
+  it('fordert eine neue Art nur an, wenn keine Art der Liste passt (#142)', () => {
+    const prompt = promptForRole(requestFor('verpackung'))
+
+    expect(prompt.instruction).toContain(
+      'Passt eine Art der Liste, setze neue_lebensmittelart_vorschlag auf null',
+    )
+    expect(prompt.instruction).toContain('Nur wenn keine passt')
+    expect(prompt.instruction).toContain('ohne Marke, Sorte oder Menge')
+    expect(prompt.instruction).toContain('Kategorie aus: Hülsenfrüchte')
   })
 })
 

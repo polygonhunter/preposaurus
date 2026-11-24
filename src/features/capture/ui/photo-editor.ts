@@ -1,6 +1,7 @@
 // Was die Oberfläche der Foto-Erfassung tun kann, als ein Objekt (#61 bis #66). Die Komponenten
 // kennen nur diesen Vertrag, nicht Reducer, Warteschlange oder Actions.
 import type { Dispatch } from 'react'
+import type { FoodTypeChoice } from '../domain/capture-options'
 import type { EstimateTarget } from './estimate-target'
 import type { PhotoCaptureAction } from './photo-capture-reducer'
 import type { CaptureStep, PhotoCaptureState } from './photo-capture-state'
@@ -10,6 +11,8 @@ export type EditUpdate = Extract<PhotoCaptureAction, { type: 'edit' }>['update']
 
 export interface PhotoEditor {
   edit: (update: EditUpdate) => void
+  /** Neu angelegte oder vorhandene Art aus dem Blatt bzw. dem Vorschlag wählen (#142) */
+  chooseFoodType: (foodType: FoodTypeChoice) => void
   /** Inhalt verlassen: genau ein passendes Produkt vorwählen (#207) */
   leaveContent: (content: string) => void
   /** „Zu … hinzufügen“ bzw. „Neu anlegen“ (null) */
@@ -33,6 +36,8 @@ export interface EditorParts {
   state: PhotoCaptureState
   dispatch: Dispatch<PhotoCaptureAction>
   edit: (update: EditUpdate) => void
+  /** Neue Art in die Auswahlliste aufnehmen (useAddedFoodTypes) */
+  addFoodType: (foodType: FoodTypeChoice) => void
   restock: Pick<PhotoEditor, 'leaveContent' | 'chooseProduct'>
   uploads: {
     takePhoto: (file: Blob, role: CaptureStep) => void
@@ -57,10 +62,18 @@ function readAgainFor(
   }
 }
 
+function chooseFoodTypeWith({ addFoodType, edit }: EditorParts): PhotoEditor['chooseFoodType'] {
+  return (foodType) => {
+    addFoodType(foodType)
+    edit({ foodTypeId: foodType.id })
+  }
+}
+
 export function createPhotoEditor(parts: EditorParts): PhotoEditor {
   const { state, dispatch, uploads } = parts
   return {
     edit: parts.edit,
+    chooseFoodType: chooseFoodTypeWith(parts),
     ...parts.restock,
     openCamera: (step) => {
       dispatch({ type: 'open-camera', step })

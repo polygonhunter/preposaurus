@@ -5,29 +5,63 @@
 //   Foto offen, bis jemand entscheidet („bitte prüfen“, „nicht lesbar“). Nie wird eines ergänzt.
 import { formatGermanNumber, formatQuantity } from '@/shared/lib/quantities'
 import type { CalendarDay } from '@/shared/lib/dates'
-import type { ContainerChoice, FoodTypeChoice } from '../domain/capture-options'
+import type { CategoryChoice, ContainerChoice, FoodTypeChoice } from '../domain/capture-options'
 import { addDateEntry } from '../domain/date-entries'
 import type { BestBeforeReading } from '../domain/map-best-before-recognition'
 import type { NutritionSuggestion, PackagingSuggestion } from '../domain/map-recognition'
 import { assessBestBefore } from '../domain/plausibility'
+import { findSimilarFoodType } from '../domain/similar-food-type'
 import type { NutritionField } from './manual-capture-draft'
-import type { DateShot, PhotoCaptureState, PhotoDateEntry } from './photo-capture-state'
+import type {
+  DateShot,
+  FoodTypeProposal,
+  PhotoCaptureState,
+  PhotoDateEntry,
+} from './photo-capture-state'
 
 export interface SuggestionLookup {
-  foodTypes: readonly Pick<FoodTypeChoice, 'id' | 'key'>[]
+  foodTypes: readonly Pick<FoodTypeChoice, 'id' | 'key' | 'name' | 'searchTerms'>[]
   containers: readonly ContainerChoice[]
+  categories: readonly Pick<CategoryChoice, 'id' | 'name'>[]
 }
 
 const fillIfEmpty = <T>(current: T | null | '', suggested: T | null) =>
   current === null || current === '' ? suggested : current
+
+type FoodTypeOutcome = Readonly<{ foodTypeId: string | null; proposal: FoodTypeProposal | null }>
+
+/**
+ * Art aus der Liste, sonst der Vorschlag einer neuen (#142). Heißt eine sichtbare Art schon so oder
+ * trägt sie den Namen als Suchwort, wird sie gewählt (wie ein Treffer der Liste) statt angeboten.
+ */
+function resolveFoodType(
+  packaging: PackagingSuggestion,
+  lookup: SuggestionLookup,
+): FoodTypeOutcome {
+  const listed = lookup.foodTypes.find((foodType) => foodType.key === packaging.foodTypeKey)
+  if (listed !== undefined) return { foodTypeId: listed.id, proposal: null }
+  const suggested = packaging.newFoodType
+  if (suggested === null) return { foodTypeId: null, proposal: null }
+  const similar = findSimilarFoodType(lookup.foodTypes, suggested.name)
+  if (similar !== null) return { foodTypeId: similar.id, proposal: null }
+  const category = lookup.categories.find((entry) => entry.name === suggested.categoryName)
+  return {
+    foodTypeId: null,
+    proposal: {
+      name: suggested.name,
+      categoryId: category?.id ?? null,
+      categoryName: suggested.categoryName,
+    },
+  }
+}
 
 export function applyPackaging(
   state: PhotoCaptureState,
   packaging: PackagingSuggestion,
   lookup: SuggestionLookup,
 ): PhotoCaptureState {
-  const foodTypeId =
-    lookup.foodTypes.find((foodType) => foodType.key === packaging.foodTypeKey)?.id ?? null
+  const resolved = resolveFoodType(packaging, lookup)
+  const foodTypeId = fillIfEmpty(state.foodTypeId, resolved.foodTypeId)
   const containerId =
     lookup.containers.find((container) => container.key === packaging.container)?.id ?? null
   const content = packaging.content === null ? null : formatQuantity(packaging.content)
@@ -35,7 +69,9 @@ export function applyPackaging(
     packaging.drainedWeightG === null ? null : formatGermanNumber(packaging.drainedWeightG)
   return {
     ...state,
-    foodTypeId: fillIfEmpty(state.foodTypeId, foodTypeId),
+    foodTypeId,
+    // Nur ohne gewählte Art: Hat jemand schon gewählt, ist der Vorschlag gegenstandslos.
+    foodTypeProposal: foodTypeId === null ? resolved.proposal : null,
     containerId: fillIfEmpty(state.containerId, containerId),
     content: fillIfEmpty(state.content, content) ?? '',
     name: fillIfEmpty(state.name, packaging.name) ?? '',

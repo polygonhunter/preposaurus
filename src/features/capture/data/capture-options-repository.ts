@@ -16,6 +16,7 @@ import type {
   LastUsed,
   NamedChoice,
 } from '../domain/capture-options'
+import { loadCategoryOptions } from './category-options'
 import { loadKnownProducts } from './known-products'
 import { isSelectableFoodType } from './visible-food-types'
 
@@ -104,5 +105,6 @@ export function createCaptureOptionsRepository(db: Database) {
     loadKnownProducts: (householdId: string) => loadKnownProducts(db, householdId),
     loadLastUsed: (householdId: string, userId: string) => loadLastUsed(db, householdId, userId),
     hasStock: (householdId: string) => hasStock(db, householdId),
+    loadCategories: (householdId: string) => loadCategoryOptions(db, householdId),
   }
 }

@@ -18,13 +18,34 @@ const BASE =
   'Du liest Aufdrucke auf Lebensmittelverpackungen für eine Vorratsliste in einem Haushalt. ' +
   'Antworte nur mit den Feldern des vorgegebenen Schemas.'
 
-function packagingInstruction({ foodTypes }: RoleContexts['verpackung']): string {
+type PackagingContext = RoleContexts['verpackung']
+
+function foodTypeChoice({ foodTypes }: PackagingContext): string {
   const list = foodTypes.map((type) => `- ${type.key}: ${type.name}`).join('\n')
-  const choice =
-    foodTypes.length === 0
-      ? 'Es gibt keine Lebensmittelarten zur Auswahl, setze lebensmittelart auf null.'
-      : `Wähle lebensmittelart nur aus dieser Liste (Schlüssel: Name), sonst null:\n${list}`
-  return `Lies die Verpackung: generische Bezeichnung ohne Marke, Behälter, Füllmenge und Abtropfgewicht. ${choice}`
+  return foodTypes.length === 0
+    ? 'Es gibt keine Lebensmittelarten zur Auswahl, setze lebensmittelart auf null.'
+    : `Wähle lebensmittelart nur aus dieser Liste (Schlüssel: Name), sonst null:\n${list}`
+}
+
+// Nur wenn keine Art der Liste passt (#142). Generisch und ohne Dublette, damit die Liste nicht mit
+// Marken und Sorten zuwächst. Die App prüft ähnliche Namen trotzdem selbst und legt nie von sich aus an.
+function newFoodTypeRule({ categories }: PackagingContext): string {
+  if (categories.length === 0) return 'Setze neue_lebensmittelart_vorschlag auf null.'
+  const names = categories.map((category) => category.name).join('; ')
+  return (
+    'Passt eine Art der Liste, setze neue_lebensmittelart_vorschlag auf null. Nur wenn keine ' +
+    'passt und das Lebensmittel sicher erkennbar ist, schlage dort eine neue Art vor: ein kurzer ' +
+    'generischer deutscher Name ohne Marke, Sorte oder Menge, der keine Art der Liste unter ' +
+    `anderem Namen doppelt, dazu die passende Kategorie aus: ${names}. Sonst null.`
+  )
+}
+
+function packagingInstruction(context: PackagingContext): string {
+  return [
+    'Lies die Verpackung: generische Bezeichnung ohne Marke, Behälter, Füllmenge und Abtropfgewicht.',
+    foodTypeChoice(context),
+    newFoodTypeRule(context),
+  ].join(' ')
 }
 
 type EstimateContext = RoleContexts['naehrwerte_schaetzen']

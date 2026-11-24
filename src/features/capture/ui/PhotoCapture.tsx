@@ -3,6 +3,7 @@ import { useState, type ReactNode } from 'react'
 import type { CaptureOptions } from '../domain/capture-options'
 import { initialPhotoCapture, type PhotoCaptureState } from './photo-capture-state'
 import { PhotoCaptureFlow } from './PhotoCaptureFlow'
+import { useAddedFoodTypes } from './use-added-food-types'
 import { useFreshRestart } from './use-fresh-restart'
 
 type PhotoCaptureProps = Readonly<{
@@ -17,7 +18,9 @@ type PhotoCaptureProps = Readonly<{
 
 // Foto-Erfassung (#61 bis #66): Kamera, Prüfen, Speichern. „Noch eins“ und „Verwerfen“ beginnen
 // mit einem frischen Stand, die Vorbelegung kommt dann neu vom Server.
-export function PhotoCapture({ options, initial, recognitionOff, header }: PhotoCaptureProps) {
+export function PhotoCapture({ initial, recognitionOff, header, ...props }: PhotoCaptureProps) {
+  // Neue Arten (#142) bleiben über „Noch eins“ hinweg in der Auswahl
+  const { options, add } = useAddedFoodTypes(props.options)
   const [run, setRun] = useState({ generation: 0, initial })
   const fresh = useFreshRestart(() => {
     setRun((previous) => ({
@@ -29,6 +32,7 @@ export function PhotoCapture({ options, initial, recognitionOff, header }: Photo
     <PhotoCaptureFlow
       key={run.generation}
       options={options}
+      onFoodTypeAdded={add}
       initial={run.initial}
       recognitionOff={recognitionOff}
       header={header}

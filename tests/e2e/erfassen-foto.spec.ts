@@ -4,37 +4,25 @@
 // die echte Antwort 503. Für den vollen Ablauf liefert eine abgefangene /api/recognize die
 // Vorschläge, wie sie der Fake-Adapter mit festen Antworten gäbe. Läuft im Projekt „foto“
 // nacheinander, weil alle Tests denselben Entwurf des Admins nutzen.
-import type { Page, Route } from '@playwright/test'
+import type { Page } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
-import sharp from 'sharp'
 import { attemptOf } from '../helpers/attempt'
+import { E2E_MEMBER, signedOut, signInViaUi } from '../helpers/e2e-auth'
 import { waitForHydration } from '../helpers/hydration'
 import { expectAccessibleLayout, expectNothingOnVerticalFold } from '../helpers/page-checks'
+import {
+  draftSaved,
+  fakeRecognition,
+  proposalFor,
+  readProposal,
+  shoot,
+  shootAndRead,
+  startFresh,
+} from '../helpers/photo-capture'
 
 test.describe.configure({ mode: 'serial' })
 
 const SHOTS = 'shots'
-
-async function testImage(color: string) {
-  return sharp({ create: { width: 320, height: 240, channels: 3, background: color } })
-    .jpeg()
-    .toBuffer()
-}
-
-async function shoot(page: Page, color: string) {
-  await page.locator('input[type="file"]').setInputFiles({
-    name: 'foto.jpg',
-    mimeType: 'image/jpeg',
-    buffer: await testImage(color),
-  })
-}
-
-/** Foto aufnehmen und warten, bis Upload und Erkennung durch sind. */
-async function shootAndRead(page: Page, color: string) {
-  const recognized = page.waitForResponse('**/api/recognize')
-  await shoot(page, color)
-  await recognized
-}
 
 const SUGGESTIONS = [
   {
@@ -73,41 +61,6 @@ const SUGGESTIONS = [
     bestBefore: { bestBefore: null, kind: null, rawText: null, confidence: 'low' },
   },
 ]
-
-/** Antworten der Erkennung der Reihe nach: Verpackung, Nährwerte, MHD lesbar, MHD unlesbar. */
-async function fakeRecognition(page: Page) {
-  let call = 0
-  await page.route('**/api/recognize', async (route: Route) => {
-    const body = SUGGESTIONS[Math.min(call, SUGGESTIONS.length - 1)]
-    call += 1
-    await route.fulfill({ json: body })
-  })
-}
-
-/**
- * Wartet, bis der Entwurf mit diesem Stand gesichert ist (Server Action, usePhotoDraftSync). Vor
- * der Änderung aufrufen. Eine feste Wartezeit reichte unter Last nicht: Das Neuladen brach die
- * Sicherung ab, der fortgesetzte Entwurf war leer (#272).
- */
-function draftSaved(page: Page, ...parts: readonly string[]) {
-  return page.waitForResponse((response) => {
-    const body = response.request().postData() ?? ''
-    return (
-      response.request().method() === 'POST' &&
-      response.request().headers()['next-action'] !== undefined &&
-      parts.every((part) => body.includes(part))
-    )
-  })
-}
-
-async function startFresh(page: Page) {
-  await page.goto('/neu/foto')
-  const discard = page.getByRole('button', { name: 'Erfassung verwerfen' })
-  if (await discard.isVisible()) {
-    await discard.click()
-  }
-  await expect(page.getByRole('heading', { name: 'Vorderseite der Verpackung' })).toBeVisible()
-}
 
 async function screenshot(page: Page, name: string) {
   await page.screenshot({
@@ -185,7 +138,7 @@ test('Stufen: mittel Sucher oben und Auslöser unten, ab „breit“ Kamera link
 test('Foto-Fluss: Erkennung füllt Vorschläge, offenes MHD wird entschieden, Speichern', async ({
   page,
 }) => {
-  await fakeRecognition(page)
+  await fakeRecognition(page, SUGGESTIONS)
   await startFresh(page)
 
   await shootAndRead(page, '#c84')
@@ -239,9 +192,14 @@ test('Foto-Fluss: Erkennung füllt Vorschläge, offenes MHD wird entschieden, Sp
   await expect(page.getByRole('heading', { name: 'Gespeichert' })).toBeVisible()
   await expect(page.getByText('7 Packungen Nudeln hinzugefügt.')).toBeVisible()
 
-  // Der Entwurf ist verbraucht: /neu fragt nicht mehr und öffnet den Foto-Weg.
+  // Der Entwurf ist verbraucht: /neu fragt nicht mehr. Die Erkennung ist aus, deshalb führt „Neu“
+  // trotz der Foto-Erfassung eben ins Formular und sagt warum (#79).
   await page.goto('/neu')
-  await expect(page).toHaveURL(/\/neu\/foto$/)
+  await expect(page).toHaveURL(/\/neu\/manuell$/)
+  await expect(
+    page.getByRole('status').filter({ hasText: /Foto-Erkennung ist ausgeschaltet/ }),
+  ).toBeVisible()
+  await expectAccessibleLayout(page)
 })
 
 test('Erkennung aus: freundlicher Übergang zur Eingabe von Hand, Schätzung nicht möglich', async ({
@@ -339,4 +297,65 @@ test('„Abbrechen“ mit Entwurf: für später behalten oder verwerfen (#285)',
   await expect(page).toHaveURL(/\/statistik$/)
   await page.goto('/neu')
   await expect(page.getByRole('dialog', { name: 'Erfassung fortsetzen?' })).toHaveCount(0)
+})
+
+test('Vorschlag einer neuen Lebensmittelart: ablehnen oder übernehmen (#142)', async ({
+  page,
+}, testInfo) => {
+  const name = `Testkorn ${String(attemptOf(testInfo))}`
+  const searchbox = page.getByRole('searchbox', { name: 'Lebensmittelart suchen' })
+  await fakeRecognition(page, [proposalFor(name)])
+
+  // Nichts wird von selbst angelegt oder gewählt
+  const offer = await readProposal(page, name)
+  await expect(offer).toContainText(
+    `Neue Lebensmittelart „${name}“ unter „Nudeln, Reis und Getreide“ anlegen?`,
+  )
+  await expect(page.getByRole('button', { name: 'Lebensmittelart ändern' })).toHaveCount(0)
+  for (const colorScheme of ['light', 'dark'] as const) {
+    await page.emulateMedia({ colorScheme })
+    await expectAccessibleLayout(page)
+  }
+  await offer.getByRole('button', { name: 'Andere wählen' }).click()
+  await expect(offer).toHaveCount(0)
+  await expect(searchbox).toBeFocused()
+  await searchbox.fill(name)
+  await expect(page.getByText(/^Keine Lebensmittelart gefunden\. Versucht/)).toBeVisible()
+
+  // Neuer Durchlauf: „Übernehmen“ legt die Art an und wählt sie
+  const again = await readProposal(page, name)
+  await again.getByRole('button', { name: 'Übernehmen' }).click()
+  await expect(again).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Lebensmittelart ändern' })).toBeVisible()
+  const review = page.getByRole('form', { name: 'Foto-Erfassung prüfen' })
+  await expect(review).toContainText(name)
+  await expect(review).toContainText('› Nudeln, Reis und Getreide')
+  await expect(page.getByLabel('Inhalt je Packung')).toBeFocused()
+})
+
+test.describe('als Mitglied', () => {
+  test.use(signedOut)
+
+  test('sieht den Vorschlag ohne „Übernehmen“ (#142)', async ({ page }) => {
+    await signInViaUi(page, E2E_MEMBER)
+    await fakeRecognition(page, [proposalFor('Testkorn Mitglied')])
+
+    const offer = await readProposal(page, 'Testkorn Mitglied')
+
+    await expect(offer).toContainText('Neue Arten legt ein Admin an')
+    await expect(offer.getByRole('button', { name: 'Übernehmen' })).toHaveCount(0)
+    await expect(offer.getByRole('button', { name: 'Ändern' })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /Neue Lebensmittelart/ })).toHaveCount(0)
+    for (const colorScheme of ['light', 'dark'] as const) {
+      await page.emulateMedia({ colorScheme })
+      await expectAccessibleLayout(page)
+    }
+    // Aufräumen: Der Entwurf des Mitglieds bleibt nicht liegen
+    await page.getByRole('link', { name: 'Abbrechen' }).click()
+    await page
+      .getByRole('dialog', { name: 'Erfassung abbrechen?' })
+      .getByRole('button', { name: 'Verwerfen' })
+      .click()
+    await expect(page).not.toHaveURL(/\/neu/)
+  })
 })

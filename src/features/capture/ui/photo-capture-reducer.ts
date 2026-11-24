@@ -36,6 +36,7 @@ type EditableFields = Pick<
   | 'drainedWeight'
   | 'nutritionSource'
   | 'isPerPortion'
+  | 'foodTypeProposal'
 >
 
 export interface UploadUpdate {
@@ -174,6 +175,12 @@ const withoutEstimate = (state: PhotoCaptureState): PhotoCaptureState => ({
   isEstimateConfirmed: false,
 })
 
+/** Wer selbst eine Art wählt oder ändert, braucht den Vorschlag einer neuen nicht mehr (#142). */
+function editFields(state: PhotoCaptureState, update: Partial<EditableFields>): PhotoCaptureState {
+  const isFoodTypeChosen = 'foodTypeId' in update && !('foodTypeProposal' in update)
+  return { ...state, ...update, ...(isFoodTypeChosen ? { foodTypeProposal: null } : {}) }
+}
+
 type Handlers = {
   [K in PhotoCaptureAction['type']]: (
     state: PhotoCaptureState,
@@ -183,7 +190,7 @@ type Handlers = {
 
 /** Je Aktion genau ein Übergang. Fehlt einer, bricht schon tsc ab. */
 const HANDLERS: Handlers = {
-  edit: (state, { update }) => ({ ...state, ...update }),
+  edit: (state, { update }) => editFields(state, update),
   'open-camera': (state, { step }) => ({ ...state, isCameraOpen: true, step }),
   'close-camera': (state) => ({ ...state, isCameraOpen: false }),
   shot: (state, { photo }) => takeShot(state, photo),

@@ -50,6 +50,16 @@ export interface DateShot {
 
 export type NutritionSource = 'label' | 'manual' | 'ai-estimate'
 
+/**
+ * Vorschlag einer neuen Lebensmittelart aus der Erkennung (#142), nur ein Angebot. Die Kategorie ist
+ * schon den sichtbaren Kategorien zugeordnet, ohne Treffer bleibt nur ihr Name (dann „Ändern“).
+ */
+export interface FoodTypeProposal {
+  name: string
+  categoryId: string | null
+  categoryName: string
+}
+
 type FormFields = Omit<ManualCaptureDraft, 'captureId' | 'units'>
 
 export interface PhotoCaptureState extends FormFields {
@@ -69,6 +79,8 @@ export interface PhotoCaptureState extends FormFields {
   photos: CapturedPhoto[]
   shots: DateShot[]
   readings: Record<'verpackung' | 'naehrwerte', Reading>
+  /** Nicht im Entwurf gesichert: Nach dem Fortsetzen hilft die Suche bzw. „+ Neue Lebensmittelart“ */
+  foodTypeProposal: FoodTypeProposal | null
 }
 
 const IDLE: Reading = { state: 'idle', message: null }
@@ -95,6 +107,7 @@ export function initialPhotoCapture(storageLocationId: string | null): PhotoCapt
     photos: [],
     shots: [],
     readings: { verpackung: IDLE, naehrwerte: IDLE },
+    foodTypeProposal: null,
   }
 }
 

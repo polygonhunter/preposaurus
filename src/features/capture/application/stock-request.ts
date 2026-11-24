@@ -34,6 +34,10 @@ export async function createStockForUser(
   return createStockWithSupply(deps, { ...user, draft })
 }
 
-export async function getCaptureOptionsForUser(user: HouseholdUser): Promise<CaptureOptions> {
-  return getCaptureOptions(createCaptureOptionsRepository(await getDb()), user)
+/** `isAdmin` fehlt z. B. beim Bearbeiten: Dort legt niemand neue Arten an. */
+export async function getCaptureOptionsForUser(
+  user: HouseholdUser & { isAdmin?: boolean },
+): Promise<CaptureOptions> {
+  const { isAdmin = false, ...actor } = user
+  return getCaptureOptions(createCaptureOptionsRepository(await getDb()), { ...actor, isAdmin })
 }

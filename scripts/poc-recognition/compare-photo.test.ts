@@ -92,6 +92,7 @@ describe('comparePhoto · Verpackung', () => {
     packaging: {
       name: 'Spaghetti',
       foodTypeKey: 'nudeln',
+      newFoodType: null,
       container: 'dose',
       content: { value, unit },
       drainedWeightG: null,

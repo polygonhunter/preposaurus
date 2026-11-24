@@ -23,14 +23,44 @@ function foodTypeField(allowedKeys: readonly string[]) {
     .describe(description)
 }
 
-/** Schema A · Verpackung. Die Liste der Lebensmittelarten kommt zur Laufzeit aus dem Haushalt. */
-export function packagingAnswerSchema(allowedFoodTypeKeys: readonly string[]) {
+/**
+ * Vorschlag einer neuen Lebensmittelart (#142), nur wenn keine Art der Liste passt. Die Kategorie
+ * stammt aus den sichtbaren Kategorien des Haushalts (Name, nicht ID: Die KI soll ihn lesen
+ * können). Ohne Kategorien bleibt nur null. Angelegt wird nie automatisch.
+ */
+function newFoodTypeField(allowedCategoryNames: readonly string[]) {
+  const [first, ...rest] = allowedCategoryNames
+  const description =
+    'Nur wenn lebensmittelart null ist und das Lebensmittel sicher erkennbar ist: neue Art, sonst null'
+  if (first === undefined) return z.null().describe(description)
+  return z
+    .strictObject({
+      name: z
+        .string()
+        .describe(
+          'Kurzer generischer deutscher Name ohne Marke, Sorte oder Menge, z. B. „Dinkelreis“',
+        ),
+      kategorie: z.enum([first, ...rest]).describe('Passende Kategorie aus der Liste'),
+    })
+    .nullable()
+    .describe(description)
+}
+
+/** Was Schema A zur Laufzeit aus dem Haushalt bekommt: sichtbare Arten und Kategorien. */
+export interface PackagingSchemaChoices {
+  foodTypeKeys: readonly string[]
+  categoryNames: readonly string[]
+}
+
+/** Schema A · Verpackung. Die Listen kommen zur Laufzeit aus dem Haushalt. */
+export function packagingAnswerSchema({ foodTypeKeys, categoryNames }: PackagingSchemaChoices) {
   return z.strictObject({
     bezeichnung: z
       .string()
       .nullable()
       .describe('Generische deutsche Bezeichnung ohne Marke, z. B. „Spaghetti“'),
-    lebensmittelart: foodTypeField(allowedFoodTypeKeys),
+    lebensmittelart: foodTypeField(foodTypeKeys),
+    neue_lebensmittelart_vorschlag: newFoodTypeField(categoryNames),
     behaelter: z
       .enum(CONTAINER_KEYS)
       .nullable()

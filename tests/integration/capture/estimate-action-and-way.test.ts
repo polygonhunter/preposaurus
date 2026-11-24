@@ -8,6 +8,7 @@ import type { CaptureDeps } from '../../../src/features/capture/application/capt
 import {
   chooseCaptureWay,
   findRecognitionOffReason,
+  findReplacedPhotoWayReason,
 } from '../../../src/features/capture/application/choose-capture-way'
 import type { AccessError } from '../../../src/server/auth/guards'
 import type { SessionUser } from '../../../src/server/auth/session'
@@ -119,7 +120,7 @@ describe('Schätzung auf Wahl und Weg der Erfassung', () => {
     })
   })
 
-  it('öffnet den zuletzt genutzten Weg, beim ersten Mal das Foto nur mit Erkennung', async () => {
+  it('öffnet ohne Erkennung immer das Formular, sonst den zuletzt genutzten Weg (#79)', async () => {
     const actor = { householdId, userId: owner.id }
     const deps = { db: testDb.db, env: FAKE_AI_ENV }
     await testDb.db.delete(units)
@@ -132,7 +133,14 @@ describe('Schätzung auf Wahl und Weg der Erfassung', () => {
     // Der Foto-Weg sagt das gleich zu Beginn (#210)
     expect(await findRecognitionOffReason(deps, actor)).toBe('ai-disabled')
 
+    expect(await findReplacedPhotoWayReason(deps, actor)).toBeNull()
+
+    // Zuletzt per Foto, Erkennung aus: trotzdem das Formular, mit Grund (#79)
     await testDb.db.insert(captures).values(buildCapture({ ...actor, method: 'foto' }))
+    expect(await chooseCaptureWay(deps, actor)).toBe('manual')
+    expect(await findReplacedPhotoWayReason(deps, actor)).toBe('ai-disabled')
+    await setAiEnabled(true)
     expect(await chooseCaptureWay(deps, actor)).toBe('photo')
+    expect(await findReplacedPhotoWayReason(deps, actor)).toBeNull()
   })
 })

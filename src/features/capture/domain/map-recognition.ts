@@ -31,9 +31,17 @@ const positiveOrNull = (value: number | null) =>
 const nonNegativeOrNull = (value: number | null) =>
   value !== null && Number.isFinite(value) && value >= 0 ? value : null
 
+/** Vorschlag einer neuen Lebensmittelart (#142): nur ein Angebot, angelegt wird erst nach Bestätigung */
+export interface NewFoodTypeSuggestion {
+  name: string
+  categoryName: string
+}
+
 export interface PackagingSuggestion {
   name: string | null
   foodTypeKey: string | null
+  /** Nur ohne passende Art aus der Liste */
+  newFoodType: NewFoodTypeSuggestion | null
   container: AiPackagingAnswer['behaelter']
   content: ContentQuantity | null
   drainedWeightG: number | null
@@ -45,11 +53,24 @@ function mapContent({ wert, einheit }: AiPackagingAnswer['inhalt']): ContentQuan
   return value === null || einheit === null ? null : { value, unit: einheit }
 }
 
+/** So lang darf der Name einer Lebensmittelart sein (catalog/schemas.ts) */
+const MAX_FOOD_TYPE_NAME_LENGTH = 40
+
+/** Nennt die KI trotz Treffer aus der Liste eine neue Art, gilt der Treffer (Schema-Regel). */
+function mapNewFoodType(answer: AiPackagingAnswer): NewFoodTypeSuggestion | null {
+  const suggestion = answer.neue_lebensmittelart_vorschlag
+  if (answer.lebensmittelart !== null || suggestion === null) return null
+  const name = suggestion.name.trim()
+  if (name === '' || name.length > MAX_FOOD_TYPE_NAME_LENGTH) return null
+  return { name, categoryName: suggestion.kategorie }
+}
+
 export function mapPackagingAnswer(answer: AiPackagingAnswer): PackagingSuggestion {
   const name = answer.bezeichnung?.trim() ?? ''
   return {
     name: name === '' ? null : name,
     foodTypeKey: answer.lebensmittelart,
+    newFoodType: mapNewFoodType(answer),
     container: answer.behaelter,
     content: mapContent(answer.inhalt),
     drainedWeightG: positiveOrNull(answer.abtropfgewicht_g),

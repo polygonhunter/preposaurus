@@ -64,7 +64,8 @@ async function runPhoto(
   const run = {
     prepared,
     image: imageFor(deps, photo),
-    loadFoodTypes: () => Promise.resolve([...deps.foodTypes]),
+    // Der PoC misst das Lesen, Vorschläge neuer Arten (#142) gehören nicht dazu: keine Kategorien.
+    loadPackagingChoices: () => Promise.resolve({ foodTypes: [...deps.foodTypes], categories: [] }),
   }
   const outcome = await runRecognitionTask(run, photo.rolle)
   return {

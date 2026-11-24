@@ -41,7 +41,11 @@ export function Sheet({ isOpen, onClose, title, children, actions }: SheetProps)
     <dialog
       ref={ref}
       aria-labelledby={titleId}
-      onClose={onClose}
+      // React reicht `close` an Vorfahren weiter: Schließt ein Blatt im Blatt (z. B. „Kategorie
+      // wählen“ in „Neue Lebensmittelart“), bleibt das äußere offen.
+      onClose={(event) => {
+        if (event.target === event.currentTarget) onClose()
+      }}
       className="mx-auto mt-auto mb-0 max-h-[90dvh] w-full max-w-none rounded-t-sheet bg-surface text-fg shadow-thumb backdrop:bg-scrim breit:my-auto breit:max-w-md breit:rounded-sheet"
     >
       <div className="flex flex-col gap-4 px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))]">

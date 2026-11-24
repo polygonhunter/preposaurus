@@ -678,10 +678,13 @@ sequenceDiagram
 <pre>bezeichnung       Text oder null
                   (generisch, deutsch,
                    ohne Marke)
-kategorie         Liste oder null
+lebensmittelart   Liste oder null
+neue_lebensmittelart_vorschlag
+                  { name, kategorie }
+                  oder null
 behaelter         dose | glas | packung |
                   flasche | tetrapak |
-                  beutel | sonstiges
+                  beutel | null
 inhalt.wert       Zahl oder null
 inhalt.einheit    g | ml | null
 abtropfgewicht_g  Zahl oder null
@@ -706,7 +709,8 @@ sicherheit    hoch | mittel | niedrig</pre>
 <p>Prompt: „ERFINDE NIEMALS EIN DATUM.“ Chargennummern und Uhrzeiten sind kein Datum.</p></div>
 </div>
 <p>Die Werte von <code>sicherheit</code> (hoch, mittel, niedrig) sind ein <span class="badge badge-vorschlag">Vorschlag</span>, das Konzept zeigt nur „hoch“ als Beispiel.</p>
-<p><strong>Feld <code>kategorie</code></strong> <span class="badge badge-vorschlag">Vorschlag</span>: Weil es eigene Kategorien gibt, baut die App die erlaubte Liste bei jedem Aufruf aus den Kategorien des Haushalts. Anthropic speichert ein Schema bis zu 24 Stunden zwischen. Nach einer neuen Kategorie ist das Schema ein anderes und wird einfach neu verarbeitet, das kostet beim ersten Aufruf etwas mehr Zeit.</p>
+<p><strong>Feld <code>lebensmittelart</code></strong> (#110): Die KI wählt die Lebensmittelart, nicht die Kategorie. Kategorie und Warengruppe leitet die App aus der Art ab. Weil es eigene und ausgeblendete Arten gibt, baut die App die erlaubte Liste (Enum der Schlüssel) bei jedem Aufruf aus den sichtbaren Arten des Haushalts. Anthropic speichert ein Schema bis zu 24 Stunden zwischen. Nach einer neuen Art ist das Schema ein anderes und wird einfach neu verarbeitet, das kostet beim ersten Aufruf etwas mehr Zeit.</p>
+<p><strong>Feld <code>neue_lebensmittelart_vorschlag</code></strong> (#142): Nur wenn <code>lebensmittelart</code> null ist, darf die KI eine neue Art vorschlagen: <code>name</code> (kurz, generisch, ohne Marke, Sorte oder Menge) und <code>kategorie</code> als Enum aus den sichtbaren Kategorien des Haushalts. Sonst null. Liefert die KI trotzdem beides, gilt der Treffer der Liste. Die App prüft ähnliche Namen und Suchwörter gegen die sichtbaren Arten: Gibt es die Art schon, wird sie gewählt. Sonst steht ein ruhiges Angebot da („Neue Lebensmittelart … anlegen?“). Angelegt wird nie automatisch, nur nach Bestätigung durch einen Admin, als eigene Art des Haushalts. Mitglieder sehen den Vorschlag mit dem Satz, dass ein Admin neue Arten anlegt.</p>
 <h3>Grenzen der Schemas bei Anthropic</h3>
 <ul>
 <li>Nicht unterstützt: rekursive Schemas, <code>oneOf</code> (stattdessen <code>anyOf</code>), <code>not</code>, Zahlengrenzen (<code>minimum</code>, <code>maximum</code>), Längengrenzen. <code>minItems</code> nur 0 oder 1. <code>additionalProperties</code> muss <code>false</code> sein.</li>
@@ -714,7 +718,7 @@ sicherheit    hoch | mittel | niedrig</pre>
 <li>Deshalb gibt es ein schlankes <strong>KI-Schema</strong> ohne Grenzen. Danach prüft die App mit dem strengen Fach-Schema: Menge größer null, Datum gültig, Datum plausibel.</li>
 </ul>
 <h3>Nach der Antwort</h3>
-<p>Die App prüft die Plausibilität (Datum in der Vergangenheit? weit weg vom üblichen Wert der Kategorie?) und markiert Auffälliges mit „bitte prüfen“. Das Ergebnis ist immer nur ein Vorschlag im Entwurf, bis jemand bestätigt.</p>
+<p>Die App prüft die Plausibilität (Datum in der Vergangenheit? weit weg von der üblichen Haltbarkeit der Lebensmittelart?) und markiert Auffälliges mit „bitte prüfen“. Das Ergebnis ist immer nur ein Vorschlag im Entwurf, bis jemand bestätigt.</p>
 <h3>Modelle</h3>
 <ul>
 <li>Start: <strong>Claude Sonnet 5.5</strong> (<code>claude-sonnet-5-5</code>) für alle drei Rollen. Im Machbarkeitstest wird je Rolle gegen <strong>Claude Haiku 5.5</strong> (<code>claude-haiku-5-5</code>) gemessen. Wichtigste Kennzahl: erfundene MHDs, Ziel etwa null.</li>

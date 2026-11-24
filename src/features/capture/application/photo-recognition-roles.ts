@@ -3,11 +3,10 @@
 // Nur Lesen: Schätz-Rollen ruft dieser Weg nie auf (#124).
 import 'server-only'
 import type { PreparedRecognition } from '@/features/ai-settings/application/prepare-recognition'
-import type { AiFailure, AiImage } from '@/server/ai/vision-recognizer'
+import type { AiFailure, AiImage, RoleContexts } from '@/server/ai/vision-recognizer'
 import type { AiRole } from '@/shared/config/ai-roles'
 import type { PhotoRole } from '@/shared/config/constants'
 import { ok, type Result } from '@/shared/lib/result'
-import type { FoodTypeOption } from '../data/food-type-options'
 import { mapBestBeforeAnswer, type BestBeforeReading } from '../domain/map-best-before-recognition'
 import {
   mapNutritionAnswer,
@@ -25,8 +24,8 @@ export type RecognitionSuggestion =
 export interface RecognitionRun {
   prepared: PreparedRecognition
   image: AiImage
-  /** Erlaubte Lebensmittelarten, geladen nur für die Verpackung */
-  loadFoodTypes: () => Promise<FoodTypeOption[]>
+  /** Sichtbare Arten und Kategorien, geladen nur für die Verpackung (#110, #142) */
+  loadPackagingChoices: () => Promise<RoleContexts['verpackung']>
 }
 
 type Outcome = Promise<Result<RecognitionSuggestion, AiFailure>>
@@ -38,12 +37,12 @@ function modelFor(prepared: PreparedRecognition, role: AiRole): string {
   return model
 }
 
-async function runPackaging({ prepared, image, loadFoodTypes }: RecognitionRun): Outcome {
+async function runPackaging({ prepared, image, loadPackagingChoices }: RecognitionRun): Outcome {
   const { answer } = await prepared.recognizer.recognize({
     role: 'verpackung',
     image,
     model: modelFor(prepared, 'verpackung'),
-    context: { foodTypes: await loadFoodTypes() },
+    context: await loadPackagingChoices(),
   })
   return answer.ok
     ? ok({ role: 'verpackung', packaging: mapPackagingAnswer(answer.value) })

@@ -10,7 +10,7 @@ const FOOD_TYPES = [
 ]
 
 const CONTEXTS: RoleContexts = {
-  verpackung: { foodTypes: FOOD_TYPES },
+  verpackung: { foodTypes: FOOD_TYPES, categories: [{ name: 'Nudeln und Reis' }] },
   naehrwerte: {},
   naehrwerte_schaetzen: { foodType: null, productName: null },
   mhd: {},
@@ -21,6 +21,7 @@ const CONTEXTS: RoleContexts = {
 const packaging = {
   bezeichnung: 'Spaghetti',
   lebensmittelart: 'spaghetti',
+  neue_lebensmittelart_vorschlag: null,
   behaelter: 'packung',
   inhalt: { wert: 500, einheit: 'g' },
   abtropfgewicht_g: null,
@@ -57,6 +58,68 @@ describe('KI-Schemas', () => {
     })
   })
 
+  it('nimmt den Vorschlag einer neuen Art nur mit Kategorie aus der Liste (#142)', () => {
+    const request = { role: 'verpackung', context: CONTEXTS.verpackung } as const
+    const proposal = (kategorie: string) => ({
+      ...packaging,
+      lebensmittelart: null,
+      neue_lebensmittelart_vorschlag: { name: 'Dinkelnudeln', kategorie },
+    })
+
+    expect(parseAnswer(request, proposal('Nudeln und Reis')).ok).toBe(true)
+    expect(parseAnswer(request, proposal('Backwaren')).ok).toBe(false)
+    expect(
+      parseAnswer(request, {
+        ...packaging,
+        neue_lebensmittelart_vorschlag: {
+          name: 'Dinkelnudeln',
+          kategorie: 'Nudeln und Reis',
+          marke: 'X',
+        },
+      }).ok,
+    ).toBe(false)
+  })
+
+  it('schickt den Vorschlag als nullable Objekt mit Pflichtfeldern und Kategorie-Enum', () => {
+    const schema = z.toJSONSchema(
+      schemaForRole({ role: 'verpackung', context: CONTEXTS.verpackung }),
+    )
+
+    expect(schema.properties?.['neue_lebensmittelart_vorschlag']).toMatchObject({
+      anyOf: [
+        {
+          type: 'object',
+          additionalProperties: false,
+          required: ['name', 'kategorie'],
+          properties: { kategorie: { enum: ['Nudeln und Reis'] } },
+        },
+        { type: 'null' },
+      ],
+    })
+  })
+
+  it('verlangt das Feld für den Vorschlag immer, auch als null (#142)', () => {
+    const request = { role: 'verpackung', context: CONTEXTS.verpackung } as const
+    const withoutProposal = Object.fromEntries(
+      Object.entries(packaging).filter(([key]) => key !== 'neue_lebensmittelart_vorschlag'),
+    )
+
+    expect(parseAnswer(request, withoutProposal).ok).toBe(false)
+  })
+
+  it('erlaubt ohne Kategorien beim Vorschlag nur null (#142)', () => {
+    const request = {
+      role: 'verpackung',
+      context: { foodTypes: FOOD_TYPES, categories: [] },
+    } as const
+    const proposal = { name: 'Dinkelnudeln', kategorie: 'Nudeln und Reis' }
+
+    expect(parseAnswer(request, packaging).ok).toBe(true)
+    expect(
+      parseAnswer(request, { ...packaging, neue_lebensmittelart_vorschlag: proposal }).ok,
+    ).toBe(false)
+  })
+
   it('nimmt Behälter nur aus den Stammdaten-Schlüsseln, sonst null (kein „sonstiges“)', () => {
     const request = { role: 'verpackung', context: CONTEXTS.verpackung } as const
 
@@ -65,7 +128,7 @@ describe('KI-Schemas', () => {
   })
 
   it('erlaubt ohne Lebensmittelarten im Haushalt nur null', () => {
-    const request = { role: 'verpackung', context: { foodTypes: [] } } as const
+    const request = { role: 'verpackung', context: { foodTypes: [], categories: [] } } as const
 
     expect(parseAnswer(request, { ...packaging, lebensmittelart: null }).ok).toBe(true)
     expect(parseAnswer(request, packaging).ok).toBe(false)

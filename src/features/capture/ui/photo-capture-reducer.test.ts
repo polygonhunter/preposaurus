@@ -11,8 +11,12 @@ import { saveBlocker } from './photo-shots'
 
 const today = toCalendarDay('2026-11-23')
 const lookup = {
-  foodTypes: [{ id: 'art-spaghetti', key: 'spaghetti' }],
+  foodTypes: [
+    { id: 'art-spaghetti', key: 'spaghetti', name: 'Spaghetti', searchTerms: [] },
+    { id: 'art-nudeln', key: 'nudeln', name: 'Nudeln', searchTerms: [] },
+  ],
   containers: [{ id: 'beh-packung', key: 'packung', name: 'Packung' }],
+  categories: [{ id: 'kat-reis', name: 'Reis und Getreide' }],
 }
 
 function photo(localId: string, role: CapturedPhoto['role']): CapturedPhoto {
@@ -74,6 +78,7 @@ describe('photoCaptureReducer', () => {
           packaging: {
             name: 'Spaghetti',
             foodTypeKey: 'spaghetti',
+            newFoodType: null,
             container: null,
             content: { value: 500, unit: 'g' },
             drainedWeightG: null,

@@ -5,7 +5,10 @@ import { retryDelayFromHeader } from './retry-after'
 
 const packagingSchema = outputJsonSchema({
   role: 'verpackung',
-  context: { foodTypes: [{ key: 'spaghetti', name: 'Spaghetti' }] },
+  context: {
+    foodTypes: [{ key: 'spaghetti', name: 'Spaghetti' }],
+    categories: [{ name: 'Nudeln und Reis' }],
+  },
 })
 
 describe('canonicalizeEnums', () => {
@@ -26,6 +29,18 @@ describe('canonicalizeEnums', () => {
       inhalt: { wert: 500, einheit: 'g' },
       abtropfgewicht_g: null,
       sicherheit: 'niedrig',
+    })
+  })
+
+  it('bringt auch die Kategorie im Vorschlag einer neuen Art in die Schreibweise (#142)', () => {
+    const raw = {
+      lebensmittelart: null,
+      neue_lebensmittelart_vorschlag: { name: 'dinkelnudeln', kategorie: 'NUDELN UND REIS' },
+    }
+
+    expect(canonicalizeEnums(packagingSchema, raw)).toEqual({
+      lebensmittelart: null,
+      neue_lebensmittelart_vorschlag: { name: 'dinkelnudeln', kategorie: 'Nudeln und Reis' },
     })
   })
 

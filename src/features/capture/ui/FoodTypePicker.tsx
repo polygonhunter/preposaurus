@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { Button } from '@/shared/ui/Button'
 import { Group } from '@/shared/ui/Group'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
@@ -8,6 +8,7 @@ import { Row } from '@/shared/ui/Row'
 import { SearchField } from '@/shared/ui/SearchField'
 import { foodTypePath, type FoodTypeChoice } from '../domain/capture-options'
 import { searchFoodTypes } from '../domain/food-type-search'
+import { FoodTypeAddEntry, type FoodTypeAdding } from './FoodTypeAddEntry'
 import { FoodTypeResults } from './FoodTypeResults'
 
 type FoodTypePickerProps = Readonly<{
@@ -16,6 +17,10 @@ type FoodTypePickerProps = Readonly<{
   selected: FoodTypeChoice | null
   onSelect: (foodTypeId: string | null) => void
   error: string | undefined
+  /** „+ Neue Lebensmittelart“ beim Erfassen (#110), fehlt z. B. beim Bearbeiten */
+  adding?: FoodTypeAdding
+  /** Über den Treffern, z. B. der Vorschlag einer neuen Art (#142) */
+  notice?: ReactNode
 }>
 
 function hitMessage(hits: readonly unknown[] | null): string | null {
@@ -27,7 +32,7 @@ function hitMessage(hits: readonly unknown[] | null): string | null {
 // Lebensmittelart per Suche aus der Liste des Haushalts (UX §8.5). Kategorie und Warengruppe stehen
 // nur als abgeleitete Pfadzeile da (#110). Das Suchfeld hat sofort den Fokus, wie im UX-Konzept.
 export function FoodTypePicker(props: FoodTypePickerProps) {
-  const { foodTypes, recentIds, selected, onSelect, error } = props
+  const { foodTypes, recentIds, selected, onSelect, error, adding, notice } = props
   const headerId = useId()
   const errorId = useId()
   const [query, setQuery] = useState('')
@@ -70,7 +75,17 @@ export function FoodTypePicker(props: FoodTypePickerProps) {
               {error}
             </p>
           ) : null}
+          {notice}
           <FoodTypeResults key={query} hits={hits} recent={recent} onChoose={choose} />
+          {adding === undefined ? null : (
+            <FoodTypeAddEntry
+              adding={adding}
+              foodTypes={foodTypes}
+              query={query}
+              hasNoHits={hits?.length === 0}
+              onChosen={choose}
+            />
+          )}
         </div>
       ) : (
         <Group labelledBy={headerId}>
