@@ -1,5 +1,6 @@
-import type { Locator, Page } from '@playwright/test'
+import type { Locator } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
+import { expectNotice, noticeBar } from '../helpers/notice-bar'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // „−1“, „1 entnehmen“ und „Verbraucht“ mit Rückgängig (#46, #125). Die Tests ändern den
@@ -43,8 +44,6 @@ async function packagesOf(locator: Locator): Promise<number> {
 // Zeile „Nudeln 3 Packungen …“, nicht der Sprungchip „Nudeln, Reis und Getreide“
 const rowName = (name: string) => new RegExp(`^${name}\\s+\\d`)
 
-const undoBar = (page: Page, text: string) => page.getByRole('status').filter({ hasText: text })
-
 test('„−1“ in der Zeile nimmt eine Packung, Rückgängig holt sie zurück', async ({ page }, info) => {
   const { list } = picksFor(info.project.name)
   await page.goto(`/vorrat/${list.groupKey}`)
@@ -56,8 +55,8 @@ test('„−1“ in der Zeile nimmt eine Packung, Rückgängig holt sie zurück'
   await takeOne.focus()
   await takeOne.press('Enter')
 
-  const bar = undoBar(page, `${list.name}: 1 Packung verbraucht`)
-  await expect(bar).toBeVisible()
+  const bar = noticeBar(page, `${list.name}: 1 Packung verbraucht`)
+  await expectNotice(page, `${list.name}: 1 Packung verbraucht`)
   await expect(row).toContainText(`${String(before - 1)} Packung`)
   await expect(takeOne).toBeFocused()
   await expectAccessibleLayout(page)
@@ -82,8 +81,8 @@ test('„1 entnehmen“ im Detail nimmt das früheste MHD', async ({ page }, inf
 
   await take.click()
 
-  const bar = undoBar(page, `${detail.name}: 1 Packung verbraucht (${date})`)
-  await expect(bar).toBeVisible()
+  const bar = noticeBar(page, `${detail.name}: 1 Packung verbraucht (${date})`)
+  await expectNotice(page, `${detail.name}: 1 Packung verbraucht (${date})`)
   await expect(packages).toHaveText(String(before - 1))
 
   await bar.getByRole('button', { name: 'Rückgängig' }).click()
@@ -103,8 +102,8 @@ test('„Verbraucht“ auf Bald fällig, mit Hinweis zum MHD', async ({ page }, 
 
   await button.click()
 
-  const bar = undoBar(page, `${due}: 1 Packung verbraucht`)
-  await expect(bar).toBeVisible()
+  const bar = noticeBar(page, `${due}: 1 Packung verbraucht`)
+  await expectNotice(page, `${due}: 1 Packung verbraucht`)
   await expect(button).toHaveCount(0)
 
   await bar.getByRole('button', { name: 'Rückgängig' }).click()

@@ -3,11 +3,13 @@
 import { useState, useTransition, type ReactNode } from 'react'
 import { useFocusRescue } from '@/shared/hooks/use-focus-rescue'
 import { useIsOnline } from '@/shared/hooks/use-is-online'
+import { NoticeAnnouncer } from '@/shared/ui/NoticeAnnouncer'
 import { NoticeBar } from '@/shared/ui/NoticeBar'
 import { OFFLINE_WRITE_MESSAGE } from '@/shared/ui/OfflineWriteGuard'
 import { UndoBar } from '@/shared/ui/UndoBar'
 import { ConsumeContext, type ConsumeContextValue } from './consume-context'
 import {
+  announcementOf,
   errorNotice,
   noticeKey,
   runConsume,
@@ -39,7 +41,8 @@ type ConsumeProviderProps = Readonly<{ children: ReactNode }>
 // Erfolg zeigt fünf Sekunden „Rückgängig“, keine Rückfrage vorher (UX-Konzept §7, P7), dazu das
 // Angebot „Nachkaufen“ (UX D15, #74). Ein Fehler steht unten an derselben Stelle, die Seite lädt
 // dabei neu, die Zeile springt also zurück. Verschwindet ein fokussierter Knopf (Zeile weg,
-// Rückgängig-Zeile zu), führt useFocusRescue den Fokus weiter (#269).
+// Rückgängig-Zeile zu), führt useFocusRescue den Fokus weiter (#269). Angesagt wird die Meldung im
+// immer vorhandenen NoticeAnnouncer (#274).
 export function ConsumeProvider({ children }: ConsumeProviderProps) {
   const [notice, setNotice] = useState<Notice | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -102,6 +105,7 @@ export function ConsumeProvider({ children }: ConsumeProviderProps) {
     <ConsumeContext value={value}>
       <div ref={focusRef}>
         {children}
+        <NoticeAnnouncer announcement={announcementOf(notice)} />
         {notice === null || notice.kind === 'error' ? null : (
           <UndoBar
             key={noticeKey(notice)}

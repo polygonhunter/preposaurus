@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
+import { expectNotice, noticeBar } from '../helpers/notice-bar'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // „Entsorgt“ und „Noch gut“ auf Bald fällig, Anzeige und Verlauf im Detail (#47, #48). Der Test
@@ -17,7 +18,6 @@ const todayInBerlin = () =>
     year: 'numeric',
   }).format(new Date())
 
-const undoBar = (page: Page, text: string) => page.getByRole('status').filter({ hasText: text })
 const entryLink = (page: Page) => page.getByRole('link', { name: `× ${FOOD}` })
 
 /** Zwei abgelaufene Packungen über die manuelle Erfassung (#52). */
@@ -47,8 +47,8 @@ test('Entsorgt mit Rückgängig, Noch gut mit Anzeige und Verlauf', async ({ pag
 
   // Entsorgt nimmt eine Packung, Rückgängig holt sie zurück
   await page.getByRole('button', { name: `1 Packung ${FOOD} entsorgt` }).click()
-  const discarded = undoBar(page, `${FOOD}: 1 Packung entsorgt (${EXPIRED})`)
-  await expect(discarded).toBeVisible()
+  const discarded = noticeBar(page, `${FOOD}: 1 Packung entsorgt (${EXPIRED})`)
+  await expectNotice(page, `${FOOD}: 1 Packung entsorgt (${EXPIRED})`)
   await expect(entryLink(page)).toContainText(`${String(count - 1)} × ${FOOD}`)
   await discarded.getByRole('button', { name: 'Rückgängig' }).click()
   await expect(entryLink(page)).toContainText(`${String(count)} × ${FOOD}`)
@@ -58,8 +58,8 @@ test('Entsorgt mit Rückgängig, Noch gut mit Anzeige und Verlauf', async ({ pag
   const detailPath = (await entryLink(page).getAttribute('href')) ?? ''
   const stillGood = page.getByRole('button', { name: `${FOOD} noch gut` })
   await stillGood.click()
-  const checkedBar = undoBar(page, `${FOOD}: ${String(count)} Packungen ${checked}`)
-  await expect(checkedBar).toBeVisible()
+  const checkedBar = noticeBar(page, `${FOOD}: ${String(count)} Packungen ${checked}`)
+  await expectNotice(page, `${FOOD}: ${String(count)} Packungen ${checked}`)
   await expect(entryLink(page)).toHaveCount(0)
   await checkedBar.getByRole('button', { name: 'Rückgängig' }).click()
   await expect(entryLink(page)).toContainText(`${String(count)} × ${FOOD}`)
@@ -81,7 +81,7 @@ test('Entsorgt mit Rückgängig, Noch gut mit Anzeige und Verlauf', async ({ pag
   for (let left = count; left > 0; left -= 1) {
     await dateRow.click()
     await page.getByRole('button', { name: '1 Packung entsorgt' }).click()
-    await expect(undoBar(page, `${FOOD}: 1 Packung entsorgt`)).toBeVisible()
+    await expectNotice(page, `${FOOD}: 1 Packung entsorgt`)
   }
   await expect(page.getByText('Aktuell nichts im Vorrat.')).toBeVisible()
   await expect(history.getByRole('listitem').first()).toContainText('Entsorgt')

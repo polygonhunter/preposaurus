@@ -1,6 +1,12 @@
 import type { Locator, Page } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
 import { neighbourCheckboxName } from '../helpers/focus-rows'
+import {
+  expectAnnouncedInExistingRegion,
+  expectNotice,
+  markLiveRegions,
+  noticeBar,
+} from '../helpers/notice-bar'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Fokus nach Entfernen, Abhaken und Rückgängig auf Nachkaufen, nur per Tastatur (#269). Verschwindet
@@ -15,7 +21,6 @@ const B = 'Fokusprobe Knäcke'
 const ownList = (page: Page) => page.getByRole('list', { name: 'Eigene Einträge' })
 const ownCheckbox = (page: Page, name: string) =>
   ownList(page).getByRole('checkbox', { name, exact: true })
-const undoBar = (page: Page, text: string) => page.getByRole('status').filter({ hasText: text })
 
 async function addEntry(page: Page, label: string) {
   await page.getByLabel('Eintrag ergänzen').fill(label)
@@ -52,10 +57,13 @@ test('Entfernen, Abhaken und Rückgängig führen den Fokus per Tastatur', async
   const removeA = page.getByRole('button', { name: `${A} entfernen` })
 
   // Entfernen: Die Zeile geht, der Fokus in die nächste. Die Rückgängig-Zeile erscheint ohne ihn.
+  // Angesagt wird im Live-Bereich, den es schon vor der Meldung gibt (#274)
   const afterRemove = await neighbourOf(page, removeA)
+  await markLiveRegions(page)
   await removeA.press('Enter')
-  const removed = undoBar(page, `${A} entfernt.`)
-  await expect(removed).toBeVisible()
+  const removed = noticeBar(page, `${A} entfernt.`)
+  await expectNotice(page, `${A} entfernt.`)
+  await expectAnnouncedInExistingRegion(page, `${A} entfernt.`)
   await expect(checkA).toHaveCount(0)
   await expect(afterRemove).toBeFocused()
 
@@ -66,8 +74,8 @@ test('Entfernen, Abhaken und Rückgängig führen den Fokus per Tastatur', async
   // Abhaken: Der Eintrag wandert nach „Erledigt“, der Fokus bleibt in der Liste
   const afterCheck = await neighbourOf(page, checkA)
   await checkA.press('Space')
-  const checked = undoBar(page, `${A} abgehakt.`)
-  await expect(checked).toBeVisible()
+  const checked = noticeBar(page, `${A} abgehakt.`)
+  await expectNotice(page, `${A} abgehakt.`)
   await expect(
     page.getByRole('list', { name: 'Erledigt' }).getByRole('checkbox', { name: A }),
   ).toBeChecked()
