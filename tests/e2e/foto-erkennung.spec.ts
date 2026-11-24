@@ -6,7 +6,8 @@ import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Foto-Erkennung in den Einstellungen (#108, #79). Die E2E-Tests laufen mit AI_PROVIDER=fake: Der
 // Test-Anbieter antwortet ohne Netz, jeder Schlüssel ist erfunden. Verbindungen gelten für den
-// ganzen Haushalt, deshalb ändert nur das Projekt „desktop“ etwas und räumt danach auf.
+// ganzen Haushalt, deshalb ändert nur das Projekt „desktop“ etwas und räumt danach auf. Den
+// Haushaltsschalter prüft foto-erkennung-schalter.spec.ts im Projekt „foto“.
 
 // Erfunden, nur in der Form eines Anthropic-Schlüssels
 const INVENTED_KEY = `sk-ant-e2e-erfunden-${'x'.repeat(40)}-e2e9`
@@ -105,25 +106,4 @@ test('Verbindung anlegen, testen, Modell wählen und entfernen', async ({ page }
   await expect(packaging.getByRole('radio', { name: 'Haiku 5.5 · empfohlen' })).toBeChecked()
 
   await removeConnection(page, name)
-})
-
-test('Haushaltsschalter an- und wieder ausschalten', async ({ page }, info) => {
-  onlyOnDesktop(info.project.name)
-  await page.goto('/einstellungen/foto-erkennung')
-  const toggle = page.getByRole('switch', { name: 'Foto-Erkennung' })
-  await expect(toggle).not.toBeChecked()
-  const saveToggle = page.getByRole('button', { name: 'Speichern' }).first()
-
-  await page.locator('label', { hasText: 'Foto-Erkennung' }).click()
-  await expect(toggle).toBeChecked()
-  await saveToggle.click()
-  await expect(page.getByText('Die Foto-Erkennung ist an.')).toBeVisible()
-  await page.reload()
-  await expect(toggle).toBeChecked()
-
-  await page.locator('label', { hasText: 'Foto-Erkennung' }).click()
-  await saveToggle.click()
-  await expect(page.getByText('Die Foto-Erkennung ist aus.')).toBeVisible()
-  await page.reload()
-  await expect(toggle).not.toBeChecked()
 })
