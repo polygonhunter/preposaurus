@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
-import type { NewFoodTypeSuggestion } from '../domain/map-recognition'
+import type { PackagingSuggestion } from '../domain/map-recognition'
 import { photoCaptureReducer, type PhotoCaptureAction } from './photo-capture-reducer'
 import { initialPhotoCapture, type PhotoCaptureState } from './photo-capture-state'
 
@@ -15,7 +15,9 @@ const lookup = {
   categories: [{ id: 'kat-reis', name: 'Reis und Getreide' }],
 }
 
-const recognizedPackaging = (newFoodType: NewFoodTypeSuggestion | null): PhotoCaptureAction => ({
+const recognizedPackaging = (
+  newFoodType: PackagingSuggestion['newFoodType'],
+): PhotoCaptureAction => ({
   type: 'recognized',
   localId: 'v',
   outcome: {
@@ -36,7 +38,7 @@ const recognizedPackaging = (newFoodType: NewFoodTypeSuggestion | null): PhotoCa
   context: { lookup, today: toCalendarDay('2026-11-24') },
 })
 
-const shotThenRead = (start: PhotoCaptureState, newFoodType: NewFoodTypeSuggestion | null) =>
+const shotThenRead = (start: PhotoCaptureState, newFoodType: PackagingSuggestion['newFoodType']) =>
   [
     {
       type: 'shot',
