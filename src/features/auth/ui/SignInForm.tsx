@@ -1,10 +1,13 @@
 'use client'
 import { useActionState } from 'react'
 import { ActionForm } from '@/shared/ui/ActionForm'
-import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import { Toggle } from '@/shared/ui/Toggle'
 import { signInAction, type SignInState } from '../actions/sign-in-action'
+
+const FORGOT_NOTE = (
+  <p className="px-4 text-footnote text-fg2">Passwort vergessen? Ein Admin kann es zurücksetzen.</p>
+)
 
 type SignInFormProps = Readonly<{
   // Geprüfter Pfad, auf den es nach der Anmeldung zurückgeht
@@ -23,6 +26,7 @@ export function SignInForm({ returnTo }: SignInFormProps) {
       action={formAction}
       result={state}
       announcement={errors.username ?? errors.password}
+      submit={{ label: 'Anmelden', isPending, pendingLabel: 'Meldet an …', after: FORGOT_NOTE }}
       className="mx-4 flex flex-col gap-4 pt-6 breit:mx-6"
     >
       <input type="hidden" name="weiter" value={returnTo} />
@@ -48,12 +52,6 @@ export function SignInForm({ returnTo }: SignInFormProps) {
       <div className="rounded-group bg-surface px-4">
         <Toggle label="Angemeldet bleiben" name="angemeldetBleiben" defaultChecked />
       </div>
-      <Button type="submit" pendingLabel={isPending ? 'Meldet an …' : undefined}>
-        Anmelden
-      </Button>
-      <p className="px-4 text-footnote text-fg2">
-        Passwort vergessen? Ein Admin kann es zurücksetzen.
-      </p>
     </ActionForm>
   )
 }

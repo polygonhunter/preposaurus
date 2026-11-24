@@ -1,9 +1,7 @@
 'use client'
 import { useActionState } from 'react'
 import { ActionForm } from '@/shared/ui/ActionForm'
-import { Button } from '@/shared/ui/Button'
 import { PasswordField } from '@/shared/ui/PasswordField'
-import { SaveStatus } from '@/shared/ui/SaveStatus'
 import { Toggle } from '@/shared/ui/Toggle'
 import { changeOwnPasswordAction } from '../actions/change-own-password-action'
 import { PROFILE_ACTION_IDLE } from '../actions/profile-action-state'
@@ -23,6 +21,7 @@ export function ChangePasswordForm() {
       result={state}
       announcement={state.errors?.currentPassword ?? state.errors?.newPassword}
       action={formAction}
+      submit={{ label: 'Passwort ändern', isPending, pendingLabel: 'Ändert …', status: state }}
       className="mx-4 flex flex-col gap-4 breit:mx-6"
     >
       <PasswordField
@@ -42,12 +41,6 @@ export function ChangePasswordForm() {
       />
       <div className="rounded-group bg-surface px-4 breit:border breit:border-line">
         <Toggle label="Andere Geräte abmelden" name="andere-abmelden" value="an" defaultChecked />
-      </div>
-      <div className="flex items-center justify-between gap-3">
-        <SaveStatus state={state} />
-        <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Ändert …' : undefined}>
-          Passwort ändern
-        </Button>
       </div>
     </ActionForm>
   )

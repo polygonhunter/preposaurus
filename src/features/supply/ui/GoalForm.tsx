@@ -1,7 +1,6 @@
 'use client'
 import { useActionState, useState } from 'react'
 import { ActionForm } from '@/shared/ui/ActionForm'
-import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import { Segmented } from '@/shared/ui/Segmented'
 import { saveGoalAction, type GoalFormState } from '../actions/save-goal-action'
@@ -34,6 +33,7 @@ export function GoalForm({ initialValues, defaultDays, place }: GoalFormProps) {
       result={state}
       announcement={errors.customDays ?? errors.targetDate ?? errors.choice}
       action={formAction}
+      submit={{ label: SUBMIT_LABELS[place], isPending }}
       className="mx-4 flex flex-col gap-4 breit:mx-6"
     >
       <input type="hidden" name="ort" value={place} />
@@ -72,9 +72,6 @@ export function GoalForm({ initialValues, defaultDays, place }: GoalFormProps) {
       {state.status === 'error' && state.message ? (
         <p className="px-4 text-footnote text-red">{state.message}</p>
       ) : null}
-      <Button type="submit" pendingLabel={isPending ? 'Speichert …' : undefined}>
-        {SUBMIT_LABELS[place]}
-      </Button>
     </ActionForm>
   )
 }
