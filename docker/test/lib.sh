@@ -12,12 +12,15 @@ prepare_install_dir() {
   repo_dir=$1
   install_dir=$(mktemp -d)
   cp "$repo_dir/compose.yaml" "$repo_dir/compose.tailscale.yaml" "$install_dir/"
-  mkdir -p "$install_dir/docker/tailscale" "$install_dir/db" "$install_dir/fotos" "$install_dir/backups"
+  mkdir -p "$install_dir/docker/tailscale" "$install_dir/docker/db" "$install_dir/db" "$install_dir/fotos" \
+    "$install_dir/backups"
   cp "$repo_dir/docker/tailscale/serve.json" "$install_dir/docker/tailscale/"
+  cp "$repo_dir/docker/db/rollen.sh" "$install_dir/docker/db/"
   # Wegwerf-Werte nur für diesen Lauf
   {
     echo "PREPOSAURUS_VERSION=${PREPOSAURUS_VERSION:-ci}"
     echo "POSTGRES_PASSWORD=$(openssl rand -hex 24)"
+    echo "POSTGRES_BACKUP_PASSWORD=$(openssl rand -hex 24)"
     echo "APP_SECRET=$(openssl rand -base64 32)"
     echo "PREPOSAURUS_UID=$(id -u)"
     echo "PREPOSAURUS_GID=$(id -g)"
@@ -41,6 +44,19 @@ wait_for_health() {
   fail "/api/health hat nicht geantwortet"
 }
 
+# Als Superuser postgres über den Socket im Container, wie ein Admin am NAS (#146)
 psql_value() {
-  docker compose exec -T db psql -U preposaurus -d preposaurus -tAc "$1"
+  docker compose exec -T db psql -U postgres -d preposaurus -tAc "$1"
 }
+
+# Schemas, Tabellen und Sequenzen der App, die nicht preposaurus_app gehören (leer = alles richtig).
+# public gehört pg_database_owner, also dem Eigentümer der Datenbank.
+# shellcheck disable=SC2034 # genutzt von den Tests, die diese Datei einbinden
+FOREIGN_OWNED="select coalesce(string_agg(name || '=' || owner, ','), '') from (
+  select nspname as name, pg_get_userbyid(nspowner) as owner from pg_namespace
+  where nspname in ('drizzle', 'pgboss')
+  union all
+  select n.nspname || '.' || c.relname, pg_get_userbyid(c.relowner)
+  from pg_class c join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname in ('public', 'drizzle', 'pgboss') and c.relkind in ('r', 'p', 'S', 'v')
+) as objects where owner <> 'preposaurus_app'"

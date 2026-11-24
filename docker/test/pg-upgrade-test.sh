@@ -3,8 +3,9 @@
 # docs/INSTALLATION.md §12.1: Eine alte Installation (PostgreSQL 18, Ordner db/18) sichert mit
 # pg_dump 18 nach vor-update/…. Der Ordner db wandert nach db-pg18, die neue Version startet eine
 # frische Datenbank (db/19), der Backup-Dienst spielt den Stand zurück, die Zeilenzahlen sind gleich.
-# Die alte Installation entspricht compose.yaml bis Version 0.1: Superuser preposaurus, Backup-Image
-# auf postgres:18. Aufruf aus dem Repo-Ordner, beide Images (…:ci) müssen gebaut sein.
+# Die alte Installation entspricht compose.yaml vor #146: Superuser preposaurus, Backup-Image auf
+# postgres:18. Die neue nutzt die Rollen preposaurus_app und preposaurus_backup (#146).
+# Aufruf aus dem Repo-Ordner, beide Images (…:ci) müssen gebaut sein.
 set -euo pipefail
 repo_dir=$(pwd)
 # shellcheck source=docker/test/lib.sh
@@ -92,6 +93,9 @@ docker compose up -d
 wait_for_health
 after=$(psql_value "$ROW_COUNTS")
 [ "$after" = "$before" ] || fail "Zeilenzahlen weichen ab: vorher $before, nachher $after"
+# Die alte Installation hatte nur den Superuser preposaurus, die neue gehört preposaurus_app (#146).
+foreign=$(psql_value "$FOREIGN_OWNED")
+[ -z "$foreign" ] || fail "Nach dem Umzug gehören Objekte nicht preposaurus_app: $foreign"
 [ "$(psql_value "select name from nutzer where benutzername = 'alt'")" = "Alt" ] ||
   fail "Der Nutzer aus der alten Version fehlt"
 [ "$(cat fotos/haushalt/alt.jpg)" = "foto-alt" ] || fail "Das Foto aus der alten Version fehlt"
