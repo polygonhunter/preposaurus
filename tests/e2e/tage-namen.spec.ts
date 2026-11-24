@@ -26,7 +26,8 @@ test('Übersicht: „Menge reicht“ steht über den Warengruppen und im Messwer
   await page.goto('/uebersicht')
   const region = page.getByRole('region', { name: 'Warengruppen' })
 
-  await expect(region.getByText('Menge reicht', { exact: true })).toBeVisible()
+  // Der Kopf der Liste; die Blätter der Warengruppen tragen denselben Namen als Überschrift
+  await expect(region.getByText('Menge reicht', { exact: true }).first()).toBeVisible()
   await expect(region.getByRole('meter', { name: GRAIN })).toHaveAttribute(
     'aria-valuetext',
     /^Menge reicht [\d,]+ von 10 Tagen, Ziel 10 Tage$/,
@@ -91,15 +92,15 @@ test('Detail: die Kachel heißt „Satt für“, bei Wasser „Wasser für“', 
   await expect(tile(page, 'Satt für')).toHaveCount(0)
 })
 
+// Übersicht (samt Blatt der Warengruppe) und Ebene 1 prüfen uebersicht.spec.ts und vorrat.spec.ts
+// schon mit axe. Hier der Kopf von Ebene 2 mit beiden Zahlen, je Seite ein eigener Test.
 for (const colorScheme of ['light', 'dark'] as const) {
-  test(`Übersicht, Ebene 1 und Ebene 2 mit Namen sind barrierefrei (${colorScheme})`, async ({
-    page,
-  }) => {
-    await page.emulateMedia({ colorScheme })
-    for (const path of ['/uebersicht', '/vorrat', '/vorrat/getreide', '/vorrat/wasser']) {
+  for (const path of ['/vorrat/getreide', '/vorrat/wasser']) {
+    test(`Kopf mit beiden Zahlen ist barrierefrei: ${path} (${colorScheme})`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme })
       await page.goto(path)
-      await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+      await expect(main(page).getByText(AMOUNT)).toBeVisible()
       await expectAccessibleLayout(page)
-    }
-  })
+    })
+  }
 }

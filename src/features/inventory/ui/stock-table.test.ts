@@ -71,7 +71,7 @@ describe('tableCells', () => {
     expect(water).toMatchObject({
       amount: '9 l',
       kcal: '–',
-      days: 'Wasser für 1,5 Tage',
+      days: { label: 'Wasser für', value: '1,5 Tage' },
       nextDate: null,
     })
     expect(
