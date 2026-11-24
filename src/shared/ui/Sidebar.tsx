@@ -25,7 +25,7 @@ export function Sidebar({ counts }: SidebarProps) {
   return (
     <nav
       aria-label={MAIN_NAV_LABEL}
-      className="sticky top-0 hidden h-dvh w-[216px] shrink-0 flex-col justify-between overflow-y-auto border-r border-line bg-bg px-2.5 py-3.5 breit:flex"
+      className="sticky top-0 hidden h-dvh w-(--seitenleiste) shrink-0 flex-col justify-between overflow-y-auto border-r border-line bg-bg px-2.5 py-3.5 breit:flex"
     >
       <div className="flex flex-col gap-3">
         <SidebarCaptureLink isCurrent={current === CAPTURE_NAV.href} />

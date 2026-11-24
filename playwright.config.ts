@@ -1,6 +1,7 @@
 import { resolve } from 'node:path'
 import { defineConfig, devices } from '@playwright/test'
 import { ADMIN_STORAGE_STATE, E2E_BACKUP_STATUS_DIR } from './tests/helpers/e2e-auth'
+import { DUO_FOLD, type FoldOptions } from './tests/helpers/fold'
 
 // E2E_PORT, wenn mehrere Arbeitskopien gleichzeitig testen (sonst nutzt reuseExistingServer den
 // Server einer anderen Kopie mit anderer Datenbank).
@@ -28,7 +29,11 @@ const E2E_DATA_DIR = '.data/e2e'
 const freshDatabase = `rm -rf ${E2E_DATA_DIR} && npm run db:migrate && npm run db:seed`
 const startServer = isCi ? 'npm run start:standalone' : `npm run dev -- -p ${String(PORT)}`
 
-export default defineConfig({
+// Spaltenbreiten im PC-Fenster ohne Falz (#253): nur tests/e2e/falz.spec.ts, alles andere deckt
+// „desktop“ ab.
+const FOLD_SPEC = /falz\.spec\.ts$/
+
+export default defineConfig<FoldOptions>({
   testDir: 'tests/e2e',
   testIgnore: PHOTO_SPEC,
   fullyParallel: true,
@@ -87,12 +92,20 @@ export default defineConfig({
         viewport: { width: 951, height: 585 },
         ...touch,
         ...signedIn,
+        // Die Falz des Duo, per Chromium nachgestellt (tests/helpers/fold.ts)
+        fold: DUO_FOLD,
       },
       dependencies: afterSetup,
     },
     {
       name: 'desktop',
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 }, ...signedIn },
+      dependencies: afterSetup,
+    },
+    {
+      name: 'pc-schmal',
+      testMatch: FOLD_SPEC,
+      use: { ...devices['Desktop Chrome'], viewport: { width: 960, height: 800 }, ...signedIn },
       dependencies: afterSetup,
     },
     {

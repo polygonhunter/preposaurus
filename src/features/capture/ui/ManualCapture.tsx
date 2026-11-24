@@ -4,7 +4,7 @@ import { flushSync } from 'react-dom'
 import { cx } from '@/shared/lib/class-names'
 import { Button } from '@/shared/ui/Button'
 import { LiveMessage } from '@/shared/ui/LiveMessage'
-import { FOLD_SPLIT_COLUMNS } from '@/shared/ui/split-columns'
+import { EVEN_SPLIT_COLUMNS, FOLD_SPLIT_MARKER } from '@/shared/ui/split-columns'
 import type { CaptureOptions } from '../domain/capture-options'
 import type { CapturePrefill } from '../domain/capture-prefill'
 import { NO_LEAVE_GUARD, useLeaveGuard } from './capture-leave'
@@ -40,13 +40,9 @@ const isNutritionField = (field: CaptureField) =>
 const firstPrefilledField = (prefill: CapturePrefill) =>
   prefill.product === null ? ('content' as const) : ('units' as const)
 
-// Ab „breit“ zwei Spalten mit der Grenze in der Fenstermitte (Falz beim Duo quer), ab „weit“ zwei
-// gleich breite Spalten (ManualCaptureFields ordnet die Felder zu).
-const FORM_COLUMNS = cx(
-  'pb-6',
-  FOLD_SPLIT_COLUMNS,
-  'breit:items-start weit:max-w-[1080px] weit:grid-cols-2',
-)
+// Ab „breit“ zwei gleich breite Spalten, mit Falz die linke bis zur Falz (split-columns.ts).
+// ManualCaptureFields ordnet die Felder zu.
+const FORM_COLUMNS = cx('pb-6', EVEN_SPLIT_COLUMNS, 'breit:items-start weit:max-w-[1080px]')
 
 const UNSAVED = { kind: 'unsaved' } as const
 
@@ -102,6 +98,7 @@ export function ManualCapture({ prefill, ...props }: ManualCaptureProps) {
     <form
       ref={formRef}
       noValidate
+      {...FOLD_SPLIT_MARKER}
       aria-label="Produkt erfassen"
       className={FORM_COLUMNS}
       onSubmit={(event) => {
