@@ -80,3 +80,9 @@ export function clearErrorsFor(errors: CaptureErrors, changed: readonly string[]
     : changed
   return Object.fromEntries(Object.entries(errors).filter(([field]) => !cleared.includes(field)))
 }
+
+/** Steht etwas anderes im Formular als beim Öffnen? Dann fragt „Abbrechen“ nach (#285). */
+export function isDraftChanged(initial: ManualCaptureDraft, draft: ManualCaptureDraft): boolean {
+  const comparable = (value: ManualCaptureDraft) => JSON.stringify({ ...value, captureId: '' })
+  return comparable(initial) !== comparable(draft)
+}

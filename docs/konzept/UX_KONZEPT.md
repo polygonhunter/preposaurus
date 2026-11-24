@@ -152,7 +152,7 @@ Regeln:
 - **Gleiche Namen, gleiche Reihenfolge** auf allen Geräten. Nur die Anordnung wechselt.
 - **Höchstens zwei Ebenen unter einem Tab.** Tiefer geht es nur über die Pfadzeile im Vorrat.
 - **Jeder Screen hat eine Adresse.** Push, Mail und Zurück-Taste landen genau dort, auch Filter stehen in der Adresse. Auf- und Zuklappen ändert nur das Layout.
-- **Erfassen läuft im Vollbild** ohne Dock, mit „Abbrechen“ oben links.
+- **Erfassen läuft im Vollbild** ohne Dock, mit „Abbrechen“ oben links. Ab „breit“ bleibt die Seitenleiste, „Abbrechen“ steht trotzdem da (#285). Gehen dabei Eingaben verloren, fragt die App vorher ruhig nach.
 
 ### Sitemap
 

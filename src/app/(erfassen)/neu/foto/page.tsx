@@ -5,13 +5,12 @@ import { loadCaptureDeps } from '@/features/capture/application/capture-deps'
 import { findRecognitionOffReason } from '@/features/capture/application/choose-capture-way'
 import { findOpenDraft } from '@/features/capture/application/find-open-draft'
 import { getCaptureOptionsForUser } from '@/features/capture/application/stock-request'
-import { CaptureModeSwitch } from '@/features/capture/ui/CaptureModeSwitch'
+import { CaptureHeader } from '@/features/capture/ui/CaptureHeader'
 import { NoHouseholdPage } from '@/features/capture/ui/NoHouseholdPage'
 import { PhotoCapture } from '@/features/capture/ui/PhotoCapture'
 import { initialPhotoCapture } from '@/features/capture/ui/photo-capture-state'
 import { fromDraft } from '@/features/capture/ui/photo-draft-data'
 import { requireHouseholdUser } from '@/server/auth/guards'
-import { PageHeader } from '@/shared/ui/PageHeader'
 
 export const metadata: Metadata = { title: 'Erfassen per Foto · Preposaurus' }
 
@@ -41,12 +40,7 @@ export default async function PhotoCapturePage() {
       options={options}
       initial={initial}
       recognitionOff={recognitionOff}
-      header={
-        <>
-          <PageHeader title="Erfassen" />
-          <CaptureModeSwitch current="foto" />
-        </>
-      }
+      header={<CaptureHeader mode="foto" />}
     />
   )
 }

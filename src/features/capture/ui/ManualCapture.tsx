@@ -7,6 +7,7 @@ import { LiveMessage } from '@/shared/ui/LiveMessage'
 import { FOLD_SPLIT_COLUMNS } from '@/shared/ui/split-columns'
 import type { CaptureOptions } from '../domain/capture-options'
 import type { CapturePrefill } from '../domain/capture-prefill'
+import { NO_LEAVE_GUARD, useLeaveGuard } from './capture-leave'
 import { CaptureSaved } from './CaptureSaved'
 import { NUTRITION_FIELDS, type CaptureErrors, type CaptureField } from './manual-capture-draft'
 import { deriveView } from './manual-capture-view'
@@ -46,6 +47,8 @@ const FORM_COLUMNS = cx(
   'breit:items-start weit:max-w-[1080px] weit:grid-cols-2',
 )
 
+const UNSAVED = { kind: 'unsaved' } as const
+
 const firstMessage = (errors: CaptureErrors) => Object.values(errors).find(Boolean) ?? null
 
 // Manuelles Erfassen (#52, #53, #54): ein Formular, danach Bestätigung mit „Noch eins“. Vorbelegt
@@ -68,6 +71,7 @@ export function ManualCapture({ options, prefill }: ManualCaptureProps) {
 
   const capture = useManualCapture({ ...options, prefill }, focusField)
   const view = deriveView(options, capture.draft)
+  useLeaveGuard(capture.saved === null && capture.isChanged ? UNSAVED : NO_LEAVE_GUARD)
   const another = useFreshRestart(() => {
     capture.restart()
     setNutritionOpen(false)

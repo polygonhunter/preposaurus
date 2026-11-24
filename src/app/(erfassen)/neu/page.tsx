@@ -3,11 +3,11 @@ import { redirect } from 'next/navigation'
 import { loadCaptureDeps } from '@/features/capture/application/capture-deps'
 import { chooseCaptureWay } from '@/features/capture/application/choose-capture-way'
 import { findOpenDraft } from '@/features/capture/application/find-open-draft'
+import { CaptureHeader } from '@/features/capture/ui/CaptureHeader'
 import { draftAgeLabel } from '@/features/capture/ui/draft-age-label'
 import { DraftResumePrompt } from '@/features/capture/ui/DraftResumePrompt'
 import { NoHouseholdPage } from '@/features/capture/ui/NoHouseholdPage'
 import { requireHouseholdUser } from '@/server/auth/guards'
-import { PageHeader } from '@/shared/ui/PageHeader'
 
 export const metadata: Metadata = { title: 'Erfassen · Preposaurus' }
 
@@ -27,7 +27,7 @@ export default async function CapturePage() {
   }
   return (
     <>
-      <PageHeader title="Erfassen" />
+      <CaptureHeader />
       <DraftResumePrompt
         draftId={draft.draftId}
         ageLabel={draftAgeLabel(draft.updatedAt, new Date())}
