@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
+import { DEFAULT_AMPEL_THRESHOLDS } from '../../../../tests/helpers/ampel-thresholds'
 import type { DueEntry } from '../schemas/due'
 import { dueCounterLabel, dueEntryLine, dueEntryTitle, dueGroupTitle } from './due-labels'
 
-const standard = { soonDays: 90, urgentDays: 28 }
+const standard = DEFAULT_AMPEL_THRESHOLDS
 
 function entry(overrides: Partial<DueEntry> = {}): DueEntry {
   return {
