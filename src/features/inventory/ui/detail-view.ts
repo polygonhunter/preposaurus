@@ -69,6 +69,14 @@ export function stillGoodCandidates(group: BestBeforeGroupDto): string[] {
     .map((unit) => unit.id)
 }
 
+/**
+ * Datumsart einer Zeile (#294). Steht eine Packung mit Verbrauchsdatum darin, gilt die Zeile als
+ * Verbrauchsdatum: lieber einmal zu vorsichtig als ein beruhigender MHD-Hinweis.
+ */
+export function groupDateKind(group: BestBeforeGroupDto): 'best-before' | 'use-by' {
+  return group.units.some((unit) => unit.kind === 'use-by') ? 'use-by' : 'best-before'
+}
+
 /** Zustand einer Datumszeile als Ton und Wort. Alle geprüft: „noch gut (geprüft am …)“ (#47). */
 export function groupBadge(group: BestBeforeGroupDto) {
   if (group.kind === 'no-date') return STATE_BADGE['no-date']

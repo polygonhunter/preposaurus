@@ -48,4 +48,10 @@ describe('Texte auf Bald fällig', () => {
       '04.12.2026 · seit 2 Tagen · Verbrauchsdatum überschritten, bitte nicht mehr essen.',
     )
   })
+
+  it('nennt ein noch nicht überschrittenes Verbrauchsdatum (#294)', () => {
+    expect(dueEntryLine(entry({ kind: 'use-by' }))).toBe(
+      '04.12.2026 · in 12 Tagen · Keller · Verbrauchsdatum',
+    )
+  })
 })

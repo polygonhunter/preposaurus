@@ -4,10 +4,10 @@ import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { todayInBerlin } from '@/shared/lib/dates'
-import { parseBestBefore } from '../domain/best-before'
-import { doubtAboutBestBefore, type BestBeforeDoubt } from '../domain/best-before-plausibility'
+import { detectDateKind, parseBestBefore } from '../domain/best-before'
+import { doubtAboutBestBefore } from '../domain/best-before-plausibility'
 import { addDateEntry, changeDateCount, type DateEntry } from '../domain/date-entries'
-import { PARSE_MESSAGES } from './best-before-messages'
+import { addedDateNote, PARSE_MESSAGES } from './best-before-messages'
 import { DateEntryList } from './DateEntryList'
 import { QuickCounts } from './QuickCounts'
 
@@ -17,23 +17,22 @@ type BestBeforeEntriesProps = Readonly<{
   error: string | undefined
 }>
 
-// Leise Rückfrage nach dem Hinzufügen, das Datum bleibt trotzdem in der Liste (#218)
-const DOUBT_MESSAGES: Record<BestBeforeDoubt, string> = {
-  'in-past': 'Das Datum liegt schon zurück, stimmt das?',
-  'far-future': 'Das Datum liegt sehr weit in der Zukunft, stimmt das?',
-}
+const HINT =
+  'Wie aufgedruckt: 30.09.2027, 09/2027 oder 2027, auch mit „zu verbrauchen bis“. Gleiches Datum zählt hoch.'
 
 /** Beim Speichern steht noch ein Datum im Feld, das nicht hinzugefügt wurde. */
 const PENDING_MESSAGE = 'Bitte übernimm das Datum mit Enter oder „Datum hinzufügen“.'
 
 // MHD manuell (#53): je Datum ein Eintrag mit Anzahl, „Datum fehlt“ als eigene Wahl (#116).
 // Die Genauigkeit folgt der Eingabe (Tag, Monat oder Jahr). Es wird nie ein Datum vorgeschlagen.
+// Steht „zu verbrauchen bis“ davor, wird der Eintrag ein Verbrauchsdatum und sagt es (#294).
 // Darunter die Schnellzahlen, gleich im Formular und im Foto-Weg (#211).
 export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntriesProps) {
   const headerId = useId()
   const [text, setText] = useState('')
   const [parseError, setParseError] = useState<string>()
-  const [doubt, setDoubt] = useState<BestBeforeDoubt | null>(null)
+  // Erkannte Datumsart und Rückfrage nach dem Hinzufügen (#218, #294)
+  const [note, setNote] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const isPending = error !== undefined && entries.length === 0 && text.trim() !== ''
   const fieldError = parseError ?? (isPending ? PENDING_MESSAGE : error)
@@ -45,10 +44,11 @@ export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntrie
       setParseError(PARSE_MESSAGES[parsed.error.kind])
       return
     }
+    const kind = detectDateKind(text)
     setParseError(undefined)
-    setDoubt(doubtAboutBestBefore(parsed.value, today))
+    setNote(addedDateNote({ doubt: doubtAboutBestBefore(parsed.value, today), kind }))
     setText('')
-    onChange(addDateEntry(entries, parsed.value))
+    onChange(addDateEntry(entries, parsed.value, kind ?? undefined))
   }
 
   function addOnEnter(event: KeyboardEvent<HTMLInputElement>) {
@@ -68,11 +68,11 @@ export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntrie
           inputMode="text"
           autoComplete="off"
           placeholder="z. B. 09/2027"
-          hint="Wie aufgedruckt: 30.09.2027, 09/2027 oder 2027. Gleiches Datum zählt hoch."
+          hint={HINT}
           value={text}
           onChange={(event) => {
             setText(event.target.value)
-            setDoubt(null)
+            setNote('')
           }}
           onKeyDown={addOnEnter}
           ref={inputRef}
@@ -86,7 +86,7 @@ export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntrie
             variant="tinted"
             onClick={() => {
               setParseError(undefined)
-              setDoubt(null)
+              setNote('')
               onChange(addDateEntry(entries, null))
             }}
           >
@@ -94,7 +94,7 @@ export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntrie
           </Button>
         </div>
         <p role="status" className="px-4 text-footnote text-fg2 empty:hidden">
-          {doubt === null ? '' : DOUBT_MESSAGES[doubt]}
+          {note}
         </p>
       </div>
       <DateEntryList

@@ -8,7 +8,13 @@ import {
   parseGermanNumber,
   type ContentParseError,
 } from '@/shared/lib/quantities'
-import { createStockSchema, MAX_COUNT_PER_DATE, MAX_DATES_PER_CAPTURE, MAX_PER_100 } from './stock'
+import {
+  createStockSchema,
+  dateKindSchema,
+  MAX_COUNT_PER_DATE,
+  MAX_DATES_PER_CAPTURE,
+  MAX_PER_100,
+} from './stock'
 
 const CONTENT_MESSAGES: Record<ContentParseError['kind'], string> = {
   empty: 'Bitte gebt den Inhalt einer Packung an, z. B. 500 g.',
@@ -42,6 +48,8 @@ export const formUnitSchema = z.object({
   bestBefore: z
     .object({ date: z.string(), precision: z.enum(['day', 'month', 'year']) })
     .nullable(),
+  /** „zu verbrauchen bis“ mitgetippt (#294) */
+  kind: dateKindSchema,
   count: z
     .int()
     .min(1)

@@ -32,7 +32,10 @@ export function SidebarLink({ item, isCurrent, count, isSub = false }: SidebarLi
       {count === undefined || count === 0 ? null : (
         <>
           {' '}
-          <span className="text-callout font-normal text-fg2">{count}</span>
+          {/* Auf der getönten Fläche des gewählten Ziels reicht fg2 nicht für 4,5:1 (axe) */}
+          <span className={cx('text-callout font-normal', isCurrent ? 'text-fg' : 'text-fg2')}>
+            {count}
+          </span>
         </>
       )}
     </Link>

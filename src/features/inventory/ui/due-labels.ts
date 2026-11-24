@@ -2,7 +2,7 @@
 // aus den Einstellungen: Ändert der Admin sie, ändern sich die Überschriften mit.
 import type { DueEntry, DueGroupDto, DueUnits } from '../schemas/due'
 import { formatDaysLeft } from '@/shared/lib/dates'
-import { expiryHint, formatDate } from './stock-format'
+import { expiryHint, formatDate, USE_BY_LABEL } from './stock-format'
 
 type Thresholds = DueUnits['thresholds']
 
@@ -46,18 +46,23 @@ export function dueEntryTitle(entry: DueEntry): string {
   return `${String(entry.unitIds.length)} × ${name}`
 }
 
+/** Ein noch nicht überschrittenes Verbrauchsdatum sagt seine Art, ein überschrittenes warnt. */
+function dateKindPart(entry: DueEntry, isExpired: boolean): string | null {
+  if (entry.kind !== 'use-by') return null
+  return isExpired ? expiryHint('expired', 'use-by') : USE_BY_LABEL
+}
+
 /**
- * „04.12.2026 · in 12 Tagen · Keller“. Ein überschrittenes Verbrauchsdatum steht dabei, der
- * MHD-Hinweis dagegen einmal je Gruppe.
+ * „04.12.2026 · in 12 Tagen · Keller“. Ein Verbrauchsdatum steht dabei (#294), der MHD-Hinweis
+ * dagegen einmal je Gruppe.
  */
 export function dueEntryLine(entry: DueEntry): string {
   const isExpired = entry.daysLeft !== null && entry.daysLeft < 0
-  const useByHint = isExpired && entry.kind === 'use-by' ? expiryHint('expired', 'use-by') : null
   const parts = [
     entry.bestBefore === null ? null : formatDate(entry.bestBefore),
     entry.daysLeft === null ? null : formatDaysLeft(entry.daysLeft),
     entry.storageLocations.join(', ') || null,
-    useByHint,
+    dateKindPart(entry, isExpired),
   ]
   return parts.filter((part) => part !== null).join(' · ')
 }

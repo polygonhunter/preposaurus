@@ -17,6 +17,9 @@ const calendarDay = z.string().transform((text, context) => {
   return z.NEVER
 })
 
+/** MHD oder Verbrauchsdatum. Ohne Angabe gilt das MHD (DATENKATALOG §2.8, `mhd_art`). */
+export const dateKindSchema = z.enum(['best-before', 'use-by']).default('best-before')
+
 const unitEntrySchema = z.object({
   /** null heißt „Datum fehlt“ (#116) */
   bestBefore: z
@@ -26,7 +29,7 @@ const unitEntrySchema = z.object({
       isEstimated: z.boolean().default(false),
     })
     .nullable(),
-  kind: z.enum(['best-before', 'use-by']).default('best-before'),
+  kind: dateKindSchema,
   count: z.int().min(1).max(MAX_COUNT_PER_DATE),
 })
 

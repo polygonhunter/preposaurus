@@ -5,9 +5,15 @@ import { Row } from '@/shared/ui/Row'
 import { Sheet } from '@/shared/ui/Sheet'
 import { StatusBadge } from '@/shared/ui/StatusBadge'
 import type { BestBeforeGroupDto } from '../schemas/detail'
-import { groupBadge, groupLabel, partlyCheckedNote, stillGoodCandidates } from './detail-view'
+import {
+  groupBadge,
+  groupDateKind,
+  groupLabel,
+  partlyCheckedNote,
+  stillGoodCandidates,
+} from './detail-view'
 import { DateRowExtras } from './DateRowExtras'
-import { expiryHint, formatPackages } from './stock-format'
+import { expiryHint, formatPackages, USE_BY_LABEL } from './stock-format'
 import { UnitSheetActions } from './UnitSheetActions'
 
 type DateGroupRowProps = Readonly<{
@@ -28,6 +34,7 @@ const STILL_GOOD_NOTE =
 // Datumszeile im Detail (UX-Konzept §8.4): „11/2027 · 5×“ mit Zustand. Ein Tipp öffnet das Blatt
 // mit Verbraucht, Entsorgt und bei abgelaufenem MHD „Noch gut“ (#47). So lässt sich statt der
 // vorgeschlagenen auch eine andere Packung nehmen. Dazu Datum ändern (#49) und Löschen (#50).
+// Ein Verbrauchsdatum steht an der Zeile, im Blatt mit seinem Hinweis statt des MHD-Hinweises (#294).
 export function DateGroupRow({ name, group, isNext, isAdmin, leaveHref }: DateGroupRowProps) {
   const [isOpen, setOpen] = useState(false)
   const label = groupLabel(group)
@@ -35,10 +42,8 @@ export function DateGroupRow({ name, group, isNext, isAdmin, leaveHref }: DateGr
   const partly = partlyCheckedNote(group)
   const stillGoodIds = stillGoodCandidates(group)
   const first = group.units[0]
-  const hint = expiryHint(
-    group.kind === 'dated' ? group.state : 'no-date',
-    first?.kind ?? 'best-before',
-  )
+  const dateKind = groupDateKind(group)
+  const hint = expiryHint(group.kind === 'dated' ? group.state : 'no-date', dateKind)
   const close = () => {
     setOpen(false)
   }
@@ -49,6 +54,7 @@ export function DateGroupRow({ name, group, isNext, isAdmin, leaveHref }: DateGr
       subtitle={
         <span className="flex flex-wrap items-center gap-x-1.5">
           <StatusBadge tone={badge.tone} label={badge.label} />
+          {dateKind === 'use-by' ? <span>· {USE_BY_LABEL}</span> : null}
           {partly === null ? null : <span>· {partly}</span>}
           {isNext ? <span>· als Nächstes dran</span> : null}
         </span>

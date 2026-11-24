@@ -6,18 +6,13 @@
 import { formatGermanNumber, formatQuantity } from '@/shared/lib/quantities'
 import type { CalendarDay } from '@/shared/lib/dates'
 import type { CategoryChoice, ContainerChoice, FoodTypeChoice } from '../domain/capture-options'
-import { addDateEntry } from '../domain/date-entries'
+import { addDateEntry, type DateEntry } from '../domain/date-entries'
 import type { BestBeforeReading } from '../domain/map-best-before-recognition'
 import type { NutritionSuggestion, PackagingSuggestion } from '../domain/map-recognition'
 import { assessBestBefore } from '../domain/plausibility'
 import { findSimilarFoodType } from '../domain/similar-food-type'
 import type { NutritionField } from './manual-capture-draft'
-import type {
-  DateShot,
-  FoodTypeProposal,
-  PhotoCaptureState,
-  PhotoDateEntry,
-} from './photo-capture-state'
+import type { DateShot, FoodTypeProposal, PhotoCaptureState } from './photo-capture-state'
 
 export interface SuggestionLookup {
   foodTypes: readonly Pick<FoodTypeChoice, 'id' | 'key' | 'name' | 'searchTerms'>[]
@@ -128,17 +123,10 @@ export function applyNutritionEstimate(
 }
 
 /** Neues Datum zu den Einträgen, gleiches Datum zählt eine Packung hoch. */
-export function addReadDate(
-  entries: readonly PhotoDateEntry[],
+export const addReadDate = (
+  entries: readonly DateEntry[],
   reading: Pick<DateShot, 'bestBefore' | 'kind'>,
-): PhotoDateEntry[] {
-  const merged: PhotoDateEntry[] = addDateEntry(entries, reading.bestBefore)
-  return merged.map((entry) =>
-    entry.kind === undefined && entry.bestBefore === reading.bestBefore
-      ? { ...entry, kind: reading.kind }
-      : entry,
-  )
-}
+): DateEntry[] => addDateEntry(entries, reading.bestBefore, reading.kind)
 
 /** Gelesenes MHD: passt es, wird es ein Eintrag, sonst bleibt das Foto offen. */
 export function applyBestBefore(

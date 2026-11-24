@@ -11,7 +11,8 @@ type DueListProps = Readonly<{ due: DueUnits }>
 
 // Bald fällig (UX-Konzept §8.2, #125): Zähler als Sprungmarken, Gruppen nach Zeitraum, je Eintrag
 // „Verbraucht“, unter „Abgelaufen“ dazu „Entsorgt“ und „Noch gut“ (#47). Leere Gruppen fallen
-// weg. Der Hinweis zum MHD steht einmal unter „Abgelaufen“.
+// weg. Der Hinweis zum MHD steht einmal unter „Abgelaufen“, wenn dort ein MHD steht; ein
+// Verbrauchsdatum warnt in seiner Zeile (#294).
 export function DueList({ due }: DueListProps) {
   return (
     <>
@@ -36,7 +37,7 @@ export function DueList({ due }: DueListProps) {
               />
             ))}
           </Group>
-          {group === 'expired' ? (
+          {group === 'expired' && entries.some((entry) => entry.kind === 'best-before') ? (
             <p className="px-8 pt-2 text-footnote text-fg2 breit:px-10">{BEST_BEFORE_HINT}</p>
           ) : null}
         </section>

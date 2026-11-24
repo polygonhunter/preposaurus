@@ -10,9 +10,6 @@ import { emptyDraft, type ManualCaptureDraft } from './manual-capture-draft'
 export const CAPTURE_STEPS = ['verpackung', 'naehrwerte', 'mhd'] as const
 export type CaptureStep = (typeof CAPTURE_STEPS)[number]
 
-/** Ein Datum mit Anzahl. Ohne `kind` gilt es als MHD (eingetippte Daten). */
-export type PhotoDateEntry = DateEntry & { kind?: DateKind }
-
 export type UploadStatus = 'uploading' | 'uploaded' | 'failed' | 'rejected'
 
 export interface CapturedPhoto {
@@ -66,7 +63,7 @@ export interface PhotoCaptureState extends FormFields {
   draftId: string | null
   isCameraOpen: boolean
   step: CaptureStep
-  units: PhotoDateEntry[]
+  units: DateEntry[]
   name: string
   drainedWeight: string
   /** null: keine eigenen Werte, es gilt der Richtwert der Art */
