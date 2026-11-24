@@ -37,6 +37,59 @@ describe('Suchwörter der Lebensmittelarten (#212)', () => {
     }
   })
 
+  // #128: Jedes Beispiel der BLE-Vorratstabelle (Mischkost und vegetarisch) findet seine Art
+  it.each([
+    ['Vollkornbrot', 'dauerbrot'],
+    ['Zwieback', 'zwieback'],
+    ['Knäckebrot', 'knaeckebrot'],
+    ['Nudeln', 'nudeln'],
+    ['Reis', 'reis'],
+    ['Haferflocken', 'haferflocken'],
+    ['Kartoffeln', 'kartoffeln'],
+    ['Grüne Bohnen', 'gruene_bohnen_konserve'],
+    ['Erbsen und Möhren', 'mischgemuese_konserve'],
+    ['Rotkohl', 'rotkohl_konserve'],
+    ['Sauerkraut', 'sauerkraut'],
+    ['Spargel', 'spargel_konserve'],
+    ['Mais', 'mais_konserve'],
+    ['Pilze', 'pilze_konserve'],
+    ['Saure Gurken', 'gewuerzgurken'],
+    ['Rote Bete', 'rote_bete_konserve'],
+    ['Zwiebeln', 'zwiebeln'],
+    ['Sauerkirschen', 'obst_konserve'],
+    ['Birnen im Glas', 'obst_konserve'],
+    ['Aprikosen im Glas', 'obst_konserve'],
+    ['Mandarinen', 'obst_konserve'],
+    ['Ananas', 'obst_konserve'],
+    ['Rosinen', 'rosinen'],
+    ['Haselnüsse', 'haselnuesse'],
+    ['Trockenpflaumen', 'trockenpflaumen'],
+    ['Äpfel', 'aepfel'],
+    ['Mineralwasser', 'stilles_wasser'],
+    ['Zitronensaft', 'zitronensaft'],
+    ['Instantkaffee', 'instantkaffee'],
+    ['Tee', 'tee'],
+    ['H-Milch', 'h_milch'],
+    ['Hartkäse', 'hartkaese'],
+    ['Thunfisch', 'thunfisch_konserve'],
+    ['Ölsardinen', 'sardinen_konserve'],
+    ['Heringsfilet', 'hering_konserve'],
+    ['Corned Beef', 'fleischkonserve'],
+    ['Leberwurst', 'wurstkonserve'],
+    ['Salami', 'salami'],
+    ['Bockwürstchen', 'wuerstchen_konserve'],
+    ['Eier', 'eier'],
+    ['Butter', 'butter'],
+    ['Margarine', 'margarine'],
+    ['Rapsöl', 'speiseoel'],
+    ['Tofu', 'tofu'],
+    ['Bratlinge', 'falafel'],
+    ['Vegetarische Wurst', 'fleischersatz'],
+    ['Brotaufstrich', 'aufstrich_herzhaft'],
+  ])('findet das BLE-Beispiel „%s“ unter %s', (query, key) => {
+    expect(searchFoodTypes(choices, query).map((hit) => hit.key)).toContain(key)
+  })
+
   it('trifft die Alltagswörter aus dem Testlauf zuerst', () => {
     expect(firstHit('Spaghetti')).toBe('nudeln')
     expect(firstHit('Dosentomaten')).toBe('tomaten_konserve')
