@@ -6,10 +6,13 @@
 #   preposaurus_backup  Backup. Erbt die Rechte von preposaurus_app (pg_dump liest alles, dropdb und
 #                       Umbenennen als Eigentümer) und hat CREATEDB für die neue Datenbank beim
 #                       Wiederherstellen. Darf sie preposaurus_app übergeben (SET).
-#   postgres            Superuser des Images. Ohne Passwort: Anmelden geht nur im Container über den
-#                       Socket (docker compose exec db psql -U postgres), nie übers Netz.
-# Die Passwörter gehen als psql-Variablen hinein, nicht in den Text des Skripts, und stehen in
-# keinem Log (log_statement bleibt aus).
+#   postgres            Superuser des Images. Ohne Passwort: Anmelden geht nur im Container selbst
+#                       (Socket und 127.0.0.1 stehen in pg_hba.conf auf trust, z. B. docker compose exec
+#                       db psql -U postgres), nie übers Netz (dort scram-sha-256).
+# Scheitert das Skript, bricht der erste Start ab, der Ordner db/<version> ist aber schon angelegt.
+# Ein zweiter Start ruft das Skript nicht mehr auf (INSTALLATION, Fehlersuche).
+# Die Passwörter gehen als psql-Variablen hinein (sicher gequotet), nicht in den Text des Skripts.
+# log_statement bleibt aus. Nur eine scheiternde Anweisung nennen psql und der Server samt Text.
 # Nur -e: Ohne Ausführungsrecht bindet das Image die Datei per "." ein, -u gälte dann auch dort.
 set -e
 
