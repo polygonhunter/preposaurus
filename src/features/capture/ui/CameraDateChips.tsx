@@ -1,8 +1,8 @@
-import { dateEntryKey, dateEntryLabel } from '../domain/date-entries'
-import type { DateShot, PhotoDateEntry } from './photo-capture-state'
+import { dateEntryKey, dateEntryLabel, type DateEntry } from '../domain/date-entries'
+import type { DateShot } from './photo-capture-state'
 
 type CameraDateChipsProps = Readonly<{
-  units: readonly PhotoDateEntry[]
+  units: readonly DateEntry[]
   shots: readonly DateShot[]
 }>
 

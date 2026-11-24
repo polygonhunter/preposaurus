@@ -96,6 +96,7 @@ describe('parseBestBefore – kein geratenes Datum', () => {
 describe('detectDateKind', () => {
   it.each([
     ['zu verbrauchen bis 03.12.2026', 'use-by'],
+    ['Verbrauchen bis 03.12.2026', 'use-by'],
     ['Use by 03/12/2026', 'use-by'],
     ['Mindestens haltbar bis 09/2027', 'best-before'],
     ['MHD 2027', 'best-before'],

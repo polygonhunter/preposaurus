@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import type { BestBeforeGroupDto, FoodTypeDetail, NutritionDto } from '../schemas/detail'
-import { fifoGroupOf, nutritionLine, nutritionOrigin, shelfLifeColumns } from './detail-view'
+import {
+  fifoGroupOf,
+  groupDateKind,
+  nutritionLine,
+  nutritionOrigin,
+  shelfLifeColumns,
+} from './detail-view'
 
 type DetailProduct = FoodTypeDetail['products'][number]
 
@@ -47,6 +53,16 @@ describe('Detailseite', () => {
       ['03/2028', 2, 'good'],
       ['Datum fehlt', 1, 'no-date'],
     ])
+  })
+
+  it('führt eine Zeile mit Verbrauchsdatum als Verbrauchsdatum (#294)', () => {
+    const mhd = dated('2026-12-31', ['a', 'b'])
+    const units = mhd.units.map((unit, index) =>
+      index === 1 ? { ...unit, kind: 'use-by' as const } : unit,
+    )
+
+    expect(groupDateKind(mhd)).toBe('best-before')
+    expect(groupDateKind({ ...mhd, units })).toBe('use-by')
   })
 
   it('findet die Datumszeile der Packung für „1 entnehmen“', () => {

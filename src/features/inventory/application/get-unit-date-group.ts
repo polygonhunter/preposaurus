@@ -1,8 +1,9 @@
 // „Datum ändern“ für eine Datumszeile im Detail (#49, #116): Aus einer Packung wird die ganze
 // Zeile, also alle Packungen desselben Produkts im Vorrat mit demselben Datum (gleicher Schlüssel
-// wie `bestBeforeGroupsOf`). Die ID kommt ungeprüft aus der Adresse.
+// wie `bestBeforeGroupsOf`). Die ID kommt ungeprüft aus der Adresse. Die Datumsart folgt der
+// Zeile wie im Detail: gemischt gilt als Verbrauchsdatum (#294).
 import 'server-only'
-import { bestBeforeKeyOf } from '../domain/group-units'
+import { bestBeforeKeyOf, rowDateKindOf } from '../domain/group-units'
 import { err, ok, type Result } from '@/shared/lib/result'
 import type { UnitDateGroup } from '../schemas/detail'
 import { unitIdSchema } from '../schemas/requests'
@@ -30,7 +31,7 @@ export async function getUnitDateGroup(
     name: source.product.foodType?.name ?? source.product.name,
     productName: source.product.name,
     bestBefore: unit.bestBefore,
-    kind: unit.kind,
+    kind: rowDateKindOf(members),
     unitIds: members.map((member) => member.id),
     checkedCount: members.filter((member) => member.checkedAt !== null).length,
   })

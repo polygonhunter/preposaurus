@@ -11,6 +11,7 @@ import {
   parseGermanNumber,
 } from '@/shared/lib/quantities'
 import type { ContainerChoice } from '../domain/capture-options'
+import type { DateEntry } from '../domain/date-entries'
 import type { CaptureDraftData } from '../schemas/draft'
 import {
   CAPTURE_STEPS,
@@ -18,7 +19,6 @@ import {
   type CapturedPhoto,
   type NutritionSource,
   type PhotoCaptureState,
-  type PhotoDateEntry,
 } from './photo-capture-state'
 
 type DraftNutrition = NonNullable<CaptureDraftData['naehrwerte']>
@@ -75,7 +75,7 @@ function nutritionOf(state: PhotoCaptureState): DraftNutrition {
   }
 }
 
-function dateOf(entry: PhotoDateEntry): DraftDate {
+function dateOf(entry: DateEntry): DraftDate {
   const { bestBefore } = entry
   return {
     datum: bestBefore?.date ?? null,
@@ -101,7 +101,7 @@ export function toDraftData(
   }
 }
 
-function entryOf(date: DraftDate): PhotoDateEntry | null {
+function entryOf(date: DraftDate): DateEntry | null {
   const kind: DateKind = date.art === 'verbrauchen_bis' ? 'use-by' : 'best-before'
   if (date.datum === null) return { bestBefore: null, count: date.anzahl, kind }
   const day = parseCalendarDay(date.datum)

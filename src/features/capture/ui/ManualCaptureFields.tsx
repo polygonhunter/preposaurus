@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
-import { Field } from '@/shared/ui/Field'
 import type { CaptureOptions, FoodTypeChoice } from '../domain/capture-options'
 import { BestBeforeEntries } from './BestBeforeEntries'
 import { CaptureSummaryGroup } from './CaptureSummaryGroup'
 import { ChoiceChips } from './ChoiceChips'
+import { ContentField } from './ContentField'
 import { FoodTypePicker } from './FoodTypePicker'
 import type { CaptureField } from './manual-capture-draft'
 import type { ManualCaptureView } from './manual-capture-view'
@@ -62,15 +62,10 @@ export function ManualCaptureFields({
           }}
         />
         <div className="mx-4 pt-[22px] breit:mx-6">
-          <Field
-            label="Inhalt je Packung"
-            name="inhalt"
-            autoComplete="off"
-            placeholder="z. B. 500 g"
-            hint="Mit Einheit: g, kg, ml oder l"
+          <ContentField
             value={draft.content}
-            onChange={(event) => change({ content: event.target.value })}
-            onBlur={(event) => capture.leaveContent(event.currentTarget.value)}
+            onChange={(text) => change({ content: text })}
+            onLeave={capture.leaveContent}
             error={errors.content}
           />
         </div>

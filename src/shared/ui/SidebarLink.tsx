@@ -32,7 +32,11 @@ export function SidebarLink({ item, isCurrent, count, isSub = false }: SidebarLi
       {count === undefined || count === 0 ? null : (
         <>
           {' '}
-          <span className="text-callout font-normal text-fg2">{count}</span>
+          {/* Auf der getönten Fläche des gewählten Ziels hat fg2 nur 4,08:1. axe meldet das erst ab
+              zwei Ziffern, eine einzelne gilt dort als „shortTextContent“ (ungeprüft). */}
+          <span className={cx('text-callout font-normal', isCurrent ? 'text-fg' : 'text-fg2')}>
+            {count}
+          </span>
         </>
       )}
     </Link>

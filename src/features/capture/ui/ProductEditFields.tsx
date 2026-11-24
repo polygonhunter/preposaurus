@@ -3,6 +3,7 @@ import { Field } from '@/shared/ui/Field'
 import { Toggle } from '@/shared/ui/Toggle'
 import type { CaptureOptions, FoodTypeChoice } from '../domain/capture-options'
 import { ChoiceChips } from './ChoiceChips'
+import { ContentField } from './ContentField'
 import { NutritionFields } from './NutritionFields'
 import type { useProductEdit } from './use-product-edit'
 
@@ -35,13 +36,9 @@ export function ProductEditFields(props: ProductEditFieldsProps) {
           onChange={(event) => change({ name: event.target.value })}
           error={errors.name}
         />
-        <Field
-          label="Inhalt je Packung"
-          name="inhalt"
-          autoComplete="off"
-          hint="Mit Einheit: g, kg, ml oder l"
+        <ContentField
           value={draft.content}
-          onChange={(event) => change({ content: event.target.value })}
+          onChange={(text) => change({ content: text })}
           error={errors.content}
         />
       </div>

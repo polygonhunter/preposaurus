@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createStock } from '../../../src/features/capture/application/create-stock'
 import type { StockWriter } from '../../../src/features/capture/application/stock-writer'
 import { createStockWriteRepository } from '../../../src/features/capture/data/stock-write-repository'
+import { manualCaptureSchema } from '../../../src/features/capture/schemas/manual-capture'
 import { createStockSchema } from '../../../src/features/capture/schemas/stock'
 import { captures } from '../../../src/server/db/schema/confirmed-captures'
 import { products, units } from '../../../src/server/db/schema/inventory'
@@ -94,6 +95,36 @@ describe('Speichern einer Erfassung gegen die DB (#51)', () => {
       ]),
     )
     expect(saved).toHaveLength(4)
+  })
+
+  it('speichert ein mitgetipptes „zu verbrauchen bis“ als Verbrauchsdatum (#294)', async () => {
+    const form = manualCaptureSchema.parse({
+      captureId: randomUUID(),
+      foodTypeId: setup.noodlesId,
+      content: '500 g',
+      containerId: setup.packageId,
+      storageLocationId: setup.storageLocationId,
+      existingProductId: null,
+      nutrition: { kcal: '', protein: '', carbs: '', fat: '' },
+      units: [
+        { bestBefore: { date: '2026-12-03', precision: 'day' }, kind: 'use-by', count: 2 },
+        { bestBefore: { date: '2026-12-03', precision: 'day' }, count: 1 },
+      ],
+    })
+    const result = await save(form)
+    const productId = result.ok ? result.value.productId : ''
+
+    const saved = await testDb.db
+      .select({ bestBefore: units.bestBefore, kind: units.bestBeforeKind })
+      .from(units)
+      .where(eq(units.productId, productId))
+
+    expect(saved.map(({ kind }) => kind).sort()).toEqual([
+      'mhd',
+      'verbrauchen_bis',
+      'verbrauchen_bis',
+    ])
+    expect(saved.every(({ bestBefore }) => bestBefore === '2026-12-03')).toBe(true)
   })
 
   it('speichert Nährwerte mit Herkunft und Bestätigung einer Schätzung', async () => {

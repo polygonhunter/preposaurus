@@ -5,7 +5,8 @@ import { CameraDateChips } from './CameraDateChips'
 import { CameraStepAction } from './CameraStepAction'
 import { CameraFallback } from './CameraFallback'
 import { CameraNotice } from './CameraNotice'
-import type { CaptureStep, DateShot, PhotoDateEntry } from './photo-capture-state'
+import type { DateEntry } from '../domain/date-entries'
+import type { CaptureStep, DateShot } from './photo-capture-state'
 import { Shutter } from './Shutter'
 import { StepBar } from './StepBar'
 import { useCamera } from './use-camera'
@@ -18,7 +19,7 @@ type CameraViewProps = Readonly<{
   onSkipTable: () => void
   /** Erkennung aus (#210): gleich zu Beginn sagen, dass nichts gelesen wird */
   notice: string | null
-  dates: Readonly<{ units: readonly PhotoDateEntry[]; shots: readonly DateShot[] }>
+  dates: Readonly<{ units: readonly DateEntry[]; shots: readonly DateShot[] }>
 }>
 
 const HINTS: Record<CaptureStep, string> = {

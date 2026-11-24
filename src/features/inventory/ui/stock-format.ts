@@ -137,6 +137,8 @@ export function groupSubtitle(totals: NodeTotalsDto): string {
 }
 
 export const BEST_BEFORE_HINT = 'MHD ist kein Wegwerfdatum: anschauen, riechen, probieren.'
+/** Datumsart neben dem Datum, wenn es kein MHD ist (#294) */
+export const USE_BY_LABEL = 'Verbrauchsdatum'
 const USE_BY_HINT = 'Verbrauchsdatum überschritten, bitte nicht mehr essen.'
 
 /** Hinweis nur bei Abgelaufenem: beim MHD beruhigend, beim Verbrauchsdatum klar (UX §8.2). */
