@@ -40,7 +40,6 @@ export function PhotoFoodTypePicker({
       }}
       error={error}
       adding={{
-        canAdd: options.canAddFoodTypes,
         categories: options.categories,
         onAdded: editor.chooseFoodType,
       }}

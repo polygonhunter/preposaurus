@@ -1,6 +1,6 @@
 // „+ Neue Lebensmittelart“ direkt aus der Erfassung (#110, #142): Das Blatt legt die Art an, ohne
 // das Formular zu verlassen, und wählt sie. Ähnliche Namen und Suchwörter führen zur vorhandenen
-// Art. Nur Admins legen an, Mitglieder lesen, wer das tut. Alle Projekte teilen einen Haushalt,
+// Art. Admin und Mitglied legen an (#298). Alle Projekte teilen einen Haushalt,
 // deshalb hat jede neue Art einen eigenen Namen je Projekt und Versuch. Den Vorschlag der Erkennung
 // prüft erfassen-foto.spec.ts (Entwurf des Admins, nacheinander).
 import type { Page } from '@playwright/test'
@@ -85,21 +85,32 @@ test.describe('als Admin', () => {
 test.describe('als Mitglied', () => {
   test.use(signedOut)
 
-  test('legt keine Arten an und liest, wer das tut', async ({ page }) => {
+  test('legt eine neue Art mit Pflicht-Kategorie an und wählt sie (#298)', async ({
+    page,
+  }, testInfo) => {
+    const name = `Testbeere ${testInfo.project.name} ${String(attemptOf(testInfo))}`
     await signInViaUi(page, E2E_MEMBER)
     await page.goto('/neu/manuell')
     await expect(search(page)).toBeFocused()
-    await expect(page.getByRole('button', { name: '+ Neue Lebensmittelart' })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: '+ Neue Lebensmittelart' })).toBeVisible()
 
-    await search(page).fill('Testfrucht ohne Treffer')
-
-    await expect(page.getByText('Neue Lebensmittelarten legt ein Admin an.')).toBeVisible()
-    await expect(
-      page.getByRole('button', { name: /als neue Lebensmittelart anlegen/ }),
-    ).toHaveCount(0)
+    await search(page).fill(name)
+    await expect(page.getByText('Neue Lebensmittelarten legt ein Admin an.')).toHaveCount(0)
+    await offerFor(page, name).click()
+    const sheet = newFoodTypeSheet(page)
+    await sheet.getByRole('button', { name: 'Anlegen' }).click()
+    await expect(sheet.getByText('Bitte eine Kategorie wählen.')).toBeVisible()
+    await chooseCategory(page, 'Obst (frisch)')
     for (const colorScheme of ['light', 'dark'] as const) {
       await page.emulateMedia({ colorScheme })
       await expectAccessibleLayout(page)
     }
+
+    await sheet.getByRole('button', { name: 'Anlegen' }).click()
+    await expect(sheet).toBeHidden()
+    const form = page.getByRole('form', { name: 'Produkt erfassen' })
+    await expect(form).toContainText(name)
+    await expect(form).toContainText('Obst und Nüsse › Obst (frisch)')
+    await expect(page.getByLabel('Inhalt je Packung')).toBeFocused()
   })
 })

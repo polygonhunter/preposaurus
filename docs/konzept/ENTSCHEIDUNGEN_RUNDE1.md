@@ -109,6 +109,8 @@ Fehlt beim Erfassen ein Lagerort oder eine Lebensmittelart, müsste sonst ein Ad
 **Empfehlung: a.**
 Betrifft: Einstellungen, Datenstruktur.
 
+**Entschieden (Maintainer, 2026-11-24): a** („Auch Mitglieder“, #298). Lebensmittelarten beim Erfassen sind umgesetzt, der Lagerort beim Erfassen folgt mit #301.
+
 ### 12 · „Packungen hinzufügen“ schon im MVP?
 Ein Knopf auf der Seite einer Lebensmittelart, der direkt zu Datum und Anzahl springt. Bisher als „später“ eingeplant.
 - a) ins MVP
