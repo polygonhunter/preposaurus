@@ -2,10 +2,15 @@ import { describe, expect, it } from 'vitest'
 import { jobDatabaseFor } from './job-queue'
 
 describe('jobDatabaseFor', () => {
-  it('nutzt die Adresse von PostgreSQL mit einer kleinen eigenen Verbindungsgruppe', () => {
+  it('nutzt die Adresse von PostgreSQL mit einer kleinen, benannten Verbindungsgruppe', () => {
     expect(jobDatabaseFor('postgres://app:geheim@db:5432/preposaurus')).toEqual({
       ok: true,
-      value: { connectionString: 'postgres://app:geheim@db:5432/preposaurus', max: 3 },
+      value: {
+        connectionString: 'postgres://app:geheim@db:5432/preposaurus',
+        max: 3,
+        // pg-boss erkennt seine Verbindungen am Präfix, restore.sh nennt den Worker (#261)
+        application_name: 'pgboss:preposaurus-worker',
+      },
     })
   })
 

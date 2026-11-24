@@ -33,6 +33,7 @@ confirm_restore() {
 CONNECTION_WAIT_SECONDS=10
 
 # Verbindungen anderer Prozesse zur Betriebs-DB als "name (anzahl), …", leer, wenn keine offen ist.
+# Die App meldet sich als preposaurus-web bzw. preposaurus-worker und pgboss:preposaurus-worker (#261).
 # Der Name der Datenbank geht als psql-Variable hinein, nicht in den SQL-Text.
 open_connections() {
   psql --dbname=postgres -tA -v ON_ERROR_STOP=1 -v db="$PGDATABASE" <<'SQL'
