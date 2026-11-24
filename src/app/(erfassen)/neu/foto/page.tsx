@@ -26,7 +26,7 @@ export default async function PhotoCapturePage() {
   const actor = { householdId: user.value.householdId, userId: user.value.id }
   const deps = await loadCaptureDeps()
   const [options, draft, offReason] = await Promise.all([
-    getCaptureOptionsForUser({ ...actor, isAdmin: user.value.role === 'admin' }),
+    getCaptureOptionsForUser(actor),
     findOpenDraft(deps, actor),
     findRecognitionOffReason(deps, actor),
   ])

@@ -39,11 +39,7 @@ function fakeReader(change: Partial<CaptureOptionsReader> = {}): CaptureOptionsR
 
 describe('getCaptureOptions', () => {
   it('liefert Auswahllisten mit Vorbelegung aus der letzten Erfassung', async () => {
-    const options = await getCaptureOptions(fakeReader(), {
-      householdId: 'h',
-      userId: 'u',
-      isAdmin: true,
-    })
+    const options = await getCaptureOptions(fakeReader(), { householdId: 'h', userId: 'u' })
 
     expect(options).toEqual({
       foodTypes: [noodles],
@@ -54,7 +50,6 @@ describe('getCaptureOptions', () => {
       recentFoodTypeIds: ['nudeln'],
       isStockEmpty: false,
       categories: [CEREALS],
-      canAddFoodTypes: true,
     })
   })
 
@@ -69,7 +64,7 @@ describe('getCaptureOptions', () => {
         loadKnownProducts,
         hasStock: () => Promise.resolve(false),
       }),
-      { householdId: 'haushalt', userId: 'nutzer', isAdmin: false },
+      { householdId: 'haushalt', userId: 'nutzer' },
     )
 
     expect(loadLastUsed).toHaveBeenCalledWith('haushalt', 'nutzer')
@@ -77,7 +72,5 @@ describe('getCaptureOptions', () => {
     expect(loadKnownProducts).toHaveBeenCalledWith('haushalt')
     expect(options.isStockEmpty).toBe(true)
     expect(options.lastStorageLocationId).toBeNull()
-    // Mitglieder legen keine neuen Arten an (#142)
-    expect(options.canAddFoodTypes).toBe(false)
   })
 })

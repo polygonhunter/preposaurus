@@ -82,7 +82,6 @@ export function FoodTypePicker(props: FoodTypePickerProps) {
               adding={adding}
               foodTypes={foodTypes}
               query={query}
-              hasNoHits={hits?.length === 0}
               onChosen={choose}
             />
           )}
