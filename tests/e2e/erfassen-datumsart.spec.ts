@@ -166,4 +166,12 @@ test('Umschalter passt in jede Stufe, Ziel mindestens 44 px', async ({ page }) =
   for (const height of targetHeights) expect(height).toBeGreaterThanOrEqual(44)
   await expectAccessibleLayout(page)
   if (width >= BREIT && width < WEIT) await expectNothingOnVerticalFold(page)
+
+  // Gleiches Datum, neue Art, die es schon gibt: eine Zeile, Anzahl addiert, und es wird gesagt
+  await bestBefore(page).fill('zu verbrauchen bis 09/2027')
+  await bestBefore(page).press('Enter')
+  await choice.getByText('Verbrauchsdatum', { exact: true }).click()
+  const dates = form(page).getByRole('list', { name: 'MHD und Anzahl' })
+  await expect(dates.getByRole('listitem')).toHaveText([/09\/2027 \(Verbrauchsdatum\).*2×/])
+  await expect(page.getByRole('status').filter({ hasText: 'Zusammengeführt' })).toBeVisible()
 })

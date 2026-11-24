@@ -11,6 +11,7 @@ import {
   type DateEntry,
 } from '../domain/date-entries'
 import { MAX_COUNT_PER_DATE } from '../schemas/stock'
+import { kindChangedNote } from './best-before-messages'
 import { CountStepper } from './CountStepper'
 import { DATE_KIND_EXPLANATION, DateKindChoice } from './DateKindChoice'
 
@@ -20,6 +21,8 @@ type DateEntryListProps = Readonly<{
   onChange: (entries: DateEntry[]) => void
   // Eine Zeile ist weg (Anzahl auf 0): Der Fokus braucht ein neues Ziel
   onRowRemoved: () => void
+  // Satz nach dem Umschalten der Art, leer oder „Zusammengeführt …“
+  onKindChange: (note: string) => void
 }>
 
 interface FocusTarget {
@@ -30,7 +33,13 @@ interface FocusTarget {
 // Je Datum eine Zeile „09/2027 · − 2× +“, darunter der Umschalter MHD · Verbrauchsdatum (#294),
 // „Datum fehlt“ zuletzt. Die Art gehört zum Schlüssel der Zeile: Nach dem Umschalten entsteht sie
 // neu, darum holt die Liste den Fokus auf die gewählte Art in der neuen Zeile zurück.
-export function DateEntryList({ entries, labelledBy, onChange, onRowRemoved }: DateEntryListProps) {
+export function DateEntryList({
+  entries,
+  labelledBy,
+  onChange,
+  onRowRemoved,
+  onKindChange,
+}: DateEntryListProps) {
   const baseName = useId()
   const listRef = useRef<HTMLDivElement>(null)
   const focusAfterChange = useRef<FocusTarget | null>(null)
@@ -74,11 +83,11 @@ export function DateEntryList({ entries, labelledBy, onChange, onRowRemoved }: D
                     name={nameOf(key)}
                     value={entry.kind ?? 'best-before'}
                     onChange={(kind) => {
-                      focusAfterChange.current = {
-                        name: nameOf(dateEntryKey({ ...entry, kind })),
-                        kind,
-                      }
-                      onChange(changeDateKind(entries, { key, kind }))
+                      const nextKey = dateEntryKey({ ...entry, kind })
+                      const next = changeDateKind(entries, { key, kind })
+                      focusAfterChange.current = { name: nameOf(nextKey), kind }
+                      onKindChange(kindChangedNote(next, nextKey, next.length < entries.length))
+                      onChange(next)
                     }}
                   />
                 </div>

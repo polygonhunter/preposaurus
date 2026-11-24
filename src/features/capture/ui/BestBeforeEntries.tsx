@@ -104,6 +104,7 @@ export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntrie
         onChange={onChange}
         // Verschwindet die Zeile samt Knopf, bleibt der Fokus nicht im Nichts, sondern im Feld.
         onRowRemoved={() => inputRef.current?.focus()}
+        onKindChange={setNote}
       />
       <QuickCounts units={entries} onChange={onChange} />
     </section>
