@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
-import { expectAccessibleLayout } from '../helpers/page-checks'
+import { expectAccessibleLayout, expectNothingOnVerticalFold } from '../helpers/page-checks'
 
 // Vorrat je Stufe (DESIGN_SYSTEM §6, #92 bis #94) mit dem Beispielvorrat: kompakt Liste und Detail als
 // eigene Seiten, mittel Liste oben und Detail unten, ab „breit“ nebeneinander, ab „weit“ die Tabelle.
@@ -77,19 +77,10 @@ test.describe('ab „breit“', () => {
     await expect(oats).toHaveAttribute('aria-current', 'page')
   })
 
-  test('Liste und Detail lassen die Mitte frei (Falz beim Duo quer)', async ({ page }) => {
-    test.skip(widthOf(page) >= WEIT, 'Am PC gibt es keine Falz')
+  test('Liste und Detail lassen die Falz frei (Duo quer)', async ({ page, fold }) => {
+    test.skip(fold === null, 'Nur mit Falz')
     await openOats(page)
-    const middle = widthOf(page) / 2
-    const crossing = await page.evaluate((x) => {
-      const targets = [...document.querySelectorAll<HTMLElement>('main a, main button')]
-      return targets.filter((element) => {
-        const rect = element.getBoundingClientRect()
-        return rect.width > 0 && rect.left < x + 12 && rect.right > x - 12
-      }).length
-    }, middle)
-
-    expect(crossing).toBe(0)
+    await expectNothingOnVerticalFold(page)
   })
 
   for (const colorScheme of ['light', 'dark'] as const) {

@@ -22,6 +22,10 @@ const CONTENT_ID = 'inhalt'
 
 const MAIN =
   'mx-auto w-full max-w-[640px] breit:min-h-dvh breit:max-w-none breit:min-w-0 breit:bg-surface breit:pb-6'
+// Mit Falz (#253): Eine einspaltige Seite steht ganz auf dem rechten Bildschirm, links bleibt nur die
+// Seitenleiste. Seiten mit Falz-Spalten (split-columns.ts) nutzen beide Bildschirme selbst.
+const MAIN_ON_FOLD =
+  'falz:ml-[calc(var(--falz-ende)-var(--seitenleiste))] falz:has-[[data-falz-spalten]]:ml-0'
 // Platz für die feste Tab-Leiste, ohne sie nur für die Safe Area
 const MAIN_WITH_TAB_BAR = 'pb-[calc(74px+env(safe-area-inset-bottom))]'
 const MAIN_FOCUSED = 'pb-[env(safe-area-inset-bottom)]'
@@ -43,7 +47,10 @@ export async function AppFrame({ children, isFocused = false }: AppFrameProps) {
       <div className="min-h-dvh pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)] breit:flex">
         <SkipLink targetId={CONTENT_ID} />
         <Sidebar counts={counts} />
-        <main id={CONTENT_ID} className={cx(MAIN, isFocused ? MAIN_FOCUSED : MAIN_WITH_TAB_BAR)}>
+        <main
+          id={CONTENT_ID}
+          className={cx(MAIN, MAIN_ON_FOLD, isFocused ? MAIN_FOCUSED : MAIN_WITH_TAB_BAR)}
+        >
           {children}
         </main>
         {isFocused ? null : <TabBar />}

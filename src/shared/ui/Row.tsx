@@ -11,7 +11,8 @@ type RowProps = RowContentProps &
     // Zeilen-Handlung, weil ein Knopf in einem Link nicht erlaubt ist.
     accessory?: ReactNode
     // Kompakt rückt `accessory` unter den Text, damit Titel und Zweitzeile Platz haben, ab
-    // „mittel“ steht er wieder rechts (#284). Nur für Zeilen ohne eigene Handlung.
+    // „mittel“ steht er wieder rechts (#284), mit Falz auf dem rechten Bildschirm wieder darunter
+    // (#253). Nur für Zeilen ohne eigene Handlung.
     stacksAccessory?: boolean
     // Knopfreihe unter Link oder Knopf der Zeile, wenn rechts kein Platz für mehrere Knöpfe ist
     footer?: ReactNode
