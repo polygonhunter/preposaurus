@@ -33,7 +33,7 @@ Selbst gehostete Web-App, mit der ein Haushalt seinen **Notvorrat nach offiziell
 
 ## Tech-Stack
 
-Next.js 16 (Full-Stack, TypeScript strict) · PostgreSQL 18 mit Drizzle · Zod 4 · Better Auth · Anthropic SDK hinter einem austauschbaren Adapter · sharp · web-push und Nodemailer · pg-boss (Worker) · Serwist (PWA) · Vitest, Playwright, ESLint, Prettier · Docker Compose. Details: [`research/26_tech_stack_mvp.md`](research/26_tech_stack_mvp.md).
+Next.js 16 (Full-Stack, TypeScript strict) · PostgreSQL 19 mit Drizzle · Zod 4 · Better Auth · Anthropic SDK hinter einem austauschbaren Adapter · sharp · web-push und Nodemailer · pg-boss (Worker) · Serwist (PWA) · Vitest, Playwright, ESLint, Prettier · Docker Compose. Details: [`research/26_tech_stack_mvp.md`](research/26_tech_stack_mvp.md).
 
 ## Entwickeln
 
