@@ -40,7 +40,8 @@ updates:
       # Image (wie in #187), deshalb kommt sie gezielt als eigenes Issue.
       - dependency-name: node
         update-types: [version-update:semver-major]
-      # PostgreSQL-Hauptversion braucht einen Datenumzug, kommt gezielt (#250).
+      # Eine PostgreSQL-Hauptversion braucht einen Datenumzug (INSTALLATION §12.1, Test
+      # docker/test/pg-upgrade-test.sh). Sie kommt gezielt als eigenes Issue, wie 18 → 19 in #250.
       - dependency-name: postgres
         update-types: [version-update:semver-major]
 
@@ -50,5 +51,6 @@ updates:
     schedule:
       interval: weekly
     ignore:
+      # wie oben: Hauptversion nur gezielt mit Datenumzug
       - dependency-name: postgres
         update-types: [version-update:semver-major]

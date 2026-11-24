@@ -8,8 +8,13 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
 import { attemptOf } from '../helpers/attempt'
 import { E2E_MEMBER, signedOut, signInViaUi } from '../helpers/e2e-auth'
+import { DUO_FOLD, emulateFold } from '../helpers/fold'
 import { waitForHydration } from '../helpers/hydration'
-import { expectAccessibleLayout, expectNothingOnVerticalFold } from '../helpers/page-checks'
+import {
+  expectAccessibleLayout,
+  expectNoButtonOnHorizontalFold,
+  expectNothingOnVerticalFold,
+} from '../helpers/page-checks'
 import {
   draftSaved,
   fakeRecognition,
@@ -106,16 +111,11 @@ test('Stufen: mittel Sucher oben und Auslöser unten, ab „breit“ Kamera link
   await expect(reviewForm).toHaveCount(0)
   const shutterBox = await shutter.boundingBox()
   expect(shutterBox?.y ?? 0).toBeGreaterThanOrEqual(fold + 12)
-  const onFold = await camera.evaluate((section, middle) => {
-    return [...section.querySelectorAll('button')].filter((button) => {
-      const rect = button.getBoundingClientRect()
-      return rect.height > 0 && rect.top < middle + 12 && rect.bottom > middle - 12
-    }).length
-  }, fold)
-  expect(onFold).toBe(0)
+  await expectNoButtonOnHorizontalFold(camera, fold)
 
-  // Duo quer: Kamera links, Formular rechts, die Falz bleibt frei (UX §8.5 „Am PC“, M12-06)
+  // Duo quer mit Falz: Kamera links, Formular rechts, die Falz bleibt frei (UX §8.5, #253)
   await page.setViewportSize({ width: 951, height: 585 })
+  await emulateFold(page, { fold: DUO_FOLD, isMobile: true })
   await expect(reviewForm).toBeVisible()
   await expect(page.getByRole('heading', { level: 1, name: 'Erfassen' })).toBeVisible()
   const [cameraBox, formBox] = await Promise.all([camera.boundingBox(), reviewForm.boundingBox()])

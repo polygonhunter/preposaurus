@@ -1,5 +1,6 @@
 # Gemeinsame Einstellungen und Helfer des Backup-Containers (UMSETZUNG M13-03).
-# Die Datenbank-Verbindung kommt aus PGHOST, PGUSER, PGPASSWORD und PGDATABASE.
+# Die Datenbank-Verbindung kommt aus PGHOST, PGUSER, PGPASSWORD und PGDATABASE. DB_OWNER ist die
+# Rolle der App (#146): Ihr gehören die Datenbank und alle Tabellen, auch nach dem Wiederherstellen.
 #
 # Arten von Ständen, je ein Ordner unter /backups. Jeder Stand heißt nach seinem Zeitpunkt
 # (2026-11-22_030000), mehrere am selben Tag überschreiben sich also nie.
@@ -12,6 +13,7 @@
 BACKUP_DIR=${BACKUP_DIR:-/backups}
 PHOTO_DIR=${PHOTO_DIR:-/fotos}
 STAND_KINDS="taeglich woechentlich manuell vor-update vor-wiederherstellung"
+DB_OWNER=${DB_OWNER:-$PGUSER}
 KEEP_DAILY=${KEEP_DAILY:-7}
 KEEP_WEEKLY=${KEEP_WEEKLY:-4}
 KEEP_MANUAL=${KEEP_MANUAL:-5}
