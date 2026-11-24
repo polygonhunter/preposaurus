@@ -54,8 +54,13 @@ export function StockTableRow({ row, isSelected }: StockTableRowProps) {
       <td className={NUMBER}>{cells.kcal}</td>
       <td className={NUMBER}>{cells.days}</td>
       <td className={cx(CELL, 'pr-6')}>
-        <span className="flex flex-wrap items-center gap-x-1.5 whitespace-nowrap">
-          {badge === null ? null : <StatusBadge tone={badge.tone} label={badge.label} />}
+        {/* „nächstes MHD …“ darf umbrechen, damit die Spalte neben dem Detail schmal bleibt */}
+        <span className="flex flex-wrap items-center gap-x-1.5">
+          {badge === null ? null : (
+            <span className="whitespace-nowrap">
+              <StatusBadge tone={badge.tone} label={badge.label} />
+            </span>
+          )}
           {cells.nextDate === null ? null : <span>{cells.nextDate}</span>}
         </span>
       </td>
