@@ -153,7 +153,7 @@ Server-Teil ohne UI, Details in den Kopfkommentaren von `src/features/capture/{d
 - **Adressen:** Das Formular steht unter `/neu/manuell`. `/neu` leitet dorthin, bis der Foto-Weg (M6) eine Oberfläche hat; dann öffnet `/neu` den zuletzt genutzten Weg mit Umschalter Foto · Manuell (UX §8.5).
 - **Reihenfolge:** Lebensmittelart · Inhalt · Behälter · MHD und Anzahl · Lagerort · Nährwerte · Zusammenfassung · Speichern. Abweichung von UX §8.5: Der Behälter steht vor dem MHD und nicht unter „Weitere Angaben“, weil er fürs Wiedererkennen zählt. Wählt man „Zu … hinzufügen“, entfallen Lagerort und Nährwerte (sie gehören zum Produkt). Eine Bezeichnung gibt es im Formular nicht, es gilt der Name der Art.
 - **Lebensmittelart:** Suche direkt im Formular statt in einem eigenen Blatt (Fokus sofort im Suchfeld, darunter „Zuletzt genutzt“, Treffer mit Pfadzeile). Treffer im Namen vor Treffern im Pfad, Umlaute und ß egal (`searchFoodTypes`). Neue Arten anlegen folgt mit #126.
-- **MHD:** ein Textfeld, die Genauigkeit folgt der Eingabe (30.09.2027, 09/2027, 2027, `parseBestBefore`), je Datum eine Zeile mit − und +, gleiches Datum zählt hoch, „Datum fehlt“ ist ein eigener Knopf. **Keine Schnellknöpfe „+6 Mon. · +1 J. · +2 J.“**, weil sie ein Datum vorschlügen, das nicht auf der Packung steht (zur Klärung offen, #180).
+- **MHD:** ein Textfeld, die Genauigkeit folgt der Eingabe (30.09.2027, 09/2027, 2027, `parseBestBefore`), je Datum eine Zeile mit − und +, gleiches Datum zählt hoch, „Datum fehlt“ ist ein eigener Knopf. **Keine Schnellknöpfe „+6 Mon. · +1 J. · +2 J.“**, weil sie ein Datum vorschlügen, das nicht auf der Packung steht (zur Klärung offen, #180). Seit 2026-11-24 vom Maintainer entschieden (#180 B): als ausdrücklich gewählte Abkürzung zugelassen, siehe offene Frage 4.
 - **Vorbelegung ohne Einstellungstabelle (E-4):** Lagerort und „Zuletzt genutzt“ kommen aus den letzten 20 Erfassungen des Nutzers (`getCaptureOptions`), nur solange sie nicht ausgeblendet sind. Nach dem Speichern behält „Noch eins“ den gewählten Lagerort.
 - **Prüfung:** `manualCaptureSchema` (in `capture/schemas/manual-capture.ts`) übersetzt das Formular in die Eingabe von `createStockAction` und prüft sie mit `createStockSchema`, das die Action auf dem Server noch einmal anwendet. Meldungen stehen am Feld, der Fokus springt zum ersten Fehler. Die `captureId` entsteht einmal je Formular (`createUuid`, mit Rückfall ohne sicheren Kontext), ein doppeltes Absenden speichert einmal.
 - **Nährwerte:** freiwillig, je 100 g bzw. ml, eingetippt gelten sie als `manual`. Ohne Werte zeigt das Formular den Richtwert der Art als „ca. … geschätzt“, die Zusammenfassung die kcal mit „ca.“.
@@ -723,6 +723,8 @@ Beim Datenmodell getroffen, Details in den Kopfkommentaren von `src/server/db/sc
 ## Delegierte Entscheidungen #106 (U1–U14), U3 und Runde 1 (2026-11-24)
 Der Maintainer hat die offenen Punkte aus #106 und #128 delegiert („Mach einfach passt schon“). Jede Zeile hier gilt als **vom Maintainer delegiert, 2026-11-24, entschieden nach Empfehlung** (bzw. nach der vorläufigen Annahme, wo es keine Empfehlung gab). Hatte der Maintainer eine Frage vorher schon anders beantwortet, gilt seine Antwort; das steht dann als „überholt durch …“ dabei. Was nur er selbst tun kann (Zugänge, NAS, Geräte, Fotos, Kontakt nach außen), steht gesammelt in **#311**. Die Startliste (#128) ist in `docs/quellen/LEBENSMITTELARTEN.md` §10 entschieden.
 
+Nicht delegiert, sondern am 2026-11-24 vom Maintainer **selbst** entschieden (gehen immer vor, Begründung in den Issues): #298 (Mitglieder legen Arten an), #180 B (MHD-Schnellknöpfe als gewählte Abkürzung, geschätzt), #170 C (Schätzung nur monatsgenau), #209 (beide Tage-Zahlen benannt), #287 (überall breite Knöpfe), #253 (fürs Duo optimiert), #146 und #250 (vor dem ersten Release), #96 (keine Bildschirmfotos ins Repo), offene Frage 6 (Umschalter MHD · Verbrauchsdatum, #294).
+
 **U1–U14** (UMSETZUNG §7.1)
 | Nr. | Entscheidung | Folge |
 |---|---|---|
@@ -744,7 +746,7 @@ Der Maintainer hat die offenen Punkte aus #106 und #128 delegiert („Mach einfa
 | 3 | überholt durch M3-06 (#37): freiwillige Angaben stehen eingeklappt unter „Weitere Angaben“. Empfehlung a hieße, gespeicherte Angaben per Migration zu löschen; bleibt deshalb so | – |
 | 4 | überholt durch #75: freiwillige Adresse `nutzer.erinnerung_email`, getrennt von der Anmeldung, SMTP optional | – |
 | 5 | a, je Haushalt | umgesetzt (M11-05), Push folgt mit #86 |
-| 6 | überholt durch die Maintainer-Entscheidung „Ohne MHD (Update)“ (2026-11-22): KI-Schätzung nur auf Wahl (#124), keine Schätzung aus der üblichen Haltbarkeit | MHD-Schnellknöpfe entfallen ebenso (#180, offene Frage 4), toter Code: #307 |
+| 6 | überholt durch die Maintainer-Entscheidung „Ohne MHD (Update)“ (2026-11-22): KI-Schätzung nur auf Wahl (#124), keine Schätzung aus der üblichen Haltbarkeit | Die MHD-Schnellknöpfe sind davon getrennt: Der Maintainer hat #180 selbst mit B entschieden (zugelassen als ausdrücklich gewählte Abkürzung, geschätzt, monatsgenau, „ca.“; offene Frage 4) |
 | 7 | a, Bestätigen beim Speichern | Oberfläche umgesetzt, Reste im Datenmodell: #310 |
 | 8 | a, zuerst der Richtwert | umgesetzt; „Von der KI schätzen lassen“ bleibt als ausdrückliche Wahl |
 | 9 | überholt durch UX D10: die Kamera geht selbst weiter, geprüft wird gesammelt im Schritt „Prüfen“. Ohne Schalter, wie Runde 1 b | Vermerk „Schalter offen“ bei M6-07 erledigt |
@@ -761,7 +763,7 @@ Der Maintainer hat die offenen Punkte aus #106 und #128 delegiert („Mach einfa
 1. ~~**Offline**~~ entschieden 2026-11-24 (vom Maintainer delegiert, nach der Annahme): nur anzeigen, Eintragen ohne Netz kommt später (U12)
 2. ~~**Lizenz**~~ entschieden 2026-11-22: AGPL-3.0-or-later (siehe oben). Der Prototyp mit GSAP ist ausgenommen, siehe `prototypes/README.md`
 3. **NAS**: Welches Modell bzw. Hersteller (Synology, QNAP, Unraid; x86 oder ARM)? Bleibt beim Maintainer (#311)
-4. ~~**MHD-Schnellknöpfe**~~ entschieden 2026-11-24 (vom Maintainer delegiert, nach der Annahme, #180): weglassen. Es zählt nur das Aufgedruckte, „Datum fehlt“ oder die ausdrücklich gewählte KI-Schätzung. `quickPickBestBefore` entfernen: #307
+4. ~~**MHD-Schnellknöpfe**~~ entschieden 2026-11-24 vom Maintainer selbst (#180): **B) zulassen als ausdrücklich gewählte Abkürzung.** Das Datum ist als geschätzt gekennzeichnet (`isEstimated`), nur monatsgenau (#170 C) und in der Liste mit „ca.“ sichtbar. Nie automatisch, nur auf Tippen. `quickPickBestBefore` bleibt und wird angeschlossen (#307 entfällt)
 5. ~~**Mitglieder legen beim Erfassen neue Lebensmittelarten an?**~~ entschieden 2026-11-24 (#298): ja, Option a aus DATENKATALOG Frage 9 bzw. Runde 1 Frage 11, mit Pflicht-Kategorie; Ändern, Richtwerte, Ausblenden, Löschen und Sortieren bleiben beim Admin. Lagerort beim Erfassen: #301
 6. **Umschalter MHD/Verbrauchsdatum im manuellen Formular?** Heute wird ein Verbrauchsdatum nur erkannt, wenn „zu verbrauchen bis“ mitgetippt wird (#294) oder die Foto-Erkennung es liest. Ein Umschalter am Feld schlösse die Lücke ganz. Issue #294
 
