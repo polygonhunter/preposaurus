@@ -1,9 +1,8 @@
 'use client'
 import { useActionState, useState } from 'react'
-import { useFocusFirstInvalid } from '@/shared/hooks/use-focus-first-invalid'
+import { ActionForm } from '@/shared/ui/ActionForm'
 import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
-import { LiveMessage } from '@/shared/ui/LiveMessage'
 import { RadioChips } from '@/shared/ui/RadioChips'
 import { Segmented } from '@/shared/ui/Segmented'
 import { saveMemberAction, type MemberFormState } from '../actions/save-member-action'
@@ -37,11 +36,15 @@ export function MemberForm({
   const [state, formAction, isPending] = useActionState(saveMemberAction, INITIAL_STATE)
   const values = state.values ?? initialValues
   const [type, setType] = useState(values.type)
-  const formRef = useFocusFirstInvalid(state)
   const { errors } = state
   const dietOptions = [{ value: '', label: 'Wie Haushalt' }, ...optionsOf(DIET_LABELS)]
   return (
-    <form ref={formRef} action={formAction} className="mx-4 flex flex-col gap-4 pt-6 breit:mx-6">
+    <ActionForm
+      result={state}
+      announcement={firstError(state)}
+      action={formAction}
+      className="mx-4 flex flex-col gap-4 pt-6 breit:mx-6"
+    >
       <input type="hidden" name="id" value={memberId ?? ''} />
       <input type="hidden" name="zurueck" value={returnTo} />
       <Field label="Name" name="name" required defaultValue={values.name} error={errors.name} />
@@ -84,12 +87,11 @@ export function MemberForm({
       </p>
       <MemberMoreFields values={values} errors={errors} />
       {state.message ? <p className="px-4 text-footnote text-red">{state.message}</p> : null}
-      <LiveMessage message={firstError(state)} />
       <div className="pt-2">
         <Button type="submit" pendingLabel={isPending ? 'Speichert …' : undefined}>
           Speichern
         </Button>
       </div>
-    </form>
+    </ActionForm>
   )
 }

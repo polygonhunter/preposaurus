@@ -1,6 +1,6 @@
 'use client'
 import { useActionState } from 'react'
-import { useFocusFirstInvalid } from '@/shared/hooks/use-focus-first-invalid'
+import { ActionForm } from '@/shared/ui/ActionForm'
 import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import { PasswordField } from '@/shared/ui/PasswordField'
@@ -17,9 +17,13 @@ type AddConnectionFormProps = Readonly<{ defaultName: string }>
 // Speichern ist es wieder leer. Der Schlüssel steht danach nur noch verschlüsselt auf dem Server.
 export function AddConnectionForm({ defaultName }: AddConnectionFormProps) {
   const [state, formAction, isPending] = useActionState(addAiConnectionAction, AI_ACTION_IDLE)
-  const formRef = useFocusFirstInvalid(state)
   return (
-    <form ref={formRef} action={formAction} className="mx-4 flex flex-col gap-4 breit:mx-6">
+    <ActionForm
+      result={state}
+      announcement={state.errors?.name ?? state.errors?.apiKey}
+      action={formAction}
+      className="mx-4 flex flex-col gap-4 breit:mx-6"
+    >
       <Field
         label="Name"
         name="name"
@@ -54,6 +58,6 @@ export function AddConnectionForm({ defaultName }: AddConnectionFormProps) {
           Hinzufügen
         </Button>
       </div>
-    </form>
+    </ActionForm>
   )
 }

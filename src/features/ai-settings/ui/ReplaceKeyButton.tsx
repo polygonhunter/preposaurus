@@ -1,5 +1,6 @@
 'use client'
 import { useActionState, useState } from 'react'
+import { ActionForm } from '@/shared/ui/ActionForm'
 import { Button } from '@/shared/ui/Button'
 import { PasswordField } from '@/shared/ui/PasswordField'
 import { SaveStatus } from '@/shared/ui/SaveStatus'
@@ -28,7 +29,12 @@ export function ReplaceKeyButton({ connectionId, name }: ReplaceKeyButtonProps) 
         Schlüssel ersetzen
       </Button>
       <Sheet isOpen={isOpen} onClose={close} title={`Schlüssel für ${name} ersetzen`}>
-        <form action={formAction} className="flex flex-col gap-3">
+        <ActionForm
+          action={formAction}
+          result={state}
+          announcement={state.errors?.apiKey}
+          className="flex flex-col gap-3"
+        >
           <input type="hidden" name="id" value={connectionId} />
           <PasswordField
             label="Neuer API-Schlüssel"
@@ -46,7 +52,7 @@ export function ReplaceKeyButton({ connectionId, name }: ReplaceKeyButtonProps) 
               {state.status === 'saved' ? 'Fertig' : 'Abbrechen'}
             </Button>
           </div>
-        </form>
+        </ActionForm>
       </Sheet>
     </>
   )

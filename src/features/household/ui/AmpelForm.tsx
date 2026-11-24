@@ -1,10 +1,9 @@
 'use client'
 import { useActionState } from 'react'
 import type { AmpelThresholds } from '@/features/inventory/domain/unit-state'
-import { useFocusFirstInvalid } from '@/shared/hooks/use-focus-first-invalid'
+import { ActionForm } from '@/shared/ui/ActionForm'
 import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
-import { LiveMessage } from '@/shared/ui/LiveMessage'
 import { SaveStatus } from '@/shared/ui/SaveStatus'
 import { saveAmpelAction, type AmpelFormState } from '../actions/save-ampel-action'
 
@@ -20,15 +19,15 @@ const INITIAL_STATE: AmpelFormState = { status: 'idle', message: null, errors: {
 // und orange (dringend) wird. Standard 90 und 28 Tage.
 export function AmpelForm({ thresholds, labelledBy }: AmpelFormProps) {
   const [state, formAction, isPending] = useActionState(saveAmpelAction, INITIAL_STATE)
-  const formRef = useFocusFirstInvalid(state)
   const values = state.values ?? {
     soonDays: String(thresholds.soonDays),
     urgentDays: String(thresholds.urgentDays),
   }
   const { errors } = state
   return (
-    <form
-      ref={formRef}
+    <ActionForm
+      result={state}
+      announcement={errors.urgentDays ?? errors.soonDays}
       action={formAction}
       aria-labelledby={labelledBy}
       className="mx-4 flex flex-col gap-4 breit:mx-6"
@@ -51,13 +50,12 @@ export function AmpelForm({ thresholds, labelledBy }: AmpelFormProps) {
         hint="Mindestens 7 Tage und höchstens so viele wie bei Gelb. Standard 28 Tage."
         error={errors.urgentDays}
       />
-      <LiveMessage message={errors.urgentDays ?? errors.soonDays} />
       <div className="flex items-center justify-between gap-3">
         <SaveStatus state={state} />
         <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Speichert …' : undefined}>
           Speichern
         </Button>
       </div>
-    </form>
+    </ActionForm>
   )
 }

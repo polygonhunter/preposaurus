@@ -1,11 +1,10 @@
 'use client'
 import { useActionState } from 'react'
-import { useFocusFirstInvalid } from '@/shared/hooks/use-focus-first-invalid'
+import { ActionForm } from '@/shared/ui/ActionForm'
 import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import { GroupFooter } from '@/shared/ui/GroupFooter'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
-import { LiveMessage } from '@/shared/ui/LiveMessage'
 import { RadioChips } from '@/shared/ui/RadioChips'
 import { SaveStatus } from '@/shared/ui/SaveStatus'
 import { Toggle } from '@/shared/ui/Toggle'
@@ -34,11 +33,16 @@ export function ReminderSettingsForm({ settings }: ReminderSettingsFormProps) {
     saveReminderSettingsAction,
     REMINDER_FORM_IDLE,
   )
-  const formRef = useFocusFirstInvalid(state)
   const values = state.values ?? toValues(settings)
   const { errors } = state
   return (
-    <form ref={formRef} action={formAction} aria-label="Erinnerungen" className="flex flex-col">
+    <ActionForm
+      result={state}
+      announcement={errors.time ?? errors.weekday}
+      action={formAction}
+      aria-label="Erinnerungen"
+      className="flex flex-col"
+    >
       <GroupHeader id="wochenuebersicht">Wochenübersicht</GroupHeader>
       <div className={SWITCH_BOX}>
         <Toggle
@@ -76,13 +80,12 @@ export function ReminderSettingsForm({ settings }: ReminderSettingsFormProps) {
         />
       </div>
       <GroupFooter>{URGENT_EXPLANATION}</GroupFooter>
-      <LiveMessage message={errors.time ?? errors.weekday} />
       <div className="mx-4 flex items-center justify-between gap-3 pt-4 breit:mx-6">
         <SaveStatus state={state} />
         <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Speichert …' : undefined}>
           Speichern
         </Button>
       </div>
-    </form>
+    </ActionForm>
   )
 }

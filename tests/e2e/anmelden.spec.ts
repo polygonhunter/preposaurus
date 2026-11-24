@@ -43,6 +43,17 @@ test('falsche Angaben ergeben einen neutralen Satz am Feld', async ({ page }, te
   await expectAccessibleLayout(page)
 })
 
+test('ein zu langer Name ergibt denselben neutralen Satz am Passwort', async ({ page }) => {
+  // Über der Höchstlänge prüft das Schema, nicht die Anmeldung; verraten wird trotzdem nichts
+  await page.goto('/anmelden')
+  await submitSignIn(page, { username: 'n'.repeat(31), password: 'falsches-passwort' })
+
+  const password = page.getByLabel('Passwort', { exact: true })
+  await expect(password).toHaveAccessibleDescription('Benutzername oder Passwort stimmt nicht.')
+  await expect(password).toHaveAttribute('aria-invalid', 'true')
+  await expect(page.getByLabel('Benutzername')).not.toHaveAttribute('aria-invalid', 'true')
+})
+
 test('abmelden beendet die Sitzung, geschützte Seiten führen wieder zur Anmeldung', async ({
   page,
 }) => {

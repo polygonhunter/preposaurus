@@ -1,9 +1,8 @@
 'use client'
 import { useActionState } from 'react'
-import { useFocusFirstInvalid } from '@/shared/hooks/use-focus-first-invalid'
+import { ActionForm } from '@/shared/ui/ActionForm'
 import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
-import { LiveMessage } from '@/shared/ui/LiveMessage'
 import { RadioChips } from '@/shared/ui/RadioChips'
 import { SaveStatus } from '@/shared/ui/SaveStatus'
 import { entryFormIdle } from '../actions/entry-form-state'
@@ -28,11 +27,15 @@ const valuesOf = (category: CategoryFormProps['category']) => ({
 // statt Dropdown (DESIGN_SYSTEM §7).
 export function CategoryForm({ groups, category }: CategoryFormProps) {
   const [state, formAction, isPending] = useActionState(saveCategoryAction, INITIAL_STATE)
-  const formRef = useFocusFirstInvalid(state)
   const values = state.values ?? valuesOf(category)
   const { errors } = state
   return (
-    <form ref={formRef} action={formAction} className="mx-4 flex flex-col gap-4 breit:mx-6">
+    <ActionForm
+      result={state}
+      announcement={errors.name ?? errors.productGroupId}
+      action={formAction}
+      className="mx-4 flex flex-col gap-4 breit:mx-6"
+    >
       <input type="hidden" name="id" value={category?.id ?? ''} />
       <Field
         label="Name der Kategorie"
@@ -50,13 +53,12 @@ export function CategoryForm({ groups, category }: CategoryFormProps) {
         defaultValue={values.productGroupId}
         error={errors.productGroupId}
       />
-      <LiveMessage message={errors.name ?? errors.productGroupId} />
       <div className="flex items-center justify-between gap-3">
         <SaveStatus state={state} />
         <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Speichert …' : undefined}>
           {category ? 'Speichern' : 'Anlegen'}
         </Button>
       </div>
-    </form>
+    </ActionForm>
   )
 }

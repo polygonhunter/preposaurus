@@ -2,10 +2,9 @@
 
 import { useActionState, useEffect, useRef } from 'react'
 import { isFocusLost } from '@/shared/hooks/focus-targets'
-import { useFocusFirstInvalid } from '@/shared/hooks/use-focus-first-invalid'
+import { ActionForm } from '@/shared/ui/ActionForm'
 import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
-import { LiveMessage } from '@/shared/ui/LiveMessage'
 import { addRestockItemAction, type AddRestockItemState } from '../actions/add-restock-item-action'
 import { RESTOCK_LABEL_MAX_LENGTH } from '../schemas'
 
@@ -17,13 +16,17 @@ const INITIAL_STATE: AddRestockItemState = { error: null, added: 0 }
 // inzwischen woanders weitergemacht hat, behält seinen Fokus.
 export function AddItemForm() {
   const [state, formAction, isPending] = useActionState(addRestockItemAction, INITIAL_STATE)
-  const formRef = useFocusFirstInvalid(state)
   const inputRef = useRef<HTMLInputElement>(null)
   useEffect(() => {
     if (state.added > 0 && isFocusLost()) inputRef.current?.focus()
   }, [state.added])
   return (
-    <form ref={formRef} action={formAction} className="mx-4 flex flex-col gap-3 pt-6 breit:mx-6">
+    <ActionForm
+      result={state}
+      announcement={state.error}
+      action={formAction}
+      className="mx-4 flex flex-col gap-3 pt-6 breit:mx-6"
+    >
       <Field
         key={state.added}
         ref={inputRef}
@@ -35,12 +38,11 @@ export function AddItemForm() {
         required
         error={state.error ?? undefined}
       />
-      <LiveMessage message={state.error} />
       <div className="flex justify-end">
         <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Speichert …' : undefined}>
           Hinzufügen
         </Button>
       </div>
-    </form>
+    </ActionForm>
   )
 }
