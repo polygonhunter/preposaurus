@@ -3,7 +3,6 @@
 import { useActionState, useEffect, useRef } from 'react'
 import { isFocusLost } from '@/shared/hooks/focus-targets'
 import { ActionForm } from '@/shared/ui/ActionForm'
-import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import { addRestockItemAction, type AddRestockItemState } from '../actions/add-restock-item-action'
 import { RESTOCK_LABEL_MAX_LENGTH } from '../schemas'
@@ -25,6 +24,7 @@ export function AddItemForm() {
       result={state}
       announcement={state.error}
       action={formAction}
+      submit={{ label: 'Hinzufügen', isPending }}
       className="mx-4 flex flex-col gap-3 pt-6 breit:mx-6"
     >
       <Field
@@ -38,11 +38,6 @@ export function AddItemForm() {
         required
         error={state.error ?? undefined}
       />
-      <div className="flex justify-end">
-        <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Speichert …' : undefined}>
-          Hinzufügen
-        </Button>
-      </div>
     </ActionForm>
   )
 }

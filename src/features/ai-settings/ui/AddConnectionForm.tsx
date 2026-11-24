@@ -1,10 +1,8 @@
 'use client'
 import { useActionState } from 'react'
 import { ActionForm } from '@/shared/ui/ActionForm'
-import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import { PasswordField } from '@/shared/ui/PasswordField'
-import { SaveStatus } from '@/shared/ui/SaveStatus'
 import { addAiConnectionAction } from '../actions/add-ai-connection-action'
 import { AI_ACTION_IDLE } from '../actions/ai-action-state'
 
@@ -22,6 +20,7 @@ export function AddConnectionForm({ defaultName }: AddConnectionFormProps) {
       result={state}
       announcement={state.errors?.name ?? state.errors?.apiKey}
       action={formAction}
+      submit={{ label: 'Hinzufügen', isPending, status: state }}
       className="mx-4 flex flex-col gap-4 breit:mx-6"
     >
       <Field
@@ -52,12 +51,6 @@ export function AddConnectionForm({ defaultName }: AddConnectionFormProps) {
         </a>{' '}
         unter „API Keys“ an. Die Abrechnung läuft direkt über euer Konto dort.
       </p>
-      <div className="flex items-center justify-between gap-3">
-        <SaveStatus state={state} />
-        <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Speichert …' : undefined}>
-          Hinzufügen
-        </Button>
-      </div>
     </ActionForm>
   )
 }

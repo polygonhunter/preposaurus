@@ -1,6 +1,7 @@
 'use client'
 import { useActionState, useState } from 'react'
 import { Button } from '@/shared/ui/Button'
+import { FormSubmit } from '@/shared/ui/FormSubmit'
 import { Sheet } from '@/shared/ui/Sheet'
 import { setUserActiveAction } from '../actions/set-user-active-action'
 import { USER_ACTION_IDLE } from '../actions/user-action-messages'
@@ -38,12 +39,16 @@ export function DeactivateUserButton({ userId, name }: DeactivateUserButtonProps
               {state.message}
             </p>
           ) : null}
-          <Button type="submit" pendingLabel={isPending ? 'Deaktiviert …' : undefined}>
-            Deaktivieren
-          </Button>
-          <Button variant="plain" onClick={close}>
-            Abbrechen
-          </Button>
+          <FormSubmit
+            label="Deaktivieren"
+            isPending={isPending}
+            pendingLabel="Deaktiviert …"
+            after={
+              <Button variant="plain" onClick={close}>
+                Abbrechen
+              </Button>
+            }
+          />
         </form>
       </Sheet>
     </div>

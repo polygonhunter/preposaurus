@@ -1,10 +1,8 @@
 'use client'
 import { useActionState } from 'react'
 import { ActionForm } from '@/shared/ui/ActionForm'
-import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import { RadioChips } from '@/shared/ui/RadioChips'
-import { SaveStatus } from '@/shared/ui/SaveStatus'
 import { entryFormIdle } from '../actions/entry-form-state'
 import { saveCategoryAction, type CategoryFormState } from '../actions/save-category-action'
 import type { ProductGroup } from '../domain/category'
@@ -34,6 +32,7 @@ export function CategoryForm({ groups, category }: CategoryFormProps) {
       result={state}
       announcement={errors.name ?? errors.productGroupId}
       action={formAction}
+      submit={{ label: category ? 'Speichern' : 'Anlegen', isPending, status: state }}
       className="mx-4 flex flex-col gap-4 breit:mx-6"
     >
       <input type="hidden" name="id" value={category?.id ?? ''} />
@@ -53,12 +52,6 @@ export function CategoryForm({ groups, category }: CategoryFormProps) {
         defaultValue={values.productGroupId}
         error={errors.productGroupId}
       />
-      <div className="flex items-center justify-between gap-3">
-        <SaveStatus state={state} />
-        <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Speichert …' : undefined}>
-          {category ? 'Speichern' : 'Anlegen'}
-        </Button>
-      </div>
     </ActionForm>
   )
 }
