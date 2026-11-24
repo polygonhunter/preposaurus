@@ -96,14 +96,6 @@ export function createFakeStockReader(data: FakeData) {
       ),
     loadUnits: (householdId: string, query: UnitQuery) =>
       Promise.resolve(ownUnits(householdId).filter(unitMatcher(query))),
-    countUnitsByStatus: (householdId: string, productIds: readonly string[]) => {
-      const counts: Record<UnitStatus, number> = { stock: 0, consumed: 0, discarded: 0 }
-      const ids = new Set(productIds)
-      for (const unit of ownUnits(householdId)) {
-        if (ids.has(unit.productId)) counts[unit.status] += 1
-      }
-      return Promise.resolve(counts)
-    },
   }
 }
 

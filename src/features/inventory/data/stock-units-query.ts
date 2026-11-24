@@ -2,7 +2,7 @@
 // auch wenn die Produkt-IDs schon aus dem eigenen Haushalt stammen. Die Abfrage nutzt
 // einheit_produkt_status_mhd_idx bzw. für Bald fällig den Teilindex einheit_mhd_vorrat_idx.
 import 'server-only'
-import { and, asc, count, eq, inArray, lte, type SQL } from 'drizzle-orm'
+import { and, asc, count, eq, gte, inArray, lte, type SQL } from 'drizzle-orm'
 import type { StockProductUnit, UnitQuery } from '@/features/inventory/domain/stock-entry'
 import type { UnitStatus } from '@/features/inventory/domain/unit'
 import type { Database } from '@/server/db/connection'
@@ -70,19 +70,33 @@ export async function loadUnits(
   }))
 }
 
+export type StatusCountQuery = Readonly<{
+  /** Ohne Liste alle Produkte des Haushalts */
+  productIds?: readonly string[]
+  /** Nur Packungen, die ab diesem Augenblick entnommen wurden; null zählt alle */
+  takenFrom: Date | null
+}>
+
 /** Packungen je Status, z. B. für die Zähler „Verbraucht“ und „Entsorgt“, ohne sie zu laden. */
 export async function countUnitsByStatus(
   db: Database,
   householdId: string,
-  productIds: readonly string[],
+  { productIds, takenFrom }: StatusCountQuery,
 ): Promise<Record<UnitStatus, number>> {
   const counts: Record<UnitStatus, number> = { stock: 0, consumed: 0, discarded: 0 }
-  if (productIds.length === 0) return counts
+  if (productIds?.length === 0) return counts
   const rows = await db
     .select({ status: units.status, total: count() })
     .from(units)
     .innerJoin(products, eq(products.id, units.productId))
-    .where(and(eq(products.householdId, householdId), isAnyOf(units.productId, productIds)))
+    .where(
+      and(
+        eq(products.householdId, householdId),
+        productCondition(productIds),
+        // Packungen im Vorrat haben keinen Zeitpunkt und fallen mit einer Grenze heraus
+        takenFrom === null ? undefined : gte(units.takenAt, takenFrom),
+      ),
+    )
     .groupBy(units.status)
   for (const row of rows) counts[toUnitStatus(row.status)] = row.total
   return counts

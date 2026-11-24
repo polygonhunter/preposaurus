@@ -1,17 +1,12 @@
 // Use-Case 5 · Filter und Suche (UX-Konzept §8.3 Treffermodus, DATENKATALOG `searchStock`):
 // flache Liste der Lebensmittelarten, gegliedert nach Warengruppe, mit Zählern je Zustand.
 // Suche, Warengruppe, Kategorie, Behälter und Lagerort filtert die Datenbank, den Zustand
-// (berechnet, nie gespeichert) die Fachlogik.
+// (berechnet, nie gespeichert) die Fachlogik. Verbraucht und Entsorgt zeigt der Verlauf (#48).
 import 'server-only'
 import type { CalendarDay } from '@/shared/lib/dates'
 import { incompleteReasonCounts } from '../domain/incomplete'
-import {
-  countByStatusFilter,
-  matchesStatusFilter,
-  type StockStatusFilter,
-} from '../domain/stock-filter'
+import { countByStatusFilter, matchesStatusFilter } from '../domain/stock-filter'
 import type { StockProduct } from '../domain/stock-entry'
-import type { UnitStatus } from '../domain/unit'
 import type { StockFilter } from '../schemas/requests'
 import type { StockSearch } from '../schemas/stock'
 import { loadReadContext, type ReadContext } from './read-context'
@@ -23,39 +18,6 @@ interface SearchInput {
   householdId: string
   today: CalendarDay
   filter: StockFilter
-}
-
-const TAKEN_OUT: Partial<Record<StockStatusFilter, UnitStatus>> = {
-  consumed: 'consumed',
-  discarded: 'discarded',
-}
-
-/** Packungen, die zum Zustand passen. Verbraucht und Entsorgt werden eigens nachgeladen. */
-async function matchingUnits(
-  reader: StockReader,
-  input: SearchInput & { products: readonly StockProduct[]; stock: readonly JoinedUnit[] },
-  context: ReadContext,
-): Promise<JoinedUnit[]> {
-  const takenOut = TAKEN_OUT[input.filter.status]
-  if (takenOut === undefined) {
-    return input.stock.filter((entry) =>
-      matchesStatusFilter(toFilterableUnit(entry), input.filter.status, context),
-    )
-  }
-  const productIds = input.products.map((product) => product.id)
-  const units = await reader.loadUnits(input.householdId, { productIds, statuses: [takenOut] })
-  return joinUnits(units, input.products)
-}
-
-async function countsFor(
-  reader: StockReader,
-  input: { householdId: string; products: readonly StockProduct[]; stock: readonly JoinedUnit[] },
-  context: ReadContext,
-): Promise<Record<StockStatusFilter, number>> {
-  const productIds = input.products.map((product) => product.id)
-  const taken = await reader.countUnitsByStatus(input.householdId, productIds)
-  const counts = countByStatusFilter(input.stock.map(toFilterableUnit), context)
-  return { ...counts, consumed: taken.consumed, discarded: taken.discarded }
 }
 
 function groupsOf(
@@ -103,10 +65,9 @@ export async function searchStock(reader: StockReader, input: SearchInput): Prom
   const productIds = products.map((product) => product.id)
   const stockUnits = await reader.loadUnits(householdId, { productIds, statuses: ['stock'] })
   const stock = joinUnits(stockUnits, products)
-  const data = { ...input, products, stock }
-  const [counts, matching] = await Promise.all([
-    countsFor(reader, data, context),
-    matchingUnits(reader, data, context),
-  ])
+  const matching = stock.filter((entry) =>
+    matchesStatusFilter(toFilterableUnit(entry), filter.status, context),
+  )
+  const counts = countByStatusFilter(stock.map(toFilterableUnit), context)
   return { counts, groups: groupsOf(context, { products, stock, matching }), options }
 }

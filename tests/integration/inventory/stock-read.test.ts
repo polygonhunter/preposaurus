@@ -108,7 +108,7 @@ describe('Vorrat lesen gegen die Datenbank (Demo-Daten)', () => {
       await searchStock(reader, { householdId, today, filter }),
     )
 
-    expect(result.counts).toMatchObject({ incomplete: 2, consumed: 1, discarded: 1 })
+    expect(result.counts).toMatchObject({ incomplete: 2 })
     expect(result.groups.flatMap((group) => group.rows.map((row) => row.name))).toEqual([
       'Haferflocken',
       'Walnüsse',

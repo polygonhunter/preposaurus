@@ -1,7 +1,6 @@
 // Ausgaben der Vorrat-Ebenen 1 und 2, des Baums neben dem Detail und des Treffermodus (#43, #125).
 import { z } from 'zod'
 import {
-  STOCK_STATUS_FILTERS,
   coverageSchema,
   groupRef,
   inStockCountsSchema,
@@ -51,7 +50,7 @@ export const stockTreeSchema = z.object({ groups: z.array(foodTypeLevelSchema) }
 
 /** @internal Nur Tests prüfen die Ausgabe gegen das Schema, die Seiten nutzen die Typen. */
 export const stockSearchSchema = z.object({
-  counts: z.record(z.enum(STOCK_STATUS_FILTERS), z.number().int()),
+  counts: inStockCountsSchema,
   groups: z.array(
     groupRef.extend({
       rows: z.array(

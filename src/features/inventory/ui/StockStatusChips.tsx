@@ -13,8 +13,8 @@ type StockStatusChipsProps = Readonly<{
 
 type ChipStatus = keyof InStockCounts
 
-// Die eine Chip-Reihe über der Liste (UX-Konzept §8.3, P9). Verbraucht und Entsorgt gehören in
-// den Verlauf (#119) und stehen deshalb nicht hier.
+// Die eine Chip-Reihe über der Liste (UX-Konzept §8.3, P9). Verbraucht und Entsorgt stehen im
+// Verlauf (#48, D7).
 const STATUS_CHIPS: readonly Readonly<{ status: ChipStatus; label: string }>[] = [
   { status: 'in-stock', label: 'Im Vorrat' },
   { status: 'due-soon', label: 'Bald fällig' },

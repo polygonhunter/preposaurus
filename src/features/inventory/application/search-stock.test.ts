@@ -1,7 +1,7 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
 import type { IncompleteReason } from '../domain/incomplete'
-import type { InStockStatusFilter, StockStatusFilter } from '../domain/stock-filter'
+import type { StockStatusFilter } from '../domain/stock-filter'
 import { type StockFilter, stockFilterSchema } from '../schemas/requests'
 import type { InStockCounts, IncompleteReasonDto } from '../schemas/shared'
 import {
@@ -57,11 +57,11 @@ const search = (filter: Record<string, string>, household = householdId) =>
 describe('searchStock', () => {
   it('spiegelt die Zustands-Filter des Schemas genau im Domain-Typ', () => {
     expectTypeOf<StockFilter['status']>().toEqualTypeOf<StockStatusFilter>()
-    expectTypeOf<keyof InStockCounts>().toEqualTypeOf<InStockStatusFilter>()
+    expectTypeOf<keyof InStockCounts>().toEqualTypeOf<StockStatusFilter>()
     expectTypeOf<IncompleteReasonDto>().toEqualTypeOf<IncompleteReason>()
   })
 
-  it('zählt jeden Zustand in Packungen, auch Verbraucht und Entsorgt', async () => {
+  it('zählt jeden Zustand in Packungen, Verbraucht und Entsorgt nicht', async () => {
     const result = await search({})
 
     expect(result.counts).toEqual({
@@ -69,8 +69,6 @@ describe('searchStock', () => {
       'due-soon': 1,
       expired: 1,
       incomplete: 2,
-      consumed: 1,
-      discarded: 1,
     })
     expect(result.options).toEqual({ containers: [can], storageLocations: [cellar] })
   })
@@ -88,7 +86,6 @@ describe('searchStock', () => {
 
   it('filtert nach Zustand, auch nach berechnetem wie „Unvollständig“', async () => {
     const incomplete = await search({ status: 'incomplete' })
-    const consumed = await search({ status: 'consumed' })
 
     expect(incomplete.groups.flatMap((group) => group.rows.map((row) => row.name))).toEqual([
       'Spaghetti',
@@ -100,11 +97,11 @@ describe('searchStock', () => {
       ['Spaghetti', [{ reason: 'date-missing', packages: 1 }]],
       ['Ravioli', [{ reason: 'estimate-unconfirmed', packages: 1 }]],
     ])
-    expect(consumed.groups[0]?.rows[0]).toMatchObject({
-      name: 'Spaghetti',
-      matchingPackages: 1,
-      packagesInStock: 3,
-    })
+  })
+
+  it('kennt Verbraucht und Entsorgt nicht als Zustand, die stehen im Verlauf (#48)', () => {
+    expect(stockFilterSchema.safeParse({ status: 'consumed' }).success).toBe(false)
+    expect(stockFilterSchema.safeParse({ status: 'discarded' }).success).toBe(false)
   })
 
   it('sucht über Bezeichnung und Lebensmittelart, die Zähler folgen der Suche', async () => {
