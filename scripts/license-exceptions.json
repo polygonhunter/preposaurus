@@ -2,21 +2,21 @@
   {
     "package": "@img/sharp-libvips-*",
     "license": "LGPL-3.0-or-later",
-    "reason": "libvips kommt mit sharp (Fotoverarbeitung M6-01, außerdem optionale Abhängigkeit von next). Dynamisch gelinkte Bibliothek, mit MIT, GPL und AGPL vereinbar (FAKTEN F9). [USER] U2."
+    "reason": "libvips kommt mit sharp (Fotoverarbeitung M6-01, außerdem optionale Abhängigkeit von next). Dynamisch gelinkte Bibliothek, mit MIT, GPL und AGPL vereinbar (FAKTEN F9). U2 zugelassen (vom Maintainer delegiert, 2026-11-24, entschieden nach Empfehlung)."
   },
   {
     "package": "caniuse-lite",
     "license": "CC-BY-4.0",
-    "reason": "Browser-Daten, die next zur Build-Zeit für Browserslist liest. Reine Daten, keine Software, Namensnennung durch die Lizenzdatei im Paket. [USER] U2."
+    "reason": "Browser-Daten, die next zur Build-Zeit für Browserslist liest. Reine Daten, keine Software, Namensnennung durch die Lizenzdatei im Paket. U2 zugelassen (vom Maintainer delegiert, 2026-11-24, entschieden nach Empfehlung)."
   },
   {
     "package": "lightningcss*",
     "license": "MPL-2.0",
-    "reason": "CSS-Werkzeug von vite. Fällt nur über vitest, eine optionale Peer-Abhängigkeit von better-auth (#32), in den Produktionsbaum. Läuft nie zur Laufzeit und landet nicht im Standalone-Image. MPL-2.0 gilt je Datei, unverändert genutzt, mit AGPL vereinbar. Freigabe durch den Maintainer offen."
+    "reason": "CSS-Werkzeug von vite. Fällt nur über vitest, eine optionale Peer-Abhängigkeit von better-auth (#32), in den Produktionsbaum. Läuft nie zur Laufzeit und landet nicht im Standalone-Image. MPL-2.0 gilt je Datei, unverändert genutzt, mit AGPL vereinbar. Zugelassen wie U2 (vom Maintainer delegiert, 2026-11-24, entschieden nach Empfehlung)."
   },
   {
     "package": "fast-sha256",
     "license": "Unlicense",
-    "reason": "Kommt über standardwebhooks, eine Abhängigkeit von @anthropic-ai/sdk (Anthropic-Adapter M6-05, #59). Das SDK lädt standardwebhooks beim Import, deshalb landet fast-sha256 im Server-Bundle und ab M6-06 auch im Standalone-Image, auch wenn die App die Webhook-Helfer nicht aufruft. Unlicense gibt den Code in die Gemeinfreiheit und ist mit der AGPL vereinbar (laut FSF GPL-kompatibel). Freigabe durch den Maintainer offen."
+    "reason": "Kommt über standardwebhooks, eine Abhängigkeit von @anthropic-ai/sdk (Anthropic-Adapter M6-05, #59). Das SDK lädt standardwebhooks beim Import, deshalb landet fast-sha256 im Server-Bundle und ab M6-06 auch im Standalone-Image, auch wenn die App die Webhook-Helfer nicht aufruft. Unlicense gibt den Code in die Gemeinfreiheit und ist mit der AGPL vereinbar (laut FSF GPL-kompatibel). Zugelassen wie U2 (vom Maintainer delegiert, 2026-11-24, entschieden nach Empfehlung)."
   }
 ]

@@ -1,6 +1,6 @@
 # Prüfblatt Empfehlungswerte (M1-08)
 
-Prüfblatt für den Maintainer (U3). Die Werte stehen als Seed in `db/seeds/quellen/bbk-ble.ts` (M1-09, #20), bis zur Freigabe mit `geprueft = false` und dem Hinweis „Werte noch nicht geprüft“ in der App.
+Prüfblatt für den Maintainer (U3). Die Werte stehen als Seed in `db/seeds/quellen/bbk-ble.ts` (M1-09, #20). **Freigegeben am 2026-11-24** (vom Maintainer delegiert, entschieden nach Empfehlung, Ergebnis in §6): `geprueft = true`, der Hinweis „Werte noch nicht geprüft“ entfällt.
 **Abrufdatum aller Quellen: 2026-11-22.** Issue: #19, dazu #128 (Startliste der Lebensmittelarten).
 
 **Kennzeichnung**
@@ -274,23 +274,27 @@ Fazit: Der Vorschlag in §4.2 nutzt nur CC0-Daten (USDA) plus eigene Rechnung. E
 
 ## 6. Checkliste für den Maintainer (U3)
 
-Bitte je Punkt bestätigen oder korrigieren:
+**Entschieden: vom Maintainer delegiert, 2026-11-24, entschieden nach Empfehlung** (#106, „Mach einfach passt schon“). Vor dem Abhaken ist jeder Wert erneut gegen die Primärquelle gelesen worden (Abruf 2026-11-24):
+- **BLE-Vorratstabelle Mischkost (PDF, © BLE 2024):** 3,3 / 4,0 / 2,5 / 2,5 / 1,2 kg, 330 g (180 g Streichfett + 0,15 l Öl), 20 l Getränke, 10 Tage, 2.200 kcal, Fußnote 4 (1,5 l Trinken + 0,5 l Kochen; ab 65 Jahren 2 l Getränke; Kinder bis 12 Jahre, nicht Säuglinge, 1 l Getränke). Alles wie in §1.2 und §2.1.
+- **BLE-Webseiten Mischkost und vegetarisch:** gleiche Summen, vegetarisch nur Eier und Ersatzprodukte 1,3 kg. **Vorratskalkulator:** 1–10 Personen, 1–28 Tage, Tageswerte 0,33 / 0,40 / 0,25 / 0,25 / 0,12 kg, 33 g, 2,00 l, keine Altersstufen.
+- **BBK-Ratgeber Stand 11/2025, 2. Auflage (ISBN 978-3-949117-36-7):** möglichst 10, zumindest 3 Tage (S. 3 und 6), Verweis auf den BLE-Vorratskalkulator statt kg-Mengen (S. 6), 2 l Wasser je Person und Tag, davon 0,5 l zum Kochen, Beispiel 18 / 30 / 60 l (S. 7). **Checkliste** (S. 32 im Ratgeber): Trinkwasser und haltbare Lebensmittel je für 3 / 5 / 7 / 10 Tage.
+- **Richtwerte je Art:** alle 46 Arten mit Nährwerten im Seed (Startliste v2, 47 FDC-Einträge, weil Speiseöl Raps und Sonnenblume umfasst) per FoodData-Central-API gegen die genannten FDC-IDs nachgerechnet (LMIV-Rechnung §4.1). Alle stimmen auf ±1 kcal bzw. ±0,1 g (Rundung). Die Haltbarkeiten stimmen mit der CC0-Kopie des FoodKeeper-Datensatzes überein; die Original-Datei der FSIS blockt automatische Abrufe weiter (HTTP 403).
 
-1. [ ] **Primärquelle für Mengen** ist die BLE-Vorratstabelle (3,3 / 4,0 / 2,5 / 2,5 / 1,2 kg, 330 g, 20 l), nicht die alte BBK-Tabelle. Die Prototyp-Werte 3,5 / 2,6 / 1,5 kg und 357 g werden nicht übernommen.
-2. [ ] **Standardzeitraum** 10 Tage, Etappen 3 / 5 / 7 / 10.
-3. [ ] **Energie** im Modus „Offiziell“: 2.200 kcal für alle außer Baby (auch für Kinder, obwohl zu hoch).
-4. [ ] **Wasser Kind**: 1.500 ml (1 l + 0,5 l Kochen, Annahme) **oder** wörtlich 1.000 ml.
-5. [ ] **Wasser Senior**: 2.500 ml (2 l + 0,5 l Kochen, Annahme) **oder** wörtlich 2.000 ml.
-6. [ ] **Jugendliche** wie Erwachsene (2.200 kcal, 2.000 ml), Annahme.
-7. [ ] **Vegetarisch** nach BLE: nur `fleisch_fisch_eier` 130 g statt 120 g. Die Verschiebung aus dem Prototyp (2/3 Hülsenfrüchte, 1/3 Nüsse) entfällt.
-8. [ ] **Vegan** als gekennzeichneter Preposaurus-Vorschlag (§3.3): 130 g pflanzliche Eiweißquellen, 200 g Pflanzendrinks, 280 g Obst und Nüsse; B12-Hinweis. Eigene Quelle, nicht „BBK/BLE“.
-9. [ ] **Nährwerte je Art** aus USDA SR Legacy mit LMIV-Umrechnung (§4.1). Stichproben ansehen, vor allem die Stellvertreter (Basmati, Linsen-Konserve, Hartkäse, Fruchtsaft, Schokolade, Thunfisch) und die Bezugsbasis der Konserven.
-10. [ ] **Leere Felder** bleiben leer (10 Arten ohne Nährwerte): Müsli, Rote Bete, Gewürzgurken, Trockenobst, Haferdrink, Makrele, Hering, Fleischkonserve, Eintopf, Suppe. Alternativ einzelne Sammelarten in #128 aufteilen oder streichen.
-11. [ ] **Tee und Kaffee** mit 0 kcal (Annahme), damit sie nicht als „unvollständig“ gelten.
-12. [ ] **Haltbarkeit**: oberer FoodKeeper-Wert (§4.1). Für Konserven: 60 Monate (FoodKeeper, für die Plausibilität) **oder** 18 Monate (VZ Sachsen, als realistischer Hinweistext)? Werte vorher in der FoodKeeper-App stichprobenartig gegenprüfen.
-13. [ ] **Unbegrenzt haltbar** (Zucker, Salz, Wasser) bleibt leer, weil eine Monatszahl das nicht ausdrückt.
-14. [ ] **BLS 4.0**: beim MRI anfragen, ob Werte in einem öffentlichen AGPL-Repo weitergegeben werden dürfen. Wenn ja, Richtwerte später auf BLS umstellen.
-15. [ ] Danach: `quelle_version.geprueft = true` für die Fassung „BBK 11/2025 + BLE 2024“ und Seed in M1-09.
+1. [x] **Primärquelle für Mengen** ist die BLE-Vorratstabelle (3,3 / 4,0 / 2,5 / 2,5 / 1,2 kg, 330 g, 20 l), nicht die alte BBK-Tabelle. Die Prototyp-Werte 3,5 / 2,6 / 1,5 kg und 357 g werden nicht übernommen.
+2. [x] **Standardzeitraum** 10 Tage, Etappen 3 / 5 / 7 / 10.
+3. [x] **Energie** im Modus „Offiziell“: 2.200 kcal für alle außer Baby (auch für Kinder, obwohl zu hoch).
+4. [x] **Wasser Kind**: **1.500 ml** (1 l Getränke offiziell + 0,5 l Kochwasser, abgeleitet wie die BLE die 2 l für Erwachsene bildet).
+5. [x] **Wasser Senior**: **2.500 ml** (2 l Getränke offiziell + 0,5 l Kochwasser, abgeleitet wie Nr. 4).
+6. [x] **Jugendliche** wie Erwachsene (2.200 kcal, 2.000 ml): Die Tabelle gilt je Person, Fußnote 4 nimmt nur Kinder bis 12, Säuglinge und ab 65 aus.
+7. [x] **Vegetarisch** nach BLE: nur `fleisch_fisch_eier` 130 g statt 120 g. Die Verschiebung aus dem Prototyp entfällt.
+8. [x] **Vegan** als gekennzeichneter Preposaurus-Vorschlag (§3.3) mit B12-Hinweis, eigene Quelle, nicht „BBK/BLE“. Umsetzung: #303. Bis dahin rechnet vegan wie „alles“.
+9. [x] **Nährwerte je Art** aus USDA SR Legacy mit LMIV-Umrechnung (§4.1), nachgerechnet wie oben. Stellvertreter (Basmati, Linsen-Konserve, Hartkäse, Fruchtsaft, Schokolade, Thunfisch) bleiben, ihre Bezugsbasis steht in §4.2.
+10. [x] **Leere Felder** bleiben leer (Sammelarten und Arten ohne passenden Eintrag). Ohne Richtwert zählt eine Art nur mit eigenen Werten.
+11. [x] **Tee und Kaffee** bleiben **ohne** Richtwert (abweichend vom Vorschlag 0 kcal): Die BLE nennt 0 bzw. 2 kcal nur für das fertige Getränk (Fußnote 5), für die trockene Ware gibt es keinen belegten Wert. Ein Wert wird nicht erfunden; wer Tee oder Kaffee erfasst, trägt die kcal vom Etikett ein.
+12. [x] **Haltbarkeit**: oberer FoodKeeper-Wert (§4.1), für Konserven also 60 Monate, damit die Plausibilitätsprüfung bei normaler Ware nicht anschlägt. Die Stichprobe in der FoodKeeper-App steht in #311 (die Original-Datei ist für Skripte gesperrt).
+13. [x] **Unbegrenzt haltbar** (Zucker, Salz, Wasser) bleibt leer.
+14. [ ] **BLS 4.0**: Anfrage beim MRI bleibt beim Maintainer (#311). Bis dahin bleibt USDA die Quelle.
+15. [x] `quelle_version.geprueft = true` für die Fassung „BBK 11/2025, BLE 2024“ (`isVerified: true` in `db/seeds/quellen/bbk-ble.ts`, der Seed stellt bestehende Installationen per Upsert um). Der Hinweis „Werte noch nicht geprüft“ entfällt damit.
 
 ## 7. Für #128 (Startliste) aufgefallen
 

@@ -63,10 +63,11 @@ test('zeigt Warengruppen ohne Wasser und führt in den Vorrat der Gruppe', async
   await expect(
     page.getByRole('link', { name: /^\d+ Personen · Ziel 10 Tage bis/ }),
   ).toHaveAttribute('href', '/einstellungen')
-  // Die Quelle ist noch nicht vom Maintainer geprüft und sagt das dezent (#20)
+  // Die Quelle ist geprüft (U3, #106) und trägt deshalb keinen Hinweis mehr (#20)
   await expect(
-    page.getByText('BBK/BLE, Stand BBK 11/2025, BLE 2024 · Werte noch nicht geprüft'),
+    page.getByText('BBK/BLE, Stand BBK 11/2025, BLE 2024', { exact: true }),
   ).toBeVisible()
+  await expect(page.getByText('Werte noch nicht geprüft')).toHaveCount(0)
 
   // Kurzname in Zeile und Titel, der amtliche Name steht über dem Titel (#177)
   await groups.getByRole('link', { name: /^Getreide und Kartoffeln/ }).click()
@@ -99,7 +100,7 @@ test('Erklär-Blatt öffnet per Tastatur und nennt Rechnung, „ca.“ und Quell
   await expect(sheet.getByRole('heading', { name: 'Was „ca.“ bedeutet' })).toBeVisible()
   await expect(sheet.getByRole('heading', { name: 'Was nicht mitzählt' })).toBeVisible()
   await expect(sheet.getByRole('link', { name: 'Zur Quelle' })).toHaveAttribute('href', /^https:/)
-  await expect(sheet.getByText('Werte noch nicht geprüft')).toBeVisible()
+  await expect(sheet.getByText('Werte noch nicht geprüft')).toHaveCount(0)
 
   await page.keyboard.press('Escape')
   await expect(sheet).toBeHidden()
