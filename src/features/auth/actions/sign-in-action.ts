@@ -39,6 +39,14 @@ function readForm(formData: FormData) {
   })
 }
 
+// Ein zu langer Name kann nicht stimmen. Der neutrale Satz steht dann wie nach einer falschen
+// Anmeldung am Passwort, nicht am Namen; ein leeres Passwort geht vor.
+function formErrors(error: z.ZodError<SignInInput>): SignInState['errors'] {
+  const errors = firstMessages(z.flattenError(error).fieldErrors)
+  if (errors.username !== SIGN_IN_FAILED) return errors
+  return { password: errors.password ?? SIGN_IN_FAILED }
+}
+
 export async function signInAction(
   _previous: SignInState,
   formData: FormData,
@@ -46,9 +54,7 @@ export async function signInAction(
   // Das Passwort geht nie zurück ans Formular, der Name schon, damit er nicht neu getippt wird.
   const username = readFormText(formData, 'benutzername')
   const parsed = readForm(formData)
-  if (!parsed.success) {
-    return { errors: firstMessages(z.flattenError(parsed.error).fieldErrors), username }
-  }
+  if (!parsed.success) return { errors: formErrors(parsed.error), username }
   const result = await signInFromRequest(parsed.data, await headers())
   if (!result.ok) return { errors: { password: messageFor(result.error) }, username }
   const setupPath = await openSetupPath(result.value.userId)

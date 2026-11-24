@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
 import { expectRequiredFieldError } from '../helpers/field-errors'
+import { waitForHydration } from '../helpers/hydration'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Foto-Erkennung in den Einstellungen (#108, #79). Die E2E-Tests laufen mit AI_PROVIDER=fake: Der
@@ -16,6 +17,21 @@ const onlyOnDesktop = (projectName: string) => {
 
 const connectionSection = (page: Page, name: string) =>
   page.getByRole('region', { name, exact: true })
+
+async function removeConnection(page: Page, name: string) {
+  await connectionSection(page, name).getByRole('button', { name: 'Entfernen' }).click()
+  const sheet = page.getByRole('dialog', { name: `${name} entfernen?` })
+  await expectAccessibleLayout(page)
+  await sheet.getByRole('button', { name: 'Entfernen' }).click()
+  await expect(connectionSection(page, name)).toHaveCount(0)
+}
+
+// Ein abgebrochener erster Versuch lässt die Verbindung stehen, ein Retry hinge sonst an ihr
+// („Diesen Namen gibt es schon.“)
+async function removeLeftoverConnection(page: Page, name: string) {
+  await waitForHydration(page)
+  if ((await connectionSection(page, name).count()) > 0) await removeConnection(page, name)
+}
 
 test('zeigt dem Admin Status, Schalter und den Test-Anbieter', async ({ page }) => {
   await page.goto('/einstellungen')
@@ -38,6 +54,7 @@ test('Verbindung anlegen, testen, Modell wählen und entfernen', async ({ page }
   onlyOnDesktop(info.project.name)
   const name = 'E2E Anthropic'
   await page.goto('/einstellungen/foto-erkennung')
+  await removeLeftoverConnection(page, name)
 
   // Ein falscher Schlüssel bleibt am Feld hängen und wird nicht wiederholt
   await page.getByLabel('Name', { exact: true }).fill(name)
@@ -87,11 +104,7 @@ test('Verbindung anlegen, testen, Modell wählen und entfernen', async ({ page }
   await page.reload()
   await expect(packaging.getByRole('radio', { name: 'Haiku 5.5 · empfohlen' })).toBeChecked()
 
-  await connectionSection(page, name).getByRole('button', { name: 'Entfernen' }).click()
-  const sheet = page.getByRole('dialog', { name: `${name} entfernen?` })
-  await expectAccessibleLayout(page)
-  await sheet.getByRole('button', { name: 'Entfernen' }).click()
-  await expect(connectionSection(page, name)).toHaveCount(0)
+  await removeConnection(page, name)
 })
 
 test('Haushaltsschalter an- und wieder ausschalten', async ({ page }, info) => {
