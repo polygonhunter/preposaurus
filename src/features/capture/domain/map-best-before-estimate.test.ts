@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { toCalendarDay } from '@/shared/lib/dates'
+import { addMonths, normalizeToPrecision, toCalendarDay } from '@/shared/lib/dates'
 import type { AiBestBeforeEstimateAnswer } from './ai-answers'
 import { mapBestBeforeEstimateAnswer } from './map-best-before-estimate'
 
@@ -7,7 +7,6 @@ const today = toCalendarDay('2026-11-22')
 
 const answer = (overrides: Partial<AiBestBeforeEstimateAnswer>): AiBestBeforeEstimateAnswer => ({
   haltbar_monate: 18,
-  genauigkeit: 'monat',
   sicherheit: 'mittel',
   ...overrides,
 })
@@ -20,11 +19,21 @@ describe('mapBestBeforeEstimateAnswer', () => {
     })
   })
 
-  it('bei Genauigkeit Jahr zum Jahresende', () => {
-    const result = mapBestBeforeEstimateAnswer(answer({ genauigkeit: 'jahr' }), today)
+  it('setzt nie das Jahresende, auch nicht über den Jahreswechsel (#170)', () => {
+    const result = mapBestBeforeEstimateAnswer(answer({ haltbar_monate: 14 }), today)
 
-    expect(result.bestBefore).toEqual({ date: '2028-12-31', precision: 'year', isEstimated: true })
+    expect(result.bestBefore).toEqual({ date: '2028-01-31', precision: 'month', isEstimated: true })
   })
+
+  it.each([1, 2, 6, 13, 14, 25, 120])(
+    'hält bei %s Monaten nie länger als bis zum Ende des geschätzten Monats',
+    (months) => {
+      const { bestBefore } = mapBestBeforeEstimateAnswer(answer({ haltbar_monate: months }), today)
+
+      expect(bestBefore?.date).toBe(normalizeToPrecision(addMonths(today, months), 'month'))
+      expect(bestBefore?.precision).toBe('month')
+    },
+  )
 
   it('rundet auf ganze Monate', () => {
     const result = mapBestBeforeEstimateAnswer(answer({ haltbar_monate: 2.4 }), today)
@@ -43,14 +52,9 @@ describe('mapBestBeforeEstimateAnswer', () => {
 
   it('liefert nie ein taggenaues oder ungekennzeichnetes Datum', () => {
     for (const months of [1, 6, 12, 24, 60, 360]) {
-      for (const genauigkeit of ['monat', 'jahr'] as const) {
-        const { bestBefore } = mapBestBeforeEstimateAnswer(
-          answer({ haltbar_monate: months, genauigkeit }),
-          today,
-        )
-        expect(bestBefore?.isEstimated).toBe(true)
-        expect(bestBefore?.precision).not.toBe('day')
-      }
+      const { bestBefore } = mapBestBeforeEstimateAnswer(answer({ haltbar_monate: months }), today)
+      expect(bestBefore?.isEstimated).toBe(true)
+      expect(bestBefore?.precision).toBe('month')
     }
   })
 })

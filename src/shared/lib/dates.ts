@@ -107,12 +107,12 @@ export function addMonths(day: CalendarDay, months: number): CalendarDay {
   return toCalendarDay(`${pad(targetYear, 4)}-${pad(targetMonth, 2)}-${pad(targetDay, 2)}`)
 }
 
-export function endOfMonth(day: CalendarDay): CalendarDay {
+function endOfMonth(day: CalendarDay): CalendarDay {
   const { year, month } = dayParts(day)
   return toCalendarDay(`${pad(year, 4)}-${pad(month, 2)}-${pad(daysInMonth(year, month), 2)}`)
 }
 
-export function endOfYear(day: CalendarDay): CalendarDay {
+function endOfYear(day: CalendarDay): CalendarDay {
   return toCalendarDay(`${pad(dayParts(day).year, 4)}-12-31`)
 }
 

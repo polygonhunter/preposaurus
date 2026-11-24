@@ -138,19 +138,29 @@ export function detectDateKind(text: string): DateKind | null {
   return null
 }
 
+/**
+ * Geschätztes MHD ab heute plus Monate (#170): immer Genauigkeit Monat, zum Monatsende, als
+ * geschätzt gekennzeichnet. Nie ein Jahresende, damit eine Schätzung nie länger hält als geschätzt.
+ */
+export function estimatedBestBefore(today: CalendarDay, months: number): BestBefore {
+  return { ...withPrecision(addMonths(today, months), 'month'), isEstimated: true }
+}
+
 const QUICK_PICK_MONTHS = {
   'plus-6-months': 6,
   'plus-1-year': 12,
   'plus-2-years': 24,
 } as const
 
-/** @internal Gehört zu `quickPickBestBefore` und wartet mit ihr auf #180. */
 export type QuickPick = keyof typeof QUICK_PICK_MONTHS
 
+/** Reihenfolge der Schnellknöpfe unter dem MHD-Feld */
+export const QUICK_PICKS = Object.keys(QUICK_PICK_MONTHS) as QuickPick[]
+
 /**
- * Schnellknöpfe „+6 Mon. · +1 J. · +2 J.“ unter dem MHD-Feld (UX §8.5), ab heute, zum Monatsende.
- * @internal Einzelausnahme: Ob die Schnellknöpfe kommen, entscheidet der Maintainer in #180.
+ * Schnellknöpfe „+6 Mon. · +1 J. · +2 J.“ unter dem MHD-Feld (UX §8.5, #180): nur auf Tippen,
+ * eine ausdrücklich gewählte Schätzung, z. B. für selbst Eingekochtes oder lose Ware.
  */
 export function quickPickBestBefore(today: CalendarDay, pick: QuickPick): BestBefore {
-  return withPrecision(addMonths(today, QUICK_PICK_MONTHS[pick]), 'month')
+  return estimatedBestBefore(today, QUICK_PICK_MONTHS[pick])
 }
