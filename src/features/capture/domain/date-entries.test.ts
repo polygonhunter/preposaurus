@@ -4,6 +4,7 @@ import type { BestBeforePrecision } from '@/features/inventory/domain/unit'
 import {
   addDateEntry,
   changeDateCount,
+  changeDateKind,
   countPackages,
   dateEntryKey,
   dateEntryLabel,
@@ -107,5 +108,52 @@ describe('Verbrauchsdatum (#294)', () => {
     expect(dateEntryLabel({ bestBefore: estimated, kind: 'use-by' })).toBe(
       '09/2027 (geschätzt, Verbrauchsdatum)',
     )
+  })
+})
+
+describe('changeDateKind (Umschalter, #294)', () => {
+  const december = date('2026-12-03', 'day')
+
+  it('macht aus einem MHD ein Verbrauchsdatum, Anzahl und Reihenfolge bleiben', () => {
+    const entries = addDateEntry(addDateEntry([], december), year2028)
+    const key = dateEntryKey(entries[0] ?? { bestBefore: null })
+
+    const changed = changeDateKind(entries, { key, kind: 'use-by' })
+
+    expect(changed.map(dateEntryLabel)).toEqual(['03.12.2026 (Verbrauchsdatum)', '2028'])
+    expect(changed[0]?.count).toBe(1)
+  })
+
+  it('stuft ein Verbrauchsdatum auf Wunsch zum MHD zurück', () => {
+    const entries = addDateEntry([], december, 'use-by')
+
+    const changed = changeDateKind(entries, {
+      key: dateEntryKey({ bestBefore: december, kind: 'use-by' }),
+      kind: 'best-before',
+    })
+
+    expect(changed).toEqual([{ bestBefore: december, count: 1, kind: 'best-before' }])
+    expect(dateEntryLabel(changed[0] ?? { bestBefore: null })).toBe('03.12.2026')
+  })
+
+  it('legt gleiches Datum mit gleicher Art zusammen und addiert die Anzahl', () => {
+    let entries = addDateEntry(addDateEntry([], december, 'use-by'), december)
+    entries = changeDateCount(entries, { key: dateEntryKey({ bestBefore: december }), delta: 2 })
+
+    const changed = changeDateKind(entries, {
+      key: dateEntryKey({ bestBefore: december }),
+      kind: 'use-by',
+    })
+
+    expect(changed).toEqual([{ bestBefore: december, count: 4, kind: 'use-by' }])
+  })
+
+  it('lässt alles, wie es ist, bei gleicher Art oder unbekanntem Eintrag', () => {
+    const entries = addDateEntry([], december)
+
+    expect(
+      changeDateKind(entries, { key: dateEntryKey({ bestBefore: december }), kind: 'best-before' }),
+    ).toEqual(entries)
+    expect(changeDateKind(entries, { key: 'unbekannt', kind: 'use-by' })).toEqual(entries)
   })
 })

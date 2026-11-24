@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { cx } from '@/shared/lib/class-names'
 import type { RowContentProps } from './RowContent'
+import { RowFooter } from './RowFooter'
 import { RowHandle, type RowAction } from './RowHandle'
 import { RowStaticBody } from './RowStaticBody'
 
@@ -14,7 +15,8 @@ type RowProps = RowContentProps &
     // „mittel“ steht er wieder rechts (#284), mit Falz auf dem rechten Bildschirm wieder darunter
     // (#253). Nur für Zeilen ohne eigene Handlung.
     stacksAccessory?: boolean
-    // Knopfreihe unter Link oder Knopf der Zeile, wenn rechts kein Platz für mehrere Knöpfe ist
+    // Knopfreihe unter Link oder Knopf der Zeile, wenn rechts kein Platz für mehrere Knöpfe ist.
+    // Auch unter einer Zeile ohne Handlung, z. B. eine Auswahl zur Zeile (#294).
     footer?: ReactNode
     // Stabiler Schlüssel der Zeile, an dem useFocusRescue sie nach dem Neuladen wiederfindet
     focusKey?: string | undefined
@@ -38,27 +40,21 @@ export function Row({
     content.icon ? 'before:left-[52px]' : 'before:left-4',
     isCurrent && 'bg-accent/7 shadow-[inset_3px_0_0_var(--color-accent)]',
   )
-  if (action && footer) {
-    return (
-      <li className={itemClass} data-focus-row={focusKey}>
-        <RowHandle action={action} {...content} />
-        <div className={cx('flex flex-wrap gap-2 pr-4 pb-3', content.icon ? 'pl-[52px]' : 'pl-4')}>
-          {footer}
-        </div>
-      </li>
-    )
-  }
+  const footerRow = footer ? <RowFooter hasIcon={Boolean(content.icon)}>{footer}</RowFooter> : null
   if (!action) {
     return (
       <li className={itemClass} data-focus-row={focusKey}>
         <RowStaticBody accessory={accessory} stacks={stacksAccessory} {...content} />
+        {footerRow}
       </li>
     )
   }
-  if (!accessory) {
+  // Mit Knopfreihe darunter braucht es keinen Knopf daneben
+  if (footerRow || !accessory) {
     return (
       <li className={itemClass} data-focus-row={focusKey}>
         <RowHandle action={action} {...content} />
+        {footerRow}
       </li>
     )
   }

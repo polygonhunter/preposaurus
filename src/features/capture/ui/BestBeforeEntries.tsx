@@ -6,7 +6,7 @@ import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { todayInBerlin } from '@/shared/lib/dates'
 import { detectDateKind, parseBestBefore } from '../domain/best-before'
 import { doubtAboutBestBefore } from '../domain/best-before-plausibility'
-import { addDateEntry, changeDateCount, type DateEntry } from '../domain/date-entries'
+import { addDateEntry, type DateEntry } from '../domain/date-entries'
 import { addedDateNote, PARSE_MESSAGES } from './best-before-messages'
 import { DateEntryList } from './DateEntryList'
 import { QuickCounts } from './QuickCounts'
@@ -25,7 +25,8 @@ const PENDING_MESSAGE = 'Bitte übernimm das Datum mit Enter oder „Datum hinzu
 
 // MHD manuell (#53): je Datum ein Eintrag mit Anzahl, „Datum fehlt“ als eigene Wahl (#116).
 // Die Genauigkeit folgt der Eingabe (Tag, Monat oder Jahr). Es wird nie ein Datum vorgeschlagen.
-// Steht „zu verbrauchen bis“ davor, wird der Eintrag ein Verbrauchsdatum und sagt es (#294).
+// Steht „zu verbrauchen bis“ davor, wird der Eintrag ein Verbrauchsdatum und sagt es (#294). Jeder
+// Eintrag hat den Umschalter MHD · Verbrauchsdatum, vorbelegt von Erkennung oder KI.
 // Darunter die Schnellzahlen, gleich im Formular und im Foto-Weg (#211).
 export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntriesProps) {
   const headerId = useId()
@@ -100,12 +101,10 @@ export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntrie
       <DateEntryList
         entries={entries}
         labelledBy={headerId}
-        onCountChange={(key, delta) => {
-          const next = changeDateCount(entries, { key, delta })
-          // Verschwindet die Zeile samt Knopf, bleibt der Fokus nicht im Nichts, sondern im Feld.
-          if (next.length < entries.length) inputRef.current?.focus()
-          onChange(next)
-        }}
+        onChange={onChange}
+        // Verschwindet die Zeile samt Knopf, bleibt der Fokus nicht im Nichts, sondern im Feld.
+        onRowRemoved={() => inputRef.current?.focus()}
+        onKindChange={setNote}
       />
       <QuickCounts units={entries} onChange={onChange} />
     </section>

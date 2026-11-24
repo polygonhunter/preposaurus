@@ -80,5 +80,29 @@ export function changeDateCount(
     .filter((entry) => entry.count > 0)
 }
 
+interface KindChange {
+  key: string
+  kind: DateKind
+}
+
+/**
+ * Datumsart eines Eintrags umschalten (#294). Gibt es dasselbe Datum schon mit der neuen Art,
+ * werden beide ein Eintrag und die Anzahl addiert, wie beim erneuten Hinzufügen.
+ */
+export function changeDateKind(entries: readonly DateEntry[], { key, kind }: KindChange) {
+  const entry = entries.find((candidate) => dateEntryKey(candidate) === key)
+  if (entry === undefined) return [...entries]
+  const nextKey = dateEntryKey({ ...entry, kind })
+  if (nextKey === key) return [...entries]
+  const others = entries.filter((candidate) => candidate !== entry)
+  const twin = others.find((candidate) => dateEntryKey(candidate) === nextKey)
+  if (twin === undefined) {
+    return entries.map((candidate) => (candidate === entry ? { ...entry, kind } : candidate))
+  }
+  return others.map((candidate) =>
+    candidate === twin ? { ...twin, count: twin.count + entry.count } : candidate,
+  )
+}
+
 export const countPackages = (entries: readonly DateEntry[]) =>
   entries.reduce((sum, entry) => sum + entry.count, 0)

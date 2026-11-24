@@ -20,6 +20,6 @@ export interface UnitDateEditor {
   loadSource: (householdId: string, unitId: string) => Promise<UnitDateSource | null>
   /** Nur Packungen des Haushalts, die noch im Vorrat sind. */
   loadStockUnits: (householdId: string, unitIds: readonly string[]) => Promise<StockUnit[]>
-  /** Schreibt MHD und „Noch gut“, bedingt auf Haushalt und Vorrat. Liefert die Anzahl. */
+  /** Schreibt Datum, Datumsart und „Noch gut“, bedingt auf Haushalt und Vorrat. Liefert die Anzahl. */
   saveDates: (householdId: string, units: readonly StockUnit[]) => Promise<number>
 }
