@@ -19,6 +19,9 @@ const TEXTS = {
     'Fotos und Angaben liegen als Entwurf auf dem NAS. Beim nächsten Erfassen könnt ihr ihn fortsetzen oder verwerfen.',
 } as const
 
+// Die Action kam nicht an (Verbindung weg, NAS neu gestartet). Der Entwurf bleibt, wie er ist.
+const UNREACHABLE = 'Das NAS ist gerade nicht erreichbar. Bitte versucht es gleich noch einmal.'
+
 // Ruhige Rückfrage vor dem Verlassen (#285). Der sichere Weg steht oben: ungespeicherte Eingaben
 // bleiben mit „Weiter erfassen“, ein Entwurf mit „Für später behalten“. Escape und der Hintergrund
 // schließen das Blatt und lassen alles, wie es ist; der Fokus kehrt dann auf „Abbrechen“ zurück.
@@ -29,7 +32,7 @@ export function CaptureLeaveSheet({ guard, onStay, onLeave }: CaptureLeaveSheetP
 
   async function run(kind: Exclude<Pending, null>, step: () => Promise<string | null>) {
     setPending(kind)
-    const failure = await step()
+    const failure = await step().catch(() => UNREACHABLE)
     setPending(null)
     setMessage(failure)
     if (failure === null) onLeave()
@@ -61,7 +64,7 @@ export function CaptureLeaveSheet({ guard, onStay, onLeave }: CaptureLeaveSheetP
             >
               Verwerfen
             </Button>
-            <Button variant="plain" onClick={stay}>
+            <Button variant="plain" disabled={pending !== null} onClick={stay}>
               Weiter erfassen
             </Button>
           </>

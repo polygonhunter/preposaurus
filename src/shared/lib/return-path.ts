@@ -4,9 +4,12 @@ const RETURN_PATH_KEY = 'preposaurus:ruecksprung'
 
 export const FALLBACK_RETURN_PATH = '/uebersicht'
 
+// Browser streichen Tab und Zeilenumbruch und lesen „\“ als „/“: Aus „/\t/host“ würde „//host“
+const UNSAFE_CHARACTER = /[\u0000-\u001f\u007f\\]/
+
 /** Ein Pfad dieser App: beginnt mit genau einem „/“ (kein „//host“, keine volle Adresse). */
 function isOwnPath(path: string): boolean {
-  return path.startsWith('/') && !path.startsWith('//') && !path.startsWith('/\\')
+  return path.startsWith('/') && !path.startsWith('//') && !UNSAFE_CHARACTER.test(path)
 }
 
 export function rememberReturnPath(path: string): void {

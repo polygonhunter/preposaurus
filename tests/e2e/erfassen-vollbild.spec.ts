@@ -110,6 +110,24 @@ test('„Abbrechen“ mit Eingaben fragt ruhig nach, Weiter erfassen behält all
   await expect(page).toHaveURL(/\/statistik$/)
 })
 
+test('ab „breit“: die Seitenleiste fragt bei Eingaben wie „Abbrechen“', async ({ page }) => {
+  test.skip(widthOf(page) < BREIT, 'Seitenleiste erst ab 900 px')
+  await openFormFrom(page, '/statistik')
+  await content(page).fill('500 g')
+  const stockLink = mainNav(page).getByRole('link', { name: 'Vorrat', exact: true })
+
+  await stockLink.click()
+  const sheet = leaveSheet(page)
+  await expect(sheet).toBeVisible()
+  await expect(page).toHaveURL(/\/neu\/manuell$/)
+  await sheet.getByRole('button', { name: 'Weiter erfassen' }).click()
+  await expect(content(page)).toHaveValue('500 g')
+
+  await stockLink.click()
+  await sheet.getByRole('button', { name: 'Verwerfen' }).click()
+  await expect(page).toHaveURL(/\/vorrat$/)
+})
+
 for (const colorScheme of ['light', 'dark'] as const) {
   test(`Vollbild und Rückfrage sind barrierefrei (${colorScheme})`, async ({ page }) => {
     await page.emulateMedia({ colorScheme })

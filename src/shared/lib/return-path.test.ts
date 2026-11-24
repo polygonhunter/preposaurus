@@ -9,6 +9,16 @@ function stubStorage() {
   })
 }
 
+const FOREIGN = [
+  '//example.org',
+  '/\\example.org',
+  '/\t/example.org',
+  '/\n/example.org',
+  'https://example.org',
+  'javascript:alert(1)',
+  '',
+]
+
 afterEach(() => {
   vi.unstubAllGlobals()
 })
@@ -26,8 +36,16 @@ describe('Rücksprung merken', () => {
     stubStorage()
     expect(readReturnPath()).toBe(FALLBACK_RETURN_PATH)
 
-    for (const foreign of ['//example.org', '/\\example.org', 'https://example.org', '']) {
+    for (const foreign of FOREIGN) {
       rememberReturnPath(foreign)
+      expect(readReturnPath()).toBe(FALLBACK_RETURN_PATH)
+    }
+  })
+
+  it('liest auch einen untergeschobenen Wert nie als fremde Adresse', () => {
+    stubStorage()
+    for (const foreign of FOREIGN) {
+      sessionStorage.setItem('preposaurus:ruecksprung', foreign)
       expect(readReturnPath()).toBe(FALLBACK_RETURN_PATH)
     }
   })

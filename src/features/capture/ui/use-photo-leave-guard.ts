@@ -25,10 +25,10 @@ function draftGuard(draftId: string, daten: unknown): LeaveGuard {
       const result = await saveDraftAction({ entwurfId: draftId, daten })
       return result.ok ? null : result.message
     },
-    // Scheitert das Verwerfen (Entwurf schon weg, Sitzung abgelaufen), geht es trotzdem hinaus:
+    // Scheitert das Verwerfen (Entwurf schon weg, Sitzung abgelaufen, keine Verbindung), geht es trotzdem hinaus:
     // Ein übrig gebliebener Entwurf kommt beim nächsten Erfassen als Frage, sonst räumt ihn der Job weg.
     discard: async () => {
-      await discardDraftAction({ entwurfId: draftId })
+      await discardDraftAction({ entwurfId: draftId }).catch(() => null)
       return null
     },
   }
