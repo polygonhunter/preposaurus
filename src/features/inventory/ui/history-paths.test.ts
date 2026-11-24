@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { historyFilterSchema } from '../schemas/history'
-import { historyDayLabel, historyRangeText, outcomeLine } from './history-labels'
+import {
+  historyDayLabel,
+  historyRangeText,
+  historyTruncatedText,
+  outcomeLine,
+} from './history-labels'
 import { historyHref, readHistoryParams } from './history-paths'
 
 const typeId = '00000000-0000-4000-8000-0000000000a1'
@@ -56,5 +61,12 @@ describe('Texte des Verlaufs', () => {
   it('sagt, seit wann der Verlauf reicht', () => {
     expect(historyRangeText('2026-10-26')).toBe('Seit 26.10.2026.')
     expect(historyRangeText(null)).toBe('Alles, was ihr verbraucht oder entsorgt habt.')
+  })
+
+  it('verweist bei einer gekürzten Seite nur ohne gewählte Art auf den Verlauf der Art', () => {
+    expect(historyTruncatedText(false)).toBe(
+      'Hier stehen die neuesten 200 Packungen. Ältere findet ihr im Verlauf der einzelnen Lebensmittelart.',
+    )
+    expect(historyTruncatedText(true)).toBe('Hier stehen die neuesten 200 Packungen.')
   })
 })

@@ -2,13 +2,13 @@
 // und Person, neueste zuerst. Gefiltert auf den Haushalt über das Produkt (#133), auf Wunsch auf
 // bestimmte Produkte (eine Lebensmittelart) und ab einem Zeitpunkt.
 import 'server-only'
-import { and, desc, eq, gte, inArray, type SQL } from 'drizzle-orm'
+import { and, desc, eq, inArray } from 'drizzle-orm'
 import type { HistoryOutcome, TakenOutUnit } from '@/features/inventory/domain/history'
 import type { Database } from '@/server/db/connection'
 import { users } from '@/server/db/schema/account'
 import { products, units } from '@/server/db/schema/inventory'
-import { isAnyOf } from './id-list'
 import { DB_UNIT_STATUS, toBestBefore, toUnitStatus, type BestBeforeColumns } from './db-values'
+import { productCondition, takenFromCondition } from './stock-units-query'
 
 export type TakenOutQuery = Readonly<{
   /** Ohne Liste alle Produkte des Haushalts */
@@ -18,12 +18,6 @@ export type TakenOutQuery = Readonly<{
   takenFrom: Date | null
   limit: number
 }>
-
-const takenFromCondition = (takenFrom: Date | null): SQL | undefined =>
-  takenFrom === null ? undefined : gte(units.takenAt, takenFrom)
-
-const productCondition = (productIds: readonly string[] | undefined): SQL | undefined =>
-  productIds === undefined ? undefined : isAnyOf(units.productId, productIds)
 
 function toOutcome(status: Parameters<typeof toUnitStatus>[0]): HistoryOutcome {
   const outcome = toUnitStatus(status)

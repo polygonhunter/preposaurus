@@ -21,8 +21,13 @@ const columns = {
   checkedAt: units.checkedAt,
 }
 
-function productCondition(productIds: readonly string[] | undefined): SQL | undefined {
+export function productCondition(productIds: readonly string[] | undefined): SQL | undefined {
   return productIds === undefined ? undefined : isAnyOf(units.productId, productIds)
+}
+
+/** Packungen im Vorrat haben keinen Zeitpunkt und fallen mit einer Grenze heraus. */
+export function takenFromCondition(takenFrom: Date | null): SQL | undefined {
+  return takenFrom === null ? undefined : gte(units.takenAt, takenFrom)
 }
 
 function unitCondition(unitIds: readonly string[] | undefined): SQL | undefined {
@@ -93,8 +98,7 @@ export async function countUnitsByStatus(
       and(
         eq(products.householdId, householdId),
         productCondition(productIds),
-        // Packungen im Vorrat haben keinen Zeitpunkt und fallen mit einer Grenze heraus
-        takenFrom === null ? undefined : gte(units.takenAt, takenFrom),
+        takenFromCondition(takenFrom),
       ),
     )
     .groupBy(units.status)

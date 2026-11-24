@@ -2,10 +2,10 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getHistory } from '@/features/inventory/application/get-history'
 import { stockServices } from '@/features/inventory/application/stock-services'
-import { HISTORY_PAGE_LIMIT, historyFilterSchema } from '@/features/inventory/schemas/history'
+import { historyFilterSchema } from '@/features/inventory/schemas/history'
 import { HistoryDayList } from '@/features/inventory/ui/HistoryDayList'
 import { HistoryFilters } from '@/features/inventory/ui/HistoryFilters'
-import { historyRangeText } from '@/features/inventory/ui/history-labels'
+import { historyRangeText, historyTruncatedText } from '@/features/inventory/ui/history-labels'
 import { historyHref, readHistoryParams } from '@/features/inventory/ui/history-paths'
 import { HistoryTable } from '@/features/inventory/ui/HistoryTable'
 import { STOCK_PATH } from '@/features/inventory/ui/stock-paths'
@@ -57,7 +57,7 @@ export default async function HistoryPage({ searchParams }: PageProps<'/vorrat/v
       )}
       {page.isTruncated ? (
         <p className="px-8 pt-3 text-footnote text-fg2 breit:px-10">
-          {`Hier stehen die neuesten ${String(HISTORY_PAGE_LIMIT)} Packungen. Ältere findet ihr im Verlauf der einzelnen Lebensmittelart.`}
+          {historyTruncatedText(page.target !== null)}
         </p>
       ) : null}
     </>

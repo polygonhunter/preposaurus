@@ -2,7 +2,7 @@
 // welches MHD.
 import { dayParts, formatDayWithPrecision, toCalendarDay } from '@/shared/lib/dates'
 import type { HistoryEntry } from '../schemas/detail'
-import type { HistoryFilter, HistoryItem } from '../schemas/history'
+import { HISTORY_PAGE_LIMIT, type HistoryFilter, type HistoryItem } from '../schemas/history'
 import { formatDate } from './stock-format'
 
 const KIND_LABEL: Record<HistoryEntry['kind'], string> = {
@@ -56,4 +56,10 @@ export function historyRangeText(from: string | null): string {
   return from === null
     ? 'Alles, was ihr verbraucht oder entsorgt habt.'
     : `Seit ${formatDay(from)}.`
+}
+
+/** Satz unter einer gekürzten Seite. Auf den Verlauf einer Art zu verweisen, hilft nur ohne Art. */
+export function historyTruncatedText(hasTarget: boolean): string {
+  const shown = `Hier stehen die neuesten ${String(HISTORY_PAGE_LIMIT)} Packungen.`
+  return hasTarget ? shown : `${shown} Ältere findet ihr im Verlauf der einzelnen Lebensmittelart.`
 }
