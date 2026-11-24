@@ -32,7 +32,8 @@ export function SidebarLink({ item, isCurrent, count, isSub = false }: SidebarLi
       {count === undefined || count === 0 ? null : (
         <>
           {' '}
-          {/* Auf der getönten Fläche des gewählten Ziels reicht fg2 nicht für 4,5:1 (axe) */}
+          {/* Auf der getönten Fläche des gewählten Ziels hat fg2 nur 4,08:1. axe meldet das erst ab
+              zwei Ziffern, eine einzelne gilt dort als „shortTextContent“ (ungeprüft). */}
           <span className={cx('text-callout font-normal', isCurrent ? 'text-fg' : 'text-fg2')}>
             {count}
           </span>
