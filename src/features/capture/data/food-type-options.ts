@@ -26,7 +26,7 @@ export async function loadFoodTypeOptions(
     .from(foodTypes)
     .innerJoin(categories, eq(categories.id, foodTypes.categoryId))
     .where(isSelectableFoodType(db, householdId))
-    .orderBy(asc(foodTypes.sortOrder), asc(foodTypes.name))
+    .orderBy(asc(foodTypes.isSystem), asc(foodTypes.sortOrder), asc(foodTypes.name))
 }
 
 /** Eine Art des Haushalts als Grundlage einer Schätzung (#124), sonst null. */

@@ -5,6 +5,7 @@ import { moveFoodTypeAction } from '../actions/move-food-type-action'
 import type { FoodTypeEntry } from '../domain/category'
 import { foodTypeSummary } from './catalog-labels'
 import { MoveButtons } from './MoveButtons'
+import { SortableArea } from './SortableArea'
 
 type FoodTypeListProps = Readonly<{
   foodTypes: readonly FoodTypeEntry[]
@@ -40,7 +41,7 @@ export function FoodTypeList(props: FoodTypeListProps) {
     canEdit && isSortable === true
       ? foodTypes.filter((foodType) => !foodType.isSystem).map((foodType) => foodType.id)
       : []
-  return (
+  const list = (
     <Group labelledBy={labelledBy}>
       {foodTypes.map((foodType) => {
         const summary = foodTypeSummary(foodType)
@@ -49,6 +50,7 @@ export function FoodTypeList(props: FoodTypeListProps) {
         return (
           <Row
             key={foodType.id}
+            focusKey={foodType.id}
             title={foodType.name}
             subtitle={showPath === true ? `${path} · ${summary}` : summary}
             {...(canEdit ? { action: { href: foodTypePath(foodType.id) } } : {})}
@@ -58,4 +60,5 @@ export function FoodTypeList(props: FoodTypeListProps) {
       })}
     </Group>
   )
+  return ownIds.length < 2 ? list : <SortableArea>{list}</SortableArea>
 }
