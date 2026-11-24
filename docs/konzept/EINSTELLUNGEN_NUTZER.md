@@ -46,7 +46,7 @@ Einstufung: **notwendig** (ohne geht die App nicht) · **sinnvoll** (MVP) · **s
 
 | Bereich | Einstellung | Standard | Wer | Einstufung | Begründung | ID |
 |---|---|---|---|---|---|---|
-| Vorrat und Kategorien | Lagerorte anlegen, umbenennen, ausblenden | keine | A (Anlegen beim Erfassen: siehe Frage 9) | sinnvoll | Lagerort hängt am Produkt (VOR-05) | EIN-04 |
+| Vorrat und Kategorien | Lagerorte anlegen, umbenennen, ausblenden | keine | A (Anlegen beim Erfassen: A, M, Frage 9, #301) | sinnvoll | Lagerort hängt am Produkt (VOR-05) | EIN-04 |
 | Vorrat und Kategorien | Eigene Lebensmittelarten und Kategorien | Startliste (Seed) | A | sinnvoll | Baum laut #110. System-Einträge nur ausblendbar, nie löschbar | EIN-04 |
 | Vorrat und Kategorien | Sortierung, Piktogramm je Kategorie | Seed | A | später | Kosmetik | EIN-04 |
 | Vorrat und Kategorien | Schlagwörter | – | A | später | Laut MVP-Zuschnitt | VOR-06 |
@@ -270,7 +270,7 @@ Die Zähler liegen in der DB (`anmelde_sperre`, §6), damit ein Neustart sie nic
 | Nachkaufen | Eigene Einträge endgültig entfernen | ✓ | – (ausblenden reicht) |
 | Haushalt | Mitglieder, Ernährungsform, Allergien ändern | ✓ | liest |
 | Haushalt | Ziel und Zieldatum ändern | ✓ | liest |
-| Haushalt | Lagerorte, Lebensmittelarten, Kategorien verwalten | ✓ | liest, legt beim Erfassen neue Lebensmittelarten an (Frage 9 bzw. DATENKATALOG Frage 9, #298; Lagerort #301) |
+| Haushalt | Lagerorte, Lebensmittelarten, Kategorien verwalten | ✓ | liest, legt beim Erfassen neue Lebensmittelarten (Frage 9 bzw. DATENKATALOG Frage 9, #298) und Lagerorte (#301) an |
 | Haushalt | Ampel-Schwellen, „Noch gut zählt mit“, Erinnerungen des Haushalts | ✓ | liest |
 | KI | An/aus, Schlüssel, Modelle, Verbindung testen | ✓ | liest nur „an“ oder „aus“ |
 | KI | Hinweis vor dem ersten eigenen Foto bestätigen | ✓ | ✓ |
@@ -346,7 +346,7 @@ Diese Änderungen sind in `SCHNITTSTELLEN.md` als „Einstellungen → Datenstru
 | 6 | **Erzeugtes Passwort** als vier Wörter oder als 12 zufällige Zeichen? | Vier Wörter. Lässt sich vorlesen und abtippen |
 | 7 | **Hell/Dunkel und Startansicht** ganz streichen statt „später je Nutzer“? | Startansicht streichen. Dunkel später als Wahl je Gerät, ohne DB |
 | 8 | **Foto-Erkennung** in den Einstellungen unter „Haushalt“ (hier) oder „Daten & System“ (#108)? | Haushalt, neben dem Schalter aus EIN-06 |
-| 9 | **Darf ein Mitglied beim Erfassen einen neuen Lagerort anlegen?** EIN-04 sagt Admin | Ja, anlegen. Umbenennen und Ausblenden bleiben beim Admin. Sonst stockt die Erfassung. **Entschieden (Maintainer, 2026-11-24): ja** (#298, Option a). Umsetzung beim Erfassen: #301 |
+| 9 | **Darf ein Mitglied beim Erfassen einen neuen Lagerort anlegen?** EIN-04 sagt Admin | Ja, anlegen. Umbenennen und Ausblenden bleiben beim Admin. Sonst stockt die Erfassung. **Entschieden (Maintainer, 2026-11-24): ja** (#298, Option a). Umgesetzt mit #301: „+ Neuer Lagerort“ beim Erfassen für Admin und Mitglied, gleicher Name wählt den vorhandenen Ort; Umbenennen, Ausblenden, Löschen, Sortieren und das Formular unter Einstellungen bleiben beim Admin |
 | 10 | **Better Auth ohne Admin-Plugin**, mit eigenen Use-Cases? | Ja, wenn der Probelauf vor M3-01 zeigt, dass sich Hash und Sitzungen sauber über den Server-Kontext setzen lassen. Sonst Admin-Plugin mit gesperrten Routen für Löschen und Imitieren |
 | 11 | **Ersteinrichtung ohne Einrichtungs-Code:** Wer zuerst öffnet, wird Admin | Ja. Ein Code aus dem Container-Log wäre sicherer, kostet aber die 2 Minuten. Als Option für später notieren |
 | 12 | **Mehrere Admins** erlaubt? | Ja, ohne Obergrenze. Bei zwei Erwachsenen empfiehlt die App einen zweiten |

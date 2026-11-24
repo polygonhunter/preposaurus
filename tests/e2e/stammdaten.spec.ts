@@ -30,10 +30,19 @@ test('Lagerort anlegen, beim Erfassen finden, umbenennen, ausblenden und lösche
   await nameField.fill('Speisekammer')
   await page.getByRole('button', { name: 'Hinzufügen' }).click()
   await expect(page.getByText('„Speisekammer“ ist angelegt.')).toBeVisible()
+  // Andere Projekte legen gleichzeitig Orte an (z. B. beim Erfassen, #301): Geprüft wird die Lage
+  // zum Nachbarn, nicht der letzte Platz der Liste.
   const visible = page.getByRole('list', { name: 'Zur Wahl beim Erfassen' })
-  await expect(visible.getByRole('listitem').last()).toContainText('Speisekammer')
+  const names = async () => visible.getByRole('listitem').allTextContents()
+  const positionOf = async (name: string) =>
+    (await names()).findIndex((text) => text.includes(name))
+  await expect(visible).toContainText('Speisekammer')
+  expect(await positionOf('Speisekammer')).toBeGreaterThan(await positionOf('Keller'))
+  const neighbour = (await names())[(await positionOf('Speisekammer')) - 1] ?? ''
   await page.getByRole('button', { name: 'Speisekammer nach oben' }).click()
-  await expect(visible.getByRole('listitem').last()).not.toContainText('Speisekammer')
+  await expect
+    .poll(async () => (await positionOf('Speisekammer')) < (await positionOf(neighbour)))
+    .toBe(true)
   await expectAccessibleLayout(page)
 
   await page.goto('/neu/manuell')
