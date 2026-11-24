@@ -57,7 +57,6 @@ export function ManualCaptureFields({
           }}
           error={errors.foodTypeId}
           adding={{
-            canAdd: options.canAddFoodTypes,
             categories: options.categories,
             onAdded: onFoodTypeAdded,
           }}

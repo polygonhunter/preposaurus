@@ -29,13 +29,11 @@ export interface CaptureOptionsReader {
 interface CaptureOptionsRequest {
   householdId: string
   userId: string
-  /** Admin: darf beim Erfassen neue Lebensmittelarten anlegen (#142) */
-  isAdmin: boolean
 }
 
 export async function getCaptureOptions(
   reader: CaptureOptionsReader,
-  { householdId, userId, isAdmin }: CaptureOptionsRequest,
+  { householdId, userId }: CaptureOptionsRequest,
 ): Promise<CaptureOptions> {
   const [foodTypes, containers, storageLocations, knownProducts, lastUsed, hasStock, categories] =
     await Promise.all([
@@ -55,6 +53,5 @@ export async function getCaptureOptions(
     ...applyLastUsed(lastUsed, { foodTypes, storageLocations }),
     isStockEmpty: !hasStock,
     categories,
-    canAddFoodTypes: isAdmin,
   }
 }
