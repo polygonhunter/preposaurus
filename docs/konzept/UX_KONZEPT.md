@@ -145,13 +145,14 @@ Vier Bereiche plus eine Handlung. Die Tabs bleiben wie beschlossen, „Neu“ he
 |---|---|---|---|
 | iPhone, Duo zugeklappt | kompakt | Dock unten: Übersicht · Vorrat · **Erfassen** (Mitte, betont) · Nachkaufen · Statistik. Zahnrad oben rechts. Unterseiten haben oben links „Zurück“ mit dem Namen des Ziels | eine Spalte. Details sind eigene Seiten, kurze Aktionen ein Blatt von unten |
 | Duo aufgeklappt hochkant | mittel | Dock unten wie kompakt | Liste oben, Detail unten. Nichts Antippbares auf der Falz |
-| Duo aufgeklappt quer, schmales PC-Fenster | breit | schmale Leiste links mit denselben fünf Zielen, Einstellungen unten | Liste links, Detail rechts. Die Falz liegt zwischen den beiden Hälften |
+| Duo aufgeklappt quer, schmales PC-Fenster | breit | Seitenleiste links mit denselben Zielen, Einstellungen unten (die schmale Leiste entfiel mit #245) | Liste links (340 px), Detail rechts. Mit Falz (#253) liegt die Falz zwischen Liste und Detail, einspaltige Seiten stehen ganz auf dem rechten Bildschirm. Nichts Antippbares auf der Falz |
 | PC | weit | Seitenleiste links mit Beschriftung. „Bald fällig“ steht eingerückt unter Übersicht, weil Platz da ist. „Erfassen“ als Knopf oben in der Leiste | Vorrat dreispaltig: Warengruppen, Liste, Detail. Tabellen statt Karten, Mehrfachauswahl |
 
 Regeln:
 - **Gleiche Namen, gleiche Reihenfolge** auf allen Geräten. Nur die Anordnung wechselt.
 - **Höchstens zwei Ebenen unter einem Tab.** Tiefer geht es nur über die Pfadzeile im Vorrat.
 - **Jeder Screen hat eine Adresse.** Push, Mail und Zurück-Taste landen genau dort, auch Filter stehen in der Adresse. Auf- und Zuklappen ändert nur das Layout.
+- **Falz nur, wo eine ist (#253):** Das Layout mit Falz gilt nur, wenn der Browser zwei Bildschirme meldet (Viewport Segments). Ein PC-Fenster gleicher Breite bekommt die gewohnte Aufteilung ohne Grenze in der Fenstermitte.
 - **Erfassen läuft im Vollbild** ohne Dock, mit „Abbrechen“ oben links. Ab „breit“ bleibt die Seitenleiste, „Abbrechen“ steht trotzdem da (#285). Gehen dabei Eingaben verloren, fragt die App vorher ruhig nach.
 
 ### Sitemap

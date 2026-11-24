@@ -503,6 +503,8 @@ Punkte, die eine Entscheidung oder Handlung des Maintainers brauchen. Die vorlä
 | U13 | Abnahme auf einem echten iPhone, optional im Simulator für das iPhone Duo | M13-06, M12-07 | – |
 | U14 | Optional: Docker lokal | nie zwingend | Docker läuft nur in der CI und auf dem NAS |
 
+**Stand 2026-11-24:** Der Maintainer hat die Punkte delegiert („Mach einfach passt schon“, #106). Entschieden ist jeweils nach Empfehlung bzw. vorläufiger Annahme; Einzelheiten in `05_STATUS_ENTSCHEIDUNGEN.md` („Delegierte Entscheidungen“). Erledigt: U1, U2 (Ausnahmen zugelassen), U3 (Werte geprüft, Seed `geprueft = true`), U4 und U14 (nicht nötig), U11 (siehe 7.3), U12 (Offline nur lesen). Was nur der Maintainer tun kann, steht gesammelt in #311: U5, U6, U7 (NAS-Modell und Installation), U8, U9, U10 (Lese-Token), U13.
+
 ### 7.2 Technische Risiken
 
 | Risiko | Folge | Gegenmaßnahme |
@@ -549,6 +551,8 @@ W1 Zugriff immer über Tailscale · W3 nur Anthropic, Adapter bleibt austauschba
 | Vorrat-Filter: drei Reihen (A) oder eine Reihe plus „Filter“ (B) | M4-02 | drei Reihen |
 | Eigene Ampelstufe für das Verbrauchsdatum | M2-04 | nein, nur die Regel aus ROT-06 |
 | Tailscale-Zugang für weitere Haushaltsmitglieder (L4) | M13-05 | Anleitung beschreibt beide Wege |
+
+**Stand 2026-11-24:** Alle Zeilen sind entschieden (vom Maintainer delegiert, nach der vorläufigen Annahme). Abweichend von der Spalte gilt, was der Maintainer schon vorher festgelegt hatte: „Noch gut“ zählt standardmäßig nicht, ein Schalter unter Haushalt stellt es um (05, „Noch gut“ Update). Die Rundung meint die Balken; im Satz stehen ganze Tage, abgerundet (Runde 1, Frage 13). Die Punkte „Vom Plan aufgelöst“ oben gelten damit als bestätigt.
 
 **Noch offen aus Issue #3:** ROT-08 entfällt (später). `linkMemberAction` für HH-06 ist in M3-10 eingeplant. `quelle_bedarf` kommt mit M0-08 in den Kanon. Die Freigaben stehen schon in `05`. Issue #3 kann nach M0-08 und M3-10 geschlossen werden.
 

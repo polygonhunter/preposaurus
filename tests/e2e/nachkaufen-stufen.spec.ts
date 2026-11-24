@@ -3,7 +3,8 @@ import { expect, test } from '../helpers/e2e-test'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Nachkaufen je Stufe (#284, #288): Kompakt steht „Ausblenden“ unter dem Text, damit Titel höchstens
-// zweizeilig umbrechen. Ab „mittel“ steht der Knopf rechts in der Zeile. Ab „breit“ ist der Inhalt
+// zweizeilig umbrechen. Ab „mittel“ steht der Knopf rechts in der Zeile, mit Falz (Seite auf dem
+// rechten Bildschirm, #253) wieder darunter wie kompakt. Ab „breit“ ist der Inhalt
 // eine Lesespalte von höchstens 768 px. Diese Tests ändern nichts.
 
 const BREIT = 900
@@ -46,8 +47,11 @@ async function hideButtonBelowTitle(row: Locator): Promise<boolean> {
   return button.y >= title.y + title.height
 }
 
-test('kompakt: Titel höchstens zweizeilig, „Ausblenden“ unter dem Text', async ({ page }) => {
-  test.skip(!isCompact(page), 'Nur in „kompakt“')
+test('kompakt und mit Falz: Titel höchstens zweizeilig, „Ausblenden“ unter dem Text', async ({
+  page,
+  fold,
+}) => {
+  test.skip(!isCompact(page) && fold === null, 'Nur in „kompakt“ und mit Falz')
   const gaps = await openRestock(page)
 
   const lines = await titleLineCounts(gaps)
@@ -56,8 +60,8 @@ test('kompakt: Titel höchstens zweizeilig, „Ausblenden“ unter dem Text', as
   expect(await hideButtonBelowTitle(gaps.getByRole('listitem').first())).toBe(true)
 })
 
-test('ab „mittel“: „Ausblenden“ steht rechts in der Zeile', async ({ page }) => {
-  test.skip(isCompact(page), 'Erst ab „mittel“')
+test('ab „mittel“ ohne Falz: „Ausblenden“ steht rechts in der Zeile', async ({ page, fold }) => {
+  test.skip(isCompact(page) || fold !== null, 'Erst ab „mittel“, ohne Falz')
   const gaps = await openRestock(page)
 
   expect(await hideButtonBelowTitle(gaps.getByRole('listitem').first())).toBe(false)
