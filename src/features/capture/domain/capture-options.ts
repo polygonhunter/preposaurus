@@ -60,8 +60,6 @@ export interface CaptureOptions {
   isStockEmpty: boolean
   /** Sichtbare Kategorien: Vorschlag der Erkennung zuordnen und neue Arten anlegen (#142) */
   categories: CategoryChoice[]
-  /** Neue Lebensmittelarten legt nur ein Admin an (#126, #142), Mitglieder sehen einen Hinweis */
-  canAddFoodTypes: boolean
 }
 
 /** Was die Datenschicht zur letzten Erfassung liefert, ohne zu wissen, was auswählbar ist. */
