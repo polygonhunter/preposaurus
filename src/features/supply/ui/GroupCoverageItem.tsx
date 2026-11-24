@@ -19,8 +19,8 @@ const SEPARATOR =
   'relative not-first:before:absolute not-first:before:top-0 not-first:before:right-0 not-first:before:left-4 not-first:before:hairline'
 
 // Fläche über der Zahl rechts („6,6 von 10 Tagen“, der Name „Menge reicht“ steht im Kopf der
-// Liste), so breit wie deren Spalte samt Rand. Sie liegt
-// über der Fläche des Links, ein Tipp auf die Zahl öffnet also das Blatt statt des Vorrats (#230).
+// Liste), so breit wie deren Spalte samt Rand. Sie liegt über der Fläche des Links, ein Tipp auf
+// die Zahl öffnet also das Blatt statt des Vorrats (#230).
 const EXPLAIN_AREA = 'absolute right-0 bottom-0 z-10 h-11 w-40 rounded-group'
 
 // Eine Warengruppe: Name, bei der knappsten das Wort „am knappsten“, darunter der Balken. Der Name

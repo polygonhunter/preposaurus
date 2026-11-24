@@ -14,8 +14,9 @@ type GroupCoverageListProps = Readonly<{
 const HEADING_ID = 'warengruppen'
 
 // Abdeckung je Warengruppe (UX-Konzept A9, #69): „X von Y Tagen“ als Balken, Wasser steht als
-// zweiter Balken oben. Der Name „Menge reicht“ steht einmal über der Spalte der Zahlen (#209). Die knappste Gruppe trägt das Wort, nicht nur die Farbe. Tippen öffnet den
-// Vorrat dieser Warengruppe, ein Tipp auf die Zahl ihren Rechenweg (#230).
+// zweiter Balken oben. Der Name „Menge reicht“ steht einmal über der Spalte der Zahlen (#209).
+// Die knappste Gruppe trägt das Wort, nicht nur die Farbe. Tippen öffnet den Vorrat dieser
+// Warengruppe, ein Tipp auf die Zahl ihren Rechenweg (#230).
 export function GroupCoverageList({ groups, source }: GroupCoverageListProps) {
   const goalDays = groups[0]?.goalDays ?? null
   const scaleDays = scaleFor(

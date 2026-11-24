@@ -17,8 +17,8 @@ const HEAD =
 const HEAD_NUMBER = `${HEAD} text-right`
 
 // Vorrat als Tabelle ab „weit“ (DESIGN_SYSTEM §6, M12-04): echte Tabelle mit Spaltenköpfen, je
-// Warengruppe eine Zwischenzeile (Link auf Ebene 2), Spalten Packungen · Menge · kcal · Satt für · nächstes MHD. Die
-// Reihenfolge ist die des Baums (Warengruppe, Kategorie, Name) wie in der Liste.
+// Warengruppe eine Zwischenzeile (Link auf Ebene 2), Spalten Packungen · Menge · kcal · Satt für ·
+// nächstes MHD. Die Reihenfolge ist die des Baums (Warengruppe, Kategorie, Name) wie in der Liste.
 export function StockTable({ groups, selected = null, caption }: StockTableProps) {
   return (
     <table className="w-full border-collapse text-callout">
