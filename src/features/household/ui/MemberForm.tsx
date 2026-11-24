@@ -1,7 +1,6 @@
 'use client'
 import { useActionState, useState } from 'react'
 import { ActionForm } from '@/shared/ui/ActionForm'
-import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import { RadioChips } from '@/shared/ui/RadioChips'
 import { Segmented } from '@/shared/ui/Segmented'
@@ -43,6 +42,7 @@ export function MemberForm({
       result={state}
       announcement={firstError(state)}
       action={formAction}
+      submit={{ label: 'Speichern', isPending }}
       className="mx-4 flex flex-col gap-4 pt-6 breit:mx-6"
     >
       <input type="hidden" name="id" value={memberId ?? ''} />
@@ -87,11 +87,6 @@ export function MemberForm({
       </p>
       <MemberMoreFields values={values} errors={errors} />
       {state.message ? <p className="px-4 text-footnote text-red">{state.message}</p> : null}
-      <div className="pt-2">
-        <Button type="submit" pendingLabel={isPending ? 'Speichert …' : undefined}>
-          Speichern
-        </Button>
-      </div>
     </ActionForm>
   )
 }

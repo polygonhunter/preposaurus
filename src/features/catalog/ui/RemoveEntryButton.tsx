@@ -1,6 +1,7 @@
 'use client'
 import { useActionState, useState } from 'react'
 import { Button } from '@/shared/ui/Button'
+import { FormSubmit } from '@/shared/ui/FormSubmit'
 import { Sheet } from '@/shared/ui/Sheet'
 import { REMOVE_IDLE, type RemoveState } from '../actions/catalog-form-state'
 
@@ -38,12 +39,16 @@ export function RemoveEntryButton({ id, name, action, label }: RemoveEntryButton
               {state.message}
             </p>
           ) : null}
-          <Button type="submit" pendingLabel={isPending ? 'Löscht …' : undefined}>
-            Löschen
-          </Button>
-          <Button variant="plain" onClick={close}>
-            Abbrechen
-          </Button>
+          <FormSubmit
+            label="Löschen"
+            isPending={isPending}
+            pendingLabel="Löscht …"
+            after={
+              <Button variant="plain" onClick={close}>
+                Abbrechen
+              </Button>
+            }
+          />
         </form>
       </Sheet>
     </div>

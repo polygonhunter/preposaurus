@@ -3,7 +3,6 @@ import { useActionState, useState } from 'react'
 import { ActionForm } from '@/shared/ui/ActionForm'
 import { Button } from '@/shared/ui/Button'
 import { PasswordField } from '@/shared/ui/PasswordField'
-import { SaveStatus } from '@/shared/ui/SaveStatus'
 import { Sheet } from '@/shared/ui/Sheet'
 import { AI_ACTION_IDLE } from '../actions/ai-action-state'
 import { replaceAiKeyAction } from '../actions/replace-ai-key-action'
@@ -33,6 +32,16 @@ export function ReplaceKeyButton({ connectionId, name }: ReplaceKeyButtonProps) 
           action={formAction}
           result={state}
           announcement={state.errors?.apiKey}
+          submit={{
+            label: 'Ersetzen',
+            isPending,
+            status: state.errors?.apiKey === undefined ? state : AI_ACTION_IDLE,
+            after: (
+              <Button variant="plain" onClick={close}>
+                {state.status === 'saved' ? 'Fertig' : 'Abbrechen'}
+              </Button>
+            ),
+          }}
           className="flex flex-col gap-3"
         >
           <input type="hidden" name="id" value={connectionId} />
@@ -43,15 +52,6 @@ export function ReplaceKeyButton({ connectionId, name }: ReplaceKeyButtonProps) 
             autoComplete="off"
             required
           />
-          <SaveStatus state={state.errors?.apiKey === undefined ? state : AI_ACTION_IDLE} />
-          <div className="flex flex-col gap-2">
-            <Button type="submit" pendingLabel={isPending ? 'Speichert …' : undefined}>
-              Ersetzen
-            </Button>
-            <Button variant="plain" onClick={close}>
-              {state.status === 'saved' ? 'Fertig' : 'Abbrechen'}
-            </Button>
-          </div>
         </ActionForm>
       </Sheet>
     </>
