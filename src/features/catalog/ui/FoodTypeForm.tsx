@@ -8,13 +8,8 @@ import { SaveStatus } from '@/shared/ui/SaveStatus'
 import { entryFormIdle } from '../actions/entry-form-state'
 import { saveFoodTypeAction, type FoodTypeFormState } from '../actions/save-food-type-action'
 import { CategoryPicker, type CategoryChoice } from './CategoryPicker'
-
-type FoodTypeFormValues = Readonly<{
-  name: string
-  categoryId: string
-  searchTerms: string
-  kcalPer100: string
-}>
+import type { FoodTypeFormValues } from './food-type-form-values'
+import { FoodTypeReferenceFields } from './FoodTypeReferenceFields'
 
 type FoodTypeFormProps = Readonly<{
   categories: readonly CategoryChoice[]
@@ -25,9 +20,8 @@ type FoodTypeFormProps = Readonly<{
 
 const INITIAL_STATE: FoodTypeFormState = entryFormIdle()
 
-// Eigene Lebensmittelart anlegen oder ändern (#126): Name und Kategorie sind Pflicht, Suchwörter und
-// ein kcal-Richtwert freiwillig. Der Richtwert gilt nur, wenn ein Produkt keine eigenen Nährwerte
-// hat, und steht dann als „ca.“ da.
+// Eigene Lebensmittelart anlegen oder ändern (#126, #243): Name und Kategorie sind Pflicht,
+// Suchwörter und Richtwerte (kcal, Makros, übliche Haltbarkeit) freiwillig.
 export function FoodTypeForm({ categories, initialValues, foodTypeId }: FoodTypeFormProps) {
   const [state, formAction, isPending] = useActionState(saveFoodTypeAction, INITIAL_STATE)
   const formRef = useFocusFirstInvalid(state)
@@ -58,17 +52,8 @@ export function FoodTypeForm({ categories, initialValues, foodTypeId }: FoodType
         hint="Andere Namen, unter denen ihr sie beim Erfassen findet, durch Komma getrennt."
         error={errors.searchTerms}
       />
-      <Field
-        label="kcal je 100 g oder ml (freiwillig)"
-        name="kcal"
-        inputMode="decimal"
-        defaultValue={values.kcalPer100}
-        hint="Richtwert für Produkte ohne eigene Nährwerte, steht dann als „ca.“ da."
-        error={errors.kcalPer100}
-      />
-      <LiveMessage
-        message={errors.name ?? errors.categoryId ?? errors.searchTerms ?? errors.kcalPer100}
-      />
+      <FoodTypeReferenceFields values={values} errors={errors} />
+      <LiveMessage message={Object.values(errors)[0]} />
       <div className="flex items-center justify-between gap-3">
         <SaveStatus state={state} />
         <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Speichert …' : undefined}>

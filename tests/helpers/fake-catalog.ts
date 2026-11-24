@@ -32,6 +32,10 @@ export const foodType = (id: string, extra: Partial<FoodTypeEntry> = {}): FoodTy
   isCategoryHidden: false,
   searchTerms: [],
   kcalPer100: null,
+  proteinPer100: null,
+  carbsPer100: null,
+  fatPer100: null,
+  typicalShelfLifeMonths: null,
   productCount: 0,
   ...extra,
 })
@@ -67,6 +71,10 @@ export function fakeCatalog(categories: CategoryEntry[], foodTypes: FoodTypeEntr
       return Promise.resolve()
     },
     remove: (): Promise<RemoveOutcome> => Promise.resolve('in-use'),
+    saveOrder: (_household: string, ids: readonly string[]) => {
+      calls.push(`order-food-types:${ids.join('|')}`)
+      return Promise.resolve()
+    },
   }
   return { deps: { categories: categoryRepository, foodTypes: foodTypeRepository }, calls }
 }

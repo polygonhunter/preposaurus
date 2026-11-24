@@ -21,6 +21,14 @@ import { products } from '../../../src/server/db/schema/inventory'
 import { insertBasics, type Basics } from '../../helpers/db-fixtures'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
 
+const NO_REFERENCE = {
+  kcalPer100: null,
+  proteinPer100: null,
+  carbsPer100: null,
+  fatPer100: null,
+  typicalShelfLifeMonths: null,
+}
+
 describe('Kategorien und Lebensmittelarten in der Datenbank', () => {
   let testDb: TestDb
   let categoryRepository: CategoryRepository
@@ -119,6 +127,7 @@ describe('Kategorien und Lebensmittelarten in der Datenbank', () => {
       key: 'eigen_dinkelpops',
       categoryId: basics.categoryId,
       searchTerms: ['Knusperflocken', 'Pops'],
+      ...NO_REFERENCE,
       kcalPer100: 380,
     })
     if (id === null) throw new Error('Art fehlt')
@@ -137,7 +146,7 @@ describe('Kategorien und Lebensmittelarten in der Datenbank', () => {
         name: 'X',
         categoryId: basics.categoryId,
         searchTerms: [],
-        kcalPer100: null,
+        ...NO_REFERENCE,
       }),
     ).toBe(false)
   })
@@ -152,7 +161,7 @@ describe('Kategorien und Lebensmittelarten in der Datenbank', () => {
       name: 'Dinkelpops',
       categoryId: basics.categoryId,
       searchTerms: ['Frühstück'],
-      kcalPer100: null,
+      ...NO_REFERENCE,
     })
 
     const after = (await foodTypeRepository.list(basics.householdId)).find(
@@ -201,7 +210,7 @@ describe('Kategorien und Lebensmittelarten in der Datenbank', () => {
       key: 'eigen_testart',
       categoryId: id,
       searchTerms: [],
-      kcalPer100: null,
+      ...NO_REFERENCE,
     })
     if (typeId === null) throw new Error('Art fehlt')
 
@@ -220,7 +229,7 @@ describe('Kategorien und Lebensmittelarten in der Datenbank', () => {
       key: 'eigen_wandernd',
       categoryId: basics.categoryId,
       searchTerms: [],
-      kcalPer100: null,
+      ...NO_REFERENCE,
     })
     if (target === null || typeId === null) throw new Error('Einträge fehlen')
     const product = buildProduct({
@@ -234,7 +243,7 @@ describe('Kategorien und Lebensmittelarten in der Datenbank', () => {
       name: 'Wandernde Art',
       categoryId: target,
       searchTerms: [],
-      kcalPer100: null,
+      ...NO_REFERENCE,
     })
 
     const [moved] = await testDb.db

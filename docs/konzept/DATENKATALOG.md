@@ -135,9 +135,9 @@ Hinweis: HH-02 nennt das Geburtsjahr als Pflicht. Das ist durch den MVP-Zuschnit
 | `kategorie.kcal_durchschnitt_100`, `uebliche_haltbarkeit_monate` **[S]** | alte Ersatzwerte | numeric, int | o | S | keine mehr: Richtwerte stehen an der Lebensmittelart (#110, UX §4: eigene Art ohne Richtwert zählt mit 0) | – |
 | `lebensmittelart.name`, `kategorie_id`, `sortierung`, `ausgeblendet` | „Spaghetti“ | text, uuid | P | S / M | Vorrat-Zeile, Detail, Suche, Bald fällig, Nachkaufen, Erfassen, KI-Schema A | MVP |
 | `lebensmittelart.schluessel` **[Ä]** | Schlüssel für KI-Liste und Export | text | P (Vorschlag) | S / Sys (Slug aus Name) | KI-Schema A braucht für **eigene** Arten einen Wert. Vorschlag: Schlüssel für alle Arten, UNIQUE je Haushalt (`NULLS NOT DISTINCT`) | MVP |
-| `lebensmittelart.kcal_100` | kcal-Richtwert | numeric | o | S | A1, A5, A8 als „ca.“, A18 | MVP |
-| `lebensmittelart.eiweiss_100`, `kh_100`, `fett_100` **[L]** | Makro-Richtwerte | numeric | o | S | A6, A8 für Produkte ohne Tabelle. Ohne sie fehlen Makros genau bei den Produkten, die „ca.“ tragen | MVP |
-| `lebensmittelart.uebliche_haltbarkeit_monate` | Richtwert Haltbarkeit | int | o | S | Hinweis auf Detailseite, M2-09 Plausibilität („weit weg vom Üblichen“). Nie als MHD (#110), Ausnahme siehe Frage 3 | MVP |
+| `lebensmittelart.kcal_100` | kcal-Richtwert | numeric | o | S / M (eigene) | A1, A5, A8 als „ca.“, A18 | MVP |
+| `lebensmittelart.eiweiss_100`, `kh_100`, `fett_100` **[L]** | Makro-Richtwerte | numeric | o | S / M (eigene, #243) | A6, A8 für Produkte ohne Tabelle. Ohne sie fehlen Makros genau bei den Produkten, die „ca.“ tragen | MVP |
+| `lebensmittelart.uebliche_haltbarkeit_monate` | Richtwert Haltbarkeit | int | o | S / M (eigene, #243) | Hinweis auf Detailseite, M2-09 Plausibilität („weit weg vom Üblichen“). Nie als MHD (#110), Ausnahme siehe Frage 3 | MVP |
 | `lebensmittelart.piktogramm` | – | – | – | – | Entscheidung: Kategorie-Piktogramm reicht (an Design gemeldet) | – |
 | `behaelter.schluessel`, `name`, `sortierung` | Dose, Glas … | text | P | S | Filter (VOR-03), KI-Schema A (Liste), Wiedererkennen eines Produkts | MVP |
 | `lagerort.name`, `sortierung` | Keller, Küche | text, int | P | M | Filter (A19, VOR-05), Bald fällig „nach Lagerort“ | MVP |

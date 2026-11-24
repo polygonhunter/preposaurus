@@ -12,6 +12,10 @@ const foodTypeInput = (name: string, categoryId = 'nudeln') => ({
   categoryId,
   searchTerms: ['Pasta'],
   kcalPer100: null,
+  proteinPer100: null,
+  carbsPer100: null,
+  fatPer100: null,
+  typicalShelfLifeMonths: null,
 })
 
 describe('Kategorien verwalten', () => {

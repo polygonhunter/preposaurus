@@ -1,5 +1,6 @@
 // Kurze Texte der Stammdaten-Seiten (EIN-04).
-import type { CategoryEntry, FoodTypeEntry } from '../domain/category'
+import { formatGermanNumber } from '@/shared/lib/quantities'
+import type { CategoryEntry, FoodTypeEntry, FoodTypeReference } from '../domain/category'
 import type { CategoryChoice } from './CategoryPicker'
 
 export function productCountLabel(count: number): string {
@@ -35,4 +36,25 @@ export function categoryChoices(
   return categories
     .filter((category) => !category.isHidden || category.id === currentId)
     .map(({ id, name, productGroupName }) => ({ id, name, productGroupName }))
+}
+
+const NO_REFERENCE = 'kein Richtwert'
+
+const amountOrNone = (value: number | null, unit: string) =>
+  value === null ? NO_REFERENCE : `${formatGermanNumber(value)} ${unit}`
+
+const monthsLabel = (months: number | null) => {
+  if (months === null) return NO_REFERENCE
+  return months === 1 ? '1 Monat' : `${String(months)} Monate`
+}
+
+/** Richtwerte zum Lesen (#243): „Brennwert · 359 kcal“, fehlende als „kein Richtwert“ */
+export function referenceFacts(reference: FoodTypeReference): { title: string; value: string }[] {
+  return [
+    { title: 'Brennwert', value: amountOrNone(reference.kcalPer100, 'kcal') },
+    { title: 'Eiweiß', value: amountOrNone(reference.proteinPer100, 'g') },
+    { title: 'Kohlenhydrate', value: amountOrNone(reference.carbsPer100, 'g') },
+    { title: 'Fett', value: amountOrNone(reference.fatPer100, 'g') },
+    { title: 'Übliche Haltbarkeit', value: monthsLabel(reference.typicalShelfLifeMonths) },
+  ]
 }

@@ -1,10 +1,11 @@
-// Lebensmittelarten in der Verwaltung (#126): System-Arten und eigene des Haushalts. Jede Abfrage
-// filtert auf den Haushalt. Ändern und Löschen treffen nur eigene Arten; die Suchwörter werden beim
-// Speichern als Ganzes ersetzt. Wechselt eine eigene Art die Kategorie, ziehen ihre Produkte über
-// den zusammengesetzten Fremdschlüssel (ON UPDATE CASCADE) mit.
+// Lebensmittelarten in der Verwaltung (#126, #243): System-Arten und eigene des Haushalts. Jede
+// Abfrage filtert auf den Haushalt. Ändern, Sortieren und Löschen treffen nur eigene Arten; die
+// Suchwörter werden beim Speichern als Ganzes ersetzt. Wechselt eine eigene Art die Kategorie,
+// ziehen ihre Produkte über den zusammengesetzten Fremdschlüssel (ON UPDATE CASCADE) mit, und sie
+// rückt dort ans Ende der eigenen Arten.
 import 'server-only'
 import { and, asc, eq, isNull, notExists, or, sql } from 'drizzle-orm'
-import type { FoodTypeEntry } from '@/features/catalog/domain/category'
+import type { FoodTypeEntry, FoodTypeReference } from '@/features/catalog/domain/category'
 import type { Database } from '@/server/db/connection'
 import { loadOwnSearchTerms } from '@/server/db/queries/own-search-terms'
 import { categories } from '@/server/db/schema/catalog'
@@ -13,14 +14,15 @@ import { foodTypes } from '@/server/db/schema/food-types'
 import { products } from '@/server/db/schema/inventory'
 import { productGroups } from '@/server/db/schema/recommendation'
 import { categoryHiddenBy, foodTypeHiddenBy, setFoodTypeHidden } from './catalog-hiding'
+import { fromReferenceRow, referenceColumns, toReferenceRow } from './food-type-columns'
 import type { RemoveOutcome } from './remove-outcome'
 
-type FoodTypeValues = Readonly<{
-  name: string
-  categoryId: string
-  searchTerms: readonly string[]
-  kcalPer100: number | null
-}>
+type FoodTypeValues = FoodTypeReference &
+  Readonly<{
+    name: string
+    categoryId: string
+    searchTerms: readonly string[]
+  }>
 
 export interface FoodTypeRepository {
   list: (householdId: string) => Promise<FoodTypeEntry[]>
@@ -31,12 +33,27 @@ export interface FoodTypeRepository {
   update: (householdId: string, id: string, values: FoodTypeValues) => Promise<boolean>
   setHidden: (householdId: string, id: string, isHidden: boolean) => Promise<void>
   remove: (householdId: string, id: string) => Promise<RemoveOutcome>
+  /** Nummeriert die übergebenen eigenen Arten in dieser Reihenfolge neu durch */
+  saveOrder: (householdId: string, ids: readonly string[]) => Promise<void>
 }
 
 const ownFoodType = (householdId: string, id: string) =>
   and(eq(foodTypes.householdId, householdId), eq(foodTypes.id, id))
 
-const toKcalColumn = (kcal: number | null) => (kcal === null ? null : String(kcal))
+// Eigene Arten stehen in ihrer Kategorie vor den System-Arten (Sortierung nach ist_system, dann
+// sortierung), eine neue kommt ans Ende der eigenen.
+const nextOwnSortOrder = (householdId: string, categoryId: string) =>
+  sql<number>`(select coalesce(max(own.sortierung), -1) + 1 from ${foodTypes} own
+    where own.haushalt_id = ${householdId} and own.kategorie_id = ${categoryId})`
+
+// Wie der Baum: Warengruppe, Kategorie, eigene Arten vor denen der Startliste
+const CATALOG_ORDER = [
+  asc(productGroups.sortOrder),
+  asc(categories.name),
+  asc(foodTypes.isSystem),
+  asc(foodTypes.sortOrder),
+  asc(foodTypes.name),
+]
 
 async function list(db: Database, householdId: string): Promise<FoodTypeEntry[]> {
   const productCount = sql<number>`(select count(*)::int from ${products}
@@ -54,21 +71,21 @@ async function list(db: Database, householdId: string): Promise<FoodTypeEntry[]>
       isCategoryRetired: categories.isHidden,
       isCategoryHiddenByHousehold: categoryHiddenBy(db, householdId, categories.id),
       productGroupName: productGroups.name,
-      kcalPer100: foodTypes.kcalPer100,
+      ...referenceColumns,
       productCount,
     })
     .from(foodTypes)
     .innerJoin(categories, eq(categories.id, foodTypes.categoryId))
     .innerJoin(productGroups, eq(productGroups.id, categories.productGroupId))
     .where(or(isNull(foodTypes.householdId), eq(foodTypes.householdId, householdId)))
-    .orderBy(asc(productGroups.sortOrder), asc(categories.name), asc(foodTypes.name))
+    .orderBy(...CATALOG_ORDER)
   const terms = await loadOwnSearchTerms(db, householdId)
   return rows.map(
     ({ isHiddenByHousehold, isCategoryRetired, isCategoryHiddenByHousehold, ...row }) => ({
       ...row,
       isHidden: row.isRetired || isHiddenByHousehold,
       isCategoryHidden: isCategoryRetired || isCategoryHiddenByHousehold,
-      kcalPer100: row.kcalPer100 === null ? null : Number(row.kcalPer100),
+      ...fromReferenceRow(row),
       searchTerms: terms.get(row.id) ?? [],
     }),
   )
@@ -77,12 +94,19 @@ async function list(db: Database, householdId: string): Promise<FoodTypeEntry[]>
 async function create(
   db: Database,
   householdId: string,
-  { searchTerms, kcalPer100, ...values }: FoodTypeValues & { key: string },
+  { searchTerms, ...values }: FoodTypeValues & { key: string },
 ): Promise<string | null> {
   return db.transaction(async (tx) => {
     const [row] = await tx
       .insert(foodTypes)
-      .values({ householdId, ...values, kcalPer100: toKcalColumn(kcalPer100) })
+      .values({
+        householdId,
+        key: values.key,
+        name: values.name,
+        categoryId: values.categoryId,
+        ...toReferenceRow(values),
+        sortOrder: nextOwnSortOrder(householdId, values.categoryId),
+      })
       .onConflictDoNothing()
       .returning({ id: foodTypes.id })
     if (row === undefined) return null
@@ -98,12 +122,19 @@ async function create(
 async function update(
   db: Database,
   { householdId, id }: Readonly<{ householdId: string; id: string }>,
-  { searchTerms, kcalPer100, ...values }: FoodTypeValues,
+  { searchTerms, ...values }: FoodTypeValues,
 ): Promise<boolean> {
+  const sortOrder = sql<number>`case when ${foodTypes.categoryId} = ${values.categoryId}
+    then ${foodTypes.sortOrder} else ${nextOwnSortOrder(householdId, values.categoryId)} end`
   return db.transaction(async (tx) => {
     const rows = await tx
       .update(foodTypes)
-      .set({ ...values, kcalPer100: toKcalColumn(kcalPer100) })
+      .set({
+        name: values.name,
+        categoryId: values.categoryId,
+        ...toReferenceRow(values),
+        sortOrder,
+      })
       .where(ownFoodType(householdId, id))
       .returning({ id: foodTypes.id })
     if (rows.length === 0) return false
@@ -134,6 +165,14 @@ async function remove(db: Database, householdId: string, id: string): Promise<Re
   return existing === undefined ? 'not-found' : 'in-use'
 }
 
+async function saveOrder(db: Database, householdId: string, ids: readonly string[]) {
+  await db.transaction(async (tx) => {
+    for (const [sortOrder, id] of ids.entries()) {
+      await tx.update(foodTypes).set({ sortOrder }).where(ownFoodType(householdId, id))
+    }
+  })
+}
+
 export function createFoodTypeRepository(db: Database): FoodTypeRepository {
   return {
     list: (householdId) => list(db, householdId),
@@ -148,5 +187,6 @@ export function createFoodTypeRepository(db: Database): FoodTypeRepository {
     update: (householdId, id, values) => update(db, { householdId, id }, values),
     setHidden: (householdId, id, isHidden) => setFoodTypeHidden(db, { householdId, id, isHidden }),
     remove: (householdId, id) => remove(db, householdId, id),
+    saveOrder: (householdId, ids) => saveOrder(db, householdId, ids),
   }
 }

@@ -99,6 +99,8 @@ function selectProducts(db: Database, householdId: string, filter: ProductFilter
       asc(productGroups.sortOrder),
       asc(categories.sortOrder),
       asc(categories.name),
+      // Eigene Arten vor denen der Startliste, jeweils in ihrer Reihenfolge (#243)
+      asc(foodTypes.isSystem),
       asc(foodTypes.sortOrder),
       asc(foodTypes.name),
       asc(products.name),
