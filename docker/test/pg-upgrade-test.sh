@@ -67,13 +67,10 @@ docker rm -f "$OLD_DB" > /dev/null
 # Ohne Schritt 2 startet die neue Datenbank nicht, mit der Meldung aus der Fehlersuche (§14).
 docker compose up -d --wait --wait-timeout 30 db > /dev/null 2>&1 &&
   fail "Die neue Datenbank darf neben Daten von $OLD_MAJOR nicht starten"
-# up --wait kann zurückkehren, bevor der Container seine Meldung geschrieben hat.
-for _ in $(seq 1 15); do
-  if docker compose logs db 2>&1 | grep -q "there appears to be PostgreSQL data in"; then break; fi
-  sleep 2
-done
-docker compose logs db 2>&1 | grep -q "there appears to be PostgreSQL data in" ||
-  { docker compose logs db; fail "Die Meldung zu den alten Daten fehlt im Log von db"; }
+# Erst in eine Datei: grep -q direkt hinter logs bricht die Pipe ab, mit pipefail gilt das als Fehler.
+docker compose logs db > old-data.log 2>&1
+grep -q "there appears to be PostgreSQL data in" old-data.log ||
+  { cat old-data.log; fail "Die Meldung zu den alten Daten fehlt im Log von db"; }
 docker compose down > /dev/null 2>&1
 
 # Schritt 2: Der alte Ordner db wandert beiseite.
@@ -88,8 +85,8 @@ fi
 [ -d "db-pg$OLD_MAJOR/$OLD_MAJOR/docker" ] || fail "Der alte Ordner db-pg$OLD_MAJOR ist nicht mehr da"
 [ "$(psql_value 'show server_version_num')" -ge "${NEW_MAJOR}0000" ] ||
   fail "Die Datenbank läuft nicht mit PostgreSQL $NEW_MAJOR"
-docker compose run --rm -T --entrypoint pg_restore backup -l "/backups/$stand/datenbank.dump" |
-  grep -q "Dumped by pg_dump version: $OLD_MAJOR\." || fail "Der Stand stammt nicht von pg_dump $OLD_MAJOR"
+docker compose run --rm -T --entrypoint pg_restore backup -l "/backups/$stand/datenbank.dump" > dump-list.txt
+grep -q "Dumped by pg_dump version: $OLD_MAJOR\." dump-list.txt || fail "Der Stand stammt nicht von pg_dump $OLD_MAJOR"
 
 # Schritt 5: zurückspielen, Schritt 6: alles starten (migrate läuft dabei noch einmal).
 docker compose run --rm -T backup wiederherstellen "$stand" --ja | tee upgrade.log
