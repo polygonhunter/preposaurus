@@ -84,10 +84,11 @@ async function resumeAfterSignOut(page: Page) {
   await expectSetupStep(page, { path: '/einrichten/ziel', title: 'Euer Ziel', step: 3 })
 }
 
-// Schritt „Ziel“ mit der Quelle samt Hinweis wie auf der Zielseite. Ein vergangenes Datum lehnt
+// Schritt „Ziel“ mit der geprüften Quelle wie auf der Zielseite (ohne Hinweis, U3). Ein vergangenes Datum lehnt
 // das Formular ab, „Weiter“ speichert den Standard und schließt die Einrichtung am PC ab.
 async function goalStep(page: Page) {
-  await expect(page.getByText('Werte noch nicht geprüft')).toBeVisible()
+  await expect(page.getByText('BBK/BLE', { exact: true })).toBeVisible()
+  await expect(page.getByText('Werte noch nicht geprüft')).toHaveCount(0)
   await expect(page.getByText('Rechenmodus')).toBeVisible()
   const date = page.getByLabel('Bis wann? (freiwillig)')
   await date.fill('2020-01-31')
@@ -112,8 +113,8 @@ async function expectEmptyOverview(page: Page) {
     'href',
     '/einstellungen',
   )
-  // Die Einrichtung setzt die Quelle BBK/BLE aus dem Seed, noch ungeprüft (#20)
-  await expect(page.getByText(/^BBK\/BLE, Stand .* · Werte noch nicht geprüft$/)).toBeVisible()
+  // Die Einrichtung setzt die geprüfte Quelle BBK/BLE aus dem Seed (#20, U3)
+  await expect(page.getByText(/^BBK\/BLE, Stand [^·]*$/)).toBeVisible()
   for (const colorScheme of ['light', 'dark'] as const) {
     // Neu laden statt umschalten: Farbübergänge würden axe sonst mitten im Wechsel treffen
     await page.emulateMedia({ colorScheme })

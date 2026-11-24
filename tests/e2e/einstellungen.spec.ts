@@ -83,7 +83,8 @@ test('ein Zieldatum in der Vergangenheit wird nicht gespeichert', async ({ page 
   await page.goto('/einstellungen/ziel')
   await expect(page.getByRole('heading', { level: 1, name: 'Ziel und Empfehlung' })).toBeVisible()
   await expect(page.getByText('Rechenmodus')).toBeVisible()
-  await expect(page.getByText('Werte noch nicht geprüft')).toBeVisible()
+  await expect(page.getByText('BBK/BLE', { exact: true })).toBeVisible()
+  await expect(page.getByText('Werte noch nicht geprüft')).toHaveCount(0)
   await expectAccessibleLayout(page)
 
   const date = page.getByLabel('Bis wann? (freiwillig)')
