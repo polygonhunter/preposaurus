@@ -38,8 +38,9 @@ const isEstimate = (bestBefore: BestBefore | null) => bestBefore?.isEstimated ==
  */
 export function dateEntryLabel({ bestBefore, kind }: Pick<DateEntry, 'bestBefore' | 'kind'>) {
   if (bestBefore === null) return MISSING_DATE_LABEL
-  const date = formatDayWithPrecision(bestBefore)
-  if (isEstimate(bestBefore)) return `${ESTIMATE_PREFIX}${date}`
+  const prefix = isEstimate(bestBefore) ? ESTIMATE_PREFIX : ''
+  const date = `${prefix}${formatDayWithPrecision(bestBefore)}`
+  // Eine Schätzung als Verbrauchsdatum gibt es nur noch aus einem älteren Entwurf: Sie sagt es dazu.
   return kind === 'use-by' ? `${date} (${USE_BY_NOTE})` : date
 }
 

@@ -48,10 +48,20 @@ const REFERENCE_MESSAGES = {
   product: 'Dieses Produkt gibt es nicht mehr. Bitte lege es neu an.',
 } as const
 
+// Eine Schätzung ist immer monatsgenau und ein MHD (#170, #180). Trifft das nicht zu, stammt sie
+// meist aus einem älteren Entwurf: Dann hilft nur, sie zu entfernen und neu zu wählen.
+const ESTIMATE_MESSAGES = {
+  'estimate-too-precise': 'Eine Schätzung gibt es nur auf den Monat, nicht als genauen Tag.',
+  'estimate-too-coarse':
+    'Eine Schätzung gilt nur auf den Monat. Bitte entfernt sie und wählt sie neu.',
+  'estimate-use-by':
+    'Eine Schätzung ist immer ein MHD, nie ein Verbrauchsdatum. Bitte entfernt sie und wählt sie neu.',
+} as const
+
 function errorMessage(error: CreateStockError): string {
   switch (error.kind) {
     case 'invalid':
-      return 'Eine Schätzung gibt es nur als Monat oder Jahr, nicht als genauen Tag.'
+      return ESTIMATE_MESSAGES[error.issue]
     case 'not-found':
       return REFERENCE_MESSAGES[error.reference]
     case 'conflict':

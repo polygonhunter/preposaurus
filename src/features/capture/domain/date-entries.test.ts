@@ -94,6 +94,12 @@ describe('Schätzung auf Wahl (#124, #180)', () => {
     expect(changeDateKind(entries, { key, kind: 'use-by' })).toEqual(entries)
   })
 
+  it('nennt ein Verbrauchsdatum aus einem älteren Entwurf weiter beim Namen', () => {
+    expect(dateEntryLabel({ bestBefore: estimated, kind: 'use-by' })).toBe(
+      'ca. 09/2027 (Verbrauchsdatum)',
+    )
+  })
+
   it('lässt die Datumsart bei gelesenen Daten und „Datum fehlt“ offen', () => {
     expect(isKindFixed({ bestBefore: september })).toBe(false)
     expect(isKindFixed({ bestBefore: null })).toBe(false)
