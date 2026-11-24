@@ -385,8 +385,8 @@ Alle Pakete: nur `domain/` oder `shared/lib`, keine Abhängigkeit zu React, Next
   - Fertig, wenn: Versand je Nutzer nach seinen Einstellungen. Ohne gültiges Push-Abo geht die Wochenübersicht als Mail. „Dringend“ höchstens einmal je Nutzer und Tag (pg-boss-Schlüssel je Nutzer und Tag, keine neue Tabelle). Check-in-Mail wöchentlich, monatlich oder aus. Vorläufig sind Ausweich-Mail und Check-in-Mail zwei Vorgänge mit gemeinsamen Vorlagen (U11).
   - Tests: Use-Case mit Fake-Push und Fake-Mail, Integration in der CI · Braucht: M11-01 bis M11-04
 - **M11-06 · Benachrichtigungen einstellen** (M) — IDs: ERI-07, ERI-01 · Quelle: F ERI-07, `Proto/components/d6/settings/account` · Ordner: `reminders/{ui,actions,application}`
-  - Fertig, wenn: Jeder Nutzer schaltet Wochenübersicht (Tag, Uhrzeit), Dringend und Check-in-Mail für sich. Push je Gerät an und aus. Ohne eingerichteten Mailversand ist die Check-in-Mail nicht wählbar, mit ruhiger Erklärung.
-  - Tests: Integration: Änderung betrifft nur den eigenen Nutzer. E2E · Braucht: M11-03, M3-06
+  - Fertig, wenn: Der Admin stellt Wochenübersicht (an/aus, Tag, Uhrzeit) und „Dringend“ **je Haushalt** ein (EINSTELLUNGEN_NUTZER §1.5), Mitglieder sehen die Werte lesend. Die Check-in-Mail schaltet jeder Nutzer für sich unter Mein Konto (#75). Push je Gerät an und aus kommt mit M11-03 (#86). Ohne eingerichteten Mailversand ist die Check-in-Mail nicht wählbar, mit ruhiger Erklärung.
+  - Tests: Integration: Änderung betrifft nur den eigenen Haushalt. E2E · Braucht: M11-03, M3-06
 
 ### M12 · Responsive Layouts
 
