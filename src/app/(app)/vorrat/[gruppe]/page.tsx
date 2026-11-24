@@ -22,7 +22,7 @@ export default async function FoodTypeLevelPage({ params }: PageProps<'/vorrat/[
     <ConsumeProvider>
       <PageHeader
         title={group.shortName}
-        subtitle={groupSubtitle(group.totals)}
+        subtitle={groupSubtitle(group)}
         {...officialNameEyebrow(group)}
         back={{ href: STOCK_PATH, label: 'Vorrat' }}
       />

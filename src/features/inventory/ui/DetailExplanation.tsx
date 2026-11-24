@@ -7,6 +7,7 @@ import {
   countedText,
   daysCalculation,
   daysMeaningTexts,
+  daysTitle,
   kcalOriginText,
   kcalText,
   notCountedTexts,
@@ -25,7 +26,7 @@ const paragraphs = (texts: readonly string[]) =>
   ))
 
 // Inhalt des Erklär-Blatts zu den Kennwerten im Detail (#230): Packungen und Menge, kcal mit
-// Herkunft, der Beitrag in Tagen samt Bedeutung (#209), Richtwert zur Haltbarkeit und die Quelle.
+// Herkunft, „Satt für“ bzw. „Wasser für“ samt Bedeutung (#209), Richtwert zur Haltbarkeit und Quelle.
 export function DetailExplanation({ detail, source }: DetailExplanationProps) {
   const { totals, need } = detail
   const origin = kcalOriginText(totals)
@@ -38,7 +39,7 @@ export function DetailExplanation({ detail, source }: DetailExplanationProps) {
       <ExplainPart title="kcal">
         {paragraphs(origin === null ? [kcalText(totals)] : [kcalText(totals), origin])}
       </ExplainPart>
-      <ExplainPart title="Beitrag in Tagen">
+      <ExplainPart title={daysTitle(totals)}>
         {days === null ? null : <p className="text-callout tabular-nums">{days}</p>}
         {paragraphs(daysMeaningTexts(totals))}
       </ExplainPart>

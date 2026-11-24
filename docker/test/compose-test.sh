@@ -44,6 +44,26 @@ docker compose exec -T web grep -q ' /app/.next/cache tmpfs ' /proc/mounts || fa
   fail ".next/cache ist im Image für andere schreibbar"
 [ "$(psql_value 'select count(*) from kategorie')" -gt 0 ] || fail "Stammdaten fehlen"
 
+# Eigene Rollen ohne Superuser (#146): App und migrate als preposaurus_app, Eigentümer von allem.
+# Das Backup erbt deren Rechte und darf Datenbanken anlegen. postgres kommt übers Netz nicht hinein.
+roles=$(psql_value "select string_agg(rolname || ':' || rolsuper || ':' || rolcreatedb || ':' || rolcreaterole, ','
+  order by rolname) from pg_roles where rolname like 'preposaurus%'")
+[ "$roles" = "preposaurus_app:false:false:false,preposaurus_backup:false:true:false" ] ||
+  fail "Rollen nicht wie erwartet: $roles"
+[ "$(psql_value "select pg_has_role('preposaurus_backup', 'preposaurus_app', 'USAGE')")" = "t" ] ||
+  fail "preposaurus_backup erbt die Rechte von preposaurus_app nicht"
+[ "$(psql_value "select pg_get_userbyid(datdba) from pg_database where datname = 'preposaurus'")" = "preposaurus_app" ] ||
+  fail "Die Datenbank gehört nicht preposaurus_app"
+foreign=$(psql_value "$FOREIGN_OWNED")
+[ -z "$foreign" ] || fail "Objekte gehören nicht preposaurus_app: $foreign"
+[ "$(psql_value "select rolpassword is null from pg_authid where rolname = 'postgres'")" = "t" ] ||
+  fail "Der Superuser postgres hat noch ein Passwort"
+first_password=$(grep '^POSTGRES_PASSWORD=' .env | cut -d= -f2-)
+docker compose run --rm -T --no-deps --entrypoint psql -e PGUSER=postgres -e PGPASSWORD="$first_password" \
+  backup -c 'select 1' > /dev/null 2>&1 && fail "Der Superuser postgres darf sich nicht übers Netz anmelden"
+docker compose run --rm -T --no-deps --entrypoint psql backup -c 'select 1' > /dev/null ||
+  fail "preposaurus_backup kann sich nicht anmelden"
+
 if docker compose exec -T web node scripts/admin.mjs passwort-zuruecksetzen niemand; then
   fail "Der Notfall-Befehl muss bei einem unbekannten Namen scheitern"
 fi
@@ -88,6 +108,9 @@ for _ in $(seq 1 30); do
 done
 docker compose logs worker | grep -q 'Worker gestartet' || { docker compose logs worker; fail "Der Worker ist nicht gestartet"; }
 [ "$(docker compose exec -T worker id -u)" != "0" ] || fail "worker läuft als root"
+[ "$(psql_value "select string_agg(distinct usename, ',') from pg_stat_activity
+  where application_name like '%preposaurus-worker'")" = "preposaurus_app" ] ||
+  fail "Der Worker verbindet sich nicht als preposaurus_app (#146)"
 [ "$(psql_value "select timezone from pgboss.schedule where name = 'capture-cleanup'")" = "Europe/Berlin" ] ||
   fail "Der Zeitplan fürs Aufräumen fehlt"
 docker compose stop worker

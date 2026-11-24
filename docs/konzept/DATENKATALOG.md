@@ -169,7 +169,7 @@ Hinweis: HH-02 nennt das Geburtsjahr als Pflicht. Das ist durch den MVP-Zuschnit
 | `produkt_id` | Produkt | uuid | P | Sys | alles | MVP |
 | `mhd` **[Ä]** | Datum, Monat/Jahr als Monats- bzw. Jahresende | date | P → **o** | F/M | A1, A3, A11, A12, A14, A16, FIFO. `NULL` = „Datum fehlt“ (#116) | MVP |
 | `mhd_genauigkeit` **[Ä]** | tag/monat/jahr | text | P → o | F/M | Anzeige „09/2027“, Gruppierung. CHECK: leer genau dann, wenn `mhd` leer | MVP |
-| `mhd_art` | mhd/verbrauchen_bis | text | P | F/M (Standard mhd) | ROT-06, „Noch gut“ nur bei MHD | MVP |
+| `mhd_art` | mhd/verbrauchen_bis | text | P | F/M (Standard mhd; Umschalter je Datum beim Erfassen, beim „Datum ändern“ auch zurück zum MHD, #294, #300) | ROT-06, „Noch gut“ nur bei MHD | MVP |
 | `mhd_geschaetzt` | Datum auf Wunsch geschätzt | bool | P | Sys | Chip „geschätzt“, A18. CHECK: true nur mit `mhd` | MVP |
 | `status` | vorrat/verbraucht/entsorgt | text | P | M | alle Auswertungen, ROT-03/04, Verlauf | MVP |
 | `entnommen_am` | Zeitpunkt der Entscheidung | timestamptz | P bei ≠ vorrat | Sys | A15, A16, A17, Verlauf, ROT-07 | MVP |
@@ -473,7 +473,7 @@ Rechte: **A** Admin · **M** Mitglied · **öff.** ohne Anmeldung. Eingabe als Z
 | `createCategoryAction` / `updateCategoryAction` | `{ name, warengruppeId }` / `{ id, name?, warengruppeId?, ausgeblendet?, sortierung? }` | `{ id }` | `system-not-editable` (nur ausblenden), `name-taken` |
 | `createFoodTypeAction` | `{ name, kategorieId, kcal100?, … }` – **auch im Erfassen** | `{ id, schluessel }` | `name-taken` · Rechte: A, M (Frage 9, entschieden: nur Name und Kategorie) |
 | `updateFoodTypeAction` | `{ id, name?, kategorieId?, ausgeblendet?, richtwerte? }` | – | `system-not-editable` |
-| `createStorageLocationAction` | `{ name }` – auch im Erfassen | `{ id }` | `name-taken` · Rechte: A, M (Frage 9 Einstellungen) |
+| `createStorageLocationAction` | `{ name }` – auch im Erfassen | `{ id }` | `name-taken` · Rechte: Einstellungen A, Erfassen A, M (Frage 9 Einstellungen, #301: gleicher Name liefert den vorhandenen Ort) |
 | `updateStorageLocationAction` | `{ id, name?, ausgeblendet?, sortierung? }` | – | `name-taken` |
 
 **Einstellungen Foto-Erkennung** (A; M sieht nur an/aus)
@@ -644,7 +644,7 @@ Damit es später nur eine Ergänzung ist:
 | 6 | **Nachkaufen:** Abgehakte und ausgeblendete Ziel-Lücken werden gespeichert. Wann verschwindet „Erledigt“, wann kommt eine ausgeblendete Lücke zurück? | „Erledigt“ 14 Tage sichtbar. Ausgeblendete Lücke kommt zurück, wenn sie sich um mehr als 10 % ändert oder nach 30 Tagen. **Entschieden mit #201:** zurück, wenn sie um mehr als 10 % **wächst** (kleiner werden heißt: es wurde erfasst), sonst nach 30 Tagen; abgehakte nach 14 Tagen. Zurückholen jederzeit unter „Ausgeblendet“ |
 | 7 | **FIFO bei „Datum fehlt“:** zuerst oder zuletzt entnehmen? | Zuletzt, nach allen datierten Packungen. Der Filter „Unvollständig“ erinnert ans Nachtragen |
 | 8 | **Ernährungsform-Daten:** Zielmengen je Form als fertige Zeilen (`quelle_wert` je Form, heute im Schema) oder als Verschiebungsregeln (heute in der Fachlogik)? | Fertige Zeilen je Form. Geprüfte Quelle, keine Rechnung zur Laufzeit. `diet-shifts` nur noch als Werkzeug zum Erzeugen der Seed-Zeilen |
-| 9 | **Darf ein Mitglied beim Erfassen eine neue Lebensmittelart anlegen?** (Gegenstück zu Einstellungen-Frage 9 für Lagerorte) | Ja, mit Pflicht-Kategorie. Umbenennen, Ausblenden und Richtwerte bleiben beim Admin. **Entschieden (Maintainer, 2026-11-24): a** („Auch Mitglieder“, #298). Mitglieder legen beim Erfassen neue Arten an (`addFoodTypeAction` mit `requireHouseholdUser`), Ändern, Ausblenden, Löschen, Sortieren und Richtwerte bleiben beim Admin (05_STATUS_ENTSCHEIDUNGEN). Lagerort beim Erfassen: #301 |
+| 9 | **Darf ein Mitglied beim Erfassen eine neue Lebensmittelart anlegen?** (Gegenstück zu Einstellungen-Frage 9 für Lagerorte) | Ja, mit Pflicht-Kategorie. Umbenennen, Ausblenden und Richtwerte bleiben beim Admin. **Entschieden (Maintainer, 2026-11-24): a** („Auch Mitglieder“, #298). Mitglieder legen beim Erfassen neue Arten an (`addFoodTypeAction` mit `requireHouseholdUser`), Ändern, Ausblenden, Löschen, Sortieren und Richtwerte bleiben beim Admin (05_STATUS_ENTSCHEIDUNGEN). Lagerort beim Erfassen: umgesetzt mit #301 |
 | 10 | **„Dringend“-Push:** Schwelle 7 Tage („Diese Woche“) oder Orange-Schwelle (28 Tage)? | 7 Tage. Orange ist „einplanen“, nicht dringend. Meldet nur Packungen, die seit dem letzten Versand in die Gruppe gerutscht sind |
 | 11 | **Export ohne Fotos** im MVP? | Ja. Fotos sichert das Backup. Später eine ZIP-Variante „mit Fotos“ |
 | 12 | **MHD-Fotos nach dem Bestätigen** behalten (ERF-15 sagt „Fotos speichern“)? | Behalten, zeigen bei „Datum ändern“. Speicher ist klein (≈ 150 kB je Foto) |

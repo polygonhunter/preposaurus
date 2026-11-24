@@ -63,7 +63,8 @@ Regeln für die Anzeige:
 Gemeinsame Regeln für alle Rechnungen:
 - Gezählt werden nur Einheiten mit Status `vorrat`, die am Stichtag haltbar sind. Stichtag ist heute oder das Zieldatum.
 - kcal einer Einheit = Menge × kcal je 100 ÷ 100. Makros genauso.
-- Beitrag in Tagen = kcal ÷ Tagesbedarf des Haushalts.
+- Beitrag in Tagen = kcal ÷ Tagesbedarf des Haushalts. Angezeigt als **„Satt für X Tage“**, bei Wasser (keine kcal) als **„Wasser für X Tage“** (Liter ÷ Wasserbedarf).
+- Abdeckung nach Menge (A9) = Bestand ÷ empfohlene Menge je Tag. Angezeigt als **„Menge reicht X von Y Tagen“**. Beide Zahlen tragen überall diesen Namen, damit sie nicht verwechselt werden (#209, Begriffe in `shared/lib/supply-terms.ts`).
 - Alle Rechnungen sind reine Funktionen (M2), die Screens rechnen nichts selbst.
 
 | Nr. | Frage des Nutzers | Rechnung | Datenquelle | Wo angezeigt | Stand |
@@ -145,13 +146,14 @@ Vier Bereiche plus eine Handlung. Die Tabs bleiben wie beschlossen, „Neu“ he
 |---|---|---|---|
 | iPhone, Duo zugeklappt | kompakt | Dock unten: Übersicht · Vorrat · **Erfassen** (Mitte, betont) · Nachkaufen · Statistik. Zahnrad oben rechts. Unterseiten haben oben links „Zurück“ mit dem Namen des Ziels | eine Spalte. Details sind eigene Seiten, kurze Aktionen ein Blatt von unten |
 | Duo aufgeklappt hochkant | mittel | Dock unten wie kompakt | Liste oben, Detail unten. Nichts Antippbares auf der Falz |
-| Duo aufgeklappt quer, schmales PC-Fenster | breit | schmale Leiste links mit denselben fünf Zielen, Einstellungen unten | Liste links, Detail rechts. Die Falz liegt zwischen den beiden Hälften |
+| Duo aufgeklappt quer, schmales PC-Fenster | breit | Seitenleiste links mit denselben Zielen, Einstellungen unten (die schmale Leiste entfiel mit #245) | Liste links (340 px), Detail rechts. Mit Falz (#253) liegt die Falz zwischen Liste und Detail, einspaltige Seiten stehen ganz auf dem rechten Bildschirm. Nichts Antippbares auf der Falz |
 | PC | weit | Seitenleiste links mit Beschriftung. „Bald fällig“ steht eingerückt unter Übersicht, weil Platz da ist. „Erfassen“ als Knopf oben in der Leiste | Vorrat dreispaltig: Warengruppen, Liste, Detail. Tabellen statt Karten, Mehrfachauswahl |
 
 Regeln:
 - **Gleiche Namen, gleiche Reihenfolge** auf allen Geräten. Nur die Anordnung wechselt.
 - **Höchstens zwei Ebenen unter einem Tab.** Tiefer geht es nur über die Pfadzeile im Vorrat.
 - **Jeder Screen hat eine Adresse.** Push, Mail und Zurück-Taste landen genau dort, auch Filter stehen in der Adresse. Auf- und Zuklappen ändert nur das Layout.
+- **Falz nur, wo eine ist (#253):** Das Layout mit Falz gilt nur, wenn der Browser zwei Bildschirme meldet (Viewport Segments). Ein PC-Fenster gleicher Breite bekommt die gewohnte Aufteilung ohne Grenze in der Fenstermitte.
 - **Erfassen läuft im Vollbild** ohne Dock, mit „Abbrechen“ oben links. Ab „breit“ bleibt die Seitenleiste, „Abbrechen“ steht trotzdem da (#285). Gehen dabei Eingaben verloren, fragt die App vorher ruhig nach.
 
 ### Sitemap
@@ -368,11 +370,13 @@ Warum so: Die Ordnung, die dem Maintainer gefällt, bleibt als Weg erhalten. Kat
 |---|---|---|---|
 | 1 Verpackung | Vorderseite fotografieren | Karte: Lebensmittelart mit Pfad („Getreide › Nudeln › Spaghetti“), Menge, Behälter. Jedes Feld antippbar. Bei `null`: „Bitte auswählen“ mit Suche und „+ Neue Lebensmittelart“. Bei Treffer im Bestand: „Zu Spaghetti 500 g hinzufügen?“ → weiter bei Schritt 3 | „Von Hand“ öffnet dieselbe Karte leer |
 | 2 Nährwerte | Tabelle fotografieren oder „Überspringen“ | „359 kcal je 100 g → 1.795 kcal je Packung“, Makros darunter. Bei Überspringen: „Es gilt der Richtwert für Spaghetti, du kannst das später nachtragen.“ | vier Zahlenfelder |
-| 3 Datum und Anzahl | Datum fotografieren | **Ein Chip je Datum mit Anzahl:** „09/2027 × 1“ mit − und + und Schnellzahlen (2 · 3 · 4 · 6 · 12). Ein weiteres Foto mit anderem Datum ergibt einen zweiten Chip, dasselbe Datum erhöht die Anzahl. Nicht lesbar: Chip „nicht lesbar: nochmal oder eintippen“ | Monat/Jahr-Wähler mit „+6 Mon. · +1 J. · +2 J.“ |
+| 3 Datum und Anzahl | Datum fotografieren | **Ein Chip je Datum mit Anzahl:** „09/2027 × 1“ mit − und + und Schnellzahlen (2 · 3 · 4 · 6 · 12). Ein weiteres Foto mit anderem Datum ergibt einen zweiten Chip, dasselbe Datum erhöht die Anzahl. Nicht lesbar: Chip „nicht lesbar: nochmal oder eintippen“ | Textfeld wie aufgedruckt, dazu die Schnellknöpfe „+6 Mon. · +1 J. · +2 J.“ als ausdrücklich gewählte Schätzung (#180): monatsgenau, gekennzeichnet, in der Liste „ca. 05/2027“, immer MHD |
 | 4 Prüfen | „Speichern“ | „6 × Spaghetti 500 g = 3 kg · 10.770 kcal · 09/2027 (4×), 11/2027 (2×)“ · Lagerort vorbelegt · alles antippbar | gleich |
 | Danach | „Nächstes Produkt“ oder „Fertig“ | „Gespeichert. Euer Essen reicht jetzt 11,3 statt 9,4 Tage.“ | gleich |
 
 Der Chip mit Anzahl ersetzt die Wahl zwischen „MHD-Serie“ und „Alle gleiches Datum“ (ERF-05, ERF-07). Wer jede Packung einzeln fotografieren will, kann das weiter tun. Wer zehn gleiche hat, macht ein Foto und tippt „12“ oder zählt hoch.
+
+**Datumsart (#294, entschieden 2026-11-24):** Jeder Datumseintrag hat in beiden Wegen den Umschalter **MHD · Verbrauchsdatum** (Radiogruppe, Standard MHD). Vorbelegt wird er von der Foto-Erkennung (`art`) oder, wenn „zu verbrauchen bis“ mitgetippt wird, von der Erkennung am Text. Darunter ein Satz: „MHD: oft noch länger gut. Verbrauchsdatum: nach diesem Tag nicht mehr essen.“ Gleiches Datum mit gleicher Art wird ein Eintrag. Beim „Datum ändern“ steht derselbe Umschalter, vorbelegt mit der Art der Zeile (#300).
 
 Ist die Erkennung sicher und sind alle Felder gefüllt, geht die App nach Schritt 1 und 2 **von selbst weiter**. Die erkannten Werte bleiben als schmale Karte am oberen Rand stehen und sind dort und im Schritt Prüfen änderbar. So wird nichts ungesehen gespeichert, aber es braucht kein „Weiter“.
 

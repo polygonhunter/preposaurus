@@ -7,7 +7,7 @@ import {
 } from '@/shared/lib/approximation'
 import { formatGermanNumber } from '@/shared/lib/quantities'
 import type { OverviewExplanation, OverviewNeedLine, OverviewSupply } from '../schemas'
-import { formatDays } from './head-text'
+import { formatDays } from '@/shared/lib/supply-terms'
 
 const ML_PER_LITER = 1000
 
@@ -19,7 +19,9 @@ const MEMBER_WORDS: Record<OverviewNeedLine['type'], Readonly<{ one: string; man
   baby: { one: 'Baby', many: 'Babys' },
 }
 
-const kcalText = (kcal: number) => `${formatGermanNumber(Math.round(kcal), 0)} kcal`
+/** „31.965 kcal“, mit „ca.“, wenn Richtwerte spürbar mitzählen */
+export const kcalText = (kcal: number, isApproximate = false) =>
+  `${isApproximate ? 'ca. ' : ''}${formatGermanNumber(Math.round(kcal), 0)} kcal`
 const literText = (ml: number) => `${formatGermanNumber(ml / ML_PER_LITER)} l`
 
 const countText = (count: number, one: string, many: string) =>

@@ -37,7 +37,11 @@ export function createFakeUnitDateEditor(data: FakeData) {
       for (const next of changed) {
         const stored = inStock(householdId).find((unit) => unit.id === next.id)
         if (stored === undefined) continue
-        Object.assign(stored, { bestBefore: next.bestBefore, checkedAt: next.checkedAt })
+        Object.assign(stored, {
+          bestBefore: next.bestBefore,
+          kind: next.kind,
+          checkedAt: next.checkedAt,
+        })
         count += 1
       }
       return Promise.resolve(count)

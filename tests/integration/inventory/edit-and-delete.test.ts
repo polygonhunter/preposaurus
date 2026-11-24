@@ -97,6 +97,7 @@ describe('Bearbeiten und Löschen im Vorrat (#49, #50)', () => {
         householdId: own.householdId,
         unitIds: [checked, missing],
         bestBefore: { date: toCalendarDay('2027-03-01'), precision: 'month' },
+        kind: 'best-before',
       })
 
       expect(result).toEqual({ ok: true, value: { changed: 2 } })
@@ -117,11 +118,40 @@ describe('Bearbeiten und Löschen im Vorrat (#49, #50)', () => {
         householdId: own.householdId,
         unitIds: [foreignUnit, consumed],
         bestBefore: { date: toCalendarDay('2027-03-31'), precision: 'day' },
+        kind: 'best-before',
       })
 
       expect(result).toEqual({ ok: false, error: { kind: 'not-found' } })
       expect((await unitRow(foreignUnit))?.bestBefore).toBe('2026-10-31')
       expect((await unitRow(consumed))?.bestBefore).toBe('2026-09-30')
+    })
+
+    it('schreibt die Datumsart, nur im eigenen Haushalt (#300)', async () => {
+      const [ownUnit = ''] = stock.unitIds
+      const [foreignUnit = ''] = foreignStock.unitIds
+      const bestBefore = { date: toCalendarDay('2027-03-31'), precision: 'day' as const }
+
+      const toUseBy = await changeUnitDates(editor(), {
+        householdId: own.householdId,
+        unitIds: [ownUnit, foreignUnit],
+        bestBefore,
+        kind: 'use-by',
+      })
+
+      expect(toUseBy).toEqual({ ok: true, value: { changed: 1 } })
+      expect(await unitRow(ownUnit)).toMatchObject({
+        bestBeforeKind: 'verbrauchen_bis',
+        checkedAt: null,
+      })
+      expect((await unitRow(foreignUnit))?.bestBeforeKind).toBe('mhd')
+
+      await changeUnitDates(editor(), {
+        householdId: own.householdId,
+        unitIds: [ownUnit],
+        bestBefore,
+        kind: 'best-before',
+      })
+      expect((await unitRow(ownUnit))?.bestBeforeKind).toBe('mhd')
     })
 
     it('liest die Zeile nur im eigenen Haushalt', async () => {

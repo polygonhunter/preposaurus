@@ -1,5 +1,6 @@
 // System-Lebensmittelarten, je einer System-Kategorie zugeordnet. Die Listen stehen je Warengruppe
-// in arten/, damit keine Datei zu groß wird. VORLÄUFIG, wird vom Maintainer geprüft (#128).
+// in arten/, damit keine Datei zu groß wird. Geprüft (#128, vom Maintainer delegiert, 2026-11-24),
+// Antworten in docs/quellen/LEBENSMITTELARTEN.md §10.1.
 // Neue Arten bekommen erst Richtwerte, wenn sie belegt sind (EMPFEHLUNGSWERTE.md).
 import { FAT_WATER_DRINK_FOOD_TYPES } from './arten/fette-wasser-getraenke'
 import { MEAT_FISH_EGG_FOOD_TYPES } from './arten/fleisch-fisch-eier'

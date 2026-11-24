@@ -1,6 +1,7 @@
 // Texte der Seite Nachkaufen (#73, #200, #201, #202, UX-Konzept §8.6). Rein, damit es Tests gibt.
 import { formatDayWithPrecision, toCalendarDay } from '@/shared/lib/dates'
 import { formatGermanNumber } from '@/shared/lib/quantities'
+import { amountDays, namedDaysText } from '@/shared/lib/supply-terms'
 import { DONE_VISIBLE_DAYS, GAP_GROWTH_TOLERANCE, HIDDEN_GAP_DAYS } from '../domain/goal-entries'
 import type { RestockGapDto, RestockListDto, RestockSuggestionDto } from '../schemas'
 
@@ -19,11 +20,10 @@ export function formatGapAmount({ value, unit }: RestockGapDto['missing']): stri
   return `${formatGermanNumber(Math.ceil((value / GRAMS_PER_KG) * KG_STEPS) / KG_STEPS)} kg`
 }
 
-/** „6 von 10 Tagen“ am Stichtag des Ziels */
-const gapDaysText = ({ days, goalDays }: RestockGapDto) =>
-  `${formatGermanNumber(days)} von ${String(goalDays)} Tagen`
+/** „Menge reicht 6 von 10 Tagen“ am Stichtag des Ziels, derselbe Name wie im Vorrat (#209) */
+const gapDaysText = ({ days, goalDays }: RestockGapDto) => namedDaysText(amountDays(days, goalDays))
 
-/** Zweitzeile einer Lücke: „6 von 10 Tagen · z. B. Nudeln, Reis“ */
+/** Zweitzeile einer Lücke: „Menge reicht 6 von 10 Tagen · z. B. Nudeln, Reis“ */
 export function gapSubtitle(gap: RestockGapDto): string {
   const days = gapDaysText(gap)
   return gap.examples.length === 0 ? days : `${days} · z. B. ${gap.examples.join(', ')}`

@@ -1,9 +1,7 @@
 'use client'
 import { useActionState } from 'react'
 import { ActionForm } from '@/shared/ui/ActionForm'
-import { Button } from '@/shared/ui/Button'
 import { PasswordField } from '@/shared/ui/PasswordField'
-import { SaveStatus } from '@/shared/ui/SaveStatus'
 import { AI_ACTION_IDLE } from '../actions/ai-action-state'
 import { setUpRecognitionAction } from '../actions/set-up-recognition-action'
 import { AnthropicKeyHint } from './AnthropicKeyHint'
@@ -18,6 +16,7 @@ export function SetupRecognitionForm() {
       result={state}
       announcement={state.errors?.apiKey ?? state.message}
       action={formAction}
+      submit={{ label: 'Einschalten und weiter', isPending, status: state }}
       className="mx-4 flex flex-col gap-4 breit:mx-6"
     >
       <PasswordField
@@ -29,10 +28,6 @@ export function SetupRecognitionForm() {
         required
       />
       <AnthropicKeyHint />
-      {state.message === null ? null : <SaveStatus state={state} />}
-      <Button type="submit" pendingLabel={isPending ? 'Speichert …' : undefined}>
-        Einschalten und weiter
-      </Button>
     </ActionForm>
   )
 }

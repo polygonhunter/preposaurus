@@ -35,11 +35,19 @@ export async function findStorageLocation(
   return locations.find((location) => location.id === id) ?? null
 }
 
+/** Ort, der schon so heißt (ohne Groß- und Kleinschreibung), auch ausgeblendet */
+export async function findStorageLocationByName(
+  deps: Deps,
+  { householdId, name }: Readonly<{ householdId: string; name: string }>,
+): Promise<StorageLocation | null> {
+  return findNameConflict(await deps.storageLocations.list(householdId), name, null)
+}
+
 export async function addStorageLocation(
   deps: Deps,
   { householdId, name }: Readonly<{ householdId: string; name: string }>,
 ): Promise<Result<{ id: string }, NameError>> {
-  const conflict = findNameConflict(await deps.storageLocations.list(householdId), name, null)
+  const conflict = await findStorageLocationByName(deps, { householdId, name })
   if (conflict !== null) return err({ kind: 'duplicate', isHidden: conflict.isHidden })
   const id = await deps.storageLocations.create(householdId, name)
   // Gleichzeitig unter demselben Namen angelegt: Die DB hat den zweiten abgelehnt.

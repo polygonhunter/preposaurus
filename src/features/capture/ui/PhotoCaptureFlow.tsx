@@ -2,7 +2,7 @@
 import { useRef, type ReactNode } from 'react'
 import { useIsBreit } from '@/shared/hooks/use-is-breit'
 import { discardDraftAction } from '../actions/discard-draft-action'
-import type { CaptureOptions, FoodTypeChoice } from '../domain/capture-options'
+import type { CaptureOptions, FoodTypeChoice, NamedChoice } from '../domain/capture-options'
 import { CameraView } from './CameraView'
 import { CaptureSaved } from './CaptureSaved'
 import { deriveView } from './manual-capture-view'
@@ -21,6 +21,8 @@ type PhotoCaptureFlowProps = Readonly<{
   recognitionOff: string | null
   /** Neu angelegte Art in die Auswahl aufnehmen (#142, #110) */
   onFoodTypeAdded: (foodType: FoodTypeChoice) => void
+  /** Neu angelegten Lagerort in die Auswahl aufnehmen (#301) */
+  onStorageLocationAdded: (location: NamedChoice) => void
   /** „Noch eins“ und „Verwerfen“: frischer Stand */
   onRestart: () => void
   /** Der frische Stand lädt noch (useFreshRestart) */
@@ -115,6 +117,7 @@ export function PhotoCaptureFlow(props: PhotoCaptureFlowProps) {
           <PhotoReview
             {...{ options, state, view, editor, matches, estimates }}
             errors={saving.errors}
+            onStorageLocationAdded={props.onStorageLocationAdded}
           />
           <PhotoSaveBar
             errors={saving.errors}

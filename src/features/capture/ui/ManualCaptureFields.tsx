@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { CaptureOptions, FoodTypeChoice } from '../domain/capture-options'
+import type { CaptureOptions, FoodTypeChoice, NamedChoice } from '../domain/capture-options'
 import { BestBeforeEntries } from './BestBeforeEntries'
 import { CaptureSummaryGroup } from './CaptureSummaryGroup'
 import { ChoiceChips } from './ChoiceChips'
@@ -20,6 +20,8 @@ type ManualCaptureFieldsProps = Readonly<{
   onFocus: (field: CaptureField) => void
   /** Neu angelegte Art in die Auswahl aufnehmen (#110) */
   onFoodTypeAdded: (foodType: FoodTypeChoice) => void
+  /** Neu angelegten Lagerort in die Auswahl aufnehmen (#301) */
+  onStorageLocationAdded: (location: NamedChoice) => void
   /** Speichern, unter der Zusammenfassung */
   children: ReactNode
 }>
@@ -39,6 +41,7 @@ export function ManualCaptureFields({
   nutritionOpen,
   onFocus,
   onFoodTypeAdded,
+  onStorageLocationAdded,
   children,
 }: ManualCaptureFieldsProps) {
   const { draft, errors, change } = capture
@@ -91,6 +94,7 @@ export function ManualCaptureFields({
         {isRestock ? null : (
           <NewProductExtras
             storageLocations={options.storageLocations}
+            onStorageLocationAdded={onStorageLocationAdded}
             capture={capture}
             view={view}
             nutritionOpen={nutritionOpen}

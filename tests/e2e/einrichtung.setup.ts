@@ -1,8 +1,9 @@
 // Läuft vor allen anderen Projekten (playwright.config.ts) gegen die leere E2E-Datenbank:
 // kompletter erster Start über die Oberfläche (#34, #40): Konto, Mitglieder (einmal übersprungen,
 // dann „Alex“ eingetragen), Wiedereinstieg nach dem Abmelden beim offenen Schritt, Ziel,
-// Foto-Erkennung (#314) übersprungen, Übersicht. Danach die Sitzung speichern. „Alex“ gehört auch zum Beispielvorrat, der ihn nicht doppelt anlegt,
-// und das Ziel bleibt beim Standard (10 Tage, kein Datum). So laufen alle anderen Tests unverändert.
+// Foto-Erkennung (#314) übersprungen, Übersicht. Danach die Sitzung speichern. „Alex“ gehört auch
+// zum Beispielvorrat, der ihn nicht doppelt anlegt, und das Ziel bleibt beim Standard (10 Tage, kein
+// Datum). So laufen alle anderen Tests unverändert.
 // Läuft lokal noch ein Server mit schon eingerichteter DB (reuseExistingServer), meldet sich der
 // Test stattdessen an.
 import type { Page } from '@playwright/test'
@@ -84,10 +85,11 @@ async function resumeAfterSignOut(page: Page) {
   await expectSetupStep(page, { path: '/einrichten/ziel', title: 'Euer Ziel', step: 3 })
 }
 
-// Schritt „Ziel“ mit der Quelle samt Hinweis wie auf der Zielseite. Ein vergangenes Datum lehnt
-// das Formular ab, „Weiter“ speichert den Standard und führt zur Foto-Erkennung.
+// Schritt „Ziel“ mit der geprüften Quelle wie auf der Zielseite (ohne Hinweis, U3). Ein vergangenes
+// Datum lehnt das Formular ab, „Weiter“ speichert den Standard und führt zur Foto-Erkennung.
 async function goalStep(page: Page) {
-  await expect(page.getByText('Werte noch nicht geprüft')).toBeVisible()
+  await expect(page.getByText('BBK/BLE', { exact: true })).toBeVisible()
+  await expect(page.getByText('Werte noch nicht geprüft')).toHaveCount(0)
   await expect(page.getByText('Rechenmodus')).toBeVisible()
   const date = page.getByLabel('Bis wann? (freiwillig)')
   await date.fill('2020-01-31')
@@ -132,8 +134,8 @@ async function expectEmptyOverview(page: Page) {
     'href',
     '/einstellungen',
   )
-  // Die Einrichtung setzt die Quelle BBK/BLE aus dem Seed, noch ungeprüft (#20)
-  await expect(page.getByText(/^BBK\/BLE, Stand .* · Werte noch nicht geprüft$/)).toBeVisible()
+  // Die Einrichtung setzt die geprüfte Quelle BBK/BLE aus dem Seed (#20, U3)
+  await expect(page.getByText(/^BBK\/BLE, Stand [^·]*$/)).toBeVisible()
   for (const colorScheme of ['light', 'dark'] as const) {
     // Neu laden statt umschalten: Farbübergänge würden axe sonst mitten im Wechsel treffen
     await page.emulateMedia({ colorScheme })

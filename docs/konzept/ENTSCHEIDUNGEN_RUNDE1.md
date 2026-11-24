@@ -3,6 +3,7 @@
 > Stand 2026-11-22 · gebündelt aus den Strängen Design, Datenstruktur, Einstellungen, Onboarding und dem UX-Konzept.
 > Aus 57 Einzelfragen sind **25** geworden. Der Rest hat sich erledigt oder war eine Technikfrage (siehe unten „Von uns entschieden“).
 > Herleitung und Widersprüche: `ABGLEICH.md`.
+> **Antworten (2026-11-24):** Der Maintainer hat die Fragen delegiert. Je Frage steht die Entscheidung „vom Maintainer delegiert, entschieden nach Empfehlung“ bzw. „überholt durch …“ in `05_STATUS_ENTSCHEIDUNGEN.md`, Abschnitt „Delegierte Entscheidungen“. Frage 11 hat der Maintainer selbst entschieden (a, #298).
 
 **So antwortest du:** Nummer und „ok“ reicht, wenn die Empfehlung passt. Sonst Nummer und Buchstabe oder ein Halbsatz. Beispiel: `2 ok · 6 c · 13 ok · 20 b`. „Alles ok außer 6 und 20“ geht auch.
 Was hier nicht als Frage steht und in den Konzepten keinem Punkt unten widerspricht, gilt mit deiner Antwort als freigegeben.
@@ -109,7 +110,7 @@ Fehlt beim Erfassen ein Lagerort oder eine Lebensmittelart, müsste sonst ein Ad
 **Empfehlung: a.**
 Betrifft: Einstellungen, Datenstruktur.
 
-**Entschieden (Maintainer, 2026-11-24): a** („Auch Mitglieder“, #298). Lebensmittelarten beim Erfassen sind umgesetzt, der Lagerort beim Erfassen folgt mit #301.
+**Entschieden (Maintainer, 2026-11-24): a** („Auch Mitglieder“, #298). Lebensmittelarten beim Erfassen sind umgesetzt (#298), der Lagerort beim Erfassen mit #301.
 
 ### 12 · „Packungen hinzufügen“ schon im MVP?
 Ein Knopf auf der Seite einer Lebensmittelart, der direkt zu Datum und Anzahl springt. Bisher als „später“ eingeplant.

@@ -63,10 +63,11 @@ test('zeigt Warengruppen ohne Wasser und führt in den Vorrat der Gruppe', async
   await expect(
     page.getByRole('link', { name: /^\d+ Personen · Ziel 10 Tage bis/ }),
   ).toHaveAttribute('href', '/einstellungen')
-  // Die Quelle ist noch nicht vom Maintainer geprüft und sagt das dezent (#20)
+  // Die Quelle ist geprüft (U3, #106) und trägt deshalb keinen Hinweis mehr (#20)
   await expect(
-    page.getByText('BBK/BLE, Stand BBK 11/2025, BLE 2024 · Werte noch nicht geprüft'),
+    page.getByText('BBK/BLE, Stand BBK 11/2025, BLE 2024', { exact: true }),
   ).toBeVisible()
+  await expect(page.getByText('Werte noch nicht geprüft')).toHaveCount(0)
 
   // Kurzname in Zeile und Titel, der amtliche Name steht über dem Titel (#177)
   await groups.getByRole('link', { name: /^Getreide und Kartoffeln/ }).click()
@@ -99,7 +100,7 @@ test('Erklär-Blatt öffnet per Tastatur und nennt Rechnung, „ca.“ und Quell
   await expect(sheet.getByRole('heading', { name: 'Was „ca.“ bedeutet' })).toBeVisible()
   await expect(sheet.getByRole('heading', { name: 'Was nicht mitzählt' })).toBeVisible()
   await expect(sheet.getByRole('link', { name: 'Zur Quelle' })).toHaveAttribute('href', /^https:/)
-  await expect(sheet.getByText('Werte noch nicht geprüft')).toBeVisible()
+  await expect(sheet.getByText('Werte noch nicht geprüft')).toHaveCount(0)
 
   await page.keyboard.press('Escape')
   await expect(sheet).toBeHidden()
@@ -140,7 +141,9 @@ test('Erklär-Blatt einer Warengruppe öffnet per Tastatur und nennt dieselben T
 }) => {
   await page.goto('/uebersicht')
   const meter = page.getByRole('list', { name: 'Warengruppen' }).getByRole('meter', { name: GRAIN })
-  const coverage = /^([\d,]+) von 10 Tagen/.exec((await meter.getAttribute('aria-valuetext')) ?? '')
+  const coverage = /^Menge reicht ([\d,]+) von 10 Tagen/.exec(
+    (await meter.getAttribute('aria-valuetext')) ?? '',
+  )
   const days = coverage?.[1] ?? 'fehlt'
   const sheet = groupSheet(page)
 
@@ -153,8 +156,13 @@ test('Erklär-Blatt einer Warengruppe öffnet per Tastatur und nennt dieselben T
   await expect(
     sheet.getByText(new RegExp(`^[\\d,.]+ k?g ÷ [\\d,.]+ k?g am Tag = ${days} Tage?$`)),
   ).toBeVisible()
-  await expect(sheet.getByText(/nicht wie lange das Essen reicht/)).toBeVisible()
-  await expect(sheet.getByText(/Beitrag zum Essen/)).toBeVisible()
+  // Beide Zahlen mit Namen und Rechnung (#209)
+  await expect(sheet.getByRole('heading', { name: 'Menge reicht' })).toBeVisible()
+  await expect(sheet.getByRole('heading', { name: 'Satt für' })).toBeVisible()
+  await expect(
+    sheet.getByText(/^(ca\. )?[\d.]+ kcal ÷ [\d.]+ kcal am Tag = [\d,]+ Tage?$/),
+  ).toBeVisible()
+  await expect(sheet.getByText(/„Menge reicht“ vergleicht die Menge/)).toBeVisible()
   await expect(sheet.getByRole('link', { name: 'Zur Quelle' })).toHaveAttribute('href', /^https:/)
 
   await page.keyboard.press('Escape')

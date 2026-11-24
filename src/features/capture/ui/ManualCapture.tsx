@@ -4,7 +4,7 @@ import { flushSync } from 'react-dom'
 import { cx } from '@/shared/lib/class-names'
 import { Button } from '@/shared/ui/Button'
 import { LiveMessage } from '@/shared/ui/LiveMessage'
-import { FOLD_SPLIT_COLUMNS } from '@/shared/ui/split-columns'
+import { EVEN_SPLIT_COLUMNS, FOLD_SPLIT_MARKER } from '@/shared/ui/split-columns'
 import type { CaptureOptions } from '../domain/capture-options'
 import type { CapturePrefill } from '../domain/capture-prefill'
 import { NO_LEAVE_GUARD, useLeaveGuard } from './capture-leave'
@@ -12,7 +12,7 @@ import { CaptureSaved } from './CaptureSaved'
 import { NUTRITION_FIELDS, type CaptureErrors, type CaptureField } from './manual-capture-draft'
 import { deriveView } from './manual-capture-view'
 import { ManualCaptureFields } from './ManualCaptureFields'
-import { useAddedFoodTypes } from './use-added-food-types'
+import { useAddedChoices } from './use-added-choices'
 import { useFreshRestart } from './use-fresh-restart'
 import { useManualCapture } from './use-manual-capture'
 
@@ -40,13 +40,9 @@ const isNutritionField = (field: CaptureField) =>
 const firstPrefilledField = (prefill: CapturePrefill) =>
   prefill.product === null ? ('content' as const) : ('units' as const)
 
-// Ab „breit“ zwei Spalten mit der Grenze in der Fenstermitte (Falz beim Duo quer), ab „weit“ zwei
-// gleich breite Spalten (ManualCaptureFields ordnet die Felder zu).
-const FORM_COLUMNS = cx(
-  'pb-6',
-  FOLD_SPLIT_COLUMNS,
-  'breit:items-start weit:max-w-[1080px] weit:grid-cols-2',
-)
+// Ab „breit“ zwei gleich breite Spalten, mit Falz die linke bis zur Falz (split-columns.ts).
+// ManualCaptureFields ordnet die Felder zu.
+const FORM_COLUMNS = cx('pb-6', EVEN_SPLIT_COLUMNS, 'breit:items-start weit:max-w-[1080px]')
 
 const UNSAVED = { kind: 'unsaved' } as const
 
@@ -55,7 +51,7 @@ const firstMessage = (errors: CaptureErrors) => Object.values(errors).find(Boole
 // Manuelles Erfassen (#52, #53, #54): ein Formular, danach Bestätigung mit „Noch eins“. Vorbelegt
 // (#195) steht der Fokus gleich beim Inhalt, mit vorgewähltem Produkt beim MHD.
 export function ManualCapture({ prefill, ...props }: ManualCaptureProps) {
-  const { options, add: addFoodType } = useAddedFoodTypes(props.options)
+  const { options, addFoodType, addStorageLocation } = useAddedChoices(props.options)
   const formRef = useRef<HTMLFormElement>(null)
   const [isNutritionOpen, setNutritionOpen] = useState(false)
 
@@ -102,6 +98,7 @@ export function ManualCapture({ prefill, ...props }: ManualCaptureProps) {
     <form
       ref={formRef}
       noValidate
+      {...FOLD_SPLIT_MARKER}
       aria-label="Produkt erfassen"
       className={FORM_COLUMNS}
       onSubmit={(event) => {
@@ -116,6 +113,7 @@ export function ManualCapture({ prefill, ...props }: ManualCaptureProps) {
         nutritionOpen={{ isOpen: isNutritionOpen, onToggle: setNutritionOpen }}
         onFocus={focusField}
         onFoodTypeAdded={addFoodType}
+        onStorageLocationAdded={addStorageLocation}
       >
         <LiveMessage message={firstMessage(capture.errors)} />
         <div className="mx-4 flex flex-col gap-3 pt-8 breit:mx-6">

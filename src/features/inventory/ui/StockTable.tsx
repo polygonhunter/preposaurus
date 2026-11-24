@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { DAYS_TERM } from '@/shared/lib/supply-terms'
 import type { StockTarget } from '../schemas/shared'
 import { groupPath } from './stock-paths'
 import { isSameTarget, type TableGroup } from './stock-table'
@@ -11,13 +12,15 @@ type StockTableProps = Readonly<{
   caption: string
 }>
 
-const HEAD =
-  'px-3 py-2 whitespace-nowrap text-left text-footnote font-normal tracking-wide text-fg2 uppercase'
+// Neben dem Detail hat die Tabelle ab 1280 px nur gut 630 px (#209): Spalten mit 16 px Abstand
+// (px-2), und „Nächstes MHD“ darf wie seine Zellen umbrechen, sonst rollt die Liste waagerecht.
+const HEAD_BASE = 'px-2 py-2 text-left text-footnote font-normal tracking-wide text-fg2 uppercase'
+const HEAD = `${HEAD_BASE} whitespace-nowrap`
 const HEAD_NUMBER = `${HEAD} text-right`
 
 // Vorrat als Tabelle ab „weit“ (DESIGN_SYSTEM §6, M12-04): echte Tabelle mit Spaltenköpfen, je
-// Warengruppe eine Zwischenzeile (Link auf Ebene 2), Spalten Packungen · Menge · kcal · Tage · nächstes MHD. Die
-// Reihenfolge ist die des Baums (Warengruppe, Kategorie, Name) wie in der Liste.
+// Warengruppe eine Zwischenzeile (Link auf Ebene 2), Spalten Packungen · Menge · kcal · Satt für ·
+// nächstes MHD. Die Reihenfolge ist die des Baums (Warengruppe, Kategorie, Name) wie in der Liste.
 export function StockTable({ groups, selected = null, caption }: StockTableProps) {
   return (
     <table className="w-full border-collapse text-callout">
@@ -37,9 +40,9 @@ export function StockTable({ groups, selected = null, caption }: StockTableProps
             kcal
           </th>
           <th scope="col" className={HEAD_NUMBER}>
-            Tage
+            {DAYS_TERM.food}
           </th>
-          <th scope="col" className={`${HEAD} pr-6`}>
+          <th scope="col" className={`${HEAD_BASE} pr-6`}>
             Nächstes MHD
           </th>
         </tr>

@@ -3,11 +3,13 @@ import { useId, useRef, useState, type KeyboardEvent } from 'react'
 import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
+import type { BestBefore } from '@/features/inventory/domain/unit'
 import { todayInBerlin } from '@/shared/lib/dates'
 import { detectDateKind, parseBestBefore } from '../domain/best-before'
 import { doubtAboutBestBefore } from '../domain/best-before-plausibility'
-import { addDateEntry, changeDateCount, type DateEntry } from '../domain/date-entries'
-import { addedDateNote, PARSE_MESSAGES } from './best-before-messages'
+import { addDateEntry, type DateEntry } from '../domain/date-entries'
+import { addedDateNote, estimatedDateNote, PARSE_MESSAGES } from './best-before-messages'
+import { BestBeforeQuickPicks } from './BestBeforeQuickPicks'
 import { DateEntryList } from './DateEntryList'
 import { QuickCounts } from './QuickCounts'
 
@@ -24,8 +26,11 @@ const HINT =
 const PENDING_MESSAGE = 'Bitte übernimm das Datum mit Enter oder „Datum hinzufügen“.'
 
 // MHD manuell (#53): je Datum ein Eintrag mit Anzahl, „Datum fehlt“ als eigene Wahl (#116).
-// Die Genauigkeit folgt der Eingabe (Tag, Monat oder Jahr). Es wird nie ein Datum vorgeschlagen.
-// Steht „zu verbrauchen bis“ davor, wird der Eintrag ein Verbrauchsdatum und sagt es (#294).
+// Die Genauigkeit folgt der Eingabe (Tag, Monat oder Jahr). Es wird nie ein Datum vorgeschlagen:
+// Die Schnellknöpfe „+6 Mon. · +1 J. · +2 J.“ (#180) setzen nur auf Tippen eine Schätzung.
+// Steht „zu verbrauchen bis“ davor, wird der Eintrag ein Verbrauchsdatum und sagt es (#294). Jeder
+// Eintrag außer einer Schätzung hat den Umschalter MHD · Verbrauchsdatum, vorbelegt von Erkennung
+// oder KI.
 // Darunter die Schnellzahlen, gleich im Formular und im Foto-Weg (#211).
 export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntriesProps) {
   const headerId = useId()
@@ -49,6 +54,13 @@ export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntrie
     setNote(addedDateNote({ doubt: doubtAboutBestBefore(parsed.value, today), kind }))
     setText('')
     onChange(addDateEntry(entries, parsed.value, kind ?? undefined))
+  }
+
+  /** „Datum fehlt“ oder ein Schnellknopf: ohne Eingabe, nur auf Tippen */
+  function addChosen(bestBefore: BestBefore | null) {
+    setParseError(undefined)
+    setNote(bestBefore === null ? '' : estimatedDateNote(bestBefore))
+    onChange(addDateEntry(entries, bestBefore))
   }
 
   function addOnEnter(event: KeyboardEvent<HTMLInputElement>) {
@@ -85,14 +97,13 @@ export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntrie
           <Button
             variant="tinted"
             onClick={() => {
-              setParseError(undefined)
-              setNote('')
-              onChange(addDateEntry(entries, null))
+              addChosen(null)
             }}
           >
             Datum fehlt
           </Button>
         </div>
+        <BestBeforeQuickPicks onPick={addChosen} />
         <p role="status" className="px-4 text-footnote text-fg2 empty:hidden">
           {note}
         </p>
@@ -100,12 +111,10 @@ export function BestBeforeEntries({ entries, onChange, error }: BestBeforeEntrie
       <DateEntryList
         entries={entries}
         labelledBy={headerId}
-        onCountChange={(key, delta) => {
-          const next = changeDateCount(entries, { key, delta })
-          // Verschwindet die Zeile samt Knopf, bleibt der Fokus nicht im Nichts, sondern im Feld.
-          if (next.length < entries.length) inputRef.current?.focus()
-          onChange(next)
-        }}
+        onChange={onChange}
+        // Verschwindet die Zeile samt Knopf, bleibt der Fokus nicht im Nichts, sondern im Feld.
+        onRowRemoved={() => inputRef.current?.focus()}
+        onKindChange={setNote}
       />
       <QuickCounts units={entries} onChange={onChange} />
     </section>

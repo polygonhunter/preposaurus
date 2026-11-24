@@ -114,15 +114,12 @@ export const bestBeforeAnswerSchema = z.strictObject({
 
 /**
  * MHD-Schätzung bei „Datum fehlt“ (#124), nur auf ausdrückliche Wahl. Die KI nennt nie ein Datum,
- * nur eine Haltbarkeit ab heute. Das Datum rechnet die App (Monats- bzw. Jahresende).
+ * nur eine Haltbarkeit ab heute. Das Datum rechnet die App, immer auf das Monatsende (#170).
  */
 export const bestBeforeEstimateAnswerSchema = z.strictObject({
   haltbar_monate: nullableNumber(
     'Geschätzte Haltbarkeit ab heute in ganzen Monaten, null wenn nicht sinnvoll schätzbar',
   ),
-  genauigkeit: z
-    .enum(['monat', 'jahr'])
-    .describe('Wie genau die Schätzung gemeint ist: auf den Monat oder nur auf das Jahr'),
   sicherheit: confidence,
 })
 

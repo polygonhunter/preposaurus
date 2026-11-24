@@ -145,6 +145,15 @@ const dueSchema = z.object({
   soonDays: count,
 })
 
+/** „Satt für“ einer Warengruppe (#209): kcal ÷ kcal-Tagesbedarf des Haushalts = Tage */
+const satietySchema = z.object({
+  kcal: amount,
+  /** „ca.“ vor den kcal: Richtwert-Anteil ab 10 % */
+  isApproximate: z.boolean(),
+  kcalPerDay: z.number().positive(),
+  days,
+})
+
 /** Abdeckung je Warengruppe (A9), ohne Wasser: das ist der zweite Balken der Hauptkachel. */
 const groupCoverageSchema = z.object({
   key: z.string(),
@@ -158,6 +167,8 @@ const groupCoverageSchema = z.object({
   unit: z.enum(['g', 'ml']),
   stock: amount,
   targetPerDay: z.number().positive(),
+  /** Die zweite Zahl im Erklär-Blatt (#209), null ohne Bedarf (keine Mitglieder) */
+  satiety: satietySchema.nullable(),
 })
 
 const restockSchema = z.object({

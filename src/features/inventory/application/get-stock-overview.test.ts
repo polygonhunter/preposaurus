@@ -8,7 +8,9 @@ import {
   product,
   unit,
 } from '../../../../tests/helpers/fake-stock-reader'
+import { getFoodTypeLevel } from './get-food-type-level'
 import { getStockOverview } from './get-stock-overview'
+import { getStockTree } from './get-stock-tree'
 
 const today = toCalendarDay('2026-11-22')
 const householdId = 'haushalt-a'
@@ -93,6 +95,17 @@ describe('getStockOverview', () => {
       isTightest: false,
     })
     expect(wasser?.coverage).toMatchObject({ days: 1.5, percent: 15, isTightest: true })
+  })
+
+  it('nennt im Kopf von Ebene 2 und im Baum dieselbe Abdeckung wie Ebene 1 (#209)', async () => {
+    const reader = setup()
+    const level = await getFoodTypeLevel(reader, { householdId, today, groupKey: 'getreide' })
+    const tree = await getStockTree(reader, { householdId, today })
+    const expected = { unit: 'g', stock: 1000, target: 1500, days: 6.6, goalDays: 10, percent: 66 }
+
+    expect(level.ok && level.value.group.coverage).toEqual(expected)
+    expect(tree.groups[0]?.group.coverage).toEqual(expected)
+    expect(tree.groups.find(({ group }) => group.key === 'sonstiges')?.group.coverage).toBeNull()
   })
 
   it('zählt „Noch gut“ geprüfte Packungen nur mit eingeschaltetem Schalter', async () => {

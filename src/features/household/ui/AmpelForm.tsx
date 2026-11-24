@@ -2,9 +2,7 @@
 import { useActionState } from 'react'
 import type { AmpelThresholds } from '@/features/inventory/domain/unit-state'
 import { ActionForm } from '@/shared/ui/ActionForm'
-import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
-import { SaveStatus } from '@/shared/ui/SaveStatus'
 import { saveAmpelAction, type AmpelFormState } from '../actions/save-ampel-action'
 
 type AmpelFormProps = Readonly<{
@@ -29,6 +27,7 @@ export function AmpelForm({ thresholds, labelledBy }: AmpelFormProps) {
       result={state}
       announcement={errors.urgentDays ?? errors.soonDays}
       action={formAction}
+      submit={{ label: 'Speichern', isPending, status: state }}
       aria-labelledby={labelledBy}
       className="mx-4 flex flex-col gap-4 breit:mx-6"
     >
@@ -50,12 +49,6 @@ export function AmpelForm({ thresholds, labelledBy }: AmpelFormProps) {
         hint="Mindestens 7 Tage und höchstens so viele wie bei Gelb. Standard 28 Tage."
         error={errors.urgentDays}
       />
-      <div className="flex items-center justify-between gap-3">
-        <SaveStatus state={state} />
-        <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Speichert …' : undefined}>
-          Speichern
-        </Button>
-      </div>
     </ActionForm>
   )
 }

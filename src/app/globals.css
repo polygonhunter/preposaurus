@@ -8,6 +8,11 @@
 @custom-variant weit (@media (width >= 1280px));
 /* Nur „mittel“, nicht darüber: Liste oben, Detail unten im Vorrat (M12-05, Duo hochkant). */
 @custom-variant nur-mittel (@media (640px <= width < 900px) and (height >= 700px));
+/* Falz (#253): Das Gerät meldet zwei Bildschirme nebeneinander (Viewport Segments, z. B. Surface Duo
+   quer in Edge/Chrome). Nur ab „breit“, weil das Raster mit der Seitenleiste rechnet. Ohne die API
+   (Safari, Firefox, ältere Browser) gilt „keine Falz“: Ein PC-Fenster gleicher Breite lässt sich sonst
+   nicht von einem Duo unterscheiden. Steht nach „weit“, damit die Falz immer gewinnt. */
+@custom-variant falz (@media (width >= 900px) and (horizontal-viewport-segments: 2));
 
 /* light-dark() folgt color-scheme: hell, dunkel per prefers-color-scheme, scheme-dark/-light erzwingt.
    „inline“, weil Tailwind light-dark() über Variablen nachbildet. Stünde der Wert nur in einer
@@ -83,6 +88,20 @@
     --text-body--line-height: 20px;
     --text-footnote: 12px;
     --text-footnote--line-height: 16px;
+  }
+}
+
+/* Breite der Seitenleiste ab „breit“ (Sidebar), die Falz-Spalten ziehen sie ab (split-columns.ts). */
+:root {
+  --seitenleiste: 216px;
+}
+
+/* Kanten der Falz mit je 12 px Abstand, nichts Antippbares reicht hinein (UX_KONZEPT §6, #253). Gleiche
+   Abfrage wie die Variante `falz:` oben. */
+@media (width >= 900px) and (horizontal-viewport-segments: 2) {
+  :root {
+    --falz-anfang: calc(env(viewport-segment-right 0 0) - 12px);
+    --falz-ende: calc(env(viewport-segment-left 1 0) + 12px);
   }
 }
 

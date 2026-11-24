@@ -19,6 +19,8 @@ export const incompleteReasonSchema = z.enum([
 ])
 
 export const isoDay = z.iso.date()
+/** MHD oder Verbrauchsdatum, gespiegelt als `DateKind` (domain/unit.ts) */
+export const dateKindSchema = z.enum(['best-before', 'use-by'])
 export const id = z.uuid()
 export const namedRef = z.object({ id, name: z.string() })
 /** Warengruppe mit amtlichem Namen und kurzem Anzeigenamen für Titel und Navigation (#177) */
@@ -67,6 +69,7 @@ export const stockRowSchema = z.object({
   totals: nodeTotalsSchema,
 })
 
+/** Abdeckung „Menge reicht X von Y Tagen“ einer Warengruppe (UX-Konzept A9, #209) */
 export const coverageSchema = z.object({
   unit: z.enum(['g', 'ml']),
   stock: z.number(),
@@ -74,13 +77,13 @@ export const coverageSchema = z.object({
   days: z.number(),
   goalDays: z.number().int(),
   percent: z.number().int(),
-  isTightest: z.boolean(),
 })
 
 export type StockTarget = z.infer<typeof stockTargetSchema>
 export type BestBeforeDto = z.infer<typeof bestBeforeSchema>
 export type UnitStateDto = z.infer<typeof unitStateSchema>
 export type NodeTotalsDto = z.infer<typeof nodeTotalsSchema>
+export type CoverageDto = z.infer<typeof coverageSchema>
 export type StockRowDto = z.infer<typeof stockRowSchema>
 export type InStockCounts = z.infer<typeof inStockCountsSchema>
 export type IncompleteReasonDto = z.infer<typeof incompleteReasonSchema>

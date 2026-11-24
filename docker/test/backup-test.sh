@@ -10,12 +10,6 @@ repo_dir=$(pwd)
 prepare_install_dir "$repo_dir"
 trap 'docker compose down --volumes > /dev/null 2>&1 || true' EXIT
 
-# Zeilenzahl je Tabelle, z. B. "kategorie=10,nutzer=1,…"
-ROW_COUNTS="select string_agg(table_schema || '.' || table_name || '=' || (xpath('/row/c/text()',
-  query_to_xml(format('select count(*) as c from %I.%I', table_schema, table_name), false, true, '')))[1]::text,
-  ',' order by table_schema, table_name)
-  from information_schema.tables where table_schema in ('public', 'drizzle') and table_type = 'BASE TABLE'"
-
 backup() {
   docker compose run --rm -T "$@"
 }
@@ -87,7 +81,7 @@ backup backup wiederherstellen "$stand" && fail "Ohne --ja und ohne Terminal dar
 # Eine offene Verbindung steht für eine laufende App: Dann darf das Zurückspielen nicht starten.
 # Es wartet bis zu 10 s (#247) und nennt danach den Anwendungsnamen der Verbindung.
 docker compose exec -T -d -e PGAPPNAME=offene-verbindung db \
-  psql -U preposaurus -d preposaurus -c 'select pg_sleep(60)'
+  psql -U preposaurus_app -d preposaurus -c 'select pg_sleep(60)'
 sleep 2
 # Anfragen an den Webserver halten seinen Pool verbunden (ruhende Clients schließt er nach 10 s)
 ( for _ in $(seq 1 20); do curl -s -o /dev/null http://127.0.0.1:3000/anmelden || true; sleep 1; done ) &
@@ -115,12 +109,12 @@ backup backup wiederherstellen manuell/2026-01-01_000000 --ja && fail "Ein kaput
 [ -f fotos/haushalt/zwei.jpg ] || fail "Ein gescheitertes Einspielen hat Fotos verändert"
 
 # Rest eines abgebrochenen Laufs: Eine alte Kopie unter preposaurus_alt räumt der nächste Lauf weg.
-psql_value 'create database preposaurus_alt' > /dev/null
+psql_value 'create database preposaurus_alt owner preposaurus_app' > /dev/null
 # Eine Verbindung, die sich erst kurz nach dem Stoppen schließt (wie App-Pool oder pg-boss, #247):
 # Das Zurückspielen wartet auf sie, statt abzubrechen. 8 s, damit sie den Start des Containers
 # backup sicher überdauert und trotzdem innerhalb der 10 s Wartezeit endet.
 docker compose exec -T -d -e PGAPPNAME=kurze-verbindung db \
-  psql -U preposaurus -d preposaurus -c 'select pg_sleep(8)'
+  psql -U preposaurus_app -d preposaurus -c 'select pg_sleep(8)'
 sleep 1
 backup backup wiederherstellen "$stand" --ja | tee restore.log
 grep -q 'Warte bis zu 10 s.*kurze-verbindung' restore.log ||
@@ -129,6 +123,11 @@ grep -q 'Warte bis zu 10 s.*kurze-verbindung' restore.log ||
   fail "Nach dem Zurückspielen sind preposaurus_alt oder preposaurus_neu übrig"
 after=$(psql_value "$ROW_COUNTS")
 [ "$after" = "$before" ] || fail "Zeilenzahlen weichen ab: vorher $before, nachher $after"
+# Die Rolle backup spielt ein, gehören muss alles weiter der App, sonst scheitert migrate (#146).
+[ "$(psql_value "select pg_get_userbyid(datdba) from pg_database where datname = 'preposaurus'")" = "preposaurus_app" ] ||
+  fail "Die Datenbank gehört nach dem Zurückspielen nicht preposaurus_app"
+foreign=$(psql_value "$FOREIGN_OWNED")
+[ -z "$foreign" ] || fail "Nach dem Zurückspielen gehören Objekte nicht preposaurus_app: $foreign"
 [ "$(cat fotos/haushalt/eins.jpg)" = "foto-1" ] || fail "Das gesicherte Foto ist nicht zurück"
 [ ! -e fotos/haushalt/zwei.jpg ] || fail "Das spätere Foto ist noch da"
 

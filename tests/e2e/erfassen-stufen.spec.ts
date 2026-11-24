@@ -7,7 +7,6 @@ import { expectAccessibleLayout, expectNothingOnVerticalFold } from '../helpers/
 // Foto-Erfassung je Stufe steht in erfassen-foto.spec.ts. Diese Tests speichern nichts.
 
 const BREIT = 900
-const WEIT = 1280
 
 const widthOf = (page: Page) => page.viewportSize()?.width ?? 0
 const content = (page: Page) => page.getByLabel('Inhalt je Packung')
@@ -58,8 +57,8 @@ test.describe('ab „breit“', () => {
     expect(Math.abs(dateBox.y - contentBox.y)).toBeLessThan(400)
   })
 
-  test('nichts Antippbares auf der Falz (Duo quer)', async ({ page }) => {
-    test.skip(widthOf(page) >= WEIT, 'Am PC gibt es keine Falz')
+  test('nichts Antippbares auf der Falz (Duo quer)', async ({ page, fold }) => {
+    test.skip(fold === null, 'Nur mit Falz')
     await openForm(page)
     await expectNothingOnVerticalFold(page)
   })

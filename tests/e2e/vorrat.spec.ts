@@ -114,15 +114,16 @@ async function openOatsDetail(page: Page) {
 
 const detailSheet = (page: Page) => page.getByRole('dialog', { name: 'So wird gerechnet' })
 
-test('Erklär-Blatt der Kennwerte öffnet per Tastatur und nennt die Tage der Kachel (#230)', async ({
+test('Erklär-Blatt der Kennwerte öffnet per Tastatur und nennt „Satt für“ der Kachel (#230)', async ({
   page,
 }) => {
   await openOatsDetail(page)
   const daysTile = page
     .getByRole('main')
     .locator('dl > div')
-    .filter({ has: page.getByRole('term').filter({ hasText: /^Tage$/ }) })
-  const days = (await daysTile.getByRole('definition').textContent()) ?? 'fehlt'
+    .filter({ has: page.getByRole('term').filter({ hasText: /^Satt für$/ }) })
+  const tileText = (await daysTile.getByRole('definition').textContent()) ?? ''
+  const days = /^([\d,]+) Tage?$/.exec(tileText)?.[1] ?? 'fehlt'
   const sheet = detailSheet(page)
 
   // Erst nach der Hydrierung reagiert der Knopf, deshalb mit Wiederholung
@@ -135,7 +136,8 @@ test('Erklär-Blatt der Kennwerte öffnet per Tastatur und nennt die Tage der Ka
     sheet.getByText(new RegExp(`^[\\d.]+ kcal ÷ [\\d.]+ kcal am Tag = ${days} Tage?$`)),
   ).toBeVisible()
   await expect(sheet.getByText(/zählt heute mit|zählen heute mit/).first()).toBeVisible()
-  await expect(sheet.getByText(/„X von 10 Tagen“/)).toBeVisible()
+  await expect(sheet.getByRole('heading', { name: 'Satt für' })).toBeVisible()
+  await expect(sheet.getByText(/„Menge reicht … von … Tagen“/)).toBeVisible()
   await expect(sheet.getByRole('link', { name: 'Zur Quelle' })).toHaveAttribute('href', /^https:/)
 
   await page.keyboard.press('Escape')

@@ -70,8 +70,8 @@ function bestBeforeEstimateInstruction(context: EstimateContext): string {
     'Auf der Packung ist kein Mindesthaltbarkeitsdatum lesbar. Schätze, wie viele Monate ' +
     `dieses Lebensmittel${estimateBasis(context)} ab heute typischerweise noch haltbar ist, ` +
     'ungeöffnet und richtig gelagert. Das Ergebnis ist ausdrücklich eine Schätzung, kein ' +
-    'gelesenes Datum: Lies kein Datum von der Packung ab. Wähle genauigkeit „jahr“, wenn du ' +
-    'nur grob schätzen kannst. Wenn du nicht sinnvoll schätzen kannst, setze null.'
+    'gelesenes Datum: Lies kein Datum von der Packung ab. Wenn du nur grob schätzen kannst, ' +
+    'nimm die kürzere Haltbarkeit. Wenn du nicht sinnvoll schätzen kannst, setze null.'
   )
 }
 

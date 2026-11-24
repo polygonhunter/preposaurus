@@ -1,8 +1,9 @@
 // Meldungen, wenn sich ein eingetipptes MHD nicht lesen lässt (#53). Gleich beim Erfassen und
 // beim Ändern eines Datums (#49). Es wird nie ein Datum geraten, die App fragt nach.
-import type { DateKind } from '@/features/inventory/domain/unit'
+import type { BestBefore, DateKind } from '@/features/inventory/domain/unit'
 import type { BestBeforeParseError } from '../domain/best-before'
 import type { BestBeforeDoubt } from '../domain/best-before-plausibility'
+import { dateEntryKey, dateEntryLabel, type DateEntry } from '../domain/date-entries'
 
 export const PARSE_MESSAGES: Record<BestBeforeParseError['kind'], string> = {
   empty: 'Bitte gebt das Datum ein, wie es aufgedruckt ist, oder wählt „Datum fehlt“.',
@@ -35,4 +36,22 @@ export function addedDateNote({ doubt, kind }: AddedDate): string {
     doubt === null ? null : DOUBT_MESSAGES[doubt],
   ]
   return notes.filter((note) => note !== null).join(' ')
+}
+
+/** Ruhiger Hinweis zur Zeile einer Schätzung, statt des Umschalters MHD · Verbrauchsdatum (#180) */
+export const ESTIMATE_ROW_NOTE = 'Geschätzt, kein Aufdruck'
+
+/** Satz unter dem Feld nach einem Schnellknopf (#180): „Geschätzt, kein Aufdruck: ca. 05/2027.“ */
+export function estimatedDateNote(bestBefore: BestBefore): string {
+  return `${ESTIMATE_ROW_NOTE}: ${dateEntryLabel({ bestBefore })}.`
+}
+
+/**
+ * Satz nach dem Umschalten der Datumsart (#294). Gab es das Datum mit der neuen Art schon, wurden
+ * beide Einträge einer: Das wird angesagt, denn eine Zeile verschwindet. Sonst leer.
+ */
+export function kindChangedNote(entries: readonly DateEntry[], key: string, isMerged: boolean) {
+  const merged = isMerged ? entries.find((entry) => dateEntryKey(entry) === key) : undefined
+  if (merged === undefined) return ''
+  return `Zusammengeführt mit ${dateEntryLabel(merged)}, jetzt ${String(merged.count)}×.`
 }

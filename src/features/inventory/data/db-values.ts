@@ -52,6 +52,12 @@ const DATE_KIND: Record<DbValue<typeof BEST_BEFORE_KINDS>, DateKind> = {
   verbrauchen_bis: 'use-by',
 }
 
+/** Datumsart zurück in den Wert der Datenbank, für „Datum ändern“ (#300). */
+export const DB_DATE_KIND: Record<DateKind, DbValue<typeof BEST_BEFORE_KINDS>> = {
+  'best-before': 'mhd',
+  'use-by': 'verbrauchen_bis',
+}
+
 const NUTRITION_SOURCE: Record<DbValue<typeof NUTRITION_SOURCES>, StoredNutritionSource> = {
   tabelle: 'label',
   manuell: 'manual',

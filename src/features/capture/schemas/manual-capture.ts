@@ -46,7 +46,12 @@ export const per100Text = z.string().transform((text, context) => {
 
 export const formUnitSchema = z.object({
   bestBefore: z
-    .object({ date: z.string(), precision: z.enum(['day', 'month', 'year']) })
+    .object({
+      date: z.string(),
+      precision: z.enum(['day', 'month', 'year']),
+      /** Nur nach einem Schnellknopf (#180) oder „Von der KI schätzen lassen“ (#124) */
+      isEstimated: z.boolean().default(false),
+    })
     .nullable(),
   /** „zu verbrauchen bis“ mitgetippt (#294) */
   kind: dateKindSchema,

@@ -1,13 +1,19 @@
 'use client'
 import { useActionState, useState } from 'react'
 import { ActionForm } from '@/shared/ui/ActionForm'
-import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import { PasswordField } from '@/shared/ui/PasswordField'
 import { setupAction, type SetupState } from '../actions/setup-action'
 import { suggestUsername } from './suggest-username'
 
 const INITIAL_STATE: SetupState = { errors: {} }
+
+const SETUP_NOTE = (
+  <p className="px-4 text-footnote text-fg2">
+    Mit diesem Konto verwaltet ihr Preposaurus. Weitere Personen legt ihr danach in den
+    Einstellungen an.
+  </p>
+)
 
 const PASSWORD_HINT =
   'Mindestens 10 Zeichen. Ein Satz oder ein paar Wörter sind gut. Bitte keins, das du woanders nutzt.'
@@ -37,6 +43,7 @@ export function SetupForm() {
       result={errors}
       announcement={firstError(errors)}
       action={formAction}
+      submit={{ label: 'Weiter', isPending, pendingLabel: 'Legt an …', after: SETUP_NOTE }}
       className="mx-4 flex flex-col gap-4 pt-6 pb-6 breit:mx-6"
     >
       <Field
@@ -74,15 +81,6 @@ export function SetupForm() {
         hint={PASSWORD_HINT}
         error={errors.password}
       />
-      <div className="flex flex-col gap-3 pt-4">
-        <Button type="submit" pendingLabel={isPending ? 'Legt an …' : undefined}>
-          Weiter
-        </Button>
-        <p className="px-4 text-footnote text-fg2">
-          Mit diesem Konto verwaltet ihr Preposaurus. Weitere Personen legt ihr danach in den
-          Einstellungen an.
-        </p>
-      </div>
     </ActionForm>
   )
 }

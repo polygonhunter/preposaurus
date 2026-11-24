@@ -4,8 +4,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createStock } from '../../../src/features/capture/application/create-stock'
 import type { StockWriter } from '../../../src/features/capture/application/stock-writer'
 import { createStockWriteRepository } from '../../../src/features/capture/data/stock-write-repository'
+import { quickPickBestBefore } from '../../../src/features/capture/domain/best-before'
 import { manualCaptureSchema } from '../../../src/features/capture/schemas/manual-capture'
 import { createStockSchema } from '../../../src/features/capture/schemas/stock'
+import { todayInBerlin } from '../../../src/shared/lib/dates'
 import { captures } from '../../../src/server/db/schema/confirmed-captures'
 import { products, units } from '../../../src/server/db/schema/inventory'
 import { createTestDb, type TestDb } from '../../helpers/test-db'
@@ -43,7 +45,7 @@ describe('Speichern einer Erfassung gegen die DB (#51)', () => {
       },
       units: [
         { bestBefore: { date: '2027-09-01', precision: 'month' }, count: 2 },
-        { bestBefore: { date: '2028-01-01', precision: 'year', isEstimated: true }, count: 1 },
+        { bestBefore: { date: '2028-05-01', precision: 'month', isEstimated: true }, count: 1 },
         { bestBefore: null, count: 1 },
       ],
     })
@@ -90,7 +92,7 @@ describe('Speichern einer Erfassung gegen die DB (#51)', () => {
     expect(saved).toEqual(
       expect.arrayContaining([
         { bestBefore: '2027-09-30', precision: 'monat', isEstimated: false },
-        { bestBefore: '2028-12-31', precision: 'jahr', isEstimated: true },
+        { bestBefore: '2028-05-31', precision: 'monat', isEstimated: true },
         { bestBefore: null, precision: null, isEstimated: false },
       ]),
     )
@@ -125,6 +127,40 @@ describe('Speichern einer Erfassung gegen die DB (#51)', () => {
       'verbrauchen_bis',
     ])
     expect(saved.every(({ bestBefore }) => bestBefore === '2026-12-03')).toBe(true)
+  })
+
+  it('speichert einen Schnellknopf als geschätztes MHD auf den Monat (#180, #170)', async () => {
+    const estimate = quickPickBestBefore(todayInBerlin(now), 'plus-6-months')
+    const form = manualCaptureSchema.parse({
+      captureId: randomUUID(),
+      foodTypeId: setup.noodlesId,
+      content: '500 g',
+      containerId: setup.packageId,
+      storageLocationId: setup.storageLocationId,
+      existingProductId: null,
+      nutrition: { kcal: '', protein: '', carbs: '', fat: '' },
+      units: [{ bestBefore: estimate, count: 2 }],
+    })
+    const result = await save(form)
+    const productId = result.ok ? result.value.productId : ''
+
+    const saved = await testDb.db
+      .select({
+        bestBefore: units.bestBefore,
+        precision: units.bestBeforePrecision,
+        isEstimated: units.isBestBeforeEstimated,
+        kind: units.bestBeforeKind,
+      })
+      .from(units)
+      .where(eq(units.productId, productId))
+
+    const expected = {
+      bestBefore: '2027-05-31',
+      precision: 'monat',
+      isEstimated: true,
+      kind: 'mhd',
+    }
+    expect(saved).toEqual([expected, expected])
   })
 
   it('speichert Nährwerte mit Herkunft und Bestätigung einer Schätzung', async () => {

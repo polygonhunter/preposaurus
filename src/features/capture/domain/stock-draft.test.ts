@@ -65,7 +65,7 @@ describe('planStock', () => {
             count: 1,
           },
           {
-            bestBefore: { date: day('2028-03-15'), precision: 'year', isEstimated: true },
+            bestBefore: { date: day('2028-03-15'), precision: 'year', isEstimated: false },
             kind: 'best-before',
             count: 1,
           },
@@ -81,10 +81,24 @@ describe('planStock', () => {
   })
 
   it('behält das Kennzeichen „geschätzt“', () => {
-    const bestBefore = { date: day('2028-12-31'), precision: 'year', isEstimated: true } as const
+    const bestBefore = { date: day('2028-05-31'), precision: 'month', isEstimated: true } as const
     const result = planStock(draft({ units: [{ bestBefore, kind: 'best-before', count: 1 }] }), now)
 
     expect(result.ok && result.value.units[0]?.bestBefore?.isEstimated).toBe(true)
+  })
+
+  it('lehnt eine Schätzung auf das Jahresende ab, sie hielte länger als geschätzt (#170)', () => {
+    const bestBefore = { date: day('2028-12-31'), precision: 'year', isEstimated: true } as const
+    const result = planStock(draft({ units: [{ bestBefore, kind: 'best-before', count: 1 }] }), now)
+
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid', issue: 'estimate-too-coarse' } })
+  })
+
+  it('lehnt eine Schätzung als Verbrauchsdatum ab (#180)', () => {
+    const bestBefore = { date: day('2028-05-31'), precision: 'month', isEstimated: true } as const
+    const result = planStock(draft({ units: [{ bestBefore, kind: 'use-by', count: 1 }] }), now)
+
+    expect(result).toEqual({ ok: false, error: { kind: 'invalid', issue: 'estimate-use-by' } })
   })
 
   it('lehnt eine taggenaue Schätzung ab', () => {

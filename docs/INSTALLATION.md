@@ -18,6 +18,7 @@ Diese Anleitung führt Schritt für Schritt durch die Einrichtung von Preposauru
 10. [Backups](#10-backups)
 11. [Wiederherstellen](#11-wiederherstellen)
 12. [Updates und der Weg zurück](#12-updates-und-der-weg-zurück)
+    - [12.1 Umzug auf eine neue Hauptversion von PostgreSQL](#121-umzug-auf-eine-neue-hauptversion-von-postgresql)
 13. [Notfall-Befehle: Passwort vergessen, kein Admin, alle abmelden](#13-notfall-befehle-passwort-vergessen-kein-admin-alle-abmelden)
 14. [Fehlersuche](#14-fehlersuche)
 15. [Hinweise je NAS-Typ](#15-hinweise-je-nas-typ)
@@ -31,7 +32,7 @@ Preposaurus läuft als kleine Gruppe von Containern (Programmpaketen) mit Docker
 
 | Dienst | Aufgabe |
 |---|---|
-| `db` | Datenbank (PostgreSQL 18). Nur intern erreichbar |
+| `db` | Datenbank (PostgreSQL 19). Nur intern erreichbar. App und Backup melden sich mit eigenen Rollen ohne Superuser-Rechte an (siehe unten) |
 | `migrate` | richtet beim Start die Datenbank ein bzw. bringt sie auf den neuen Stand und beendet sich dann |
 | `web` | die App selbst |
 | `backup` | sichert jede Nacht Datenbank und Fotos |
@@ -50,9 +51,11 @@ Alle Daten liegen in drei sichtbaren Ordnern neben der Compose-Datei:
 
 | Ordner | Inhalt |
 |---|---|
-| `db` | die Datenbank |
+| `db` | die Datenbank, darin ein Unterordner je Hauptversion von PostgreSQL (z. B. `19`) |
 | `fotos` | die Fotos der Packungen |
 | `backups` | die nächtlichen Sicherungen |
+
+**Rollen der Datenbank:** Beim ersten Start legt `docker/db/rollen.sh` zwei Rollen an. `preposaurus_app` nutzen App, `migrate` und `worker`; ihr gehören die Datenbank und alle Tabellen. `preposaurus_backup` nutzt der Backup-Dienst; er darf alles lesen und beim Wiederherstellen eine neue Datenbank anlegen. Beide sind **keine Superuser**. Der Superuser `postgres` hat kein Passwort und kommt nur im Container `db` hinein, für Notfälle: `docker compose exec db psql -U postgres -d preposaurus`.
 
 Dazu kommt `tailscale` mit dem Zustand des Tailscale-Containers. Er enthält den Geräteschlüssel im Tailnet und ist **vertraulich**: nicht teilen, nicht in eine öffentliche Freigabe legen.
 
@@ -123,6 +126,7 @@ Jede Version auf der [Release-Seite](https://github.com/polygonhunter/preposauru
 - `compose.yaml` – die Dienste
 - `compose.tailscale.yaml` – der Tailscale-Container
 - `docker/tailscale/serve.json` – die HTTPS-Einstellung für Tailscale Serve
+- `docker/db/rollen.sh` – legt beim ersten Start die Rollen der Datenbank an
 - `env.beispiel` – die Vorlage für die Datei `.env`, mit eingetragener Version
 
 Herunterladen und entpacken (Version anpassen):
@@ -181,6 +185,7 @@ chmod 600 .env
 
 ```bash
 openssl rand -hex 24      # für POSTGRES_PASSWORD
+openssl rand -hex 24      # für POSTGRES_BACKUP_PASSWORD (ein anderer Wert)
 openssl rand -base64 32   # für APP_SECRET
 ```
 
@@ -196,7 +201,8 @@ docker run --rm alpine:3.22 sh -c "apk add -q openssl && openssl rand -base64 32
 |---|---|---|
 | `COMPOSE_FILE` | ja | Welche Compose-Dateien gelten. Vorgabe `compose.yaml:compose.tailscale.yaml` (mit Tailscale-Container). Dadurch reicht überall ein einfaches `docker compose …`. Nur beim zweiten Weg ([Abschnitt 16](#16-tailscale-als-paket-auf-dem-nas-zweiter-weg)): `compose.yaml` |
 | `PREPOSAURUS_VERSION` | ja | Version der Images, immer eine feste Nummer wie `0.1.0`, nie `latest`. So ändert sich nichts ohne dein Zutun |
-| `POSTGRES_PASSWORD` | ja | Passwort der Datenbank. Nur Buchstaben und Ziffern (`openssl rand -hex 24`), weil es in einer Adresse steht. Nach dem ersten Start nicht mehr ändern, die Datenbank merkt es sich beim Anlegen |
+| `POSTGRES_PASSWORD` | ja | Passwort der Rolle `preposaurus_app`, mit der sich App, `migrate` und `worker` anmelden. Nur Buchstaben und Ziffern (`openssl rand -hex 24`), weil es in einer Adresse steht. Nach dem ersten Start nicht mehr ändern, die Datenbank merkt es sich beim Anlegen |
+| `POSTGRES_BACKUP_PASSWORD` | ja | Passwort der Rolle `preposaurus_backup` für den Backup-Dienst. Ein eigener Wert, erzeugt wie oben. Ebenfalls nach dem ersten Start nicht mehr ändern |
 | `APP_SECRET` | ja | Geheimnis für die Sitzungen und für den verschlüsselt gespeicherten KI-Schlüssel, mindestens 32 Zeichen (`openssl rand -base64 32`). Ein neuer Wert meldet alle Geräte ab, ein in der App hinterlegter KI-Schlüssel muss dann neu eingetragen werden. **Getrennt von der Datenbank sichern** |
 | `PREPOSAURUS_UID`, `PREPOSAURUS_GID` | ja | Nutzer- und Gruppen-ID, der die Ordner `fotos` und `backups` gehören (aus Abschnitt 4.3). Standard 1000 |
 | `TS_HOSTNAME` | mit Tailscale-Container | Gerätename im Tailnet. Neutral wählen (Abschnitt 3.2). Ergibt die Adresse `https://<TS_HOSTNAME>.<tailnet>.ts.net` |
@@ -309,7 +315,7 @@ Auf Android geht es in Chrome über das Menü (⋮) → **Zum Startbildschirm hi
 ### 10.1 Was automatisch passiert
 
 Der Dienst `backup` sichert jede Nacht um `BACKUP_TIME`:
-- die **Datenbank** mit `pg_dump` (Version 18, passend zur Datenbank) als Datei `datenbank.dump`
+- die **Datenbank** mit `pg_dump` (Version 19, passend zur Datenbank) als Datei `datenbank.dump`
 - die **Fotos** als vollständigen Ordner. Unveränderte Fotos sind feste Links auf den vorigen Stand und kosten keinen zusätzlichen Platz. Ein versehentlich gelöschtes Foto bleibt in älteren Ständen erhalten.
 
 Jeder Stand heißt nach seinem Zeitpunkt, mehrere am selben Tag überschreiben sich also nicht. Es gibt fünf Arten:
@@ -418,6 +424,47 @@ Neue Versionen stehen auf der [Release-Seite](https://github.com/polygonhunter/p
 
 Was zwischen Update und Rückweg erfasst wurde, ist danach weg (es steckt aber noch im Stand `vor-wiederherstellung/…`). Alte Stände unter `vor-update` löschst du selbst, wenn du sie nicht mehr brauchst: `rm -r backups/vor-update/<name>`.
 
+### 12.1 Umzug auf eine neue Hauptversion von PostgreSQL
+
+Steht in den Änderungen eines Releases **„neue Hauptversion von PostgreSQL“** (z. B. von 18 auf 19), reicht `pull` und `up -d` nicht. Die Daten einer Hauptversion lassen sich mit der nächsten nicht einfach weiter öffnen. Der Umzug geht über eine Sicherung: Die alte Version sichert, die neue startet mit einer leeren Datenbank, dann spielst du die Sicherung zurück. Bei den paar Megabyte eines Haushalts dauert das Einspielen Sekunden.
+
+Derselbe Weg gilt für eine Testinstallation aus der Zeit vor den eigenen Rollen der Datenbank (sie kamen zusammen mit PostgreSQL 19, vor dem ersten Release): Die neue Datenbank legt die Rollen beim ersten Start an, das Zurückspielen übergibt alle Tabellen an `preposaurus_app`. Trag vorher `POSTGRES_BACKUP_PASSWORD` in die `.env` ein (Abschnitt 5). Einen eigenen Übergang für eine bestehende Datenbank gibt es nicht, weil es vor dem ersten Release noch keine echte Installation gab.
+
+Der Ordner `db` hat je Hauptversion einen eigenen Unterordner (`db/18`, `db/19`). Die neue Version startet nicht, solange Daten einer anderen Hauptversion im Ordner `db` liegen (Meldung `there appears to be PostgreSQL data in /var/lib/postgresql/18/docker`). Deshalb schiebst du den alten Ordner `db` beiseite. **Er bleibt unverändert liegen** und ist dein Weg zurück.
+
+1. **Mit der alten Version sichern**, solange sie noch läuft:
+   ```bash
+   docker compose run --rm backup jetzt vor-update
+   ```
+   Den Namen aus der Ausgabe merken, z. B. `vor-update/2026-11-22_100512`.
+2. **Alles anhalten und den alten Ordner `db` beiseiteschieben:**
+   ```bash
+   docker compose down
+   mv db db-pg18
+   mkdir db
+   ```
+3. **Neue Version eintragen und die neuen Dateien entpacken** wie oben in Schritt 2 und 3. Dann `docker compose pull`.
+4. **Nur die Datenbank starten:**
+   ```bash
+   docker compose up -d db
+   ```
+   Sie richtet sich beim ersten Start neu und leer ein (Ordner `db/19`). Warten, bis `docker compose ps` sie als `healthy` zeigt.
+5. **Die Sicherung zurückspielen** wie in Abschnitt 11, mit der Eingabe `ja`:
+   ```bash
+   docker compose run --rm backup wiederherstellen vor-update/2026-11-22_100512
+   ```
+   Erwartet: `Wiederhergestellt. …`
+6. **Alles starten und prüfen:** `docker compose up -d`, dann `docker compose ps -a` wie in Abschnitt 6 und die App öffnen. Vorrat, Mitglieder und Fotos sind wie vorher.
+
+Warum nicht `pg_upgrade`? Das Werkzeug von PostgreSQL bräuchte beide Versionen in einem Container und hängt an Einstellungen des Dateisystems. Der Weg über die Sicherung nutzt nur das, was ohnehin jede Nacht läuft und in der CI getestet ist (`docker/test/pg-upgrade-test.sh`), und lässt die alten Daten unangetastet. Ein Snapshot des NAS ersetzt die Sicherung hier nicht: Die Dateien von 18 kann 19 nicht öffnen.
+
+**Zurück zur alten Version:** `docker compose down`, dann `mv db db-pg19` und `mv db-pg18 db`. Alte Nummer in `PREPOSAURUS_VERSION`, die Dateien des alten Releases entpacken, `docker compose pull` und `docker compose up -d`. Die alte Datenbank startet mit dem Stand von vor dem Umzug. Was du danach erfasst hast, fehlt dort.
+
+**Aufräumen:** Läuft die neue Version ein paar Wochen ohne Probleme, den alten Ordner löschen. Sein Inhalt gehört dem Nutzer der Datenbank, deshalb mit `sudo`:
+```bash
+sudo rm -r db-pg18
+```
+
 ## 13. Notfall-Befehle: Passwort vergessen, kein Admin, alle abmelden
 
 Für Notfälle gibt es vier Befehle, die du auf dem NAS im Preposaurus-Ordner ausführst, während die App läuft. Jeder Befehl, der etwas ändert, hinterlässt eine Zeile im Log von `web` (`docker compose logs web`), nie mit Passwort.
@@ -498,8 +545,12 @@ docker compose logs tailscale        # Tailscale
 | `… fehlt in .env` beim Start | Eine Pflichtvariable ist leer. Abschnitt 5 |
 | `web` startet nicht, im Log `Ungültige Umgebungsvariablen` | Ein Wert in der `.env` passt nicht, z. B. `APP_SECRET` zu kurz. Die Meldung nennt die Variable |
 | `migrate` steht auf `Exited (1)` | `docker compose logs migrate` lesen. Oft ist die Datenbank nicht erreichbar oder `POSTGRES_PASSWORD` wurde nach dem ersten Start geändert. Altes Passwort wieder eintragen |
-| `db` meldet `password authentication failed` | `POSTGRES_PASSWORD` wurde nach dem ersten Start geändert. Die Datenbank behält das erste Passwort. Altes Passwort wieder eintragen |
+| `db` meldet `password authentication failed for user "preposaurus_app"` (oder `"preposaurus_backup"`) | `POSTGRES_PASSWORD` (bzw. `POSTGRES_BACKUP_PASSWORD`) wurde nach dem ersten Start geändert. Die Datenbank behält das erste Passwort. Altes Passwort wieder eintragen |
+| `db` startet beim ersten Mal nicht, im Log `rollen.sh` (z. B. `Is a directory`) | Die Datei `docker/db/rollen.sh` fehlt, Docker hat stattdessen einen leeren Ordner angelegt. Archiv vollständig entpacken (Abschnitt 4.2), den leeren Ordner `docker/db/rollen.sh` und den halb eingerichteten Ordner `db` löschen, neu starten |
+| `db` meldet `password authentication failed for user "preposaurus_app"`, darunter `Role "preposaurus_app" does not exist` | Beim ersten Start ist `docker/db/rollen.sh` nicht durchgelaufen (der Grund steht weiter oben in `docker compose logs db`), danach ruft die Datenbank es nicht mehr auf. Bei einer neuen Installation ohne Daten: `docker compose down`, den Ordner `db` löschen (`sudo rm -r db`, dann `mkdir db`), Ursache beheben, neu starten |
+| `db` meldet `password authentication failed for user "preposaurus"` | Compose-Dateien aus der Zeit vor den eigenen Rollen sind noch im Ordner. Die Dateien des aktuellen Releases entpacken (Abschnitt 12, Schritt 3) |
 | `db` meldet etwas zu `/var/lib/postgresql/data` | Der Ordner `db` stammt von PostgreSQL 17 oder älter. Neu einrichten und ein Backup einspielen |
+| `db` startet nach einem Update nicht, im Log `there appears to be PostgreSQL data in /var/lib/postgresql/18/docker` | Das Release hat eine neue Hauptversion von PostgreSQL. Die alten Daten sind unverändert. Abschnitt 12.1 ab Schritt 2. Ohne Stand `vor-update` nimm den letzten täglichen Stand von vor dem Update (`backup liste`) |
 | Fotos lassen sich nicht speichern, im Log `EACCES` | Der Ordner `fotos` gehört nicht dem Nutzer aus `PREPOSAURUS_UID`. Abschnitt 4.3 |
 | Browser findet die Adresse nicht | Tailscale auf dem Gerät verbunden? MagicDNS an (Abschnitt 3.1)? Erscheint das Gerät unter **Machines**? |
 | Zertifikatsfehler oder langer erster Aufruf | HTTPS-Zertifikate im Admin-Bereich eingeschaltet? Der erste Aufruf holt das Zertifikat und dauert etwas. `docker compose logs tailscale` zeigt Fehler |

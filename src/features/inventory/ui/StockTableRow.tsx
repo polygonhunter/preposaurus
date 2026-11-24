@@ -4,11 +4,12 @@ import { cx } from '@/shared/lib/class-names'
 import { StatusBadge } from '@/shared/ui/StatusBadge'
 import type { StockRowDto } from '../schemas/shared'
 import { STATE_BADGE } from './stock-format'
+import { DaysValue } from './DaysValue'
 import { tableCells } from './stock-table'
 
 type StockTableRowProps = Readonly<{ row: StockRowDto; isSelected: boolean }>
 
-const CELL = 'border-t border-line px-3 py-2.5 align-middle'
+const CELL = 'border-t border-line px-2 py-2.5 align-middle'
 const NUMBER = `${CELL} text-right whitespace-nowrap`
 
 // Zeile der Vorrat-Tabelle: Der Name ist der Link ins Detail, seine Trefferfläche deckt die ganze
@@ -52,7 +53,9 @@ export function StockTableRow({ row, isSelected }: StockTableRowProps) {
       </td>
       <td className={NUMBER}>{cells.amount}</td>
       <td className={NUMBER}>{cells.kcal}</td>
-      <td className={NUMBER}>{cells.days}</td>
+      <td className={NUMBER}>
+        <DaysValue days={cells.days} />
+      </td>
       <td className={cx(CELL, 'pr-6')}>
         {/* „nächstes MHD …“ darf umbrechen, damit die Spalte neben dem Detail schmal bleibt */}
         <span className="flex flex-wrap items-center gap-x-1.5">

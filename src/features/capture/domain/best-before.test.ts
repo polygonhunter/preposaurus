@@ -115,7 +115,7 @@ describe('quickPickBestBefore', () => {
     expect(quickPickBestBefore(today, pick)).toEqual({
       date,
       precision: 'month',
-      isEstimated: false,
+      isEstimated: true,
     })
   })
 

@@ -1,6 +1,6 @@
 // Eingaben im Vorrat (#43, P14): Filter kommen aus der URL, Aktionen aus Formularen. Hier geprüft.
 import { z } from 'zod'
-import { STOCK_STATUS_FILTERS, id, isoDay, stockTargetSchema } from './shared'
+import { STOCK_STATUS_FILTERS, dateKindSchema, id, isoDay, stockTargetSchema } from './shared'
 
 const SEARCH_MAX_LENGTH = 100
 
@@ -33,10 +33,14 @@ export const undoStillGoodSchema = z.object({
   checkedAt: isoDay,
 })
 
-/** „Datum ändern“ bzw. „Datum nachtragen“ (#49, #116): ein eingegebenes MHD, nie geschätzt. */
+/**
+ * „Datum ändern“ bzw. „Datum nachtragen“ (#49, #116): ein eingegebenes Datum, nie geschätzt, mit
+ * der gewählten Datumsart (#300).
+ */
 export const changeUnitDatesSchema = z.object({
   unitIds: z.array(id).min(1).max(MAX_UNITS_PER_REQUEST),
   bestBefore: z.object({ date: isoDay, precision: z.enum(['day', 'month', 'year']) }),
+  kind: dateKindSchema,
 })
 
 /** Fehlerfassung endgültig löschen (#50): ein ganzes Produkt oder eine einzelne Packung. */
