@@ -34,11 +34,11 @@ type SubmitMeasure = Readonly<{
   height: number
   available: number
   isFirstSubmit: boolean
-  isBelowFields: boolean
+  fieldsBelow: readonly string[]
 }>
 
 // Misst jeden sichtbaren Absende-Block im Bereich: Knopf, verfügbare Breite im Formular (ohne
-// dessen Innenabstand und den Rand des Blocks) und ob alle Felder darüber stehen.
+// dessen Innenabstand und den Rand des Blocks) und welche Felder nicht darüber stehen.
 function measureSubmits(scope: Locator): Promise<SubmitMeasure[]> {
   return scope.evaluate((root) =>
     [...root.querySelectorAll<HTMLElement>('[data-form-submit]')]
@@ -51,9 +51,10 @@ function measureSubmits(scope: Locator): Promise<SubmitMeasure[]> {
         const blockStyle = getComputedStyle(block)
         const px = (value: string) => Number.parseFloat(value) || 0
         const box = button.getBoundingClientRect()
+        // Eingeklappte Bereiche (<details>) zählen nicht, ihr Inhalt steht nicht auf der Seite
         const fields = [
           ...form.querySelectorAll('input:not([type="hidden"]), textarea, select, fieldset'),
-        ].filter((field) => field.getBoundingClientRect().width > 0)
+        ].filter((field) => field.checkVisibility() && field.getBoundingClientRect().width > 0)
         return {
           label: button.textContent.trim(),
           width: box.width,
@@ -65,7 +66,9 @@ function measureSubmits(scope: Locator): Promise<SubmitMeasure[]> {
             px(blockStyle.marginLeft) -
             px(blockStyle.marginRight),
           isFirstSubmit: form.querySelector('button[type="submit"]') === button,
-          isBelowFields: fields.every((field) => field.getBoundingClientRect().bottom <= box.top),
+          fieldsBelow: fields
+            .filter((field) => field.getBoundingClientRect().bottom > box.top)
+            .map((field) => `${field.tagName} ${field.getAttribute('name') ?? ''}`),
         }
       }),
   )
@@ -74,10 +77,14 @@ function measureSubmits(scope: Locator): Promise<SubmitMeasure[]> {
 function expectWidePrimary(measures: readonly SubmitMeasure[]): void {
   for (const measure of measures) {
     const expected = Math.min(measure.available, READING_COLUMN_PX)
-    expect(measure.width, `„${measure.label}“ so breit wie das Formular`).toBeCloseTo(expected, 0)
+    // clientWidth rundet auf ganze Pixel, der Knopf misst auch halbe (Duo quer)
+    expect(
+      Math.abs(measure.width - expected),
+      `„${measure.label}“ so breit wie das Formular`,
+    ).toBeLessThanOrEqual(1)
     expect(measure.height, `„${measure.label}“ ist primary`).toBeCloseTo(PRIMARY_HEIGHT_PX, 0)
     expect(measure.isFirstSubmit, `„${measure.label}“ löst Enter aus`).toBe(true)
-    expect(measure.isBelowFields, `„${measure.label}“ steht unter den Feldern`).toBe(true)
+    expect(measure.fieldsBelow, `„${measure.label}“ steht unter den Feldern`).toEqual([])
   }
 }
 
@@ -87,18 +94,21 @@ async function openFormPage(page: Page, path: string): Promise<void> {
   await waitForHydration(page)
 }
 
+// Farbschema vor dem Laden: Ein Wechsel auf offener Seite startet Übergänge, auf die axe wartet
 for (const [path, labels] of FORM_PAGES) {
-  test(`${path}: breiter primary-Knopf unten, barrierefrei hell und dunkel`, async ({ page }) => {
-    await openFormPage(page, path)
-    const measures = await measureSubmits(page.locator('main'))
-    expect(measures.map(({ label }) => label)).toEqual(expect.arrayContaining([...labels]))
-    expect(measures.length).toBeGreaterThanOrEqual(labels.length)
-    expectWidePrimary(measures)
-    for (const colorScheme of ['light', 'dark'] as const) {
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`${path}: breiter primary-Knopf unten, barrierefrei (${colorScheme})`, async ({
+      page,
+    }) => {
       await page.emulateMedia({ colorScheme })
+      await openFormPage(page, path)
+      const measures = await measureSubmits(page.locator('main'))
+      expect(measures.map(({ label }) => label)).toEqual(expect.arrayContaining([...labels]))
+      expect(measures.length).toBeGreaterThanOrEqual(labels.length)
+      expectWidePrimary(measures)
       await expectAccessibleLayout(page)
-    }
-  })
+    })
+  }
 }
 
 test('weit über 1000 px: der Knopf bleibt in der Lesespalte', async ({ page }, info) => {
