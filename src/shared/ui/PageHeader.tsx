@@ -8,6 +8,8 @@ type PageHeaderProps = Readonly<{
   title: string
   subtitle?: string
   back?: BackLink
+  // Statt „Zurück“ oben links, z. B. „Abbrechen“ im Erfassen (#285)
+  leading?: ReactNode
   // Rechts in der Navigationszeile, z. B. das Zahnrad zu den Einstellungen.
   action?: ReactNode
   // Über dem Titel, z. B. die Pfadzeile „Getreide › Nudeln“ im Vorrat
@@ -16,22 +18,24 @@ type PageHeaderProps = Readonly<{
   level?: 1 | 2
 }>
 
-export function PageHeader({ title, subtitle, back, action, eyebrow, level = 1 }: PageHeaderProps) {
+export function PageHeader(props: PageHeaderProps) {
+  const { title, subtitle, back, leading, action, eyebrow, level = 1 } = props
   const Heading = level === 1 ? 'h1' : 'h2'
   return (
     <header className="pt-[env(safe-area-inset-top)]">
       <div className="flex h-11 items-center justify-between px-2 text-body text-accent">
-        {back ? (
-          <Link
-            href={back.href}
-            className="touch-target flex items-center gap-0.5 rounded-md pr-2 text-accent"
-          >
-            <Icon name="back" />
-            {back.label}
-          </Link>
-        ) : (
-          <span />
-        )}
+        {leading ??
+          (back ? (
+            <Link
+              href={back.href}
+              className="touch-target flex items-center gap-0.5 rounded-md pr-2 text-accent"
+            >
+              <Icon name="back" />
+              {back.label}
+            </Link>
+          ) : (
+            <span />
+          ))}
         {action}
       </div>
       {eyebrow ? <div className="px-4 text-footnote text-fg2 breit:px-6">{eyebrow}</div> : null}

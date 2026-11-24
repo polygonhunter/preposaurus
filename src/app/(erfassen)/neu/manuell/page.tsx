@@ -3,11 +3,10 @@ import { redirect } from 'next/navigation'
 import { getCaptureOptionsForUser } from '@/features/capture/application/stock-request'
 import { resolvePrefill } from '@/features/capture/domain/capture-prefill'
 import { readPrefillParams } from '@/features/capture/schemas/prefill'
-import { CaptureModeSwitch } from '@/features/capture/ui/CaptureModeSwitch'
+import { CaptureHeader } from '@/features/capture/ui/CaptureHeader'
 import { ManualCapture } from '@/features/capture/ui/ManualCapture'
 import { NoHouseholdPage } from '@/features/capture/ui/NoHouseholdPage'
 import { requireHouseholdUser } from '@/server/auth/guards'
-import { PageHeader } from '@/shared/ui/PageHeader'
 
 export const metadata: Metadata = { title: 'Erfassen · Preposaurus' }
 
@@ -31,11 +30,10 @@ export default async function ManualCapturePage({ searchParams }: PageProps<'/ne
   return (
     <>
       {options.isStockEmpty ? (
-        <PageHeader title="Erfassen" subtitle={FIRST_START} />
+        <CaptureHeader mode="manuell" subtitle={FIRST_START} />
       ) : (
-        <PageHeader title="Erfassen" />
+        <CaptureHeader mode="manuell" />
       )}
-      <CaptureModeSwitch current="manuell" />
       <ManualCapture options={options} prefill={prefill} />
     </>
   )

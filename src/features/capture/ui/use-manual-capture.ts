@@ -13,6 +13,7 @@ import {
   draftForSaving,
   emptyDraft,
   firstInvalidField,
+  isDraftChanged,
   type CaptureErrors,
   type CaptureField,
   type ManualCaptureDraft,
@@ -83,8 +84,20 @@ function initialDraft({ lastStorageLocationId, prefill }: CaptureSetup): ManualC
   return { ...draft, foodTypeId: prefill.foodTypeId, ...product }
 }
 
+/** Formular samt Stand beim Öffnen bzw. bei „Noch eins“: Daran misst „Abbrechen“ Eingaben (#285). */
+function useDraft(setup: CaptureSetup) {
+  const [initial, setInitial] = useState(() => initialDraft(setup))
+  const [draft, setDraft] = useState(initial)
+  function startFresh(storageLocationId: string | null) {
+    const fresh = emptyDraft(storageLocationId)
+    setInitial(fresh)
+    setDraft(fresh)
+  }
+  return { draft, setDraft, startFresh, isChanged: isDraftChanged(initial, draft) }
+}
+
 export function useManualCapture(setup: CaptureSetup, onInvalid: InvalidHandler) {
-  const [draft, setDraft] = useState(() => initialDraft(setup))
+  const { draft, setDraft, startFresh, isChanged } = useDraft(setup)
   const saving = useSaveCapture(onInvalid)
 
   function show(next: ManualCaptureDraft, changed: readonly string[]) {
@@ -104,7 +117,7 @@ export function useManualCapture(setup: CaptureSetup, onInvalid: InvalidHandler)
   }
 
   function restart() {
-    setDraft(emptyDraft(draft.storageLocationId))
+    startFresh(draft.storageLocationId)
     saving.setErrors({})
     restock.resetDeclined()
   }
@@ -114,6 +127,8 @@ export function useManualCapture(setup: CaptureSetup, onInvalid: InvalidHandler)
     ...outcomeOf(saving, draft.captureId),
     matches: restock.matchesFor(draft),
     isSaving: saving.isSaving,
+    /** Eingaben seit dem Öffnen bzw. „Noch eins“, die beim Verlassen verloren gingen (#285) */
+    isChanged,
     change,
     /** Art gewählt: true, wenn dabei ein vorhandenes Produkt vorgewählt wurde */
     selectFoodType: (foodTypeId: string | null) => restock.pickSoleMatch(change({ foodTypeId })),
