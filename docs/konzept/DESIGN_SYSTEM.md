@@ -82,7 +82,7 @@ Alle Text-Kombinationen erfüllen WCAG AA (4,5 : 1). Der helle Akzent ist dafür
 | `Sheet` | Blatt von unten (`<dialog>`), Griff, Titel, Inhalt, Aktionen unten. Am PC als zentrierter Dialog |
 | `UndoBar` | Rückgängig-Zeile unten über der Tab-Leiste, 5 s, optional zweite Aktion („Auf Einkaufsliste“) |
 | `NoticeBar` | Fehler-Leiste an derselben Stelle, bleibt bis „Schließen“ |
-| `NoticeAnnouncer` | Unsichtbare Ansage zu `UndoBar` und `NoticeBar`: `role="status"` bzw. `role="alert"`, immer im DOM, auch leer. Die Leisten selbst haben keine Live-Rolle (#274) |
+| `NoticeAnnouncer` | Unsichtbare Ansage zu `UndoBar` und `NoticeBar`: `role="status"` bzw. `role="alert"`, immer im DOM, auch leer. Die Leisten selbst haben keine Live-Rolle; ihre gemeinsame Hülle `BottomBar` ist eine Gruppe, benannt nach dem sichtbaren Text (#274) |
 | `EmptyState` | Ein Satz, eine Handlung. Kein Bild |
 | `Sparkline` | Verlaufsdiagramm aus „Werkbank“: 1,5-px-Linie `bar`, letzte Marke als Punkt, keine Füllung, Achse nur Anfang/Ende |
 | `Icon` | Eigene Linien-Piktogramme als Inline-SVG, 24er-Raster, Strich 1,5 px, `currentColor`. Satz siehe Prototyp Runde 2 (Übersicht, Vorrat, Plus, Wagen, Diagramm, Kalender, Tropfen, Zahnrad, Lupe, Filter, Chevron, Zurück, Haken, X, Mehr, Blitz, Ort) |
