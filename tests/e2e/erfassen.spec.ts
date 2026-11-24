@@ -6,6 +6,8 @@
 import type { Locator, Page, TestInfo } from '@playwright/test'
 import { attemptOf } from '../helpers/attempt'
 import { expect, test } from '../helpers/e2e-test'
+import { tabUntilFocused } from '../helpers/keyboard'
+import { createOwnFoodType } from '../helpers/own-food-type'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 const PROJECTS = ['iphone', 'duo-aussen', 'duo-hoch', 'duo-quer', 'desktop']
@@ -21,18 +23,26 @@ function contentFor(testInfo: TestInfo, offset: number): string {
   return `${String(400 + offset + index + 20 * attemptOf(testInfo))} g`
 }
 
-/** Eigene Lebensmittelart je Projekt und Test (alle aus Getreide), sonst nicht im Beispielvorrat */
-const OWN_FOOD_TYPES: Readonly<Record<string, readonly [restock: string, keyboard: string]>> = {
-  iphone: ['Hirse', 'Mehl'],
-  'duo-aussen': ['Graupen', 'Grieß'],
-  'duo-hoch': ['Quinoa', 'Paniermehl'],
-  'duo-quer': ['Couscous', 'Speisestärke'],
-  desktop: ['Bulgur', 'Zwieback'],
+/** Eigene Lebensmittelart je Projekt für den Nachschub (aus Getreide), nicht im Beispielvorrat */
+const RESTOCK_FOOD_TYPES: Readonly<Record<string, string>> = {
+  iphone: 'Hirse',
+  'duo-aussen': 'Graupen',
+  'duo-hoch': 'Quinoa',
+  'duo-quer': 'Couscous',
+  desktop: 'Bulgur',
 }
 
-function ownFoodType(testInfo: TestInfo, use: 'restock' | 'keyboard'): string {
-  const own = OWN_FOOD_TYPES[testInfo.project.name] ?? OWN_FOOD_TYPES['desktop']
-  return own?.[use === 'restock' ? 0 : 1] ?? 'Hirse'
+const restockFoodType = (testInfo: TestInfo) =>
+  RESTOCK_FOOD_TYPES[testInfo.project.name] ?? 'Bulgur'
+
+/**
+ * Neue Art je Projekt und Versuch, also ohne Produkt: Der Fokus geht nach der Wahl in den Inhalt. Bei
+ * einer festen Art wählte die App ab dem zweiten Versuch dessen Produkt vor, Fokus im MHD (#278).
+ */
+async function createKeyboardFoodType(page: Page, testInfo: TestInfo): Promise<string> {
+  const name = `Tastenmehl ${testInfo.project.name} ${String(attemptOf(testInfo))}`
+  await createOwnFoodType(page, 'Mehl, Grieß und Stärke', name)
+  return name
 }
 
 const form = (page: Page) => page.getByRole('form', { name: 'Produkt erfassen' })
@@ -188,8 +198,7 @@ test('Nach dem Speichern sagt ein Satz, wie lange das Essen jetzt reicht (#231)'
 test('Erfassen geht ganz per Tastatur', async ({ page, browserName }, testInfo) => {
   // WebKit erreicht Knöpfe per Tab nur mit einer Systemeinstellung (siehe rahmen.spec.ts).
   test.skip(browserName === 'webkit', 'Tab-Reihenfolge nur in Chromium')
-  // Eine Art ohne Produkt, sonst wählt die App es vor und springt gleich zum MHD
-  const name = ownFoodType(testInfo, 'keyboard')
+  const name = await createKeyboardFoodType(page, testInfo)
   await page.goto('/neu/manuell')
   await expect(search(page)).toBeFocused()
 
@@ -213,7 +222,7 @@ test('Erfassen geht ganz per Tastatur', async ({ page, browserName }, testInfo) 
 test('Nachschub eines bekannten Produkts braucht höchstens 5 Tipps (F2, #207, #211)', async ({
   page,
 }, testInfo) => {
-  const name = ownFoodType(testInfo, 'restock')
+  const name = restockFoodType(testInfo)
   // Vorher einmal erfassen, mit Behälter
   await page.goto('/neu/manuell')
   await search(page).fill(name.toLowerCase())
@@ -289,11 +298,3 @@ test('Die Suche findet Alltagswörter und zeigt auf Wunsch alle Treffer (#212)',
   expect(await hits.count()).toBeGreaterThan(8)
   await expectAccessibleLayout(page)
 })
-
-async function tabUntilFocused(page: Page, target: ReturnType<Page['locator']>) {
-  for (let step = 0; step < 25; step += 1) {
-    if (await target.evaluate((element) => element === document.activeElement)) return
-    await page.keyboard.press('Tab')
-  }
-  await expect(target).toBeFocused()
-}
