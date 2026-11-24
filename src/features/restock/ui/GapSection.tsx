@@ -13,7 +13,8 @@ const HEADING_ID = 'fehlt-bis-zum-ziel'
 // „Fehlt bis zum Ziel“ (A13): je Warengruppe die Menge und die Tage am Ziel, Wasser zuerst. Die
 // Zeilen sind live gerechnet und verschwinden von selbst, sobald genug erfasst ist (#72). Abhaken
 // und Ausblenden verdecken eine Lücke, bis sich die Lage ändert (#201). Beispiele aus den
-// Lebensmittelarten machen die Menge greifbar (#202).
+// Lebensmittelarten machen die Menge greifbar (#202). Kompakt steht „Ausblenden“ unter dem Text,
+// damit Titel und Menge Platz haben (#284).
 export function GapSection({ list }: GapSectionProps) {
   if (list.gaps.length === 0) return null
   return (
@@ -28,11 +29,8 @@ export function GapSection({ list }: GapSectionProps) {
             title={gap.name}
             subtitle={gapSubtitle(gap)}
             trailing={<span className="font-semibold text-fg">{formatGapAmount(gap.missing)}</span>}
-            accessory={
-              <div className="-my-2 -mr-1 shrink-0">
-                <HideGapButton gap={gap} />
-              </div>
-            }
+            accessory={<HideGapButton gap={gap} />}
+            stacksAccessory
           />
         ))}
       </Group>

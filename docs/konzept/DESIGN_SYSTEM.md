@@ -68,7 +68,7 @@ Alle Text-Kombinationen erfüllen WCAG AA (4,5 : 1). Der helle Akzent ist dafür
 | Baustein | Beschreibung |
 |---|---|
 | `PageHeader` | Navigationszeile 44 px (Zurück-Link mit Chevron links, Aktion rechts, beides in Akzent) und Large Title, optional Untertitel |
-| `Group` / `Row` | Gruppierte Liste auf `surface`, Radius 10, Trennlinie eingerückt ab 16 px (mit Piktogramm ab 52 px). `Row` mit Titel, Zweitzeile, rechts Wert, Chevron oder Knopf. Als Link oder Knopf nutzbar |
+| `Group` / `Row` | Gruppierte Liste auf `surface`, Radius 10, Trennlinie eingerückt ab 16 px (mit Piktogramm ab 52 px). `Row` mit Titel, Zweitzeile, rechts Wert, Chevron oder Knopf. Als Link oder Knopf nutzbar. Wird es rechts zu eng, steht der Knopf kompakt unter dem Text (Nachkaufen, #284) |
 | `GroupHeader` | 13 px VERSALIEN `fg2`, rechts optional Link in Akzent („Alle 18“) oder Summe |
 | `Button` | `primary` (Akzent gefüllt, 50 px, Radius 12, volle Breite), `tinted` (Pill auf `fill`, Text Akzent, 15/600), `plain` (nur Text Akzent), `destructive` (Text Rot). Zustand lädt mit Text, nicht nur Spinner |
 | `Segmented` | Segment-Steuerung für 2–4 Werte, Daumen auf `surface` |
@@ -90,8 +90,8 @@ Alle Text-Kombinationen erfüllen WCAG AA (4,5 : 1). Der helle Akzent ist dafür
 ## 6. Rahmen und Navigation
 
 - **Kompakt (< 640 px):** Tab-Leiste unten auf `surface` mit Haarlinie, Höhe 50 px plus Safe Area. Fünf Ziele: Übersicht · Vorrat · **Erfassen** (runder Akzent-Knopf 46 px in der Mitte, Beschriftung nur für Screenreader) · Nachkaufen · Statistik. Zahnrad oben rechts auf der Übersicht führt zu den Einstellungen.
-- **Mittel (≥ 640 px, ≥ 700 px hoch):** wie kompakt, Inhalt max. 640 px breit zentriert.
-- **Breit (≥ 900 px):** Seitenleiste 216 px links auf `bg` mit denselben Zielen, Zähler rechts (z. B. „Bald fällig 5“), darunter Einstellungen. „Erfassen“ steht als Akzent-Knopf oben, „Bald fällig“ eingerückt unter Übersicht (#90). Inhalt auf `surface`. Vorrat als Liste und Detail nebeneinander.
+- **Mittel (≥ 640 px, ≥ 700 px hoch):** wie kompakt, Inhalt max. 640 px breit zentriert. „Ab mittel“ schließt „breit“ und „weit“ ein, auch ohne die Mindesthöhe (Duo quer, #284).
+- **Breit (≥ 900 px):** Seitenleiste 216 px links auf `bg` mit denselben Zielen, Zähler rechts (z. B. „Bald fällig 5“), darunter Einstellungen. „Erfassen“ steht als Akzent-Knopf oben, „Bald fällig“ eingerückt unter Übersicht (#90). Inhalt auf `surface`. Vorrat als Liste und Detail nebeneinander. Einspaltige Listen-Seiten (Nachkaufen, Bereich der Einstellungen) höchstens 768 px breit, links ausgerichtet (#288).
 - **Weit (≥ 1280 px):** Vorrat als Tabelle mit Gruppenzeilen (Warengruppe als Zwischenzeile), Spalten Packungen · Menge · kcal · Tage · nächstes MHD, ausgewählte Zeile in Akzent, Detail rechts. Tastenkürzel als `kbd` sichtbar (`/` Suche, `n` Erfassen), abschaltbar unter Mein Konto · Darstellung (#254, WCAG 2.1.4).
 
 ## 7. Seitenmuster
