@@ -124,6 +124,9 @@ jobs:
     timeout-minutes: 20
     container:
       image: mcr.microsoft.com/playwright:v${{ needs.playwright-version.outputs.version }}-noble
+      # Als Runner-Nutzer statt root: Der Arbeitsordner gehört ihm, sonst lehnt git (lefthook
+      # install in npm ci) ihn als „dubious ownership“ ab.
+      options: --user 1001
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
