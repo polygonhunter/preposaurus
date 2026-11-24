@@ -1,19 +1,21 @@
 // Empfehlungsquelle BBK/BLE (UMSETZUNG M1-09, #20). Werte aus dem Prüfblatt
 // docs/quellen/EMPFEHLUNGSWERTE.md (Abruf aller Quellen 2026-11-22), §1.2 Mengen und §2.2 Bedarf.
-// NOCH NICHT VOM MAINTAINER GEPRÜFT (U3 offen): isVerified bleibt false, die App zeigt bei dieser
-// Quelle „Werte noch nicht geprüft“. Nach der Freigabe nur hier isVerified auf true setzen: Der
-// Seed (Dienst „migrate“) stellt die bestehende Fassung per Upsert um. Ändert die Freigabe Werte,
-// bleibt der Stand gleich und der Upsert überschreibt die ungeprüfte Fassung. Eine spätere neue
-// Fassung braucht einen neuen Stand; wie Haushalte dann wechseln, klärt #222.
+// GEPRÜFT (U3, #106): Vom Maintainer delegiert, 2026-11-24, entschieden nach Empfehlung. Jeder
+// Wert ist gegen die BLE-Vorratstabelle Mischkost (PDF, © BLE 2024), die Webfassungen Mischkost und
+// vegetarisch, den Vorratskalkulator und den BBK-Ratgeber (Stand 11/2025, 2. Auflage) geprüft
+// (Prüfblatt §6). Der Seed (Dienst „migrate“) stellt die bestehende Fassung per Upsert um. Ändern
+// sich Werte, bleibt der Stand gleich und der Upsert überschreibt sie; eine neue Fassung braucht
+// einen neuen Stand, wie Haushalte dann wechseln, klärt #222.
 //
 // Fundstellen:
 // - BBK, Ratgeber „Vorsorgen für Krisen und Katastrophen“, Stand 11/2025, 2. Auflage: 10 Tage,
-//   Wasser 2 l je Person und Tag (davon 0,5 l zum Kochen), S. 3, 6, 7.
+//   mindestens 3 Tage (S. 3 und 6), Wasser 2 l je Person und Tag, davon 0,5 l zum Kochen (S. 7),
+//   für Mengen Verweis auf den BLE-Vorratskalkulator (S. 6).
 // - BLE, Vorratstabelle Mischkost und vegetarisch, © BLE 2024: Mengen je Warengruppe für 10 Tage,
 //   2.200 kcal je Person und Tag, Getränke-Fußnote 4. Link unten (Webfassung der Tabelle).
 //
-// Nicht hier: Vegan hat keine offizielle Tabelle. Der Vorschlag aus dem Prüfblatt §3.3 gehört in
-// eine eigene Quelle „Preposaurus-Vorschlag“. Bis dahin rechnet die Fachlogik vegan wie „alles“
+// Nicht hier: Vegan hat keine offizielle Tabelle. Der Vorschlag aus dem Prüfblatt §3.3 kommt als
+// eigene Quelle „Preposaurus-Vorschlag“ (#303). Bis dahin rechnet die Fachlogik vegan wie „alles“
 // (stored-diet-targets.ts). Babys haben bei der BLE keine Werte und zählen nicht (L20).
 import type { MEMBER_TYPES } from '../../../src/shared/config/constants'
 import { DEFAULT_SOURCE_KEY } from '../../../src/shared/config/constants'
@@ -33,20 +35,21 @@ export const BBK_BLE_VERSION = {
   link: 'https://www.ernaehrungsvorsorge.de/private-vorsorge/notvorrat/vorratstabelle',
   // offiziell: möglichst 10 Tage, Etappen 3 / 5 / 7 / 10 (BBK-Checkliste)
   defaultDays: 10,
-  isVerified: false,
+  isVerified: true,
 } as const
 
 // Bedarf je Person und Tag (Prüfblatt §2.2). kcal: BLE-Pauschale 2.200 für alle (offiziell, für
-// Kinder bewusst hoch). Wasser: Erwachsene 2 l offiziell (BBK S. 7, BLE Fußnote 4).
+// Kinder bewusst hoch). Wasser: Erwachsene 2 l offiziell (BBK S. 7, BLE Fußnote 4: 1,5 l Trinken +
+// 0,5 l Kochwasser je Person und Tag). Kind und Senior sind abgeleitet: Getränkebedarf aus
+// Fußnote 4 plus dieselben 0,5 l Kochwasser, so wie die BLE die 2 l für Erwachsene bildet
+// (Checkliste Nr. 4 und 5, entschieden nach Empfehlung, #106).
 export const BBK_BLE_NEEDS: Partial<Record<PersonGroup, { kcal: string; waterMl: number }>> = {
-  // Annahme: 1 l Getränke offiziell (BLE Fußnote 4, Kinder bis 12) + 0,5 l Kochwasser.
-  // Strengere, wörtliche Lesart wären 1.000 ml (Prüfblatt Checkliste Nr. 4).
+  // abgeleitet: 1 l Getränke offiziell (BLE Fußnote 4, Kinder bis 12) + 0,5 l Kochwasser.
   kind: { kcal: '2200', waterMl: 1500 },
-  // Annahme: keine eigene Quelle für 13–17, wie Erwachsene (Checkliste Nr. 6).
+  // Die Tabelle gilt je Person; 13–17 nimmt Fußnote 4 nicht aus, also wie Erwachsene (Nr. 6).
   jugendlich: { kcal: '2200', waterMl: 2000 },
   erwachsen: { kcal: '2200', waterMl: 2000 },
-  // Annahme: 2 l Getränke ab 65 offiziell (BLE Fußnote 4) + 0,5 l Kochwasser.
-  // Wörtliche Lesart wären 2.000 ml (Checkliste Nr. 5).
+  // abgeleitet: 2 l Getränke ab 65 offiziell (BLE Fußnote 4) + 0,5 l Kochwasser.
   senior: { kcal: '2200', waterMl: 2500 },
 }
 

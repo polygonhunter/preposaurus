@@ -3,6 +3,7 @@
 > Stand 2026-11-22 · gebündelt aus den Strängen Design, Datenstruktur, Einstellungen, Onboarding und dem UX-Konzept.
 > Aus 57 Einzelfragen sind **25** geworden. Der Rest hat sich erledigt oder war eine Technikfrage (siehe unten „Von uns entschieden“).
 > Herleitung und Widersprüche: `ABGLEICH.md`.
+> **Antworten (2026-11-24):** Der Maintainer hat die Fragen delegiert. Je Frage steht die Entscheidung „vom Maintainer delegiert, entschieden nach Empfehlung“ bzw. „überholt durch …“ in `05_STATUS_ENTSCHEIDUNGEN.md`, Abschnitt „Delegierte Entscheidungen“. Frage 11 entscheidet #298.
 
 **So antwortest du:** Nummer und „ok“ reicht, wenn die Empfehlung passt. Sonst Nummer und Buchstabe oder ein Halbsatz. Beispiel: `2 ok · 6 c · 13 ok · 20 b`. „Alles ok außer 6 und 20“ geht auch.
 Was hier nicht als Frage steht und in den Konzepten keinem Punkt unten widerspricht, gilt mit deiner Antwort als freigegeben.
