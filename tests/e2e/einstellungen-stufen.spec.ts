@@ -7,7 +7,6 @@ import { expectAccessibleLayout, expectNothingOnVerticalFold } from '../helpers/
 // Auswahl ist die Adresse. Diese Tests ändern nichts.
 
 const BREIT = 900
-const WEIT = 1280
 
 const widthOf = (page: Page) => page.viewportSize()?.width ?? 0
 const areaList = (page: Page) => page.getByRole('region', { name: 'Bereiche der Einstellungen' })
@@ -71,8 +70,8 @@ test.describe('ab „breit“', () => {
     ).toHaveAttribute('aria-current', 'page')
   })
 
-  test('Liste und Bereich lassen die Mitte frei (Falz beim Duo quer)', async ({ page }) => {
-    test.skip(widthOf(page) >= WEIT, 'Am PC gibt es keine Falz')
+  test('Liste und Bereich lassen die Falz frei (Duo quer)', async ({ page, fold }) => {
+    test.skip(fold === null, 'Nur mit Falz')
     const paths = [
       '/einstellungen',
       '/einstellungen/ziel',

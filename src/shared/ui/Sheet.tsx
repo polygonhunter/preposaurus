@@ -12,7 +12,8 @@ type SheetProps = Readonly<{
 }>
 
 // Blatt von unten als modaler <dialog>: Fokusfalle, Escape und Hintergrund-Sperre liefert der Browser.
-// Ein Tippen auf den abgedunkelten Hintergrund schließt es ebenfalls. Ab „breit“ ein zentrierter Dialog.
+// Ein Tippen auf den abgedunkelten Hintergrund schließt es ebenfalls. Ab „breit“ ein zentrierter Dialog,
+// mit Falz auf dem rechten Bildschirm (#253).
 export function Sheet({ isOpen, onClose, title, children, actions }: SheetProps) {
   const ref = useRef<HTMLDialogElement>(null)
   const titleId = useId()
@@ -46,7 +47,7 @@ export function Sheet({ isOpen, onClose, title, children, actions }: SheetProps)
       onClose={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
-      className="mx-auto mt-auto mb-0 max-h-[90dvh] w-full max-w-none rounded-t-sheet bg-surface text-fg shadow-thumb backdrop:bg-scrim breit:my-auto breit:max-w-md breit:rounded-sheet"
+      className="mx-auto mt-auto mb-0 max-h-[90dvh] w-full max-w-none rounded-t-sheet bg-surface text-fg shadow-thumb backdrop:bg-scrim breit:my-auto breit:max-w-md breit:rounded-sheet falz:mr-3 falz:ml-[var(--falz-ende)] falz:w-auto"
     >
       <div className="flex flex-col gap-4 px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div aria-hidden="true" className="mx-auto h-[5px] w-9 rounded-full bg-line breit:hidden" />
