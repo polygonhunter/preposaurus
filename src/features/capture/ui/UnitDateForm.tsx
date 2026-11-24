@@ -1,15 +1,16 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useId, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import type { UnitDateGroup } from '@/features/inventory/schemas/detail'
 import { todayInBerlin } from '@/shared/lib/dates'
 import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
-import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { changeUnitDatesAction } from '../actions/change-unit-dates-action'
 import { parseBestBefore } from '../domain/best-before'
 import { PARSE_MESSAGES } from './best-before-messages'
-import { CountStepper } from './CountStepper'
+import { kindAfterTyping } from './unit-date-kind'
+import { UnitDateCountSection } from './UnitDateCountSection'
+import { UnitDateKindField } from './UnitDateKindField'
 
 type UnitDateFormProps = Readonly<{
   group: UnitDateGroup
@@ -19,14 +20,17 @@ type UnitDateFormProps = Readonly<{
 
 const EMPTY_MESSAGE = 'Bitte gebt das Datum ein, wie es aufgedruckt ist.'
 const STILL_GOOD_NOTE = 'Mit einem neuen Datum gilt „Noch gut“ für diese Packungen nicht mehr.'
+const HINT = 'Wie aufgedruckt: 30.09.2027, 09/2027 oder 2027, auch mit „zu verbrauchen bis“.'
 
 // Datum ändern bzw. nachtragen (#49, #116): eine Eingabe wie beim Erfassen (Tag, Monat oder Jahr),
-// für alle oder einige Packungen der Datumszeile. Es wird nie ein Datum vorgeschlagen.
+// für alle oder einige Packungen der Datumszeile. Es wird nie ein Datum vorgeschlagen. Der
+// Umschalter MHD · Verbrauchsdatum startet mit der Art der Zeile (#300); auch zurück zum MHD,
+// sichtbar per Satz, denn ein Verbrauchsdatum kann ein Versehen gewesen sein.
 export function UnitDateForm({ group, backHref }: UnitDateFormProps) {
   const router = useRouter()
-  const countId = useId()
   const total = group.unitIds.length
   const [text, setText] = useState('')
+  const [kind, setKind] = useState(group.kind)
   const [count, setCount] = useState(total)
   const [error, setError] = useState<string>()
   const [isPending, startTransition] = useTransition()
@@ -43,6 +47,7 @@ export function UnitDateForm({ group, backHref }: UnitDateFormProps) {
       const result = await changeUnitDatesAction({
         unitIds: group.unitIds.slice(0, count),
         bestBefore: { date, precision },
+        kind,
       })
       if (result.status === 'saved') router.push(backHref)
       else setError(result.message)
@@ -61,34 +66,29 @@ export function UnitDateForm({ group, backHref }: UnitDateFormProps) {
     >
       <div className="mx-4 pt-4 breit:mx-6">
         <Field
-          label={group.kind === 'use-by' ? 'Zu verbrauchen bis' : 'Mindestens haltbar bis'}
+          label={kind === 'use-by' ? 'Zu verbrauchen bis' : 'Mindestens haltbar bis'}
           name="mhd"
           autoComplete="off"
           placeholder="z. B. 09/2027"
-          hint="Wie aufgedruckt: 30.09.2027, 09/2027 oder 2027."
+          hint={HINT}
           value={text}
           onChange={(event) => {
-            setText(event.target.value)
+            const nextText = event.target.value
+            setKind(kindAfterTyping({ previousText: text, nextText, kind }))
+            setText(nextText)
           }}
           error={error}
         />
       </div>
+      <UnitDateKindField rowKind={group.kind} kind={kind} onChange={setKind} />
       {total > 1 ? (
-        <section aria-labelledby={countId}>
-          <GroupHeader id={countId}>Für wie viele Packungen?</GroupHeader>
-          <div className="mx-4 flex items-center justify-between rounded-group bg-surface px-4 py-2 breit:mx-6 breit:border breit:border-line">
-            <span className="text-body">{`${String(count)} von ${String(total)}`}</span>
-            <CountStepper
-              label="neuem Datum"
-              count={count}
-              min={1}
-              max={total}
-              onChange={(delta) => {
-                setCount((previous) => Math.min(total, Math.max(1, previous + delta)))
-              }}
-            />
-          </div>
-        </section>
+        <UnitDateCountSection
+          count={count}
+          total={total}
+          onChange={(delta) => {
+            setCount((previous) => Math.min(total, Math.max(1, previous + delta)))
+          }}
+        />
       ) : null}
       {group.checkedCount > 0 ? (
         <p className="px-8 text-footnote text-fg2 breit:px-10">{STILL_GOOD_NOTE}</p>

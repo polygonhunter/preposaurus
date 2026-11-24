@@ -169,7 +169,7 @@ Hinweis: HH-02 nennt das Geburtsjahr als Pflicht. Das ist durch den MVP-Zuschnit
 | `produkt_id` | Produkt | uuid | P | Sys | alles | MVP |
 | `mhd` **[Ä]** | Datum, Monat/Jahr als Monats- bzw. Jahresende | date | P → **o** | F/M | A1, A3, A11, A12, A14, A16, FIFO. `NULL` = „Datum fehlt“ (#116) | MVP |
 | `mhd_genauigkeit` **[Ä]** | tag/monat/jahr | text | P → o | F/M | Anzeige „09/2027“, Gruppierung. CHECK: leer genau dann, wenn `mhd` leer | MVP |
-| `mhd_art` | mhd/verbrauchen_bis | text | P | F/M (Standard mhd) | ROT-06, „Noch gut“ nur bei MHD | MVP |
+| `mhd_art` | mhd/verbrauchen_bis | text | P | F/M (Standard mhd; Umschalter je Datum beim Erfassen, beim „Datum ändern“ auch zurück zum MHD, #294, #300) | ROT-06, „Noch gut“ nur bei MHD | MVP |
 | `mhd_geschaetzt` | Datum auf Wunsch geschätzt | bool | P | Sys | Chip „geschätzt“, A18. CHECK: true nur mit `mhd` | MVP |
 | `status` | vorrat/verbraucht/entsorgt | text | P | M | alle Auswertungen, ROT-03/04, Verlauf | MVP |
 | `entnommen_am` | Zeitpunkt der Entscheidung | timestamptz | P bei ≠ vorrat | Sys | A15, A16, A17, Verlauf, ROT-07 | MVP |

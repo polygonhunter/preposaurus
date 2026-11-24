@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import {
   bestBeforeSchema,
+  dateKindSchema,
   groupRef,
   id,
   isoDay,
@@ -32,7 +33,7 @@ const nutritionSchema = z.object({
 
 const detailUnitSchema = z.object({
   id,
-  kind: z.enum(['best-before', 'use-by']),
+  kind: dateKindSchema,
   checkedAt: isoDay.nullable(),
 })
 
@@ -91,7 +92,7 @@ export const unitDateGroupSchema = z.object({
   name: z.string(),
   productName: z.string(),
   bestBefore: bestBeforeSchema.nullable(),
-  kind: z.enum(['best-before', 'use-by']),
+  kind: dateKindSchema,
   unitIds: z.array(id).min(1),
   /** Packungen der Zeile mit „Noch gut“, das mit einem neuen Datum entfällt */
   checkedCount: z.number().int(),

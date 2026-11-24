@@ -40,6 +40,7 @@ describe('changeUnitDates („Datum ändern“, #49)', () => {
       householdId,
       unitIds,
       bestBefore: { date: toCalendarDay('2027-09-01'), precision: 'month' },
+      kind: 'best-before',
     })
 
     expect(result).toEqual({ ok: true, value: { changed: 2 } })
@@ -56,6 +57,7 @@ describe('changeUnitDates („Datum ändern“, #49)', () => {
       householdId,
       unitIds: [idOf(units, 0)],
       bestBefore: { date: toCalendarDay('2026-10-01'), precision: 'day' },
+      kind: 'best-before',
     })
 
     expect(editor.units[0]?.checkedAt).toBe('2026-11-10')
@@ -68,6 +70,7 @@ describe('changeUnitDates („Datum ändern“, #49)', () => {
       householdId,
       unitIds: [idOf(units, 2)],
       bestBefore: { date: toCalendarDay('2028-01-01'), precision: 'year' },
+      kind: 'best-before',
     })
 
     expect(editor.units[2]?.bestBefore).toEqual({
@@ -77,18 +80,45 @@ describe('changeUnitDates („Datum ändern“, #49)', () => {
     })
   })
 
+  it('macht ein MHD zum Verbrauchsdatum, „Noch gut“ entfällt auch am selben Tag (#300)', async () => {
+    const { units, editor } = setup()
+
+    await changeUnitDates(editor, {
+      householdId,
+      unitIds: [idOf(units, 0)],
+      bestBefore: { date: toCalendarDay('2026-10-01'), precision: 'day' },
+      kind: 'use-by',
+    })
+
+    expect(editor.units[0]).toMatchObject({ kind: 'use-by', checkedAt: null })
+    expect(editor.units[1]).toMatchObject({ kind: 'best-before', checkedAt: '2026-11-10' })
+  })
+
+  it('stuft ein Verbrauchsdatum auf Wunsch zum MHD zurück (#300)', async () => {
+    const { units, editor } = setup()
+    const unitIds = [idOf(units, 3)]
+    const bestBefore = { date: toCalendarDay('2027-05-31'), precision: 'day' as const }
+    await changeUnitDates(editor, { householdId, unitIds, bestBefore, kind: 'use-by' })
+
+    await changeUnitDates(editor, { householdId, unitIds, bestBefore, kind: 'best-before' })
+
+    expect(editor.units[3]?.kind).toBe('best-before')
+  })
+
   it('ändert keine entnommene oder fremde Packung', async () => {
     const { units, editor } = setup()
     const bestBefore = { date: toCalendarDay('2027-01-01'), precision: 'day' as const }
+    const kind = 'best-before' as const
 
     expect(
-      await changeUnitDates(editor, { householdId, unitIds: [idOf(units, 4)], bestBefore }),
+      await changeUnitDates(editor, { householdId, unitIds: [idOf(units, 4)], bestBefore, kind }),
     ).toEqual({ ok: false, error: { kind: 'not-found' } })
     expect(
       await changeUnitDates(editor, {
         householdId: 'haushalt-b',
         unitIds: [idOf(units, 0)],
         bestBefore,
+        kind,
       }),
     ).toEqual({ ok: false, error: { kind: 'not-found' } })
     expect(editor.units[4]?.bestBefore?.date).toBe('2026-10-01')

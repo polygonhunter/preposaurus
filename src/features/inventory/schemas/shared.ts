@@ -19,6 +19,8 @@ export const incompleteReasonSchema = z.enum([
 ])
 
 export const isoDay = z.iso.date()
+/** MHD oder Verbrauchsdatum, gespiegelt als `DateKind` (domain/unit.ts) */
+export const dateKindSchema = z.enum(['best-before', 'use-by'])
 export const id = z.uuid()
 export const namedRef = z.object({ id, name: z.string() })
 /** Warengruppe mit amtlichem Namen und kurzem Anzeigenamen für Titel und Navigation (#177) */

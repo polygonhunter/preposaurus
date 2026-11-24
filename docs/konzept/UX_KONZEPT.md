@@ -374,6 +374,8 @@ Warum so: Die Ordnung, die dem Maintainer gefällt, bleibt als Weg erhalten. Kat
 
 Der Chip mit Anzahl ersetzt die Wahl zwischen „MHD-Serie“ und „Alle gleiches Datum“ (ERF-05, ERF-07). Wer jede Packung einzeln fotografieren will, kann das weiter tun. Wer zehn gleiche hat, macht ein Foto und tippt „12“ oder zählt hoch.
 
+**Datumsart (#294, entschieden 2026-11-24):** Jeder Datumseintrag hat in beiden Wegen den Umschalter **MHD · Verbrauchsdatum** (Radiogruppe, Standard MHD). Vorbelegt wird er von der Foto-Erkennung (`art`) oder, wenn „zu verbrauchen bis“ mitgetippt wird, von der Erkennung am Text. Darunter ein Satz: „MHD: oft noch länger gut. Verbrauchsdatum: nach diesem Tag nicht mehr essen.“ Gleiches Datum mit gleicher Art wird ein Eintrag. Beim „Datum ändern“ steht derselbe Umschalter, vorbelegt mit der Art der Zeile (#300).
+
 Ist die Erkennung sicher und sind alle Felder gefüllt, geht die App nach Schritt 1 und 2 **von selbst weiter**. Die erkannten Werte bleiben als schmale Karte am oberen Rand stehen und sind dort und im Schritt Prüfen änderbar. So wird nichts ungesehen gespeichert, aber es braucht kein „Weiter“.
 
 **Weg manuell:** ein Formular auf einer Seite, in dieser Reihenfolge: Lebensmittelart (Feld hat sofort den Fokus, darunter „Zuletzt genutzt“) · Menge je Packung · Anzahl · MHD · „Weitere Angaben“ (Behälter, Lagerort, Nährwerte) · „Prüfen und speichern“. Pflicht sind nur die ersten vier.

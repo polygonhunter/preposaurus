@@ -19,11 +19,12 @@ export async function changeUnitDatesAction(input: unknown): Promise<EditActionS
   if (!parsed.success) {
     return failure('Bitte prüft das Datum.', z.flattenError(parsed.error).fieldErrors)
   }
-  const { unitIds, bestBefore } = parsed.data
+  const { unitIds, bestBefore, kind } = parsed.data
   const result = await changeUnitDates(await unitDateEditor(), {
     householdId: user.value.householdId,
     unitIds,
     bestBefore: { date: toCalendarDay(bestBefore.date), precision: bestBefore.precision },
+    kind,
   })
   return result.ok ? { status: 'saved' } : failure(GONE)
 }

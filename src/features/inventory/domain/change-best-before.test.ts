@@ -55,6 +55,28 @@ describe('changeBestBefore', () => {
     })
   })
 
+  it('setzt „Noch gut“ zurück, wenn ein MHD am selben Tag zum Verbrauchsdatum wird (#300)', () => {
+    expect(changeBestBefore(stillGood, stillGood.bestBefore, 'use-by')).toEqual({
+      ...stillGood,
+      kind: 'use-by',
+      checkedAt: null,
+    })
+  })
+
+  it('stuft ein Verbrauchsdatum auf Wunsch zum MHD zurück (#300)', () => {
+    const useBy = { ...stillGood, kind: 'use-by' as const, checkedAt: null }
+
+    expect(changeBestBefore(useBy, bestBefore('2027-03-31'), 'best-before').kind).toBe(
+      'best-before',
+    )
+  })
+
+  it('behält ohne Angabe die bisherige Art', () => {
+    const useBy = { ...stillGood, kind: 'use-by' as const }
+
+    expect(changeBestBefore(useBy, bestBefore('2027-03-31')).kind).toBe('use-by')
+  })
+
   it('lässt alle übrigen Felder und die Eingabe unverändert', () => {
     const before = structuredClone(stillGood)
     const changed = changeBestBefore(stillGood, bestBefore('2027-03-31'))
