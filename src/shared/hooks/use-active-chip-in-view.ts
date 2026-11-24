@@ -18,14 +18,18 @@ function revealInRow(row: HTMLElement, chip: HTMLElement): void {
 
 /**
  * Hält den aktiven Chip einer waagerecht rollenden Reihe im Bild, auch wenn er weit rechts steht
- * (z. B. „Unvollständig“ auf dem iPhone). Läuft nach jedem Zeichnen, weil ein Filterwechsel per Link
- * die Reihe nicht neu einhängt; ist der Chip schon zu sehen, passiert nichts.
+ * (z. B. „Unvollständig“ auf dem iPhone). Geprüft wird nach jedem Zeichnen, weil ein Filterwechsel
+ * per Link die Reihe nicht neu einhängt. Gerollt wird nur, wenn ein anderer Chip aktiv geworden ist:
+ * Wer die Reihe selbst verschoben hat, behält seine Stelle, auch wenn die Seite neu zeichnet.
  */
 export function useActiveChipInView<T extends HTMLElement>() {
   const rowRef = useRef<T>(null)
+  const revealedRef = useRef<HTMLElement | null>(null)
   useEffect(() => {
     const row = rowRef.current
-    const chip = row?.querySelector<HTMLElement>(ACTIVE_CHIP)
+    const chip = row?.querySelector<HTMLElement>(ACTIVE_CHIP) ?? null
+    if (chip === revealedRef.current) return
+    revealedRef.current = chip
     if (row && chip) revealInRow(row, chip)
   })
   return rowRef

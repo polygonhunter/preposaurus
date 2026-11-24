@@ -72,10 +72,14 @@ test('Entsorgt mit Rückgängig, Noch gut mit Anzeige und Verlauf', async ({ pag
   await expect(page.getByRole('heading', { level: 1, name: FOOD })).toBeVisible()
   const dateRow = page.getByRole('button', { name: new RegExp(`^${EXPIRED}`) })
   await expect(dateRow).toContainText(checked)
+  // „Noch gut“ zählt ab Mitternacht, Entsorgtes eines früheren Versuchs steht deshalb darüber (#290)
   const history = page.getByRole('list', { name: 'Verlauf' })
-  await expect(history.getByRole('listitem').first()).toHaveText(
-    new RegExp(`Noch gut geprüft.*MHD ${EXPIRED}`),
-  )
+  await expect(
+    history
+      .getByRole('listitem')
+      .filter({ hasText: new RegExp(`Noch gut geprüft.*MHD ${EXPIRED}`) })
+      .first(),
+  ).toBeVisible()
   await expectAccessibleLayout(page)
 
   // Aufräumen über das Blatt: alle Packungen entsorgen, danach steht es im Verlauf
@@ -89,10 +93,12 @@ test('Entsorgt mit Rückgängig, Noch gut mit Anzeige und Verlauf', async ({ pag
 
   // Auf der Seite Verlauf (Tabelle, weil Desktop): heute, mit Person (#48)
   await page.getByRole('link', { name: 'Alle Einträge im Verlauf ansehen' }).click()
-  await page
+  const discardedChip = page
     .getByRole('group', { name: 'Ausgang' })
     .getByRole('link', { name: /^Entsorgt/ })
-    .click()
+  await discardedChip.click()
+  // Erst die gefilterte Seite, sonst misst axe den Chip mitten im Farbwechsel (#290)
+  await expect(discardedChip).toHaveAttribute('aria-current', 'true')
   const table = page.getByRole('table', { name: 'Verlauf' })
   const today = table.locator('tbody').filter({ hasText: todayInBerlin() })
   const discardedToday = today.getByRole('row', {
