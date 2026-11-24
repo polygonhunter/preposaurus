@@ -1,7 +1,7 @@
 // Ablauf der Foto-Erfassung (#61 bis #66): Zustand, Fotos samt Upload und Erkennung, Entwurf auf
 // dem NAS, Schätzung auf Wahl und Wiedererkennen. Die Komponenten bekommen nur den `PhotoEditor`.
 import { useReducer } from 'react'
-import type { CaptureOptions } from '../domain/capture-options'
+import type { CaptureOptions, FoodTypeChoice } from '../domain/capture-options'
 import { photoCaptureReducer } from './photo-capture-reducer'
 import type { PhotoCaptureState } from './photo-capture-state'
 import { createPhotoEditor, type EditUpdate } from './photo-editor'
@@ -29,12 +29,15 @@ interface PhotoCaptureSetup {
   isActive: boolean
   /** Satz, warum die Erkennung aus ist: Dann gibt es kein „Nochmal“ (#210) */
   recognitionOff: string | null
+  /** Neue Art in die Auswahllisten aufnehmen (#142) */
+  onFoodTypeAdded: (foodType: FoodTypeChoice) => void
 }
 
 export function usePhotoCapture(setup: PhotoCaptureSetup) {
   const { options, isActive, recognitionOff } = setup
   const [state, dispatch] = useReducer(photoCaptureReducer, setup.initial)
-  const lookup = { foodTypes: options.foodTypes, containers: options.containers }
+  const { foodTypes, containers, categories } = options
+  const lookup = { foodTypes, containers, categories }
   const uploads = usePhotoUploads({ dispatch, lookup, draftId: state.draftId })
   const estimates = usePhotoEstimate(state, dispatch)
   usePhotoDraftSync({ state, containers: options.containers, isActive })
@@ -59,6 +62,7 @@ export function usePhotoCapture(setup: PhotoCaptureSetup) {
     state,
     dispatch,
     edit,
+    addFoodType: setup.onFoodTypeAdded,
     restock: {
       leaveContent: (content) => {
         restock.pickSoleMatch({ ...state, content })

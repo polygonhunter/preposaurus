@@ -1,7 +1,7 @@
 // Kurze Texte der Stammdaten-Seiten (EIN-04).
 import { formatGermanNumber } from '@/shared/lib/quantities'
 import type { CategoryEntry, FoodTypeEntry, FoodTypeReference } from '../domain/category'
-import type { CategoryChoice } from './CategoryPicker'
+import type { CategoryChoice } from '@/shared/ui/CategoryPicker'
 
 export function productCountLabel(count: number): string {
   if (count === 0) return 'Keine Produkte'

@@ -7,6 +7,7 @@
 import 'server-only'
 import type { AiFailure } from '@/server/ai/vision-recognizer'
 import { err, type Result } from '@/shared/lib/result'
+import { loadCategoryOptions } from '../data/category-options'
 import { loadFoodTypeOptions } from '../data/food-type-options'
 import type { CaptureActor } from './capture-actor'
 import type { CaptureDeps } from './capture-deps'
@@ -36,7 +37,13 @@ export async function recognizePhoto(
   })
   if (!ready.ok) return ready
   const { photo, prepared, image } = ready.value
-  const loadFoodTypes = () => loadFoodTypeOptions(deps.db, photo.householdId)
-  const result = await runRecognitionTask({ prepared, image, loadFoodTypes }, photo.role)
+  const loadPackagingChoices = async () => {
+    const [foodTypes, categories] = await Promise.all([
+      loadFoodTypeOptions(deps.db, photo.householdId),
+      loadCategoryOptions(deps.db, photo.householdId),
+    ])
+    return { foodTypes, categories }
+  }
+  const result = await runRecognitionTask({ prepared, image, loadPackagingChoices }, photo.role)
   return result.ok ? result : err({ kind: 'ai-failed', failure: result.error.kind })
 }

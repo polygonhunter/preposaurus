@@ -18,6 +18,13 @@ export interface FoodTypeChoice {
   searchTerms: string[]
 }
 
+/** Kategorie, unter der eine neue Lebensmittelart entstehen kann (#142), mit Warengruppe als Pfad */
+export interface CategoryChoice {
+  id: string
+  name: string
+  productGroupName: string
+}
+
 export interface NamedChoice {
   id: string
   name: string
@@ -51,6 +58,10 @@ export interface CaptureOptions {
   recentFoodTypeIds: string[]
   /** Keine einzige Packung im Vorrat: Die Seite begrüßt freundlich (#54) */
   isStockEmpty: boolean
+  /** Sichtbare Kategorien: Vorschlag der Erkennung zuordnen und neue Arten anlegen (#142) */
+  categories: CategoryChoice[]
+  /** Neue Lebensmittelarten legt nur ein Admin an (#126, #142), Mitglieder sehen einen Hinweis */
+  canAddFoodTypes: boolean
 }
 
 /** Was die Datenschicht zur letzten Erfassung liefert, ohne zu wissen, was auswählbar ist. */

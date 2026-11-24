@@ -10,6 +10,7 @@ import {
 const packaging = (overrides: Partial<AiPackagingAnswer>): AiPackagingAnswer => ({
   bezeichnung: 'Spaghetti',
   lebensmittelart: 'spaghetti',
+  neue_lebensmittelart_vorschlag: null,
   behaelter: 'packung',
   inhalt: { wert: 500, einheit: 'g' },
   abtropfgewicht_g: null,
@@ -44,11 +45,40 @@ describe('mapPackagingAnswer', () => {
     expect(mapPackagingAnswer(packaging({ abtropfgewicht_g: 240 }))).toEqual({
       name: 'Spaghetti',
       foodTypeKey: 'spaghetti',
+      newFoodType: null,
       container: 'packung',
       content: { value: 500, unit: 'g' },
       drainedWeightG: 240,
       confidence: 'high',
     })
+  })
+
+  it('reicht den Vorschlag einer neuen Art nur ohne Treffer der Liste weiter (#142)', () => {
+    const proposal = { name: ' Dinkelreis ', kategorie: 'Reis und Getreide' }
+
+    expect(
+      mapPackagingAnswer(
+        packaging({ lebensmittelart: null, neue_lebensmittelart_vorschlag: proposal }),
+      ).newFoodType,
+    ).toEqual({ name: 'Dinkelreis', categoryName: 'Reis und Getreide' })
+    // Treffer und Vorschlag zugleich verstößt gegen die Regel: Der Treffer gilt.
+    expect(
+      mapPackagingAnswer(packaging({ neue_lebensmittelart_vorschlag: proposal })).newFoodType,
+    ).toBeNull()
+  })
+
+  it('verwirft einen leeren oder zu langen Namen für eine neue Art (#142)', () => {
+    const named = (name: string) =>
+      mapPackagingAnswer(
+        packaging({
+          lebensmittelart: null,
+          neue_lebensmittelart_vorschlag: { name, kategorie: 'Reis und Getreide' },
+        }),
+      ).newFoodType
+
+    expect(named('   ')).toBeNull()
+    expect(named('x'.repeat(41))).toBeNull()
+    expect(named('x'.repeat(40))).not.toBeNull()
   })
 
   it('lässt null überall null', () => {

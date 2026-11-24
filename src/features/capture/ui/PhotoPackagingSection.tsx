@@ -2,10 +2,10 @@ import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import type { CaptureOptions } from '../domain/capture-options'
 import { ChoiceChips } from './ChoiceChips'
-import { FoodTypePicker } from './FoodTypePicker'
 import type { CaptureErrors } from './manual-capture-draft'
 import type { ManualCaptureView } from './manual-capture-view'
 import type { PhotoCaptureState } from './photo-capture-state'
+import { PhotoFoodTypePicker } from './PhotoFoodTypePicker'
 import { ReadingNotice } from './ReadingNotice'
 import type { PhotoEditor } from './use-photo-capture'
 
@@ -32,15 +32,7 @@ export function PhotoPackagingSection(props: PhotoPackagingSectionProps) {
   const { options, state, view, editor, errors } = props
   return (
     <>
-      <FoodTypePicker
-        foodTypes={options.foodTypes}
-        recentIds={options.recentFoodTypeIds}
-        selected={view.foodType}
-        onSelect={(foodTypeId) => {
-          editor.edit({ foodTypeId })
-        }}
-        error={errors.foodTypeId}
-      />
+      <PhotoFoodTypePicker {...{ options, state, view, editor }} error={errors.foodTypeId} />
       <ReadingNotice
         reading={state.readings.verpackung}
         missing={missingOf(state)}

@@ -17,8 +17,10 @@ const afterSetup = ['beispielvorrat']
 
 // Die Foto-Erfassung arbeitet mit dem einen Entwurf des gemeinsamen Admins. Deshalb läuft sie nur
 // in einem eigenen Projekt und dort nacheinander (tests/e2e/erfassen-foto.spec.ts). Andere Tests
-// meiden die Frage „Fortsetzen oder verwerfen?“, indem sie /neu/manuell direkt öffnen.
-const PHOTO_SPEC = /erfassen-foto\.spec\.ts$/
+// meiden die Frage „Fortsetzen oder verwerfen?“, indem sie /neu/manuell direkt öffnen. Der
+// Haushaltsschalter der Erkennung läuft im selben Projekt mit einem Worker, damit er die
+// Foto-Erfassung (Erkennung aus) nie mittendrin anschaltet (Review #297).
+const PHOTO_SPEC = /(erfassen-foto|foto-erkennung-schalter)\.spec\.ts$/
 
 // Jeder Lauf beginnt mit einer leeren, migrierten Datenbank mit Stammdaten (wie im Container), damit
 // die Ersteinrichtung testbar ist.
@@ -98,6 +100,7 @@ export default defineConfig({
       testMatch: PHOTO_SPEC,
       testIgnore: [],
       fullyParallel: false,
+      workers: 1,
       use: {
         browserName: 'chromium',
         viewport: { width: 375, height: 812 },

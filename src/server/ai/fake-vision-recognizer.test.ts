@@ -10,7 +10,7 @@ const image = (text: string): AiImage => ({
 })
 
 const CONTEXTS: RoleContexts = {
-  verpackung: { foodTypes: [{ key: 'spaghetti', name: 'Spaghetti' }] },
+  verpackung: { foodTypes: [{ key: 'spaghetti', name: 'Spaghetti' }], categories: [] },
   naehrwerte: {},
   naehrwerte_schaetzen: { foodType: { key: 'spaghetti', name: 'Spaghetti' }, productName: null },
   mhd: {},

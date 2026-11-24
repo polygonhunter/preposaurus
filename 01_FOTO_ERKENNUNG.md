@@ -12,7 +12,7 @@ Mehrere Fotos pro Produkt, jedes mit eigener Rolle:
 
 | Schritt | Foto | Pflicht? | Liefert |
 |---|---|---|---|
-| 1 | **Verpackung** (Vorderseite) | ja | Bezeichnung, Kategorie, Behälter, Inhalt pro Stück (g/ml) |
+| 1 | **Verpackung** (Vorderseite) | ja | Bezeichnung, Lebensmittelart (Kategorie und Warengruppe leitet die App daraus ab, #110), Behälter, Inhalt pro Stück (g/ml); ohne passende Art ein Vorschlag für eine neue (#142) |
 | 2 | **Nährwerttabelle** | optional | kcal pro 100 g/ml → kcal pro Stück; ggf. Eiweiß/KH/Fett |
 | 3 | **MHD-Fotos**, eines pro Packung | ja (mind. 1) | je Foto ein Datum; **Anzahl Fotos = Anzahl Stück** |
 
@@ -27,14 +27,14 @@ Mehrere Fotos pro Produkt, jedes mit eigener Rolle:
 **Abkürzungen** (damit 10 Fotos nicht zur Pflicht werden):
 - „Alle gleiches Datum“: 1 MHD-Foto plus Anzahl-Stepper (−/+)
 - „Datum manuell“: Monat/Jahr-Picker mit Schnellknöpfen (+6 Mon., +1 J., +2 J.)
-- „Ohne Datum“: Schätzung nach Kategorie, markiert als „geschätzt“
-- Ohne Nährwertfoto: kcal-Durchschnitt der Kategorie (markiert als „geschätzt“)
+- „Datum fehlt“: Die Packung bleibt ohne MHD. Eine Schätzung macht die KI nur auf ausdrückliche Wahl, immer als „geschätzt“ markiert (#116, #124). Die übliche Haltbarkeit der Lebensmittelart ist nur ein Hinweis, nie ein MHD (#110).
+- Ohne Nährwertfoto: Richtwert der Lebensmittelart als „ca.“, live gelesen und nie ins Produkt kopiert; eine KI-Schätzung nur auf ausdrückliche Wahl (#115, #124).
 
 **Später möglich:** „Gleiches Produkt nochmal kaufen“, also Verpackung und Nährwerte aus früherer Erfassung übernehmen und nur noch MHDs fotografieren.
 
 ## Datenmodell (Kern)
 ```
-Produkt     (Nudeln, getreide, packung, 500 g, 359 kcal/100 g, Fotos)
+Produkt     (Lebensmittelart Nudeln, packung, 500 g, 359 kcal/100 g, Fotos)
  └─ Einheit (je Packung: MHD 2027-09-30, genauigkeit monat, status: im Vorrat / verbraucht)
 ```
 Jede Packung ist eine eigene Einheit mit eigenem MHD. So kann die App sagen, *welche* Packung zuerst weg muss (FIFO/„lebendiger Vorrat“). Die Anzeige gruppiert gleiche Daten.
@@ -45,14 +45,17 @@ Separate Aufrufe statt einem großen: kürzere Prompts, schnellere Antworten (MH
 ### A) Verpackung
 ```json
 {
-  "bezeichnung": "Nudeln",            // generisch, deutsch, ohne Marke
-  "kategorie": "getreide",            // enum, siehe Kategorien
-  "behaelter": "packung",             // dose | glas | packung | flasche | tetrapak | beutel | sonstiges
+  "bezeichnung": "Spaghetti",         // generisch, deutsch, ohne Marke
+  "lebensmittelart": "nudeln",        // enum: Schlüssel der sichtbaren Arten des Haushalts, sonst null (#110)
+  "neue_lebensmittelart_vorschlag": null,  // nur wenn lebensmittelart null ist, siehe unten (#142)
+  "behaelter": "packung",             // dose | glas | packung | flasche | tetrapak | beutel | null
   "inhalt": { "wert": 500, "einheit": "g" },   // g | ml | null wenn nicht lesbar
   "abtropfgewicht_g": null,           // Dosen/Gläser, falls aufgedruckt
   "sicherheit": "hoch"
 }
 ```
+- **Lebensmittelart statt Kategorie (#110):** Die KI wählt die Lebensmittelart aus der Laufzeit-Liste des Haushalts (System- und eigene Arten ohne Ausgeblendetes). Kategorie und Warengruppe leitet die App daraus ab, die KI schätzt sie nicht.
+- **Vorschlag einer neuen Art (#142):** Passt keine Art der Liste, darf die KI `{ "name": "Dinkelreis", "kategorie": "<Kategorie aus der Liste>" }` liefern: ein kurzer generischer Name ohne Marke, Sorte oder Menge, die Kategorie als Enum aus den sichtbaren Kategorien des Haushalts. Sonst `null`. Die App prüft ähnliche Namen und Suchwörter selbst: Gibt es die Art schon, wird sie gewählt. Sonst erscheint ein Angebot „Neue Lebensmittelart … anlegen?“. Angelegt wird nur nach Bestätigung durch einen Admin, als eigene Art des Haushalts (`eigen_<slug>`).
 
 ### B) Nährwerttabelle
 ```json
@@ -75,7 +78,7 @@ Bei Angabe in kJ und kcal gilt kcal. Gibt es nur kJ, wird umgerechnet (÷ 4,184)
   "sicherheit": "hoch"
 }
 ```
-Zusätzlich prüft die App die Plausibilität (Datum in der Vergangenheit? Weit weg vom Kategorie-Default?) und markiert Auffälliges mit „bitte prüfen“.
+Zusätzlich prüft die App die Plausibilität (Datum in der Vergangenheit? Weit weg von der üblichen Haltbarkeit der Lebensmittelart?) und markiert Auffälliges mit „bitte prüfen“.
 
 ## System-Prompts (Entwurf)
 
@@ -89,10 +92,14 @@ schätze und erfinde nichts. Bewerte deine Sicherheit ehrlich.
 ```
 Das Foto zeigt die Verpackung EINES Lebensmittels. Bestimme eine generische
 deutsche Bezeichnung ohne Markennamen ("Nudeln", "Thunfisch in Öl", "Mais"),
-genau eine Kategorie aus der Liste, den Behältertyp und die aufgedruckte
-Füllmenge pro Stück (kg→g, l→ml umrechnen). Bei Konserven zusätzlich das
-Abtropfgewicht, falls angegeben.
+genau eine Lebensmittelart aus der Liste (Schlüssel: Name) oder null, den
+Behältertyp und die aufgedruckte Füllmenge pro Stück (kg→g, l→ml umrechnen).
+Bei Konserven zusätzlich das Abtropfgewicht, falls angegeben. Passt keine Art
+der Liste und ist das Lebensmittel sicher erkennbar, schlage eine neue Art vor:
+kurzer generischer Name ohne Marke, Sorte oder Menge, keine Dublette einer Art
+der Liste, dazu die passende Kategorie aus der Liste. Sonst null.
 ```
+Der umgesetzte Wortlaut steht in `src/server/ai/prompts.ts`, das Schema in `src/features/capture/schemas/ai-answers.ts`.
 **B) Nährwerttabelle:**
 ```
 Das Foto zeigt eine Nährwerttabelle. Lies den Energiewert in kcal sowie Eiweiß,

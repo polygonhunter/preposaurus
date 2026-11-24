@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Field } from '@/shared/ui/Field'
-import type { CaptureOptions } from '../domain/capture-options'
+import type { CaptureOptions, FoodTypeChoice } from '../domain/capture-options'
 import { BestBeforeEntries } from './BestBeforeEntries'
 import { CaptureSummaryGroup } from './CaptureSummaryGroup'
 import { ChoiceChips } from './ChoiceChips'
@@ -18,6 +18,8 @@ type ManualCaptureFieldsProps = Readonly<{
   nutritionOpen: Readonly<{ isOpen: boolean; onToggle: (isOpen: boolean) => void }>
   /** Nach der Wahl der Art geht es mit dem Inhalt weiter, beim Nachschub gleich mit dem MHD */
   onFocus: (field: CaptureField) => void
+  /** Neu angelegte Art in die Auswahl aufnehmen (#110) */
+  onFoodTypeAdded: (foodType: FoodTypeChoice) => void
   /** Speichern, unter der Zusammenfassung */
   children: ReactNode
 }>
@@ -36,6 +38,7 @@ export function ManualCaptureFields({
   view,
   nutritionOpen,
   onFocus,
+  onFoodTypeAdded,
   children,
 }: ManualCaptureFieldsProps) {
   const { draft, errors, change } = capture
@@ -53,6 +56,11 @@ export function ManualCaptureFields({
             if (foodTypeId !== null) onFocus(isRestock ? 'units' : 'content')
           }}
           error={errors.foodTypeId}
+          adding={{
+            canAdd: options.canAddFoodTypes,
+            categories: options.categories,
+            onAdded: onFoodTypeAdded,
+          }}
         />
         <div className="mx-4 pt-[22px] breit:mx-6">
           <Field

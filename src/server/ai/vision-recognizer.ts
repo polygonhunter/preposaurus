@@ -23,6 +23,10 @@ interface FoodTypeOption {
   name: string
 }
 
+interface CategoryOption {
+  name: string
+}
+
 type NoContext = Readonly<Record<string, never>>
 
 /** Lebensmittelart und Bezeichnung aus dem Schritt Verpackung, beides darf fehlen */
@@ -33,8 +37,14 @@ interface EstimateContext {
 
 /** Was jede Rolle außer dem Foto braucht. */
 export interface RoleContexts {
-  /** Erlaubte Lebensmittelarten des Haushalts, bei jedem Aufruf frisch aus den Stammdaten */
-  verpackung: { foodTypes: readonly FoodTypeOption[] }
+  /**
+   * Sichtbare Lebensmittelarten und Kategorien des Haushalts, bei jedem Aufruf frisch aus den
+   * Stammdaten. Die Kategorien braucht nur der Vorschlag einer neuen Art (#142).
+   */
+  verpackung: {
+    foodTypes: readonly FoodTypeOption[]
+    categories: readonly CategoryOption[]
+  }
   naehrwerte: NoContext
   /** Grundlage der Schätzung: Lebensmittelart und Bezeichnung aus dem Schritt Verpackung */
   naehrwerte_schaetzen: EstimateContext

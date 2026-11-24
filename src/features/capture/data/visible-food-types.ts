@@ -1,5 +1,5 @@
-// Welche Lebensmittelarten ein Haushalt neu wählen kann (#126, #142): System-Arten und eigene Arten
-// des Haushalts, ohne Ausgeblendetes. Ausgeblendet ist eine Art, wenn der Seed sie (oder ihre
+// Welche Lebensmittelarten und Kategorien ein Haushalt neu wählen kann (#126, #142): System- und
+// eigene Einträge des Haushalts, ohne Ausgeblendetes. Ausgeblendet ist eine Art, wenn der Seed sie (oder ihre
 // Kategorie) ausgeblendet hat oder der Haushalt selbst (kategorie_ausblendung,
 // lebensmittelart_ausblendung). Die Abfrage muss die Kategorie der Art schon verknüpfen.
 import 'server-only'
@@ -8,6 +8,27 @@ import type { Database } from '@/server/db/connection'
 import { categories } from '@/server/db/schema/catalog'
 import { hiddenCategories, hiddenFoodTypes } from '@/server/db/schema/catalog-choices'
 import { foodTypes } from '@/server/db/schema/food-types'
+
+/**
+ * Kategorie, die der Haushalt wählen kann: System oder eigene, weder vom Seed noch vom Haushalt
+ * ausgeblendet. Die Abfrage muss `kategorie` enthalten.
+ */
+export function isSelectableCategory(db: Database, householdId: string) {
+  const hiddenByHousehold = db
+    .select({ id: hiddenCategories.id })
+    .from(hiddenCategories)
+    .where(
+      and(
+        eq(hiddenCategories.householdId, householdId),
+        eq(hiddenCategories.categoryId, categories.id),
+      ),
+    )
+  return and(
+    or(isNull(categories.householdId), eq(categories.householdId, householdId)),
+    eq(categories.isHidden, false),
+    notExists(hiddenByHousehold),
+  )
+}
 
 export function isSelectableFoodType(db: Database, householdId: string) {
   const hiddenByHousehold = db
@@ -19,20 +40,10 @@ export function isSelectableFoodType(db: Database, householdId: string) {
         eq(hiddenFoodTypes.foodTypeId, foodTypes.id),
       ),
     )
-  const categoryHiddenByHousehold = db
-    .select({ id: hiddenCategories.id })
-    .from(hiddenCategories)
-    .where(
-      and(
-        eq(hiddenCategories.householdId, householdId),
-        eq(hiddenCategories.categoryId, categories.id),
-      ),
-    )
   return and(
     or(isNull(foodTypes.householdId), eq(foodTypes.householdId, householdId)),
     eq(foodTypes.isHidden, false),
-    eq(categories.isHidden, false),
     notExists(hiddenByHousehold),
-    notExists(categoryHiddenByHousehold),
+    isSelectableCategory(db, householdId),
   )
 }

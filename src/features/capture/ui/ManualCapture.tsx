@@ -12,6 +12,7 @@ import { CaptureSaved } from './CaptureSaved'
 import { NUTRITION_FIELDS, type CaptureErrors, type CaptureField } from './manual-capture-draft'
 import { deriveView } from './manual-capture-view'
 import { ManualCaptureFields } from './ManualCaptureFields'
+import { useAddedFoodTypes } from './use-added-food-types'
 import { useFreshRestart } from './use-fresh-restart'
 import { useManualCapture } from './use-manual-capture'
 
@@ -53,7 +54,8 @@ const firstMessage = (errors: CaptureErrors) => Object.values(errors).find(Boole
 
 // Manuelles Erfassen (#52, #53, #54): ein Formular, danach Bestätigung mit „Noch eins“. Vorbelegt
 // (#195) steht der Fokus gleich beim Inhalt, mit vorgewähltem Produkt beim MHD.
-export function ManualCapture({ options, prefill }: ManualCaptureProps) {
+export function ManualCapture({ prefill, ...props }: ManualCaptureProps) {
+  const { options, add: addFoodType } = useAddedFoodTypes(props.options)
   const formRef = useRef<HTMLFormElement>(null)
   const [isNutritionOpen, setNutritionOpen] = useState(false)
 
@@ -113,6 +115,7 @@ export function ManualCapture({ options, prefill }: ManualCaptureProps) {
         view={view}
         nutritionOpen={{ isOpen: isNutritionOpen, onToggle: setNutritionOpen }}
         onFocus={focusField}
+        onFoodTypeAdded={addFoodType}
       >
         <LiveMessage message={firstMessage(capture.errors)} />
         <div className="mx-4 flex flex-col gap-3 pt-8 breit:mx-6">

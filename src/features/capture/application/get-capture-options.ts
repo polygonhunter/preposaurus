@@ -4,6 +4,7 @@ import 'server-only'
 import {
   applyLastUsed,
   type CaptureOptions,
+  type CategoryChoice,
   type ContainerChoice,
   type FoodTypeChoice,
   type KnownProduct,
@@ -21,18 +22,22 @@ export interface CaptureOptionsReader {
   loadKnownProducts: (householdId: string) => Promise<KnownProduct[]>
   loadLastUsed: (householdId: string, userId: string) => Promise<LastUsed>
   hasStock: (householdId: string) => Promise<boolean>
+  /** Sichtbare Kategorien des Haushalts (#142) */
+  loadCategories: (householdId: string) => Promise<CategoryChoice[]>
 }
 
 interface CaptureOptionsRequest {
   householdId: string
   userId: string
+  /** Admin: darf beim Erfassen neue Lebensmittelarten anlegen (#142) */
+  isAdmin: boolean
 }
 
 export async function getCaptureOptions(
   reader: CaptureOptionsReader,
-  { householdId, userId }: CaptureOptionsRequest,
+  { householdId, userId, isAdmin }: CaptureOptionsRequest,
 ): Promise<CaptureOptions> {
-  const [foodTypes, containers, storageLocations, knownProducts, lastUsed, hasStock] =
+  const [foodTypes, containers, storageLocations, knownProducts, lastUsed, hasStock, categories] =
     await Promise.all([
       reader.loadFoodTypes(householdId),
       reader.loadContainers(),
@@ -40,6 +45,7 @@ export async function getCaptureOptions(
       reader.loadKnownProducts(householdId),
       reader.loadLastUsed(householdId, userId),
       reader.hasStock(householdId),
+      reader.loadCategories(householdId),
     ])
   return {
     foodTypes,
@@ -48,5 +54,7 @@ export async function getCaptureOptions(
     knownProducts,
     ...applyLastUsed(lastUsed, { foodTypes, storageLocations }),
     isStockEmpty: !hasStock,
+    categories,
+    canAddFoodTypes: isAdmin,
   }
 }

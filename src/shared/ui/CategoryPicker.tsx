@@ -16,6 +16,9 @@ type CategoryPickerProps = Readonly<{
   categories: readonly CategoryChoice[]
   defaultId: string
   error?: string | undefined
+  /** Name des versteckten Felds im Formular; ohne Namen meldet nur `onChange` die Wahl */
+  name?: string
+  onChange?: (categoryId: string) => void
 }>
 
 const pathOf = (category: CategoryChoice) => `${category.productGroupName} › ${category.name}`
@@ -24,13 +27,14 @@ const matches = (category: CategoryChoice, query: string) =>
   normalizeSearchText(pathOf(category)).includes(normalizeSearchText(query))
 
 // Kategorie wählen ohne Dropdown (#126, DESIGN_SYSTEM §7): Ein Knopf zeigt die Wahl, ein Blatt mit
-// Suche listet die Kategorien samt Warengruppe. Die Wahl geht als verstecktes Feld ins Formular.
-export function CategoryPicker({ categories, defaultId, error }: CategoryPickerProps) {
+// Suche listet die Kategorien samt Warengruppe. Die Wahl geht als verstecktes Feld ins Formular
+// (Einstellungen) oder an `onChange` (neue Art aus der Erfassung, #142, ohne eigenes Formular).
+export function CategoryPicker(props: CategoryPickerProps) {
+  const { categories, defaultId, error, name, onChange } = props
   const [selectedId, setSelectedId] = useState(defaultId)
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
   const labelId = useId()
-  const errorId = `${labelId}-fehler`
   const selected = categories.find((category) => category.id === selectedId)
   const hits = categories.filter((category) => matches(category, query))
   const close = () => {
@@ -41,11 +45,11 @@ export function CategoryPicker({ categories, defaultId, error }: CategoryPickerP
       <span id={labelId} className="px-4 text-footnote text-fg2">
         Kategorie
       </span>
-      <input type="hidden" name="kategorie" value={selectedId} />
+      {name === undefined ? null : <input type="hidden" name={name} value={selectedId} />}
       <button
         type="button"
         aria-labelledby={`${labelId} ${labelId}-wert`}
-        aria-describedby={error ? errorId : undefined}
+        aria-describedby={error ? `${labelId}-fehler` : undefined}
         data-invalid={error ? true : undefined}
         onClick={() => {
           setIsOpen(true)
@@ -59,7 +63,7 @@ export function CategoryPicker({ categories, defaultId, error }: CategoryPickerP
         <span id={`${labelId}-wert`}>{selected ? pathOf(selected) : 'Kategorie wählen'}</span>
       </button>
       {error ? (
-        <p id={errorId} className="px-4 text-footnote text-red">
+        <p id={`${labelId}-fehler`} className="px-4 text-footnote text-red">
           {error}
         </p>
       ) : null}
@@ -84,6 +88,7 @@ export function CategoryPicker({ categories, defaultId, error }: CategoryPickerP
                   aria-pressed={category.id === selectedId}
                   onClick={() => {
                     setSelectedId(category.id)
+                    onChange?.(category.id)
                     close()
                   }}
                   className="flex min-h-11 w-full flex-col justify-center py-1.5 text-left aria-pressed:text-accent"

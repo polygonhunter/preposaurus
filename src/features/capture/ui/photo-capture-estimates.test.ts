@@ -33,7 +33,10 @@ const unreadable: PhotoCaptureAction = {
       bestBefore: { bestBefore: null, kind: 'best-before', rawText: null, confidence: 'high' },
     },
   },
-  context: { lookup: { foodTypes: [], containers: [] }, today: toCalendarDay('2026-11-23') },
+  context: {
+    lookup: { foodTypes: [], containers: [], categories: [] },
+    today: toCalendarDay('2026-11-23'),
+  },
 }
 
 describe('Schätzungen in der Foto-Erfassung', () => {

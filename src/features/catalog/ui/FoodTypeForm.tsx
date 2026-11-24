@@ -6,7 +6,7 @@ import { Field } from '@/shared/ui/Field'
 import { SaveStatus } from '@/shared/ui/SaveStatus'
 import { entryFormIdle } from '../actions/entry-form-state'
 import { saveFoodTypeAction, type FoodTypeFormState } from '../actions/save-food-type-action'
-import { CategoryPicker, type CategoryChoice } from './CategoryPicker'
+import { CategoryPicker, type CategoryChoice } from '@/shared/ui/CategoryPicker'
 import type { FoodTypeFormValues } from './food-type-form-values'
 import { FoodTypeReferenceFields } from './FoodTypeReferenceFields'
 
@@ -43,6 +43,7 @@ export function FoodTypeForm({ categories, initialValues, foodTypeId }: FoodType
         error={errors.name}
       />
       <CategoryPicker
+        name="kategorie"
         categories={categories}
         defaultId={values.categoryId}
         error={errors.categoryId}

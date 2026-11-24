@@ -78,7 +78,7 @@ describe('Anthropic-Adapter: Anfrage', () => {
 
   it('nennt der Verpackung die erlaubten Lebensmittelarten', async () => {
     const { adapter, requests } = adapterWith([messageReply({})])
-    const context = { foodTypes: [{ key: 'spaghetti', name: 'Spaghetti' }] }
+    const context = { foodTypes: [{ key: 'spaghetti', name: 'Spaghetti' }], categories: [] }
 
     await adapter.recognize({ role: 'verpackung', image: IMAGE, model: 'm', context })
 

@@ -360,7 +360,7 @@ Warum so: Die Ordnung, die dem Maintainer gefällt, bleibt als Weg erhalten. Kat
 
 **Zweck:** Neues in den Vorrat bringen, so schnell wie möglich. **Hauptfrage:** „Wie bekomme ich den Einkauf in zwei Minuten rein?“
 
-**Einstieg:** Der Erfassen-Knopf öffnet den zuletzt genutzten Weg (beim ersten Mal Foto, wenn die Erkennung an und die Kamera erlaubt ist). Oben bleibt der Umschalter **Foto · Manuell** immer sichtbar. Liegt ein Entwurf vor, fragt die App zuerst: „Erfassung von gestern fortsetzen oder verwerfen?“
+**Einstieg:** Der Erfassen-Knopf öffnet den zuletzt genutzten Weg (beim ersten Mal Foto, wenn die Erkennung an und die Kamera erlaubt ist). Ist die Erkennung aus oder nicht eingerichtet, öffnet er immer das Formular, mit einem kurzen Satz, wenn der gewohnte Weg das Foto war (#79). Oben bleibt der Umschalter **Foto · Manuell** immer sichtbar. Liegt ein Entwurf vor, fragt die App zuerst: „Erfassung von gestern fortsetzen oder verwerfen?“
 
 **Weg per Foto**
 
