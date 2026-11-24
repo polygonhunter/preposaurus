@@ -10,6 +10,8 @@ type CaptureSavedProps = Readonly<{
   productName: string
   /** Erste Erfassung in einen leeren Vorrat (#54, erster Start) */
   isFirst: boolean
+  /** „Noch eins“ lädt die Optionen neu, bis dahin bleibt die Bestätigung stehen */
+  isReloading: boolean
   onAnother: () => void
 }>
 
@@ -19,7 +21,13 @@ const packages = (count: number) => (count === 1 ? '1 Packung' : `${String(count
 // springt auf die Meldung, damit auch ein Screenreader das Ergebnis ansagt. „Hinzugefügt“ statt
 // „sind jetzt im Vorrat“, weil beim Nachschub schon mehr Packungen da sind (#207). Ändern sich die
 // ganzen Tage von Essen oder Wasser, sagt ein zweiter Satz, wie lange es jetzt reicht (#231).
-export function CaptureSaved({ saved, productName, isFirst, onAnother }: CaptureSavedProps) {
+export function CaptureSaved({
+  saved,
+  productName,
+  isFirst,
+  isReloading,
+  onAnother,
+}: CaptureSavedProps) {
   const { unitCount, supplyChange } = saved
   const headingRef = useRef<HTMLHeadingElement>(null)
 
@@ -43,7 +51,9 @@ export function CaptureSaved({ saved, productName, isFirst, onAnother }: Capture
         )}
       </div>
       <div className="flex flex-col items-center gap-3">
-        <Button onClick={onAnother}>Noch eins erfassen</Button>
+        <Button onClick={onAnother} pendingLabel={isReloading ? 'Lädt …' : undefined}>
+          Noch eins erfassen
+        </Button>
         <ButtonLink href="/vorrat" variant="tinted">
           Zum Vorrat
         </ButtonLink>

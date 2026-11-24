@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useEffectEvent } from 'react'
+import { useHoldTimeout } from '@/shared/hooks/use-hold-timeout'
 import { BottomBar } from './BottomBar'
 
 // Laut UX_KONZEPT §7: Erfolg zeigt fünf Sekunden lang „Rückgängig“.
@@ -19,21 +19,19 @@ type UndoBarProps = Readonly<{
 
 // Erscheint die Zeile, bleibt der Fokus, wo er ist; angesagt wird sie im immer vorhandenen
 // NoticeAnnouncer des Aufrufers (#274). Verschwindet sie mit dem Fokus, führt useFocusRescue zur
-// Stelle der letzten Handlung zurück (data-focus-return an der BottomBar, #269).
+// Stelle der letzten Handlung zurück (data-focus-return an der BottomBar, #269). Solange Maus
+// oder sichtbarer Fokus in der Zeile sind, steht die Zeit; danach beginnen die fünf Sekunden neu
+// (useHoldTimeout, #272).
 export function UndoBar({ message, onUndo, onDismiss, secondary }: UndoBarProps) {
-  // Eine neu erzeugte onDismiss-Funktion je Render startet die fünf Sekunden nicht neu, eine neue Meldung schon.
-  const dismiss = useEffectEvent(onDismiss)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      dismiss()
-    }, UNDO_WINDOW_MS)
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [message])
+  // Eine neue Meldung startet die fünf Sekunden neu, eine neu erzeugte onDismiss-Funktion nicht.
+  const hold = useHoldTimeout<HTMLDivElement>({
+    ms: UNDO_WINDOW_MS,
+    onExpire: onDismiss,
+    restartKey: message,
+  })
 
   return (
-    <BottomBar message={message}>
+    <BottomBar message={message} hold={hold}>
       {secondary ? (
         <button type="button" onClick={secondary.onClick} className="min-h-11 px-2 font-semibold">
           {secondary.label}

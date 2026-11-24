@@ -20,6 +20,8 @@ type PhotoCaptureFlowProps = Readonly<{
   recognitionOff: string | null
   /** „Noch eins“ und „Verwerfen“: frischer Stand */
   onRestart: () => void
+  /** Der frische Stand lädt noch (useFreshRestart) */
+  isRestarting: boolean
   /** Titel und Umschalter, ab „breit“ rechts neben der Kamera */
   header: ReactNode
 }>
@@ -88,6 +90,7 @@ export function PhotoCaptureFlow(props: PhotoCaptureFlowProps) {
           saved={saving.saved}
           productName={view.productName}
           isFirst={options.isStockEmpty}
+          isReloading={props.isRestarting}
           onAnother={onRestart}
         />
       )}
