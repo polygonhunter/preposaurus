@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
 
 // `page.goto` wartet auf `load`, React übernimmt die Seite oft erst danach. Ein Tastendruck davor
 // verpufft, weil der Listener der Tastenkürzel noch fehlt. In der CI scheiterte daran der Test
@@ -25,4 +25,27 @@ export async function pressUntil(
     await page.keyboard.press(key)
     await expectation(ATTEMPT_TIMEOUT_MS)
   }).toPass()
+}
+
+/**
+ * Klickt einen Absende-Knopf, bis der Browser die Server Action abschickt (POST), höchstens so oft,
+ * bis ein POST unterwegs ist. In WebKit verpuffte der zweite Klick auf „Anlegen“ nach einer
+ * Fehlermeldung gelegentlich ohne Anfrage (#263). Ein zweiter POST entsteht nie: Sobald einer
+ * abging, klickt der Helfer nicht mehr, auch wenn der Knopf danach verschwindet.
+ */
+export async function clickUntilPosted(page: Page, button: Locator): Promise<void> {
+  let posts = 0
+  const countPost = (request: { method: () => string }) => {
+    if (request.method() === 'POST') posts += 1
+  }
+  page.on('request', countPost)
+  try {
+    await expect(async () => {
+      if (posts > 0) return
+      await button.click({ timeout: ATTEMPT_TIMEOUT_MS })
+      await expect.poll(() => posts, { timeout: ATTEMPT_TIMEOUT_MS }).toBeGreaterThan(0)
+    }).toPass()
+  } finally {
+    page.off('request', countPost)
+  }
 }
