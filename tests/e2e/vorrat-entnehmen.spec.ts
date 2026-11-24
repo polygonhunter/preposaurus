@@ -1,4 +1,4 @@
-import type { Locator } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
 import { expectNotice, noticeBar } from '../helpers/notice-bar'
 import { expectAccessibleLayout } from '../helpers/page-checks'
@@ -69,25 +69,51 @@ test('„−1“ in der Zeile nimmt eine Packung, Rückgängig holt sie zurück'
   await expect(takeOne).toBeFocused()
 })
 
+const FIFO_LIST = 'data-e2e-fifo-list'
+
+// Die Datumszeile, aus der „1 entnehmen“ nimmt („23.01.2027 bald · als Nächstes dran 1×“), in
+// der Liste ihres Produkts. Nicht die Summe der Art: Andere Tests erfassen parallel Nudeln, die
+// Summe ändert sich dann mitten im Test (#272). Die Liste wird markiert: React behält das Element
+// (Schlüssel je Produkt) auch dann, wenn beim Neuladen ein neues Produkt davor erscheint.
+async function fifoDateRow(page: Page, date: string): Promise<Locator> {
+  const fifoRow = page.getByRole('button', { name: /als Nächstes dran/ })
+  await page
+    .getByRole('list')
+    .filter({ has: fifoRow })
+    .evaluate((list, attribute) => {
+      list.setAttribute(attribute, '')
+    }, FIFO_LIST)
+  return page
+    .locator(`ul[${FIFO_LIST}]`)
+    .getByRole('button', { name: new RegExp(`^${RegExp.escape(date)}\\s`) })
+}
+
+// allInnerTexts wartet nicht: Verschwindet die Zeile zwischen Zählen und Lesen, hinge innerText
+async function unitsOn(row: Locator): Promise<number> {
+  const [text] = await row.allInnerTexts()
+  return text === undefined ? 0 : Number(/(\d+)×/.exec(text)?.[1])
+}
+
 test('„1 entnehmen“ im Detail nimmt das früheste MHD', async ({ page }, info) => {
   const { detail } = picksFor(info.project.name)
   await page.goto(`/vorrat/${detail.groupKey}`)
   await page.getByRole('link', { name: rowName(detail.name) }).click()
   await expect(page.getByRole('heading', { level: 1, name: detail.name })).toBeVisible()
-  const packages = page.locator('dd').first()
-  const before = Number(await packages.innerText())
   const take = page.getByRole('button', { name: /^1 entnehmen · / })
   const date = (await take.innerText()).replace('1 entnehmen · ', '')
+  const row = await fifoDateRow(page, date)
+  const before = await unitsOn(row)
 
   await take.click()
 
   const bar = noticeBar(page, `${detail.name}: 1 Packung verbraucht (${date})`)
   await expectNotice(page, `${detail.name}: 1 Packung verbraucht (${date})`)
-  await expect(packages).toHaveText(String(before - 1))
+  await expect.poll(() => unitsOn(row)).toBe(before - 1)
 
   await bar.getByRole('button', { name: 'Rückgängig' }).click()
 
-  await expect(packages).toHaveText(String(before))
+  await expect(bar).toHaveCount(0)
+  await expect.poll(() => unitsOn(row)).toBe(before)
 })
 
 test('„Verbraucht“ auf Bald fällig, mit Hinweis zum MHD', async ({ page }, info) => {

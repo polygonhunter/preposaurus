@@ -1,5 +1,4 @@
 'use client'
-import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { cx } from '@/shared/lib/class-names'
@@ -12,6 +11,7 @@ import { CaptureSaved } from './CaptureSaved'
 import { NUTRITION_FIELDS, type CaptureErrors, type CaptureField } from './manual-capture-draft'
 import { deriveView } from './manual-capture-view'
 import { ManualCaptureFields } from './ManualCaptureFields'
+import { useFreshRestart } from './use-fresh-restart'
 import { useManualCapture } from './use-manual-capture'
 
 type ManualCaptureProps = Readonly<{
@@ -51,7 +51,6 @@ const firstMessage = (errors: CaptureErrors) => Object.values(errors).find(Boole
 // Manuelles Erfassen (#52, #53, #54): ein Formular, danach Bestätigung mit „Noch eins“. Vorbelegt
 // (#195) steht der Fokus gleich beim Inhalt, mit vorgewähltem Produkt beim MHD.
 export function ManualCapture({ options, prefill }: ManualCaptureProps) {
-  const router = useRouter()
   const formRef = useRef<HTMLFormElement>(null)
   const [isNutritionOpen, setNutritionOpen] = useState(false)
 
@@ -69,6 +68,10 @@ export function ManualCapture({ options, prefill }: ManualCaptureProps) {
 
   const capture = useManualCapture({ ...options, prefill }, focusField)
   const view = deriveView(options, capture.draft)
+  const another = useFreshRestart(() => {
+    capture.restart()
+    setNutritionOpen(false)
+  })
 
   const prefilledField = prefill === null ? null : firstPrefilledField(prefill)
   useEffect(() => {
@@ -84,12 +87,8 @@ export function ManualCapture({ options, prefill }: ManualCaptureProps) {
         saved={capture.saved}
         productName={view.productName}
         isFirst={options.isStockEmpty}
-        onAnother={() => {
-          capture.restart()
-          setNutritionOpen(false)
-          // Vorbelegung und „Zuletzt genutzt“ neu vom Server holen
-          router.refresh()
-        }}
+        isReloading={another.isReloading}
+        onAnother={another.restart}
       />
     )
   }

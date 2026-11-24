@@ -7,6 +7,7 @@
 import type { Page, Route } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
 import sharp from 'sharp'
+import { attemptOf } from '../helpers/attempt'
 import { expectAccessibleLayout, expectNothingOnVerticalFold } from '../helpers/page-checks'
 
 test.describe.configure({ mode: 'serial' })
@@ -79,6 +80,22 @@ async function fakeRecognition(page: Page) {
     const body = SUGGESTIONS[Math.min(call, SUGGESTIONS.length - 1)]
     call += 1
     await route.fulfill({ json: body })
+  })
+}
+
+/**
+ * Wartet, bis der Entwurf mit diesem Stand gesichert ist (Server Action, usePhotoDraftSync). Vor
+ * der Änderung aufrufen. Eine feste Wartezeit reichte unter Last nicht: Das Neuladen brach die
+ * Sicherung ab, der fortgesetzte Entwurf war leer (#272).
+ */
+function draftSaved(page: Page, ...parts: readonly string[]) {
+  return page.waitForResponse((response) => {
+    const body = response.request().postData() ?? ''
+    return (
+      response.request().method() === 'POST' &&
+      response.request().headers()['next-action'] !== undefined &&
+      parts.every((part) => body.includes(part))
+    )
   })
 }
 
@@ -199,11 +216,12 @@ test('Foto-Fluss: Erkennung füllt Vorschläge, offenes MHD wird entschieden, Sp
   await page.getByRole('button', { name: 'Datum fehlt' }).first().press('Enter')
   await expect(page.getByText('Noch zu klären')).toHaveCount(0)
   await expect(page.getByRole('heading', { name: 'MHD und Anzahl' })).toBeFocused()
+  const saved = draftSaved(page, '"datum":"2027-09-30","genauigkeit":"tag","art":"mhd","anzahl":6')
   await page.getByRole('button', { name: '6 Packungen mit 30.09.2027' }).click()
   await expect(page.getByText('7 × Nudeln 487 g')).toBeVisible()
 
   // Entwurf fortsetzen nach Neuladen
-  await page.waitForTimeout(1500)
+  await saved
   await page.reload()
   await expect(page.getByLabel('Inhalt je Packung')).toHaveValue('487 g')
   await expect(page.getByText('7 × Nudeln 487 g')).toBeVisible()
@@ -213,7 +231,7 @@ test('Foto-Fluss: Erkennung füllt Vorschläge, offenes MHD wird entschieden, Sp
   await expect(page.getByRole('dialog', { name: 'Erfassung fortsetzen?' })).toBeVisible()
   await expectAccessibleLayout(page)
   await screenshot(page, 'fortsetzen-375')
-  await page.getByRole('button', { name: 'Fortsetzen' }).click()
+  await page.getByRole('link', { name: 'Fortsetzen' }).click()
   await expect(page).toHaveURL(/\/neu\/foto$/)
 
   await page.getByRole('button', { name: 'Speichern' }).click()
@@ -227,7 +245,10 @@ test('Foto-Fluss: Erkennung füllt Vorschläge, offenes MHD wird entschieden, Sp
 
 test('Erkennung aus: freundlicher Übergang zur Eingabe von Hand, Schätzung nicht möglich', async ({
   page,
-}) => {
+}, testInfo) => {
+  // Eigener Inhalt je Versuch: Sonst erkennt ein Retry die Nudeln des ersten Versuchs wieder, wählt
+  // sie vor, und „Von der KI schätzen lassen“ fehlt (#272)
+  const grams = 488 + 20 * attemptOf(testInfo)
   await startFresh(page)
   // Der Hinweis steht gleich zu Beginn in der Kamera, nicht erst nach drei Fotos (#210)
   await expect(page.getByRole('status').filter({ hasText: 'Es wird nichts geraten' })).toBeVisible()
@@ -240,10 +261,11 @@ test('Erkennung aus: freundlicher Übergang zur Eingabe von Hand, Schätzung nic
   await expect(page.getByText(/Die Foto-Erkennung ist ausgeschaltet/)).toBeVisible()
   await page.getByRole('searchbox', { name: 'Lebensmittelart suchen' }).fill('nudel')
   await page.getByRole('button', { name: /^Nudeln\s*Getreide/ }).click()
-  await page.getByLabel('Inhalt je Packung').fill('488 g')
+  await page.getByLabel('Inhalt je Packung').fill(`${String(grams)} g`)
   await page.getByRole('button', { name: 'Keine Nährwerttabelle' }).click()
   await page.getByRole('button', { name: 'Von der KI schätzen lassen' }).click()
   await expect(page.getByRole('status').filter({ hasText: /ausgeschaltet/ })).not.toHaveCount(0)
+  const saved = draftSaved(page, `"inhaltWert":${String(grams)}`, '"ohneDatum":true')
   await page.getByRole('button', { name: 'Datum fehlt', exact: true }).click()
   // Erst prüfen, wenn der Knopf nicht mehr „Schätzt …“ zeigt (halbtransparent während des Ladens)
   await expect(page.getByRole('button', { name: 'Von der KI schätzen lassen' })).toBeEnabled()
@@ -252,9 +274,9 @@ test('Erkennung aus: freundlicher Übergang zur Eingabe von Hand, Schätzung nic
   await screenshot(page, 'ki-aus-1280')
 
   // Nach dem Fortsetzen derselbe Satz, kein „Vorschlag der Erkennung“ für Getipptes (#210)
-  await page.waitForTimeout(1500)
+  await saved
   await page.reload()
-  await expect(page.getByLabel('Inhalt je Packung')).toHaveValue('488 g')
+  await expect(page.getByLabel('Inhalt je Packung')).toHaveValue(`${String(grams)} g`)
   await expect(page.getByText(/Die Foto-Erkennung ist ausgeschaltet/)).toBeVisible()
   await expect(page.getByText('Vorschlag der Erkennung. Bitte prüfen.')).toHaveCount(0)
 
