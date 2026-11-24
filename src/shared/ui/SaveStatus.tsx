@@ -1,4 +1,4 @@
-type SaveState = Readonly<{ status: 'idle' | 'saved' | 'error'; message: string | null }>
+export type SaveState = Readonly<{ status: 'idle' | 'saved' | 'error'; message: string | null }>
 
 type SaveStatusProps = Readonly<{ state: SaveState }>
 

@@ -1,12 +1,10 @@
 'use client'
 import { useActionState } from 'react'
 import { ActionForm } from '@/shared/ui/ActionForm'
-import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
 import { GroupFooter } from '@/shared/ui/GroupFooter'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { RadioChips } from '@/shared/ui/RadioChips'
-import { SaveStatus } from '@/shared/ui/SaveStatus'
 import { Toggle } from '@/shared/ui/Toggle'
 import { REMINDER_FORM_IDLE, type ReminderFormValues } from '../actions/reminder-form-state'
 import { saveReminderSettingsAction } from '../actions/save-reminder-settings-action'
@@ -40,6 +38,7 @@ export function ReminderSettingsForm({ settings }: ReminderSettingsFormProps) {
       result={state}
       announcement={errors.time ?? errors.weekday}
       action={formAction}
+      submit={{ label: 'Speichern', isPending, status: state, isInset: true }}
       aria-label="Erinnerungen"
       className="flex flex-col"
     >
@@ -80,12 +79,6 @@ export function ReminderSettingsForm({ settings }: ReminderSettingsFormProps) {
         />
       </div>
       <GroupFooter>{URGENT_EXPLANATION}</GroupFooter>
-      <div className="mx-4 flex items-center justify-between gap-3 pt-4 breit:mx-6">
-        <SaveStatus state={state} />
-        <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Speichert …' : undefined}>
-          Speichern
-        </Button>
-      </div>
     </ActionForm>
   )
 }

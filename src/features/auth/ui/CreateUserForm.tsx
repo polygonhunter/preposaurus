@@ -2,7 +2,6 @@
 import { useActionState, useState } from 'react'
 import { USERS_PATH } from '@/shared/config/settings-paths'
 import { ActionForm } from '@/shared/ui/ActionForm'
-import { Button } from '@/shared/ui/Button'
 import { ButtonLink } from '@/shared/ui/ButtonLink'
 import { Field } from '@/shared/ui/Field'
 import { PasswordField } from '@/shared/ui/PasswordField'
@@ -49,6 +48,7 @@ export function CreateUserForm({ members }: CreateUserFormProps) {
       result={state}
       announcement={firstError(state)}
       action={formAction}
+      submit={{ label: 'Anlegen', isPending, pendingLabel: 'Legt an …' }}
       className="mx-4 flex flex-col gap-4 pt-6 breit:mx-6"
     >
       <Field
@@ -91,9 +91,6 @@ export function CreateUserForm({ members }: CreateUserFormProps) {
         error={errors.password}
       />
       {state.message ? <p className="px-4 text-footnote text-red">{state.message}</p> : null}
-      <Button type="submit" pendingLabel={isPending ? 'Legt an …' : undefined}>
-        Anlegen
-      </Button>
     </ActionForm>
   )
 }

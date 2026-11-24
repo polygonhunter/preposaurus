@@ -1,7 +1,6 @@
 'use client'
 import { useActionState } from 'react'
-import { Button } from '@/shared/ui/Button'
-import { SaveStatus } from '@/shared/ui/SaveStatus'
+import { ActionForm } from '@/shared/ui/ActionForm'
 import { Segmented } from '@/shared/ui/Segmented'
 import { PROFILE_ACTION_IDLE } from '../actions/profile-action-state'
 import { saveCheckInAction } from '../actions/save-check-in-action'
@@ -19,7 +18,13 @@ type CheckInFormProps = Readonly<{ cadence: string | null }>
 export function CheckInForm({ cadence }: CheckInFormProps) {
   const [state, formAction, isPending] = useActionState(saveCheckInAction, PROFILE_ACTION_IDLE)
   return (
-    <form action={formAction} className="mx-4 flex flex-col gap-3 breit:mx-6">
+    <ActionForm
+      action={formAction}
+      result={state}
+      announcement={null}
+      submit={{ label: 'Speichern', isPending, status: state }}
+      className="mx-4 flex flex-col gap-3 breit:mx-6"
+    >
       <Segmented
         legend="Check-in-Mail"
         name="checkin"
@@ -27,12 +32,6 @@ export function CheckInForm({ cadence }: CheckInFormProps) {
         defaultValue={cadence ?? 'aus'}
         isLegendVisible
       />
-      <div className="flex items-center justify-between gap-3">
-        <SaveStatus state={state} />
-        <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Speichert …' : undefined}>
-          Speichern
-        </Button>
-      </div>
-    </form>
+    </ActionForm>
   )
 }

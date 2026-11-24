@@ -1,9 +1,7 @@
 'use client'
 import { useActionState } from 'react'
 import { ActionForm } from '@/shared/ui/ActionForm'
-import { Button } from '@/shared/ui/Button'
 import { Field } from '@/shared/ui/Field'
-import { SaveStatus } from '@/shared/ui/SaveStatus'
 import { PROFILE_ACTION_IDLE } from '../actions/profile-action-state'
 import { saveProfileAction } from '../actions/save-profile-action'
 
@@ -17,6 +15,7 @@ export function ProfileForm({ displayName, reminderEmail }: ProfileFormProps) {
       result={state}
       announcement={state.errors?.displayName ?? state.errors?.reminderEmail}
       action={formAction}
+      submit={{ label: 'Speichern', isPending, status: state }}
       className="mx-4 flex flex-col gap-4 breit:mx-6"
     >
       <Field
@@ -37,12 +36,6 @@ export function ProfileForm({ displayName, reminderEmail }: ProfileFormProps) {
         autoComplete="email"
         inputMode="email"
       />
-      <div className="flex items-center justify-between gap-3">
-        <SaveStatus state={state} />
-        <Button type="submit" variant="tinted" pendingLabel={isPending ? 'Speichert …' : undefined}>
-          Speichern
-        </Button>
-      </div>
     </ActionForm>
   )
 }

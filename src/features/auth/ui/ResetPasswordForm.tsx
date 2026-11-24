@@ -1,6 +1,6 @@
 'use client'
 import { useActionState } from 'react'
-import { Button } from '@/shared/ui/Button'
+import { ActionForm } from '@/shared/ui/ActionForm'
 import { PasswordField } from '@/shared/ui/PasswordField'
 import {
   resetUserPasswordAction,
@@ -17,7 +17,13 @@ export function ResetPasswordForm({ userId }: ResetPasswordFormProps) {
   const [state, formAction, isPending] = useActionState(resetUserPasswordAction, INITIAL)
   if (state.revealed !== null) return <PasswordReveal {...state.revealed} />
   return (
-    <form action={formAction} className="mx-4 flex flex-col gap-3 breit:mx-6">
+    <ActionForm
+      action={formAction}
+      result={state}
+      announcement={state.passwordError}
+      submit={{ label: 'Passwort zurücksetzen', isPending, pendingLabel: 'Setzt zurück …' }}
+      className="mx-4 flex flex-col gap-3 breit:mx-6"
+    >
       <input type="hidden" name="id" value={userId} />
       <PasswordField
         label="Neues Passwort (freiwillig)"
@@ -31,15 +37,6 @@ export function ResetPasswordForm({ userId }: ResetPasswordFormProps) {
           {state.message}
         </p>
       ) : null}
-      <div className="flex justify-end">
-        <Button
-          type="submit"
-          variant="tinted"
-          pendingLabel={isPending ? 'Setzt zurück …' : undefined}
-        >
-          Passwort zurücksetzen
-        </Button>
-      </div>
-    </form>
+    </ActionForm>
   )
 }

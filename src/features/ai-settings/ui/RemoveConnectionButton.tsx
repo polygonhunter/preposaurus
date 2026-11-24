@@ -1,6 +1,7 @@
 'use client'
 import { useActionState, useState } from 'react'
 import { Button } from '@/shared/ui/Button'
+import { FormSubmit } from '@/shared/ui/FormSubmit'
 import { Sheet } from '@/shared/ui/Sheet'
 import { AI_ACTION_IDLE } from '../actions/ai-action-state'
 import { removeAiConnectionAction } from '../actions/remove-ai-connection-action'
@@ -36,12 +37,16 @@ export function RemoveConnectionButton({ connectionId, name }: RemoveConnectionB
               {state.message}
             </p>
           ) : null}
-          <Button type="submit" pendingLabel={isPending ? 'Entfernt …' : undefined}>
-            Entfernen
-          </Button>
-          <Button variant="plain" onClick={close}>
-            Abbrechen
-          </Button>
+          <FormSubmit
+            label="Entfernen"
+            isPending={isPending}
+            pendingLabel="Entfernt …"
+            after={
+              <Button variant="plain" onClick={close}>
+                Abbrechen
+              </Button>
+            }
+          />
         </form>
       </Sheet>
     </>

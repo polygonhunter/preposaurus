@@ -1,6 +1,7 @@
 'use client'
 import { useActionState, useState } from 'react'
 import { Button } from '@/shared/ui/Button'
+import { FormSubmit } from '@/shared/ui/FormSubmit'
 import { Sheet } from '@/shared/ui/Sheet'
 import { SETTING_IDLE } from '../actions/action-messages'
 import { removeMemberAction } from '../actions/remove-member-action'
@@ -38,17 +39,21 @@ export function RemoveMemberButton({ memberId, name }: RemoveMemberButtonProps) 
               {state.message}
             </p>
           ) : null}
-          <Button type="submit" pendingLabel={isPending ? 'Entfernt …' : undefined}>
-            Entfernen
-          </Button>
-          <Button
-            variant="plain"
-            onClick={() => {
-              setIsOpen(false)
-            }}
-          >
-            Abbrechen
-          </Button>
+          <FormSubmit
+            label="Entfernen"
+            isPending={isPending}
+            pendingLabel="Entfernt …"
+            after={
+              <Button
+                variant="plain"
+                onClick={() => {
+                  setIsOpen(false)
+                }}
+              >
+                Abbrechen
+              </Button>
+            }
+          />
         </form>
       </Sheet>
     </div>
