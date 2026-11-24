@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, type ReactNode } from 'react'
 import { Chip } from '@/shared/ui/Chip'
 import { ChipRow } from '@/shared/ui/ChipRow'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
@@ -11,11 +11,14 @@ type ChoiceChipsProps = Readonly<{
   onChange: (id: string | null) => void
   /** Steht da, wenn es nichts zu wählen gibt */
   emptyText: string
+  /** Unter der Reihe, z. B. „+ Neuer Lagerort“ (#301) */
+  children?: ReactNode
 }>
 
 // Einfachauswahl als Chip-Reihe statt Dropdown (DESIGN_SYSTEM §7). Ein zweites Tippen auf den
 // gewählten Chip hebt die Wahl wieder auf, denn Behälter und Lagerort sind freiwillig.
-export function ChoiceChips({ label, choices, selectedId, onChange, emptyText }: ChoiceChipsProps) {
+export function ChoiceChips(props: ChoiceChipsProps) {
+  const { label, choices, selectedId, onChange, emptyText, children } = props
   const headerId = useId()
   return (
     <section aria-labelledby={headerId}>
@@ -42,6 +45,7 @@ export function ChoiceChips({ label, choices, selectedId, onChange, emptyText }:
           })}
         </ChipRow>
       )}
+      {children}
     </section>
   )
 }

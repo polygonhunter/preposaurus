@@ -21,7 +21,7 @@ const afterSetup = ['beispielvorrat']
 // meiden die Frage „Fortsetzen oder verwerfen?“, indem sie /neu/manuell direkt öffnen. Der
 // Haushaltsschalter der Erkennung läuft im selben Projekt mit einem Worker, damit er die
 // Foto-Erfassung (Erkennung aus) nie mittendrin anschaltet (Review #297).
-const PHOTO_SPEC = /(erfassen-foto|foto-erkennung-schalter)\.spec\.ts$/
+const PHOTO_SPEC = /(erfassen-foto|erfassen-foto-lagerort|foto-erkennung-schalter)\.spec\.ts$/
 
 // Jeder Lauf beginnt mit einer leeren, migrierten Datenbank mit Stammdaten (wie im Container), damit
 // die Ersteinrichtung testbar ist.

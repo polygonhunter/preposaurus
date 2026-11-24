@@ -1,6 +1,5 @@
-import type { CaptureOptions } from '../domain/capture-options'
+import type { CaptureOptions, NamedChoice } from '../domain/capture-options'
 import { CaptureSummaryGroup } from './CaptureSummaryGroup'
-import { ChoiceChips } from './ChoiceChips'
 import type { CaptureErrors } from './manual-capture-draft'
 import type { ManualCaptureView } from './manual-capture-view'
 import type { PhotoCaptureState } from './photo-capture-state'
@@ -9,6 +8,7 @@ import { PhotoNutritionSection } from './PhotoNutritionSection'
 import { PhotoPackagingSection } from './PhotoPackagingSection'
 import { PhotoStrip } from './PhotoStrip'
 import { ProductMatchOffer } from './ProductMatchOffer'
+import { StorageLocationChoice } from './StorageLocationChoice'
 import type { PhotoEditor } from './use-photo-capture'
 import type { usePhotoEstimate } from './use-photo-estimate'
 import type { ProductMatch } from './use-product-matches'
@@ -21,6 +21,7 @@ type PhotoReviewProps = Readonly<{
   errors: CaptureErrors
   matches: readonly ProductMatch[]
   estimates: ReturnType<typeof usePhotoEstimate>
+  onStorageLocationAdded: (location: NamedChoice) => void
 }>
 
 // Schritt Prüfen (UX §8.5 Schritt 4): alle Vorschläge auf einer Seite, jedes Feld änderbar, dazu
@@ -39,14 +40,13 @@ export function PhotoReview(props: PhotoReviewProps) {
       />
       {isRestock ? null : (
         <>
-          <ChoiceChips
-            label="Lagerort"
-            choices={options.storageLocations}
+          <StorageLocationChoice
+            locations={options.storageLocations}
             selectedId={state.storageLocationId}
             onChange={(storageLocationId) => {
               editor.edit({ storageLocationId })
             }}
-            emptyText="Noch keine Lagerorte angelegt. Ohne Lagerort geht es auch."
+            onAdded={props.onStorageLocationAdded}
           />
           <PhotoNutritionSection
             {...{ state, view, editor, errors }}
