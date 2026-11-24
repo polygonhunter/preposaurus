@@ -103,7 +103,11 @@ function watchFocus(container: HTMLElement): FocusWatch {
   }
 }
 
-/** Ref für den Bereich mit Zeilen und Leisten, meist der Provider einer Seite. */
+/**
+ * Ref für den Bereich mit Zeilen und Leisten, meist der Provider einer Seite. Ist er das erste
+ * Element einer Seite, braucht er eine eigene Box: Mit `display: contents` hat er keine
+ * ClientRects, und Next.js rollt nach einem Seitenwechsel nicht mehr nach oben.
+ */
 export function useFocusRescue<T extends HTMLElement>(isPending: boolean) {
   const containerRef = useRef<T>(null)
   const watchRef = useRef<FocusWatch | null>(null)

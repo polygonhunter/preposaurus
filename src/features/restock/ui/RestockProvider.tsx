@@ -11,7 +11,7 @@ type RestockProviderProps = Readonly<{ children: ReactNode }>
 // Stellt den Zeilen Abhaken, Entfernen, „Auf die Liste“ und die Knöpfe der Lücken bereit und zeigt
 // die eine Meldung unten (Rückgängig-Zeile oder Fehler). Nach jeder Änderung lädt die Liste neu
 // (refresh in der Action). Verschwindet dabei der fokussierte Knopf, führt useFocusRescue den
-// Fokus weiter (#269); der Bereich ist dafür ein eigenes Element ohne eigene Box.
+// Fokus weiter (#269); der Bereich ist dafür ein eigenes Element.
 export function RestockProvider({ children }: RestockProviderProps) {
   const { notice, dismiss, actions, isPending, isLocked } = useRestockActions()
   const focusRef = useFocusRescue<HTMLDivElement>(isPending)
@@ -20,7 +20,7 @@ export function RestockProvider({ children }: RestockProviderProps) {
     <RestockContext
       value={{ setDone, remove, addSuggestion, setGapStatus, showGap: unlist, isLocked }}
     >
-      <div ref={focusRef} className="contents">
+      <div ref={focusRef}>
         {children}
         {notice === null ? null : (
           <RestockNoticeBar notice={notice} actions={actions} onDismiss={dismiss} />

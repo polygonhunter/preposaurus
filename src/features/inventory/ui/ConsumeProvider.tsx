@@ -100,7 +100,7 @@ export function ConsumeProvider({ children }: ConsumeProviderProps) {
 
   return (
     <ConsumeContext value={value}>
-      <div ref={focusRef} className="contents">
+      <div ref={focusRef}>
         {children}
         {notice === null || notice.kind === 'error' ? null : (
           <UndoBar
