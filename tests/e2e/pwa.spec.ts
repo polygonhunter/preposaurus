@@ -1,10 +1,16 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
+import {
+  expectAnnouncedInExistingRegion,
+  expectNotice,
+  markLiveRegions,
+} from '../helpers/notice-bar'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Installierbar und letzter Stand ohne Verbindung (M10, #81 bis #83). Der Service Worker läuft nur
 // im Produktionsbuild (CI: Standalone-Server). Lokal gegen den Dev-Server laufen nur Manifest,
 // Offline-Hinweis und Sperre; lokal mit Service Worker: CI=1 E2E_PORT=3111 npx playwright test pwa
+const BLOCKED = 'Ohne Verbindung geht das gerade nicht'
 const offlineNotice = (page: Page) =>
   page.getByRole('status').filter({ hasText: 'Ohne Verbindung' })
 
@@ -63,10 +69,10 @@ test.describe('Ohne Verbindung', () => {
     await expectAccessibleLayout(page)
 
     await page.getByRole('searchbox').fill('Linsen')
+    await markLiveRegions(page)
     await page.getByRole('searchbox').press('Enter')
-    await expect(
-      page.getByRole('alert').filter({ hasText: 'Ohne Verbindung geht das gerade nicht' }),
-    ).toBeVisible()
+    await expectNotice(page, BLOCKED, 'alert')
+    await expectAnnouncedInExistingRegion(page, BLOCKED, 'alert')
     await expect(page).toHaveURL(/suche=Haferflocken/)
 
     await context.setOffline(false)
@@ -89,10 +95,10 @@ test.describe('Ohne Verbindung', () => {
     await expect(offlineNotice(page)).toContainText('Ohne Verbindung – Stand von')
     await expect(takeOne).toBeDisabled()
     // Gesperrt heißt nicht stumm: Ein Tipp sagt, warum es gerade nicht geht (#216)
+    await markLiveRegions(page)
     await takeOne.click({ force: true })
-    await expect(
-      page.getByRole('alert').filter({ hasText: 'Ohne Verbindung geht das gerade nicht' }),
-    ).toBeVisible()
+    await expectNotice(page, BLOCKED, 'alert')
+    await expectAnnouncedInExistingRegion(page, BLOCKED, 'alert')
     await expectAccessibleLayout(page)
 
     await context.setOffline(false)

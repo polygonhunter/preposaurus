@@ -4,8 +4,15 @@ import { useState } from 'react'
 import { Button } from '@/shared/ui/Button'
 import { EmptyState } from '@/shared/ui/EmptyState'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
+import { NoticeAnnouncer, type BarAnnouncement } from '@/shared/ui/NoticeAnnouncer'
 import { Sheet } from '@/shared/ui/Sheet'
 import { UndoBar } from '@/shared/ui/UndoBar'
+
+const DEMO_NOTICE: BarAnnouncement = {
+  key: 'demo',
+  message: '1 Haferflocken entnommen',
+  isError: false,
+}
 
 export function OverlayDemo() {
   const [isSheetOpen, setSheetOpen] = useState(false)
@@ -53,9 +60,10 @@ export function OverlayDemo() {
       >
         MHD ist kein Wegwerfdatum: anschauen, riechen, probieren.
       </Sheet>
+      <NoticeAnnouncer announcement={isUndoVisible ? DEMO_NOTICE : null} />
       {isUndoVisible ? (
         <UndoBar
-          message="1 Haferflocken entnommen"
+          message={DEMO_NOTICE.message}
           onUndo={hideUndo}
           onDismiss={hideUndo}
           secondary={{ label: 'Auf Einkaufsliste', onClick: hideUndo }}

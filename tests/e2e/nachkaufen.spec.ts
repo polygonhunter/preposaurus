@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 import { E2E_MEMBER, signedOut, signInViaUi } from '../helpers/e2e-auth'
 import { expect, test } from '../helpers/e2e-test'
 import { neighbourCheckboxName } from '../helpers/focus-rows'
+import { expectNotice, noticeBar } from '../helpers/notice-bar'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
 // Nachkaufen (#72 bis #74, #200 bis #202). Der Beispielhaushalt hat ein Ziel mit Datum, also Lücken
@@ -16,10 +17,8 @@ function onlyDesktop(projectName: string) {
 
 const list = (page: Page, name: string) => page.getByRole('list', { name })
 
-const undoBar = (page: Page, text: string) => page.getByRole('status').filter({ hasText: text })
-
 const undoButton = (page: Page, text: string) =>
-  undoBar(page, text).getByRole('button', { name: 'Rückgängig' })
+  noticeBar(page, text).getByRole('button', { name: 'Rückgängig' })
 
 // Der Fokus ist nach einer Handlung per Tastatur noch auf der Seite, nicht auf body (#269)
 const focusIn = (page: Page, name: string) => list(page, name).locator(':focus')
@@ -69,16 +68,17 @@ test('ergänzt, hakt ab mit Rückgängig und „Jetzt erfassen“, entfernt', as
   await expect(page.getByLabel('Eintrag ergänzen')).toHaveValue('')
 
   await entry.click()
-  const bar = undoBar(page, 'Knäckebrot abgehakt.')
+  const bar = noticeBar(page, 'Knäckebrot abgehakt.')
   const done = list(page, 'Erledigt').getByRole('checkbox', { name: 'Knäckebrot' })
   await expect(done).toBeChecked()
+  await expectNotice(page, 'Knäckebrot abgehakt.')
   // Die Zeile schließt nach fünf Sekunden: erst „Rückgängig“, axe danach mit offener Zeile, wenn
   // nichts mehr auf sie wartet (sonst kann ein langsamer axe-Lauf sie überdauern)
   await bar.getByRole('button', { name: 'Rückgängig' }).click()
   await expect(entry).not.toBeChecked()
 
   await entry.click()
-  await undoBar(page, 'Knäckebrot abgehakt.')
+  await noticeBar(page, 'Knäckebrot abgehakt.')
     .getByRole('button', { name: 'Jetzt erfassen' })
     .click()
   await expect(page).toHaveURL(/\/neu/, { timeout: 15_000 })
@@ -86,7 +86,7 @@ test('ergänzt, hakt ab mit Rückgängig und „Jetzt erfassen“, entfernt', as
   await page.goto('/nachkaufen')
   await expect(done).toBeChecked()
   await removeEntry(page, 'Knäckebrot')
-  await expect(undoBar(page, 'Knäckebrot entfernt.')).toBeVisible()
+  await expectNotice(page, 'Knäckebrot entfernt.')
   await expectAccessibleLayout(page)
 })
 
@@ -108,11 +108,11 @@ test('setzt nach „−1“ mit einem Tipp auf die Liste, Rückgängig nimmt es 
   await page.goto('/vorrat/milch')
 
   await page.getByRole('button', { name: '1 Packung H-Milch entnehmen' }).click()
-  const bar = undoBar(page, 'H-Milch: 1 Packung verbraucht')
+  const bar = noticeBar(page, 'H-Milch: 1 Packung verbraucht')
   await bar.getByRole('button', { name: 'Nachkaufen' }).click()
 
-  const listed = undoBar(page, 'H-Milch steht jetzt auf der Nachkaufen-Liste.')
-  await expect(listed).toBeVisible()
+  const listed = noticeBar(page, 'H-Milch steht jetzt auf der Nachkaufen-Liste.')
+  await expectNotice(page, 'H-Milch steht jetzt auf der Nachkaufen-Liste.')
   await expect(listed.getByRole('button', { name: 'Nachkaufen' })).toHaveCount(0)
   await listed.getByRole('button', { name: 'Rückgängig' }).click()
   await expect(listed).toHaveCount(0)
@@ -138,7 +138,7 @@ test('setzt einen Vorschlag auf die Liste, Entfernen hat Rückgängig', async ({
   // Per Tastatur: Der Fokus bleibt in der Liste und kehrt mit „Rückgängig“ zurück (#269)
   await suggestion.press('Enter')
   const listed = 'Haferflocken steht jetzt auf der Liste.'
-  await expect(undoBar(page, listed)).toBeVisible()
+  await expectNotice(page, listed)
   await expect(entry).not.toBeChecked()
   await expect(suggestion).toHaveCount(0)
   await expect(focusIn(page, 'Ersetzen')).toHaveCount(1)
@@ -151,7 +151,7 @@ test('setzt einen Vorschlag auf die Liste, Entfernen hat Rückgängig', async ({
   await expect(entry).toBeVisible()
   await remove.press('Enter')
   const removed = 'Haferflocken entfernt.'
-  await expect(undoBar(page, removed)).toBeVisible()
+  await expectNotice(page, removed)
   await expect(entry).toHaveCount(0)
   await expect(focusIn(page, 'Ersetzen')).toHaveCount(1)
 
@@ -224,8 +224,8 @@ test('blendet eine Lücke aus und holt sie zurück, hakt sie ab und öffnet sie 
 
   const beforeHide = await neighbour()
   await hide.press('Enter')
-  const hidden = undoBar(page, `${name} ausgeblendet.`)
-  await expect(hidden).toBeVisible()
+  const hidden = noticeBar(page, `${name} ausgeblendet.`)
+  await expectNotice(page, `${name} ausgeblendet.`)
   await expect(gap).toHaveCount(0)
   await expect(beforeHide).toBeFocused()
   await expect(list(page, 'Ausgeblendet').getByRole('listitem')).toContainText(name)
@@ -251,11 +251,12 @@ test('blendet eine Lücke aus und holt sie zurück, hakt sie ab und öffnet sie 
 
   const beforeCheck = await neighbour()
   await gap.press('Space')
-  const checked = undoBar(page, `${name} abgehakt.`)
+  const checked = noticeBar(page, `${name} abgehakt.`)
   const done = list(page, 'Erledigt').getByRole('checkbox', { name })
   await expect(done).toBeChecked()
   await expect(gap).toHaveCount(0)
   await expect(beforeCheck).toBeFocused()
+  await expectNotice(page, `${name} abgehakt.`)
   await checked.getByRole('button', { name: 'Rückgängig' }).press('Enter')
   await expect(gap).toBeVisible()
   await expect(done).toHaveCount(0)
