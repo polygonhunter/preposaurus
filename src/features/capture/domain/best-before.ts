@@ -131,16 +131,14 @@ export function parseBestBefore(text: string, today: CalendarDay): ParseResult {
   return err({ kind: 'no-date' })
 }
 
-/** Erkennt am Aufdruck, ob ein MHD oder ein Verbrauchsdatum gemeint ist. Unklar ergibt null. */
+/**
+ * Erkennt am Aufdruck, ob ein MHD oder ein Verbrauchsdatum gemeint ist. Unklar ergibt null.
+ * @internal Noch ohne Aufrufer, das manuelle Datumsfeld schließt sie an (#294).
+ */
 export function detectDateKind(text: string): DateKind | null {
   if (USE_BY.test(text)) return 'use-by'
   if (BEST_BEFORE_LABEL.test(text)) return 'best-before'
   return null
-}
-
-/** Monat/Jahr-Wähler: Es gilt das Monatsende, Genauigkeit „Monat“. */
-export function bestBeforeFromMonth(year: number, month: number): ParseResult {
-  return buildMonth(year, month)
 }
 
 const QUICK_PICK_MONTHS = {
@@ -149,9 +147,13 @@ const QUICK_PICK_MONTHS = {
   'plus-2-years': 24,
 } as const
 
+/** @internal Gehört zu `quickPickBestBefore` und wartet mit ihr auf #180. */
 export type QuickPick = keyof typeof QUICK_PICK_MONTHS
 
-/** Schnellknöpfe im Monat/Jahr-Wähler, gerechnet ab heute. Es gilt das Monatsende. */
+/**
+ * Schnellknöpfe „+6 Mon. · +1 J. · +2 J.“ unter dem MHD-Feld (UX §8.5), ab heute, zum Monatsende.
+ * @internal Einzelausnahme: Ob die Schnellknöpfe kommen, entscheidet der Maintainer in #180.
+ */
 export function quickPickBestBefore(today: CalendarDay, pick: QuickPick): BestBefore {
   return withPrecision(addMonths(today, QUICK_PICK_MONTHS[pick]), 'month')
 }

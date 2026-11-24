@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
 import { bundleDueUnits, dueGroupOf, type DueUnit } from './due-bundles'
 import type { BestBeforePrecision, DateKind, UnitStatus } from './unit'
-import { DEFAULT_AMPEL_THRESHOLDS } from './unit-state'
+import { DEFAULT_AMPEL_THRESHOLDS } from '../../../../tests/helpers/ampel-thresholds'
 
 const context = { today: toCalendarDay('2026-11-22'), thresholds: DEFAULT_AMPEL_THRESHOLDS }
 

@@ -1,11 +1,13 @@
 import type { PackageMacros } from '@/features/supply/domain/node-macros'
-import type { NodeUnit, TreePath } from '@/features/supply/domain/node-totals'
+import type { NodeUnit } from '@/features/supply/domain/node-totals'
 import type { ReferenceDay } from '@/features/supply/domain/supply-rules'
 import { toCalendarDay } from '@/shared/lib/dates'
 import type { ContentQuantity } from '@/shared/lib/quantities'
 import { supplyUnit } from './supply-units'
 
 // Gemeinsame Testdaten für die Summen je Baumknoten. Alle Zahlen sind frei gewählte Testwerte.
+
+type TreePath = NodeUnit['path']
 
 export const today: ReferenceDay = { day: toCalendarDay('2026-11-22'), kind: 'today' }
 export const target: ReferenceDay = { day: toCalendarDay('2027-03-31'), kind: 'target' }

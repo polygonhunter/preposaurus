@@ -1,12 +1,13 @@
 // Deutsche Bezeichnungen der Wertelisten eines Mitglieds (02_HAUSHALT_ZIEL §1). Eine Stelle für
 // Formular, Liste und Lesesicht.
-import type {
-  ActivityLevel,
-  Diet,
-  Member,
-  MemberCondition,
-  MemberType,
-  Sex,
+import {
+  effectiveDiet,
+  type ActivityLevel,
+  type Diet,
+  type Member,
+  type MemberCondition,
+  type MemberType,
+  type Sex,
 } from '../domain/member'
 import { birthFromDate } from '../domain/birth'
 
@@ -62,7 +63,7 @@ const DIET_IN_SUMMARY: Record<Diet, string | null> = {
 
 /** Zweitzeile in der Liste: „Erwachsene:r · 1988 · vegan“ */
 export function memberSummary(member: Member, householdDiet: Diet): string {
-  const diet = member.diet ?? householdDiet
-  const parts = [MEMBER_TYPE_LABELS[member.type], formatBirth(member), DIET_IN_SUMMARY[diet]]
+  const diet = DIET_IN_SUMMARY[effectiveDiet(member, householdDiet)]
+  const parts = [MEMBER_TYPE_LABELS[member.type], formatBirth(member), diet]
   return parts.filter((part) => part !== null).join(' · ')
 }

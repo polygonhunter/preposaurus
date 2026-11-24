@@ -5,7 +5,6 @@ import {
   calendarDayFrom,
   dayParts,
   daysBetween,
-  daysInMonth,
   endOfMonth,
   endOfYear,
   formatDayWithPrecision,
@@ -59,16 +58,16 @@ describe('toCalendarDay', () => {
   })
 })
 
-describe('dayParts und daysInMonth', () => {
+describe('dayParts und Monatslänge', () => {
   it('zerlegt einen Tag in Zahlen', () => {
     expect(dayParts(day('2028-02-29'))).toEqual({ year: 2028, month: 2, day: 29 })
   })
 
   it('kennt Schaltjahre', () => {
-    expect(daysInMonth(2028, 2)).toBe(29)
-    expect(daysInMonth(2027, 2)).toBe(28)
-    expect(daysInMonth(2000, 2)).toBe(29)
-    expect(daysInMonth(2100, 2)).toBe(28)
+    expect(endOfMonth(day('2028-02-01'))).toBe('2028-02-29')
+    expect(endOfMonth(day('2027-02-01'))).toBe('2027-02-28')
+    expect(endOfMonth(day('2000-02-01'))).toBe('2000-02-29')
+    expect(endOfMonth(day('2100-02-01'))).toBe('2100-02-28')
   })
 })
 

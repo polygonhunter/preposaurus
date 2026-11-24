@@ -14,7 +14,7 @@ import { daysOrNull, isCountedOn, isFreshOn } from './supply-rules'
 type TreeLevel = 'group' | 'category' | 'foodType' | 'product'
 
 /** Ort einer Einheit im Baum. Die Schlüssel stammen aus den Stammdaten; null heißt „nicht zugeordnet“. */
-export type TreePath = Readonly<Record<TreeLevel, string | null>>
+type TreePath = Readonly<Record<TreeLevel, string | null>>
 
 export interface TreeNode {
   level: TreeLevel

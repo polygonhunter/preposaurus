@@ -22,13 +22,13 @@ interface UnitEntry {
   count: number
 }
 
-export interface NutritionDraft extends NutritionValues {
+interface NutritionDraft extends NutritionValues {
   source: StoredNutritionSource
   /** Nur bei einer KI-Schätzung von Bedeutung: gesondert bestätigt (#115) */
   isConfirmed: boolean
 }
 
-export interface NewProductDraft {
+interface NewProductDraft {
   foodTypeId: string
   /** Leer: Es gilt der Name der Lebensmittelart */
   name: string | null
@@ -105,7 +105,10 @@ function expandUnits(entries: readonly UnitEntry[]): Result<PlannedUnit[], Stock
 export const hasAnyNutritionValue = ({ kcal, protein, carbs, fat }: NutritionValues) =>
   [kcal, protein, carbs, fat].some((value) => value !== null)
 
-/** Bestätigt wird nur eine KI-Schätzung. Tabelle und eigene Eingabe brauchen das nicht. */
+/**
+ * Bestätigt wird nur eine KI-Schätzung. Tabelle und eigene Eingabe brauchen das nicht.
+ * @internal Läuft nur in `planStock`, Tests prüfen die Bestätigung direkt.
+ */
 export function planNutrition(draft: NutritionDraft | null, now: Date): PlannedNutrition | null {
   if (draft === null) return null
   const { source, isConfirmed, ...values } = draft

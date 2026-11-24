@@ -1,11 +1,11 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import type { ContentQuantity } from '@/shared/lib/quantities'
-import { amountPerUnit, kjToKcal, nutritionBase, resolveKcal, toPer100 } from './nutrition'
+import { amountPerUnit, resolveKcal, toPer100 } from './nutrition'
 
-describe('kjToKcal und resolveKcal', () => {
+describe('resolveKcal', () => {
   it('rechnet kJ durch 4,184 in kcal um', () => {
-    expect(kjToKcal(4184)).toBe(1000)
-    expect(kjToKcal(1500)).toBeCloseTo(358.5, 1)
+    expect(resolveKcal({ kcal: null, kj: 4184 })).toBe(1000)
+    expect(resolveKcal({ kcal: null, kj: 1500 })).toBeCloseTo(358.5, 1)
   })
 
   it('nimmt kcal, wenn kcal und kJ dastehen', () => {
@@ -57,17 +57,6 @@ describe('toPer100', () => {
   })
 })
 
-describe('nutritionBase', () => {
-  it('nimmt das Abtropfgewicht vor dem Inhalt', () => {
-    expect(nutritionBase({ value: 400, unit: 'g' }, 240)).toBe(240)
-  })
-
-  it('nimmt den Inhalt, wenn kein Abtropfgewicht da ist', () => {
-    expect(nutritionBase({ value: 400, unit: 'g' }, null)).toBe(400)
-    expect(nutritionBase({ value: 400, unit: 'g' }, 0)).toBe(400)
-  })
-})
-
 describe('amountPerUnit', () => {
   it('rechnet kcal je Packung: 500 g × 359 kcal ÷ 100 = 1.795 kcal', () => {
     expect(
@@ -80,6 +69,12 @@ describe('amountPerUnit', () => {
     expect(amountPerUnit({ content, drainedWeightG: 240, per100: 100 })).toBe(240)
   })
 
+  it('nimmt den Inhalt, wenn das Abtropfgewicht fehlt oder 0 ist', () => {
+    const content = { value: 400, unit: 'g' as const }
+    expect(amountPerUnit({ content, drainedWeightG: null, per100: 100 })).toBe(400)
+    expect(amountPerUnit({ content, drainedWeightG: 0, per100: 100 })).toBe(400)
+  })
+
   it('rechnet Getränke in ml', () => {
     const content = { value: 1500, unit: 'ml' as const }
     expect(amountPerUnit({ content, drainedWeightG: null, per100: 42 })).toBe(630)
@@ -87,6 +82,5 @@ describe('amountPerUnit', () => {
 
   it('nimmt Stück nicht als Inhalt an, Stück ist nur die Anzahl der Packungen', () => {
     expectTypeOf<Parameters<typeof amountPerUnit>[0]['content']>().toEqualTypeOf<ContentQuantity>()
-    expectTypeOf<Parameters<typeof nutritionBase>[0]>().toEqualTypeOf<ContentQuantity>()
   })
 })

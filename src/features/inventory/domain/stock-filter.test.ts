@@ -8,7 +8,7 @@ import {
   type FilterableUnit,
 } from './stock-filter'
 import type { NutritionGap } from './incomplete'
-import { DEFAULT_AMPEL_THRESHOLDS } from './unit-state'
+import { DEFAULT_AMPEL_THRESHOLDS } from '../../../../tests/helpers/ampel-thresholds'
 import type { UnitStatus } from './unit'
 
 const context = { today: toCalendarDay('2026-11-22'), thresholds: DEFAULT_AMPEL_THRESHOLDS }

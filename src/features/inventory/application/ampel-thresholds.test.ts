@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { DEFAULT_AMPEL_THRESHOLDS } from '../../../../tests/helpers/ampel-thresholds'
 import type { AmpelSettingsStore } from '../data/ampel-settings-repository'
 import type { AmpelThresholds } from '../domain/unit-state'
 import { getAmpelThresholds, saveAmpelThresholds } from './ampel-thresholds'
@@ -6,8 +7,7 @@ import { getAmpelThresholds, saveAmpelThresholds } from './ampel-thresholds'
 function fakeStore() {
   const saved = new Map<string, AmpelThresholds>()
   const ampel: AmpelSettingsStore = {
-    read: (householdId) =>
-      Promise.resolve(saved.get(householdId) ?? { soonDays: 90, urgentDays: 28 }),
+    read: (householdId) => Promise.resolve(saved.get(householdId) ?? DEFAULT_AMPEL_THRESHOLDS),
     save: (householdId, thresholds) => {
       saved.set(householdId, thresholds)
       return Promise.resolve()

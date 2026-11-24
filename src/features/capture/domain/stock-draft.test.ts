@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { toCalendarDay } from '@/shared/lib/dates'
-import { planNutrition, planStock, type NewProductDraft, type StockDraft } from './stock-draft'
+import { planNutrition, planStock, type StockDraft } from './stock-draft'
 
 const now = new Date('2026-11-22T10:00:00Z')
 
-const newProduct: NewProductDraft = {
+const newProduct = {
+  kind: 'new',
   foodTypeId: 'art-nudeln',
   name: null,
   content: { value: 500, unit: 'g' },
@@ -12,14 +13,14 @@ const newProduct: NewProductDraft = {
   containerId: null,
   storageLocationId: null,
   nutrition: null,
-}
+} satisfies StockDraft['product']
 
 function draft(overrides: Partial<StockDraft> = {}): StockDraft {
   return {
     captureId: 'erfassung-1',
     method: 'manual',
     draftId: null,
-    product: { kind: 'new', ...newProduct },
+    product: newProduct,
     units: [{ bestBefore: null, kind: 'best-before', count: 1 }],
     ...overrides,
   }
@@ -94,7 +95,7 @@ describe('planStock', () => {
   })
 
   it('übernimmt eine leere oder nur aus Leerzeichen bestehende Bezeichnung als null', () => {
-    const result = planStock(draft({ product: { kind: 'new', ...newProduct, name: '  ' } }), now)
+    const result = planStock(draft({ product: { ...newProduct, name: '  ' } }), now)
 
     expect(result.ok && result.value.product).toMatchObject({ kind: 'new', name: null })
   })

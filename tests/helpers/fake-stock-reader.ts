@@ -10,6 +10,7 @@ import type {
   UnitQuery,
 } from '@/features/inventory/domain/stock-entry'
 import type { UnitStatus } from '@/features/inventory/domain/unit'
+import { DEFAULT_AMPEL_THRESHOLDS } from './ampel-thresholds'
 import type { SupplyBasis } from '@/features/supply/domain/supply-basis'
 import { toCalendarDay } from '@/shared/lib/dates'
 
@@ -28,7 +29,7 @@ const NO_BASIS: SupplyBasis = {
 }
 
 export const SETTINGS: ReadSettings = {
-  thresholds: { soonDays: 90, urgentDays: 28 },
+  thresholds: DEFAULT_AMPEL_THRESHOLDS,
   stillGoodCounts: false,
 }
 

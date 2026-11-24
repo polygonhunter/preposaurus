@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { addDays, toCalendarDay } from '@/shared/lib/dates'
 import { timeGroupFor } from './time-group'
 import type { StockUnit } from './unit'
-import { DEFAULT_AMPEL_THRESHOLDS } from './unit-state'
+import { DEFAULT_AMPEL_THRESHOLDS } from '../../../../tests/helpers/ampel-thresholds'
 
 const today = toCalendarDay('2026-11-22')
 

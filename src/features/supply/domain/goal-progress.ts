@@ -54,6 +54,7 @@ interface GoalProgressInput<T extends SupplyUnit> extends Omit<SupplyInput, 'ref
  * Einheiten im Vorrat, deren Datum heute noch hält, am Zieldatum aber nicht mehr. Fehlen bewusst:
  * Einheiten ohne Datum (niemand weiß, dass sie ablaufen) und schon abgelaufene „Noch gut“-
  * Packungen, auch wenn sie mit dem Schalter heute zählen (sie laufen nicht erst noch ab).
+ * @internal Läuft nur in `calculateGoalProgress`, Tests prüfen die Auswahl direkt.
  */
 export function unitsExpiringBefore<T extends SupplyUnit>(
   units: readonly T[],

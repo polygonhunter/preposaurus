@@ -17,6 +17,7 @@ import {
  * Breite der Gruppe „Diese Woche“ in Tagen. Gleicher Wert wie `THIS_WEEK_DAYS` in
  * `inventory/domain/unit-state.ts`. domain/ darf zwischen Features nur Typen teilen, deshalb hält
  * ein Test in `tests/integration/db/ampel-check.test.ts` beide gleich.
+ * @internal Exportiert nur für diesen Test.
  */
 export const URGENT_WINDOW_DAYS = 7
 
