@@ -43,10 +43,14 @@ interface GroupName {
   shortName: string
 }
 
-/** Balken je Warengruppe ohne Wasser, die knappste der gezeigten Gruppen mit Wort markiert. */
+/**
+ * Balken je Warengruppe ohne Wasser, die knappste der gezeigten Gruppen mit Wort markiert. Dazu
+ * „Satt für“ derselben Gruppe für das Erklär-Blatt (#209).
+ */
 export function groupCoverage(
   progress: readonly GroupProgress[],
   groups: readonly GroupName[],
+  satiety: ReadonlyMap<string, OverviewGroup['satiety']>,
 ): OverviewGroup[] {
   const shown = progress.filter((entry) => entry.groupKey !== WATER_GROUP_KEY)
   const tightest = findTightestGroup(shown)
@@ -61,6 +65,7 @@ export function groupCoverage(
     unit,
     stock,
     targetPerDay,
+    satiety: satiety.get(groupKey) ?? null,
   }))
 }
 

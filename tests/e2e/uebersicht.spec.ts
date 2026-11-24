@@ -141,7 +141,9 @@ test('Erklär-Blatt einer Warengruppe öffnet per Tastatur und nennt dieselben T
 }) => {
   await page.goto('/uebersicht')
   const meter = page.getByRole('list', { name: 'Warengruppen' }).getByRole('meter', { name: GRAIN })
-  const coverage = /^([\d,]+) von 10 Tagen/.exec((await meter.getAttribute('aria-valuetext')) ?? '')
+  const coverage = /^Menge reicht ([\d,]+) von 10 Tagen/.exec(
+    (await meter.getAttribute('aria-valuetext')) ?? '',
+  )
   const days = coverage?.[1] ?? 'fehlt'
   const sheet = groupSheet(page)
 
@@ -154,8 +156,13 @@ test('Erklär-Blatt einer Warengruppe öffnet per Tastatur und nennt dieselben T
   await expect(
     sheet.getByText(new RegExp(`^[\\d,.]+ k?g ÷ [\\d,.]+ k?g am Tag = ${days} Tage?$`)),
   ).toBeVisible()
-  await expect(sheet.getByText(/nicht wie lange das Essen reicht/)).toBeVisible()
-  await expect(sheet.getByText(/Beitrag zum Essen/)).toBeVisible()
+  // Beide Zahlen mit Namen und Rechnung (#209)
+  await expect(sheet.getByRole('heading', { name: 'Menge reicht' })).toBeVisible()
+  await expect(sheet.getByRole('heading', { name: 'Satt für' })).toBeVisible()
+  await expect(
+    sheet.getByText(/^(ca\. )?[\d.]+ kcal ÷ [\d.]+ kcal am Tag = [\d,]+ Tage?$/),
+  ).toBeVisible()
+  await expect(sheet.getByText(/„Menge reicht“ vergleicht die Menge/)).toBeVisible()
   await expect(sheet.getByRole('link', { name: 'Zur Quelle' })).toHaveAttribute('href', /^https:/)
 
   await page.keyboard.press('Escape')

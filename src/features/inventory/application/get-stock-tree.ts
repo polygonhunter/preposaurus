@@ -5,6 +5,7 @@
 import 'server-only'
 import type { CalendarDay } from '@/shared/lib/dates'
 import type { StockTree } from '../schemas/stock'
+import { coverageFor, coverageToday } from './group-coverage'
 import { loadReadContext, totalsByNode, totalsOf } from './read-context'
 import { categoriesOf } from './stock-categories'
 import type { StockReader } from './stock-reader'
@@ -32,9 +33,14 @@ export async function getStockTree(
   const unitsByGroup = groupByKey(units, ({ product }) => product.group.key)
   const nodes = groups.map(({ key }) => ({ level: 'group' as const, key }))
   const groupTotals = totalsByNode(context, units, nodes)
+  const coverage = coverageToday(context, units)
   return {
     groups: groups.map((group) => ({
-      group: { ...group, totals: totalsOf(groupTotals, { level: 'group', key: group.key }) },
+      group: {
+        ...group,
+        totals: totalsOf(groupTotals, { level: 'group', key: group.key }),
+        coverage: coverageFor(coverage, group.key),
+      },
       categories: categoriesOf(
         context,
         rowsByGroup.get(group.key) ?? [],

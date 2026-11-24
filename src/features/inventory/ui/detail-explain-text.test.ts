@@ -4,6 +4,7 @@ import {
   countedText,
   daysCalculation,
   daysMeaningTexts,
+  daysTitle,
   kcalOriginText,
   kcalText,
   notCountedTexts,
@@ -53,7 +54,7 @@ describe('Erklär-Blatt der Kennwerte im Detail', () => {
 
   it('rechnet die Tage mit denselben Zahlen wie die Kacheln', () => {
     const tiles = detailTiles({ totals: totals() })
-    expect(tiles.find((tile) => tile.label === 'Tage')?.value).toBe('2,3')
+    expect(tiles.find((tile) => tile.label === 'Satt für')?.value).toBe('2,3 Tage')
     expect(daysCalculation(totals(), need)).toBe('14.320 kcal ÷ 6.000 kcal am Tag = 2,3 Tage')
   })
 
@@ -97,10 +98,17 @@ describe('Erklär-Blatt der Kennwerte im Detail', () => {
     expect(daysMeaningTexts(noNeed)[0]).toContain('Mitglieder und eine Empfehlung')
   })
 
-  it('nennt den Beitrag in kcal und grenzt ihn von der Abdeckung ab (#209)', () => {
+  it('nennt „Satt für“ und grenzt es von „Menge reicht“ ab (#209)', () => {
     const texts = daysMeaningTexts(totals()).join(' ')
-    expect(texts).toContain('für euren ganzen Haushalt')
-    expect(texts).toContain('„X von 10 Tagen“')
+    expect(daysTitle(totals())).toBe('Satt für')
+    expect(texts).toContain('„Satt für“: So lange machen die kcal')
+    expect(texts).toContain('„Menge reicht … von … Tagen“')
+  })
+
+  it('nennt Wasser „Wasser für“, weil es keine kcal hat (#209)', () => {
+    const water = totals({ kcal: 0, amounts: { g: 0, ml: 18000 }, waterMl: 18000, waterDays: 2.4 })
+    expect(daysTitle(water)).toBe('Wasser für')
+    expect(daysMeaningTexts(water).join(' ')).toContain('deshalb steht hier nicht „Satt für“')
   })
 
   it('erklärt kcal und „ca.“ mit dem Anteil der Richtwerte', () => {

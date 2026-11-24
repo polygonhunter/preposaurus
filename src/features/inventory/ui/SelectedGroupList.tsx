@@ -15,7 +15,7 @@ export function SelectedGroupList({ level, selected }: GroupListProps) {
         <Link href={groupPath(level.group.key)} className="text-headline text-accent">
           {level.group.shortName}
         </Link>
-        <p className="text-footnote text-fg2">{groupSubtitle(level.group.totals)}</p>
+        <p className="text-footnote text-fg2">{groupSubtitle(level.group)}</p>
       </div>
       <FoodTypeLevelList categories={level.categories} selected={selected} isCompact />
     </>
