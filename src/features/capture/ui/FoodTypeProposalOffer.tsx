@@ -9,7 +9,7 @@ import type { AddFoodTypeProblem } from './use-new-food-type'
 
 type FoodTypeProposalOfferProps = Readonly<{
   proposal: FoodTypeProposal
-  options: Pick<CaptureOptions, 'foodTypes' | 'categories' | 'canAddFoodTypes'>
+  options: Pick<CaptureOptions, 'foodTypes' | 'categories'>
   onChosen: (foodType: FoodTypeChoice) => void
   /** „Andere wählen“: Vorschlag weg, weiter mit der Suche */
   onDismiss: () => void
@@ -20,17 +20,13 @@ type SheetState = Readonly<{ problem: AddFoodTypeProblem | null }>
 const offerText = ({ name, categoryName }: FoodTypeProposal) =>
   `Keine Lebensmittelart der Liste passt. Neue Lebensmittelart „${name}“ unter „${categoryName}“ anlegen?`
 
-const memberText = ({ name }: FoodTypeProposal) =>
-  `Die Erkennung schlägt eine neue Lebensmittelart vor: „${name}“. Neue Arten legt ein Admin an, wählt bis dahin eine passende aus der Liste.`
-
 // Vorschlag der Erkennung (#142): ein ruhiges Angebot, nie automatisch angelegt. „Übernehmen“ legt
 // die Art mit Name und Kategorie der KI an, „Ändern“ öffnet dasselbe Blatt wie „+ Neue
-// Lebensmittelart“. Mitglieder dürfen keine Arten anlegen und lesen nur, wer das tut.
+// Lebensmittelart“. Admin und Mitglied dürfen beide anlegen (#298).
 export function FoodTypeProposalOffer(props: FoodTypeProposalOfferProps) {
   const { proposal, options, onChosen, onDismiss } = props
   const [sheet, setSheet] = useState<SheetState | null>(null)
   const [isPending, startTransition] = useTransition()
-  const canAdd = options.canAddFoodTypes
 
   function accept() {
     const { categoryId } = proposal
@@ -50,27 +46,23 @@ export function FoodTypeProposalOffer(props: FoodTypeProposalOfferProps) {
       aria-label="Vorschlag der Erkennung"
       className="mx-4 flex flex-col gap-2 rounded-group bg-surface px-4 py-3 breit:mx-6"
     >
-      <p className="text-callout">{canAdd ? offerText(proposal) : memberText(proposal)}</p>
+      <p className="text-callout">{offerText(proposal)}</p>
       <div className="flex flex-wrap gap-2">
-        {canAdd ? (
-          <>
-            <Button
-              variant="tinted"
-              onClick={accept}
-              pendingLabel={isPending ? 'Legt an …' : undefined}
-            >
-              Übernehmen
-            </Button>
-            <Button
-              variant="plain"
-              onClick={() => {
-                setSheet({ problem: null })
-              }}
-            >
-              Ändern
-            </Button>
-          </>
-        ) : null}
+        <Button
+          variant="tinted"
+          onClick={accept}
+          pendingLabel={isPending ? 'Legt an …' : undefined}
+        >
+          Übernehmen
+        </Button>
+        <Button
+          variant="plain"
+          onClick={() => {
+            setSheet({ problem: null })
+          }}
+        >
+          Ändern
+        </Button>
         <Button variant="plain" onClick={onDismiss}>
           Andere wählen
         </Button>
