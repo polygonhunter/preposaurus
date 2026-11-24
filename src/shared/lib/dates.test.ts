@@ -12,6 +12,7 @@ import {
   formatDaysLeft,
   normalizeToPrecision,
   parseCalendarDay,
+  startOfDayInBerlin,
   toCalendarDay,
   todayInBerlin,
 } from './dates'
@@ -88,6 +89,29 @@ describe('todayInBerlin', () => {
   it('stimmt an den Tagen der Zeitumstellung', () => {
     expect(todayInBerlin(new Date('2027-03-28T00:30:00Z'))).toBe('2027-03-28')
     expect(todayInBerlin(new Date('2027-10-31T23:30:00Z'))).toBe('2027-11-01')
+  })
+})
+
+describe('startOfDayInBerlin', () => {
+  it('liegt im Winter bei 23 Uhr UTC am Vortag', () => {
+    expect(startOfDayInBerlin(toCalendarDay('2026-11-24')).toISOString()).toBe(
+      '2026-11-23T23:00:00.000Z',
+    )
+  })
+
+  it('liegt im Sommer bei 22 Uhr UTC am Vortag', () => {
+    expect(startOfDayInBerlin(toCalendarDay('2026-07-01')).toISOString()).toBe(
+      '2026-06-30T22:00:00.000Z',
+    )
+  })
+
+  it('stimmt an den Tagen der Zeitumstellung', () => {
+    expect(startOfDayInBerlin(toCalendarDay('2026-03-29')).toISOString()).toBe(
+      '2026-03-28T23:00:00.000Z',
+    )
+    expect(startOfDayInBerlin(toCalendarDay('2026-10-25')).toISOString()).toBe(
+      '2026-10-24T22:00:00.000Z',
+    )
   })
 })
 

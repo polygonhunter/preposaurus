@@ -19,8 +19,6 @@ const STATUS_SLUGS: Record<StockStatus, string> = {
   'due-soon': 'bald-faellig',
   expired: 'abgelaufen',
   incomplete: 'unvollstaendig',
-  consumed: 'verbraucht',
-  discarded: 'entsorgt',
 }
 
 export const STOCK_PARAMS = {

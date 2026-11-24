@@ -1,9 +1,10 @@
 import type { Page } from '@playwright/test'
+import { E2E_ADMIN } from '../helpers/e2e-auth'
 import { expect, test } from '../helpers/e2e-test'
 import { expectNotice, noticeBar } from '../helpers/notice-bar'
 import { expectAccessibleLayout } from '../helpers/page-checks'
 
-// „Entsorgt“ und „Noch gut“ auf Bald fällig, Anzeige und Verlauf im Detail (#47, #48). Der Test
+// „Entsorgt“ und „Noch gut“ auf Bald fällig, Anzeige und Verlauf im Detail und als Seite (#47, #48). Der Test
 // ändert Daten und läuft deshalb nur im Projekt „desktop“, mit einem eigenen Lebensmittel, das
 // sonst kein Test nutzt. Am Ende ist davon nichts mehr im Vorrat.
 
@@ -85,4 +86,19 @@ test('Entsorgt mit Rückgängig, Noch gut mit Anzeige und Verlauf', async ({ pag
   }
   await expect(page.getByText('Aktuell nichts im Vorrat.')).toBeVisible()
   await expect(history.getByRole('listitem').first()).toContainText('Entsorgt')
+
+  // Auf der Seite Verlauf (Tabelle, weil Desktop): heute, mit Person (#48)
+  await page.getByRole('link', { name: 'Alle Einträge im Verlauf ansehen' }).click()
+  await page
+    .getByRole('group', { name: 'Ausgang' })
+    .getByRole('link', { name: /^Entsorgt/ })
+    .click()
+  const table = page.getByRole('table', { name: 'Verlauf' })
+  const today = table.locator('tbody').filter({ hasText: todayInBerlin() })
+  const discardedToday = today.getByRole('row', {
+    name: new RegExp(`^Rotkohl.* Entsorgt ${E2E_ADMIN.displayName}`),
+  })
+  await expect(discardedToday.first()).toBeVisible()
+  expect(await discardedToday.count()).toBeGreaterThanOrEqual(count)
+  await expectAccessibleLayout(page)
 })

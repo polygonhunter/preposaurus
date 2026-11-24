@@ -6,6 +6,7 @@ import { stockFilterSchema } from '@/features/inventory/schemas/requests'
 import { ActiveFilters } from '@/features/inventory/ui/ActiveFilters'
 import { ConsumeProvider } from '@/features/inventory/ui/ConsumeProvider'
 import { GroupList } from '@/features/inventory/ui/GroupList'
+import { HistoryLink } from '@/features/inventory/ui/HistoryLink'
 import { SearchResults } from '@/features/inventory/ui/SearchResults'
 import { StockSearchBar } from '@/features/inventory/ui/StockSearchBar'
 import { StockStatusChips } from '@/features/inventory/ui/StockStatusChips'
@@ -19,7 +20,8 @@ import { OfflineNotice } from '@/shared/ui/OfflineNotice'
 import { PageHeader } from '@/shared/ui/PageHeader'
 
 // Vorrat Ebene 1 bzw. Treffermodus (UX-Konzept §8.3, #44). Suche und Filter stehen in der Adresse.
-// Ab „weit“ steht statt der Warengruppen die Tabelle über den ganzen Vorrat (M12-04).
+// Ab „weit“ steht statt der Warengruppen die Tabelle über den ganzen Vorrat (M12-04). Oben rechts
+// führt „Verlauf“ zu Verbraucht und Entsorgt (#48).
 // Ohne Verbindung zeigt der Service Worker den zuletzt geladenen Stand (M10-02).
 export default async function StockPage({ searchParams }: PageProps<'/vorrat'>) {
   const offlineNotice = <OfflineNotice loadedAt={new Date().toISOString()} />
@@ -31,7 +33,7 @@ export default async function StockPage({ searchParams }: PageProps<'/vorrat'>) 
     const search = await searchStock(reader, { householdId, today, filter })
     return (
       <ConsumeProvider>
-        <PageHeader title="Vorrat" />
+        <PageHeader title="Vorrat" action={<HistoryLink />} />
         {offlineNotice}
         <StockSearchBar filter={filter} options={search.options} />
         <StockStatusChips filter={filter} counts={search.counts} />
@@ -48,7 +50,7 @@ export default async function StockPage({ searchParams }: PageProps<'/vorrat'>) 
   if (isEmptyStock(overview.groups)) {
     return (
       <>
-        <PageHeader title="Vorrat" />
+        <PageHeader title="Vorrat" action={<HistoryLink />} />
         {offlineNotice}
         <EmptyState
           text="Noch ist nichts eingelagert. Mit dem ersten Produkt füllt sich die Liste."
@@ -59,7 +61,7 @@ export default async function StockPage({ searchParams }: PageProps<'/vorrat'>) 
   }
   return (
     <>
-      <PageHeader title="Vorrat" />
+      <PageHeader title="Vorrat" action={<HistoryLink />} />
       {offlineNotice}
       <StockSearchBar filter={filter} options={options} />
       <StockStatusChips filter={filter} counts={overview.counts} />
