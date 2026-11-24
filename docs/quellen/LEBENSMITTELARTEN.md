@@ -3,6 +3,7 @@
 Recherche und Begründung für die zweite Startliste der Lebensmittelarten. Umgesetzt in
 `db/seeds/stammdaten/kategorien.ts` und `db/seeds/stammdaten/arten/*.ts`, Prüfseite:
 `docs/konzept/lebensmittelarten.html`. **Abrufdatum aller Quellen: 2026-11-22.** Issues: #128, #126, #110, #142.
+**Geprüft am 2026-11-24** (vom Maintainer delegiert, entschieden nach Empfehlung): Antworten auf §10 in §10.1, die Liste bleibt wie sie ist.
 
 **Kurz:** 41 Kategorien, 325 Lebensmittelarten, quer durch das Lebensmittelsortiment eines deutschen
 Supermarkts. Die Arten sind gröber als in v1 („Nudeln“ statt Spaghetti, Penne, Fusilli), aber die
@@ -667,3 +668,26 @@ Tiefkühl. Für die Datenbank wäre eine Migration nötig:
 14. **kcal aus Alkohol:** Bier, Wein und Spirituosen zählen heute zur Energie wie jedes Lebensmittel.
     Sollen alkoholische Getränke bei der Energie ausgenommen werden (würde eine Regel in der
     Rechnung brauchen)?
+
+### 10.1 Antworten (2026-11-24)
+
+**Vom Maintainer delegiert, 2026-11-24, entschieden nach Empfehlung** (#128, „Mach einfach passt schon“). Wo §10 keine Empfehlung nennt, gilt der heutige Stand der Startliste als vorläufige Annahme und ist damit entschieden. Keine Art und keine Kategorie ändert ihren Schlüssel, ihre Kategorie oder ihre Warengruppe; bestehende Haushalte (ausgeblendete Arten, eigene Arten, Produkte mit Verweis) sind deshalb nicht betroffen, eine Migration ist nicht nötig.
+
+| Nr. | Entscheidung | Folge |
+|---|---|---|
+| 1 | Richtwerte bleiben im Seed. Sie sind jetzt gegen FoodData Central nachgerechnet (EMPFEHLUNGSWERTE §6, U3) | keine |
+| 2 | Kaffee, Tee und Kakao bleiben bei Sonstiges. Die Warengruppe Getränke hat kein Ziel, ein Umzug änderte keine Zahl | keine |
+| 3 | Pflanzendrinks zählen zum Milch-Ziel, Kokosmilch und Käsealternative nicht (wie §7.3). Passt zum veganen Vorschlag (EMPFEHLUNGSWERTE §3.3, #303) | keine |
+| 4 | Babynahrung bleibt bei Sonstiges (nur kcal). Babys zählen im Bedarf nicht (L20), ein Milch-Ziel für Säuglingsmilch wäre schief | keine |
+| 5 | Obstkonserven und Bohnenkerne bleiben zusammengelegt (grob, Wunsch des Maintainers, §1). Ohne eindeutigen Richtwert bleiben sie leer | Suchwörter für die BLE-Beispiele ergänzt (Kirschen, Birnen, Aprikosen im Glas) |
+| 6 | Speiseöl (Raps, Sonnenblume) und Olivenöl bleiben getrennt | keine |
+| 7 | Stilles Wasser und Sprudelwasser bleiben getrennt | keine |
+| 8 | Frischware und Alkohol starten **nicht** ausgeblendet. Die Liste soll das ganze Sortiment abdecken (§1), ausblenden kann jeder Haushalt selbst (#126) | keine |
+| 9 | Kategorien nach Haltbarmachung bleiben bei Gemüse, Obst, Fleisch und Fisch | keine |
+| 10 | Merkmal „typische Lagerung“: später, eigenes Paket mit Migration | #309 |
+| 11 | Ausgeblendet bleibt ausgeblendet (§7.2), damit der Seed keine Entscheidung eines Haushalts überstimmt | keine |
+| 12 | KI-Liste: Vorschläge 1 und 2 aus §8 (Enum behalten, Prompt-Liste gruppieren und kürzen, cachen) | #308 |
+| 13 | Granularität bleibt wie sie ist: Nüsse nach Sorte (Richtwerte und Allergien unterscheiden sich), frisches Fleisch nach Tierart | keine |
+| 14 | kcal aus Alkohol zählen weiter wie jedes Lebensmittel; eine Ausnahme bräuchte eine eigene Regel ohne Quelle | keine |
+
+**Abgleich mit der BLE-Vorratstabelle** (Mischkost und vegetarisch, Abruf 2026-11-24): Jedes Beispiel der Tabelle findet eine Art der Startliste, von Vollkornbrot (`dauerbrot`) über Rotkohl, Spargel und Pilze in der Konserve, Trockenpflaumen, Zitronensaft und Instantkaffee bis Corned Beef (`fleischkonserve`), Kalbsleberwurst (`wurstkonserve`), Tofu, Bratlinge und vegetarischer Wurst (`fleischersatz`). Wo der Name der Art das Beispiel nicht enthält, hilft jetzt ein Suchwort (`food-type-search-terms.ts`); ein Integrationstest prüft alle Beispiele gegen die Suche. Die BBK-Checkliste (Ratgeber 11/2025, S. 32) nennt nur „haltbare Lebensmittel“ ohne einzelne Arten. **Ergänzt** wird deshalb keine Art, **gestrichen** auch keine (der Maintainer wollte „besser zu viel als zu wenig“). Die Zuordnung der Kategorien zu den Warengruppen folgt der BLE (Kartoffeln bei Getreide, Pilze beim Gemüse, Ersatzprodukte bei Eier/Fleisch/Fisch) und bleibt.
