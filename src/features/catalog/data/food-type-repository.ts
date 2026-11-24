@@ -16,6 +16,7 @@ import { productGroups } from '@/server/db/schema/recommendation'
 import { categoryHiddenBy, foodTypeHiddenBy, setFoodTypeHidden } from './catalog-hiding'
 import { fromReferenceRow, referenceColumns, toReferenceRow } from './food-type-columns'
 import type { RemoveOutcome } from './remove-outcome'
+import { saveSortOrder } from './save-sort-order'
 
 type FoodTypeValues = FoodTypeReference &
   Readonly<{
@@ -165,14 +166,6 @@ async function remove(db: Database, householdId: string, id: string): Promise<Re
   return existing === undefined ? 'not-found' : 'in-use'
 }
 
-async function saveOrder(db: Database, householdId: string, ids: readonly string[]) {
-  await db.transaction(async (tx) => {
-    for (const [sortOrder, id] of ids.entries()) {
-      await tx.update(foodTypes).set({ sortOrder }).where(ownFoodType(householdId, id))
-    }
-  })
-}
-
 export function createFoodTypeRepository(db: Database): FoodTypeRepository {
   return {
     list: (householdId) => list(db, householdId),
@@ -187,6 +180,6 @@ export function createFoodTypeRepository(db: Database): FoodTypeRepository {
     update: (householdId, id, values) => update(db, { householdId, id }, values),
     setHidden: (householdId, id, isHidden) => setFoodTypeHidden(db, { householdId, id, isHidden }),
     remove: (householdId, id) => remove(db, householdId, id),
-    saveOrder: (householdId, ids) => saveOrder(db, householdId, ids),
+    saveOrder: (householdId, ids) => saveSortOrder(db, foodTypes, { householdId, ids }),
   }
 }
