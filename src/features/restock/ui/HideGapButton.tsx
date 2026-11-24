@@ -12,7 +12,7 @@ export function HideGapButton({ gap }: HideGapButtonProps) {
   return (
     <Button
       variant="tinted"
-      disabled={isLocked}
+      aria-disabled={isLocked}
       onClick={() => {
         setGapStatus(gap, 'ausgeblendet')
       }}

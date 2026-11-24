@@ -11,7 +11,7 @@ export function ShowGapButton({ entry }: ShowGapButtonProps) {
   return (
     <Button
       variant="tinted"
-      disabled={isLocked}
+      aria-disabled={isLocked}
       onClick={() => {
         showGap(entry)
       }}

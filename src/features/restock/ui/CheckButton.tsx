@@ -12,7 +12,7 @@ export function CheckButton({ entry, isDone }: CheckButtonProps) {
     <CheckCircle
       label={entry.label}
       isChecked={isDone}
-      disabled={isLocked}
+      isLocked={isLocked}
       onToggle={() => {
         setDone(entry, !isDone)
       }}

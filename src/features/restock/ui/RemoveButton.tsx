@@ -12,11 +12,11 @@ export function RemoveButton({ entry }: RemoveButtonProps) {
     <button
       type="button"
       aria-label={`${entry.label} entfernen`}
-      disabled={isLocked}
+      aria-disabled={isLocked}
       onClick={() => {
         remove(entry)
       }}
-      className="flex size-11 items-center justify-center text-fg2 transition-opacity duration-150 ease-out active:opacity-60 disabled:opacity-40"
+      className="flex size-11 items-center justify-center text-fg2 transition-opacity duration-150 ease-out active:opacity-60 aria-disabled:opacity-40"
     >
       <Icon name="close" size={20} />
     </button>

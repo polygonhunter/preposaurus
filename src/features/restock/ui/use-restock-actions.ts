@@ -2,8 +2,8 @@
 // Handlungen der Seite Nachkaufen mit der einen Meldung unten: Rückgängig-Zeile nach Abhaken,
 // Entfernen, „Auf die Liste“ und Ausblenden (UX-Konzept §7, §8.6, #201, #202), sonst ein Fehler am
 // selben Ort.
-// Ohne Verbindung ist alles gesperrt; „Rückgängig“ steht fünf Sekunden da, die Verbindung kann in
-// der Zeit wegfallen, deshalb prüft jede Handlung sie noch einmal (M10).
+// Ohne Verbindung ist alles gesperrt (ein Tipp sagt warum); „Rückgängig“ steht fünf Sekunden da,
+// die Verbindung kann in der Zeit wegfallen, deshalb prüft jede Handlung sie noch einmal (M10).
 import { useState, useTransition } from 'react'
 import { useIsOnline } from '@/shared/hooks/use-is-online'
 import { OFFLINE_WRITE_MESSAGE } from '@/shared/ui/OfflineWriteGuard'
@@ -109,6 +109,8 @@ export function useRestockActions() {
     action: () => Promise<RestockActionResult<T>>,
     noticeAfter: (success: Success<T>) => RestockNotice | null,
   ) {
+    // Gesperrt ist nur per aria-disabled (Fokus bleibt), darum fängt run den zweiten Tipp ab
+    if (isPending) return
     if (!isOnline) {
       setNotice({ kind: 'error', message: OFFLINE_WRITE_MESSAGE })
       return
@@ -126,5 +128,11 @@ export function useRestockActions() {
     setNotice(null)
   }
 
-  return { notice, dismiss, actions: restockActions(run), isLocked: isPending || !isOnline }
+  return {
+    notice,
+    dismiss,
+    actions: restockActions(run),
+    isPending,
+    isLocked: isPending || !isOnline,
+  }
 }

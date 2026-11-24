@@ -62,10 +62,12 @@ test('„−1“ in der Zeile nimmt eine Packung, Rückgängig holt sie zurück'
   await expect(takeOne).toBeFocused()
   await expectAccessibleLayout(page)
 
-  await bar.getByRole('button', { name: 'Rückgängig' }).click()
+  // Rückgängig per Tastatur: Die Zeile geht, der Fokus zurück auf „−1“ (#269)
+  await bar.getByRole('button', { name: 'Rückgängig' }).press('Enter')
 
   await expect(bar).toHaveCount(0)
   await expect(row).toContainText(`${String(before)} Packung`)
+  await expect(takeOne).toBeFocused()
 })
 
 test('„1 entnehmen“ im Detail nimmt das früheste MHD', async ({ page }, info) => {

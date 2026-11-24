@@ -11,6 +11,8 @@ type RowProps = RowContentProps &
     accessory?: ReactNode
     // Knopfreihe unter Link oder Knopf der Zeile, wenn rechts kein Platz für mehrere Knöpfe ist
     footer?: ReactNode
+    // Stabiler Schlüssel der Zeile, an dem useFocusRescue sie nach dem Neuladen wiederfindet
+    focusKey?: string | undefined
   }>
 
 // Trennlinie oberhalb jeder Zeile außer der ersten, eingerückt wie der Text.
@@ -18,7 +20,7 @@ const SEPARATOR =
   'relative not-first:before:absolute not-first:before:top-0 not-first:before:right-0 not-first:before:hairline'
 const INNER = 'flex min-h-11 w-full items-center gap-3 px-4 py-[11px] text-left'
 
-export function Row({ action, accessory, footer, ...content }: RowProps) {
+export function Row({ action, accessory, footer, focusKey, ...content }: RowProps) {
   // Die gewählte Zeile ist samt Knopf daneben getönt (Vorrat neben dem Detail)
   const isCurrent = action !== undefined && 'href' in action && action.isCurrent === true
   const itemClass = cx(
@@ -28,7 +30,7 @@ export function Row({ action, accessory, footer, ...content }: RowProps) {
   )
   if (action && footer) {
     return (
-      <li className={itemClass}>
+      <li className={itemClass} data-focus-row={focusKey}>
         <RowHandle action={action} {...content} />
         <div className={cx('flex flex-wrap gap-2 pr-4 pb-3', content.icon ? 'pl-[52px]' : 'pl-4')}>
           {footer}
@@ -40,7 +42,7 @@ export function Row({ action, accessory, footer, ...content }: RowProps) {
     // Inhalt in eigenem Flex-Element: Das ::before der Trennlinie wäre sonst in der ersten Zeile
     // ein Flex-Kind und rückte den Text um den Abstand ein.
     return (
-      <li className={itemClass}>
+      <li className={itemClass} data-focus-row={focusKey}>
         <div className={INNER}>
           <RowContent {...content} />
           {accessory}
@@ -50,13 +52,13 @@ export function Row({ action, accessory, footer, ...content }: RowProps) {
   }
   if (!accessory) {
     return (
-      <li className={itemClass}>
+      <li className={itemClass} data-focus-row={focusKey}>
         <RowHandle action={action} {...content} />
       </li>
     )
   }
   return (
-    <li className={itemClass}>
+    <li className={itemClass} data-focus-row={focusKey}>
       <div className="flex items-center pr-4">
         <div className="min-w-0 flex-1">
           <RowHandle action={action} className="pr-2" {...content} />

@@ -17,6 +17,7 @@ export function RestockItemRow({ item }: RestockItemRowProps) {
   const isGap = item.source === 'ziel'
   return (
     <Row
+      focusKey={`item-${item.id}`}
       icon={<CheckButton entry={entry} isDone={item.isDone} />}
       title={item.isDone ? <span className="text-fg2 line-through">{item.label}</span> : item.label}
       subtitle={item.amount === null ? undefined : formatGapAmount(item.amount)}

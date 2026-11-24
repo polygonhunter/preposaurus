@@ -195,7 +195,10 @@ test('Foto-Fluss: Erkennung füllt Vorschläge, offenes MHD wird entschieden, Sp
   await expectAccessibleLayout(page)
   await screenshot(page, 'pruefen-375')
 
-  await page.getByRole('button', { name: 'Datum fehlt' }).first().click()
+  // Per Tastatur: Das entschiedene Foto verschwindet, der Fokus geht zur Liste der Daten (#269)
+  await page.getByRole('button', { name: 'Datum fehlt' }).first().press('Enter')
+  await expect(page.getByText('Noch zu klären')).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'MHD und Anzahl' })).toBeFocused()
   await page.getByRole('button', { name: '6 Packungen mit 30.09.2027' }).click()
   await expect(page.getByText('7 × Nudeln 487 g')).toBeVisible()
 

@@ -7,6 +7,7 @@ type NoticeBarProps = Readonly<{ message: string; onDismiss: () => void }>
 export function NoticeBar({ message, onDismiss }: NoticeBarProps) {
   return (
     <div
+      data-focus-return
       role="alert"
       className="fixed inset-x-2 bottom-[calc(58px+env(safe-area-inset-bottom))] z-20 mx-auto flex max-w-[624px] items-center gap-3 rounded-group bg-fg py-1 pr-1 pl-4 text-callout text-bg breit:bottom-4"
     >

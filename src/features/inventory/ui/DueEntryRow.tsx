@@ -21,6 +21,7 @@ export function DueEntryRow({ entry, isExpired }: DueEntryRowProps) {
     title: dueEntryTitle(entry),
     subtitle: dueEntryLine(entry),
     action: { href: detailPath(entry.target) },
+    focusKey: `${entry.target.kind}-${entry.target.id}-${entry.bestBefore?.date ?? 'ohne-datum'}`,
   }
   if (firstUnit === undefined) return <Row {...content} />
   if (isExpired) {

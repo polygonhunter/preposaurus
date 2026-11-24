@@ -12,7 +12,7 @@ export function AddSuggestionButton({ suggestion }: AddSuggestionButtonProps) {
   return (
     <Button
       variant="tinted"
-      disabled={isLocked}
+      aria-disabled={isLocked}
       onClick={() => {
         addSuggestion(suggestion)
       }}
