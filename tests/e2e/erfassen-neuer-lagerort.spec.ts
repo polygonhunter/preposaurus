@@ -2,7 +2,7 @@
 // zu verlassen, und wählt ihn. Admin und Mitglied legen an (#298, Option a). Gleicher Name ohne
 // Rücksicht auf Groß- und Kleinschreibung wählt den vorhandenen Ort. Alle Projekte teilen einen
 // Haushalt, deshalb hat jeder neue Ort einen eigenen Namen je Projekt und Versuch. Den Foto-Weg
-// prüft erfassen-foto.spec.ts (Entwurf des Admins, nacheinander).
+// prüft erfassen-foto-lagerort.spec.ts (Entwurf des Admins, nacheinander).
 import type { Page, TestInfo } from '@playwright/test'
 import { attemptOf } from '../helpers/attempt'
 import { E2E_MEMBER, signedOut, signInViaUi } from '../helpers/e2e-auth'

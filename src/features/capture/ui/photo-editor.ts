@@ -36,7 +36,7 @@ export interface EditorParts {
   state: PhotoCaptureState
   dispatch: Dispatch<PhotoCaptureAction>
   edit: (update: EditUpdate) => void
-  /** Neue Art in die Auswahlliste aufnehmen (useAddedFoodTypes) */
+  /** Neue Art in die Auswahlliste aufnehmen (useAddedChoices) */
   addFoodType: (foodType: FoodTypeChoice) => void
   restock: Pick<PhotoEditor, 'leaveContent' | 'chooseProduct'>
   uploads: {
