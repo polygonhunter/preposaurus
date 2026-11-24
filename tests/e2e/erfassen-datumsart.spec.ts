@@ -10,8 +10,6 @@ import { createOwnFoodType } from '../helpers/own-food-type'
 import { expectAccessibleLayout, expectNothingOnVerticalFold } from '../helpers/page-checks'
 
 const DAY_MS = 24 * 60 * 60 * 1000
-const BREIT = 900
-const WEIT = 1280
 const DOWNGRADE_NOTE = 'Diese Packungen gelten danach als MHD, nicht mehr als Verbrauchsdatum.'
 
 /** Gestern in deutscher Zeit als „TT.MM.JJJJ“: abgelaufen, also mit „Noch gut“ für ein MHD. */
@@ -148,7 +146,7 @@ test('Datum ändern: Art wechseln, zurück zum MHD sichtbar, per Vorsatz wieder 
   )
 })
 
-test('Umschalter passt in jede Stufe, Ziel mindestens 44 px', async ({ page }) => {
+test('Umschalter passt in jede Stufe, Ziel mindestens 44 px', async ({ page, fold }) => {
   const width = page.viewportSize()?.width ?? 0
   await page.goto('/neu/manuell')
   await bestBefore(page).fill('09/2027')
@@ -165,7 +163,8 @@ test('Umschalter passt in jede Stufe, Ziel mindestens 44 px', async ({ page }) =
     )
   for (const height of targetHeights) expect(height).toBeGreaterThanOrEqual(44)
   await expectAccessibleLayout(page)
-  if (width >= BREIT && width < WEIT) await expectNothingOnVerticalFold(page)
+  // Mit Falz (Duo quer, #253) liegt nichts Antippbares darauf
+  if (fold !== null) await expectNothingOnVerticalFold(page)
 
   // Gleiches Datum, neue Art, die es schon gibt: eine Zeile, Anzahl addiert, und es wird gesagt
   await bestBefore(page).fill('zu verbrauchen bis 09/2027')

@@ -22,7 +22,7 @@ export function BottomBar({ message, children, hold }: BottomBarProps) {
       data-focus-return
       role="group"
       aria-labelledby={messageId}
-      className="fixed inset-x-2 bottom-[calc(58px+env(safe-area-inset-bottom))] z-20 mx-auto flex max-w-[624px] items-center gap-3 rounded-group bg-fg py-1 pr-1 pl-4 text-callout text-bg breit:bottom-4"
+      className="fixed inset-x-2 bottom-[calc(58px+env(safe-area-inset-bottom))] z-20 mx-auto flex max-w-[624px] items-center gap-3 rounded-group bg-fg py-1 pr-1 pl-4 text-callout text-bg breit:bottom-4 falz:left-[var(--falz-ende)] falz:right-3"
     >
       <span id={messageId} className="min-w-0 flex-1">
         {message}

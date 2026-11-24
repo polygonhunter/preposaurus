@@ -1,11 +1,18 @@
 import { test as base, expect } from '@playwright/test'
+import { emulateFold, type FoldOptions } from './fold'
 
 // Jede Seite in jedem E2E-Test läuft ohne Verstoß gegen die CSP (#198). Chromium und WebKit melden
 // blockierte Skripte, Styles, Bilder oder Worker in der Konsole mit „Content Security Policy“.
 // Erfasst werden alle Seiten des Standard-Kontexts, auch neu geöffnete Tabs.
 const CSP_MARKER = 'Content Security Policy'
 
-export const test = base.extend<{ cspGuard: undefined }>({
+export const test = base.extend<{ cspGuard: undefined } & FoldOptions>({
+  // Projekte mit Falz (duo-quer) stellen sie vor jedem Test nach (tests/helpers/fold.ts, #253)
+  fold: [null, { option: true }],
+  page: async ({ page, fold, isMobile }, provide) => {
+    if (fold !== null) await emulateFold(page, { fold, isMobile })
+    await provide(page)
+  },
   cspGuard: [
     async ({ context }, use) => {
       const violations: string[] = []
