@@ -39,8 +39,8 @@ Summe: **102 Pakete.** M14 kann jederzeit nach M6-05 starten, sobald der Maintai
 5. **Datenbank ohne Docker:** Den Treiber kennt nur `src/server/db/client.ts`.
    - `DATABASE_URL=postgres://…` nutzt node-postgres (NAS, CI, optional lokal).
    - `DATABASE_URL=pglite://…` nutzt PGlite (Apache-2.0, PostgreSQL als WASM, keine Installation). Das ist der lokale Standard für Dev-Server, Integrationstests und E2E.
-   - Die CI wiederholt Integrationstests und E2E gegen einen echten `postgres:18`-Dienst.
-   - Migrationen nutzen deshalb nichts, was es nur in PostgreSQL 18 gibt. IDs erzeugt die App (`crypto.randomUUID()`), nicht die DB.
+   - Die CI wiederholt Integrationstests und E2E gegen einen echten `postgres:19`-Dienst.
+   - Migrationen nutzen deshalb nichts, was PGlite nicht kann. PGlite bringt eine eigene PostgreSQL-Version mit (0.5.17: PostgreSQL 18.7), die Docker-Installation läuft auf PostgreSQL 19 (#250). IDs erzeugt die App (`crypto.randomUUID()`), nicht die DB.
    - pg-boss braucht echtes PostgreSQL. Worker-Tests laufen in der CI. Lokal nur, wenn PostgreSQL installiert ist **[USER, optional]**.
 6. **Tabellen deutsch, Code englisch.** Tabellen- und Spaltennamen folgen dem freigegebenen Kanon (`einheit`, `mhd`, `nachkauf_eintrag`). Drizzle-Objekte, Typen und Funktionen sind englisch nach CP §4 (`units`, `bestBefore`). Die Zuordnung steht nur in `src/server/db/schema/*.ts`.
 7. **Keine Tabellen und Spalten für „später“.** Nicht angelegt werden: `ziel_etappe`, `tag`, `produkt_tag`, `nutzer_einstellung`, Passkey-Tabelle, `inventur_intervall`, `ki_modell_*`. `ki_aufruf` bleibt, weil die Technik-Seite Fehlschläge dort protokolliert und der PoC die Kosten braucht.
@@ -454,12 +454,12 @@ Alle Pakete: Quelle D „Geräte und Umbruchpunkte“, „iPhone Duo“, „PC-B
 |---|---|---|
 | **pre-commit** (lefthook) | Prettier und ESLint auf den geänderten Dateien, `tsc --noEmit` | unter 30 s |
 | **pre-push** (lefthook) | knip, Vitest komplett: Unit, Use-Case mit Fakes, Integration gegen PGlite | unter 2 min |
-| **CI je PR** | lint, `lint:budget`, typecheck, knip, Vitest mit Abdeckung (PGlite), Vitest-Integration und Worker gegen `postgres:18`, `next build`, Playwright gegen `next start`, Lizenzprüfung | unter 15 min |
+| **CI je PR** | lint, `lint:budget`, typecheck, knip, Vitest mit Abdeckung (PGlite), Vitest-Integration und Worker gegen `postgres:19`, `next build`, Playwright gegen `next start`, Lizenzprüfung | unter 15 min |
 | **CI auf `main` und Tags** | zusätzlich Docker-Build, Compose-Rauchtest, bei Tags Multi-Arch-Release | – |
 | **von Hand bzw. im PoC** | echte Anthropic-Aufrufe (M14), Abnahme auf iPhone und NAS (M13-06) | – |
 
 - **Ebenen** wie CP §10. Unit für `domain/` und `shared/lib`, Use-Case-Tests mit Fake-Repos und Fake-Adaptern, Integration für Repositories und Migrationen, E2E für Kernabläufe.
-- **E2E mit Playwright:** lokal gegen den Dev-Server (`npm run dev`, PGlite mit Demo-Daten, alle Fakes), in der CI gegen `next build` plus `next start` und `postgres:18`. Jeder Test startet mit frischer DB. Jede Seite durchläuft axe. Kamera-Tests laufen nur in Chromium mit Fake-Kamera, WebKit prüft Layout und Bedienung.
+- **E2E mit Playwright:** lokal gegen den Dev-Server (`npm run dev`, PGlite mit Demo-Daten, alle Fakes), in der CI gegen `next build` plus `next start` und `postgres:19`. Jeder Test startet mit frischer DB. Jede Seite durchläuft axe. Kamera-Tests laufen nur in Chromium mit Fake-Kamera, WebKit prüft Layout und Bedienung.
 - **Kernabläufe als E2E:** Ersteinrichtung · anmelden · manuell erfassen · per Foto erfassen mit Fake-KI inklusive nicht lesbarem Datum · entnehmen und Nachkaufen · entsorgen und Historie · Rollen (Mitglied sieht und darf weniger) · offline lesen.
 - **Die Regel „kein erfundenes Datum“** ist dreifach abgesichert: Unit (M2-02, M2-09, M6-04), Use-Case (M5-01 ergänzt kein Datum: ohne Datum gilt „Datum fehlt“ (#116), eine Schätzung braucht das Kennzeichen und ist nie taggenau), E2E (M6-11 sperrt Speichern).
 - **Visuelle Prüfung im Browser:** bei jedem Paket mit `ui/`-Änderung, vor dem Öffnen der PR. Fünf Größen: 375×812, 382×580 (Duo außen), 669×867 (Duo innen hochkant), 951×585 (Duo innen quer), 1280×800. Geprüft wird: kein waagrechtes Scrollen, Touch-Ziele, Fokus, Ampel mit Wort, Text nicht abgeschnitten. Bildschirmfotos kommen in die PR. Bis M12 genügt 375 px plus ein Blick auf 1280 px (darf einfach, aber nicht kaputt aussehen). Ab M12 alle fünf.
@@ -473,7 +473,7 @@ Alle Pakete: Quelle D „Geräte und Umbruchpunkte“, „iPhone Duo“, „PC-B
 - [ ] Die genannten Tests existieren. Neue Fachlogik hat Unit-Tests, ein Bugfix einen Regressionstest.
 - [ ] Jede Action und Route prüft Sitzung, Rolle und Haushalt und validiert mit Zod. Repositories filtern auf den Haushalt.
 - [ ] KI-Ergebnisse sind nur Vorschläge, kein Pfad erfindet ein Datum, manuell geht immer.
-- [ ] Schemaänderung nur als neue Migration, SQL gelesen, läuft auf PGlite und PostgreSQL 18.
+- [ ] Schemaänderung nur als neue Migration, SQL gelesen, läuft auf PGlite und PostgreSQL 19.
 - [ ] UI: deutsch, ruhiger Ton, Tastatur, Labels, Kontrast, `prefers-reduced-motion`, visuell geprüft (Abschnitt 5), Bildschirmfotos in der PR.
 - [ ] Keine Geheimnisse, Fotos oder personenbezogenen Daten in Code, Logs oder Tests. Neue Variablen stehen in `.env.example`.
 - [ ] Neue Abhängigkeit: Lizenz geprüft, exakt gepinnt, in der PR begründet.
@@ -491,7 +491,7 @@ Punkte, die eine Entscheidung oder Handlung des Maintainers brauchen. Die vorlä
 | U1 | Die fünf Vorschläge aus CP §14 bestätigen (Issue #2) | M0 | gelten wie in CP beschrieben |
 | U2 | Lizenz-Ausnahmen: `web-push` ist MPL-2.0, sharp bringt libvips als LGPL-3.0-or-later mit, Nodemailer ist MIT-0. Das passt nicht wörtlich zu „nur MIT, Apache, BSD, ISC“ | M0-07, M11-03 | Ausnahmen zulassen, weil der Stack diese Pakete nennt und alle drei mit MIT, GPL und AGPL vereinbar sind (FAKTEN F9). Alternative: Web-Push selbst umsetzen |
 | U3 | Empfehlungswerte freigeben: BBK/BLE-Mengen, Bedarf je Person, Ersatzregeln vegetarisch und vegan, kcal-Durchschnitt und übliche Haltbarkeit je Kategorie | M1-09, vor M13-06 | Code und Tests nutzen Testwerte. Der Seed bleibt „nicht geprüft“ |
-| U4 | Optional: PostgreSQL 18 lokal installieren, damit Worker-Tests auch lokal laufen | M11 | ohne Installation laufen sie nur in der CI |
+| U4 | Optional: PostgreSQL 19 lokal installieren, damit Worker-Tests auch lokal laufen | M11 | ohne Installation laufen sie nur in der CI |
 | U5 | Anthropic-API-Schlüssel für die Testumgebung des PoC und für den Betrieb | M14-02, M13-06 | bis dahin nur Fake-KI |
 | U6 | Testfotos für den PoC bereitstellen | M14-02 | Fotos bleiben außerhalb des Repositorys (`poc/` ist ignoriert) |
 | U7 | Zielumgebung NAS: Architektur, Docker, Ordnerstruktur | M13-02, M13-05 | amd64 und arm64, Sidecar |
@@ -509,7 +509,7 @@ Punkte, die eine Entscheidung oder Handlung des Maintainers brauchen. Die vorlä
 
 | Risiko | Folge | Gegenmaßnahme |
 |---|---|---|
-| PGlite weicht von PostgreSQL 18 ab oder läuft im Dev-Server instabil | lokale Tests grün, CI rot | CI wiederholt alles gegen `postgres:18`. Ausweg: PostgreSQL lokal (U4) |
+| PGlite weicht von PostgreSQL 19 ab oder läuft im Dev-Server instabil | lokale Tests grün, CI rot | CI wiederholt alles gegen `postgres:19`. Ausweg: PostgreSQL lokal (U4) |
 | pg-boss läuft nicht auf PGlite | Worker lokal nicht testbar | Fachlogik und Use-Cases der Erinnerungen sind ohne Worker testbar, nur M11-01 braucht echtes PostgreSQL |
 | Unsichere Werkzeugpunkte aus CP §9 (Plugins, boundaries v7, tsconfig) | M0 dauert länger | M0-02 und M0-03 prüfen gezielt, Ersatz `dependency-cruiser` |
 | Next 16 weicht vom Trainingswissen der Agenten ab | falsche APIs | Jedes Paket liest die Doku unter `node_modules/next/dist/docs/` (wie `prototypes/AGENTS.md`) |

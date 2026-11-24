@@ -60,14 +60,14 @@ jobs:
       # Laufzeit-Grenzen der Lesepfade (#141) allein, ohne parallele Testdateien daneben
       - run: npm run test:perf
 
-  # Dieselbe Suite gegen PostgreSQL 18: tests/helpers/test-db.ts legt je Testdatei eine eigene
+  # Dieselbe Suite gegen PostgreSQL 19 (wie compose.yaml): tests/helpers/test-db.ts legt je Testdatei eine eigene
   # Datenbank auf diesem Dienst an, spielt alle Migrationen ein und löscht sie danach wieder.
   test-pg:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     services:
       postgres:
-        image: postgres:18
+        image: postgres:19
         env:
           # Wegwerf-Datenbank nur für diesen Lauf, kein Geheimnis
           POSTGRES_USER: preposaurus
@@ -84,7 +84,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
-      - name: Vitest gegen PostgreSQL 18
+      - name: Vitest gegen PostgreSQL 19
         run: npx vitest run
 
   build:

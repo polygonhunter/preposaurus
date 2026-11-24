@@ -1,5 +1,5 @@
 // Warteschlange mit echtem pg-boss (UMSETZUNG M11-01): lokal auf PGlite, in der CI zusätzlich auf
-// PostgreSQL 18 (Job test-pg).
+// PostgreSQL 19 (Job test-pg).
 import { PgBoss } from 'pg-boss'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'

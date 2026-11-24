@@ -1,5 +1,5 @@
 // Datenbank für die Warteschlange in Integrationstests: lokal PGlite im Speicher (pg-boss bringt
-// einen Adapter mit), in der CI (test-pg) eine Wegwerf-Datenbank auf PostgreSQL 18.
+// einen Adapter mit), in der CI (test-pg) eine Wegwerf-Datenbank auf PostgreSQL 19.
 import { PGlite } from '@electric-sql/pglite'
 import { Pool } from 'pg'
 import { fromPglite } from 'pg-boss'
