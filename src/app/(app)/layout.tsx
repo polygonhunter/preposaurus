@@ -1,46 +1,10 @@
-import { redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { readShortcutsEnabled } from '@/features/auth/application/shortcut-preference'
-import { loadNavCounts } from '@/features/supply/application/load-nav-counts'
-import { requireUser } from '@/server/auth/guards'
-import { KeyboardShortcuts } from '@/shared/ui/KeyboardShortcuts'
-import { OfflineWriteGuard } from '@/shared/ui/OfflineWriteGuard'
-import { ShortcutsProvider } from '@/shared/ui/ShortcutsProvider'
-import { Sidebar } from '@/shared/ui/Sidebar'
-import { SkipLink } from '@/shared/ui/SkipLink'
-import { TabBar } from '@/shared/ui/TabBar'
+import { AppFrame } from '../_frame/AppFrame'
 
 type AppLayoutProps = Readonly<{ children: ReactNode }>
 
-const CONTENT_ID = 'inhalt'
-
-// App-Rahmen (DESIGN_SYSTEM §6): Tab-Leiste in kompakt und mittel, Seitenleiste mit Zählern ab breit,
-// Tastenkürzel „/“ und „n“ überall, abschaltbar unter Mein Konto (#254).
-// Zugriffsschutz (#33): src/proxy.ts leitet ohne Sitzungs-Cookie samt Rücksprung zur Anmeldung.
-// Hier prüft die DB, ob die Sitzung noch gilt (abgelaufen, abgemeldet, deaktiviert). Jede Seite,
-// Action und Route prüft ihre Daten trotzdem selbst (requireHouseholdUser), ein Layout allein schützt
-// keine Server Action.
-export default async function AppLayout({ children }: AppLayoutProps) {
-  const access = await requireUser()
-  if (!access.ok) redirect('/anmelden')
-  const { householdId } = access.value
-  const counts = householdId === null ? null : await loadNavCounts(householdId)
-  const areShortcutsOn = await readShortcutsEnabled()
-  return (
-    <ShortcutsProvider isEnabled={areShortcutsOn}>
-      <div className="min-h-dvh pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)] breit:flex">
-        <SkipLink targetId={CONTENT_ID} />
-        <Sidebar counts={counts} />
-        <main
-          id={CONTENT_ID}
-          className="mx-auto w-full max-w-[640px] pb-[calc(74px+env(safe-area-inset-bottom))] breit:min-h-dvh breit:max-w-none breit:min-w-0 breit:bg-surface breit:pb-6"
-        >
-          {children}
-        </main>
-        <TabBar />
-        <OfflineWriteGuard />
-        {areShortcutsOn ? <KeyboardShortcuts /> : null}
-      </div>
-    </ShortcutsProvider>
-  )
+// Alle Bereiche im App-Rahmen mit Tab-Leiste bzw. Seitenleiste (AppFrame). Erfassen hat ein
+// eigenes Layout ohne Tab-Leiste: src/app/(erfassen)/layout.tsx.
+export default function AppLayout({ children }: AppLayoutProps) {
+  return <AppFrame>{children}</AppFrame>
 }

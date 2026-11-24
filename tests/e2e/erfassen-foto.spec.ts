@@ -8,6 +8,7 @@ import type { Page, Route } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
 import sharp from 'sharp'
 import { attemptOf } from '../helpers/attempt'
+import { waitForHydration } from '../helpers/hydration'
 import { expectAccessibleLayout, expectNothingOnVerticalFold } from '../helpers/page-checks'
 
 test.describe.configure({ mode: 'serial' })
@@ -303,6 +304,39 @@ test('Verwerfen auf „Neu“ löscht den Entwurf', async ({ page }) => {
   await page.getByRole('button', { name: 'Verwerfen' }).click()
 
   await expect(page).toHaveURL(/\/neu\/(foto|manuell)$/)
+  await page.goto('/neu')
+  await expect(page.getByRole('dialog', { name: 'Erfassung fortsetzen?' })).toHaveCount(0)
+})
+
+test('„Abbrechen“ mit Entwurf: für später behalten oder verwerfen (#285)', async ({ page }) => {
+  await page.goto('/statistik')
+  await waitForHydration(page)
+  await startFresh(page)
+  // Vollbild: keine Tab-Leiste, auch nicht hinter der Kamera
+  await expect(page.getByRole('navigation', { name: 'Hauptnavigation' })).toHaveCount(0)
+  const uploaded = page.waitForResponse(
+    (response) => response.url().includes('/api/photos') && response.request().method() === 'POST',
+  )
+  await shoot(page, '#468')
+  await uploaded
+  await page.getByRole('button', { name: 'Kamera schließen' }).click()
+
+  const cancel = page.getByRole('link', { name: 'Abbrechen' })
+  const sheet = page.getByRole('dialog', { name: 'Erfassung abbrechen?' })
+  await cancel.click()
+  await expect(sheet).toContainText('als Entwurf auf dem NAS')
+  await expectAccessibleLayout(page)
+  await sheet.getByRole('button', { name: 'Für später behalten' }).click()
+  await expect(page).toHaveURL(/\/statistik$/)
+
+  await page.goto('/neu')
+  await expect(page.getByRole('dialog', { name: 'Erfassung fortsetzen?' })).toBeVisible()
+  await page.getByRole('link', { name: 'Fortsetzen' }).click()
+  await expect(page).toHaveURL(/\/neu\/foto$/)
+
+  await cancel.click()
+  await sheet.getByRole('button', { name: 'Verwerfen' }).click()
+  await expect(page).toHaveURL(/\/statistik$/)
   await page.goto('/neu')
   await expect(page.getByRole('dialog', { name: 'Erfassung fortsetzen?' })).toHaveCount(0)
 })

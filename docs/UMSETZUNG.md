@@ -58,8 +58,9 @@ Summe: **102 Pakete.** M14 kann jederzeit nach M6-05 starten, sobald der Maintai
 ├─ src/
 │  ├─ app/                     Routing, dünn (CP §2)
 │  │  ├─ (auth)/anmelden · einrichten · einladung/[token]
-│  │  ├─ (app)/layout.tsx      Rahmen: Kopf, Dock bzw. Seitenleiste
-│  │  ├─ (app)/uebersicht · vorrat · vorrat/[id] · neu · statistik · nachkaufen
+│  │  ├─ (app)/layout.tsx      Rahmen: Kopf, Dock bzw. Seitenleiste (_frame/AppFrame.tsx)
+│  │  ├─ (app)/uebersicht · vorrat · vorrat/[id] · statistik · nachkaufen
+│  │  ├─ (erfassen)/neu         Erfassen im Vollbild ohne Dock (#285)
 │  │  ├─ (app)/einstellungen/… konto · haushalt · nutzer · system
 │  │  ├─ api/auth/[...all] · api/photos · api/photos/[id] · api/recognize · api/push/subscribe · api/health
 │  │  ├─ manifest.ts · sw.ts · globals.css (Design-Tokens)
@@ -255,7 +256,7 @@ Alle Pakete: nur `domain/` oder `shared/lib`, keine Abhängigkeit zu React, Next
 - **M5-01 · Speichern-Use-Case für Foto und manuell** (M) — IDs: ERF-10, ERF-12 · Quelle: T#ablauf-manuell „Speichern“, T#api-intern `createStockAction` · Ordner: `capture/{schemas.ts,application,data,actions}`
   - Fertig, wenn: Ein Schema beschreibt Produkt plus Einheiten. `createStock` legt alles in einer Transaktion an. Derselbe Idempotenz-Schlüssel legt nichts doppelt an. Jede Einheit braucht ein Datum (erkannt, eingetragen oder ausdrücklich geschätzt), sonst lehnt der Use-Case ab.
   - Tests: Use-Case, Integration: doppelter Aufruf, Abbruch mitten in der Transaktion hinterlässt nichts · Braucht: M1-06, M2-02, M2-03, M3-01
-- **M5-02 · Manuelles Formular** (M) — IDs: ERF-01, ERF-10, ERF-11 · Quelle: T#ablauf-manuell, `Proto/components/d6/add/ManualForm.tsx` · Ordner: `capture/ui`, `src/app/(app)/neu`
+- **M5-02 · Manuelles Formular** (M) — IDs: ERF-01, ERF-10, ERF-11 · Quelle: T#ablauf-manuell, `Proto/components/d6/add/ManualForm.tsx` · Ordner: `capture/ui`, `src/app/(erfassen)/neu` (bis #285 `(app)/neu`)
   - Fertig, wenn: Felder Bezeichnung, Kategorie, Behälter, Inhalt, optional kcal und Makros. Pflichtfelder laut Technik-Seite. Ohne kcal gilt der Kategorie-Durchschnitt, sichtbar als „geschätzt“. Prüfung auf dem Gerät und auf dem Server mit demselben Schema.
   - Tests: E2E: Fehler am Feld, Tastaturbedienung, axe · Braucht: M5-01, M3-05
 - **M5-03 · MHD manuell eingeben** (M) — IDs: ERF-07, ERF-08, ERF-09 · Quelle: T#ablauf-foto MHD-Serie, `Proto/components/d6/add/MhdPicker.tsx` · Ordner: `capture/ui`

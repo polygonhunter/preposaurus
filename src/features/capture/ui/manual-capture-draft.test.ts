@@ -9,6 +9,7 @@ import {
   draftForSaving,
   emptyDraft,
   firstInvalidField,
+  isDraftChanged,
   type ManualCaptureDraft,
 } from './manual-capture-draft'
 
@@ -126,5 +127,29 @@ describe('clearErrorsFor', () => {
 
     expect(clearErrorsFor(errors, ['content'])).toEqual({ units: 'b', kcal: 'c', fat: 'd' })
     expect(clearErrorsFor(errors, ['nutrition'])).toEqual({ content: 'a', units: 'b' })
+  })
+})
+
+describe('isDraftChanged', () => {
+  it('ein frisches oder vorbelegtes Formular gilt als unverändert, auch mit neuer captureId', () => {
+    const initial = { ...emptyDraft(null), foodTypeId: FOOD_TYPE }
+
+    expect(isDraftChanged(initial, { ...initial })).toBe(false)
+    expect(isDraftChanged(initial, { ...initial, captureId: emptyDraft(null).captureId })).toBe(
+      false,
+    )
+  })
+
+  it('jede Eingabe zählt: Inhalt, Art, Datum oder Nährwert', () => {
+    const initial = emptyDraft(null)
+
+    expect(isDraftChanged(initial, { ...initial, content: '500 g' })).toBe(true)
+    expect(isDraftChanged(initial, { ...initial, foodTypeId: FOOD_TYPE })).toBe(true)
+    expect(isDraftChanged(initial, { ...initial, units: [{ bestBefore: null, count: 1 }] })).toBe(
+      true,
+    )
+    expect(
+      isDraftChanged(initial, { ...initial, nutrition: { ...initial.nutrition, kcal: '350' } }),
+    ).toBe(true)
   })
 })

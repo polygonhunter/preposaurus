@@ -12,6 +12,7 @@ import { PhotoReview } from './PhotoReview'
 import { PhotoSaveBar } from './PhotoSaveBar'
 import { saveBlocker } from './photo-shots'
 import { usePhotoCapture } from './use-photo-capture'
+import { usePhotoLeaveGuard } from './use-photo-leave-guard'
 import { useSavePhotoCapture } from './use-save-photo-capture'
 
 type PhotoCaptureFlowProps = Readonly<{
@@ -55,6 +56,12 @@ export function PhotoCaptureFlow(props: PhotoCaptureFlowProps) {
     initial,
     isActive: saving.saved === null,
     recognitionOff,
+  })
+  usePhotoLeaveGuard({
+    initial,
+    state,
+    containers: options.containers,
+    isSaved: saving.saved !== null,
   })
   const draft = { ...state, captureId: '', isKcalEstimate: state.nutritionSource === 'ai-estimate' }
   const view = deriveView(options, draft)
