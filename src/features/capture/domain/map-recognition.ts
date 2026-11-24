@@ -32,7 +32,7 @@ const nonNegativeOrNull = (value: number | null) =>
   value !== null && Number.isFinite(value) && value >= 0 ? value : null
 
 /** Vorschlag einer neuen Lebensmittelart (#142): nur ein Angebot, angelegt wird erst nach Bestätigung */
-export interface NewFoodTypeSuggestion {
+interface NewFoodTypeSuggestion {
   name: string
   categoryName: string
 }
