@@ -1,5 +1,5 @@
 # Eine Sicherung (UMSETZUNG M13-03, technik.html „Backups“):
-# - Datenbank mit pg_dump -Fc (Version 18 wie die Datenbank)
+# - Datenbank mit pg_dump -Fc (Version 19 wie die Datenbank)
 # - Fotos versioniert: Jeder Stand ist ein vollständiger Ordner. Unveränderte Dateien sind feste
 #   Links auf den jeweils neuesten Stand jeder Art und kosten keinen Platz. Ein gelöschtes Foto
 #   bleibt in älteren Ständen.

@@ -40,14 +40,15 @@ x-app: &app
 
 services:
   db:
-    image: postgres:18.7-trixie
+    image: postgres:19.0-trixie
     # Capabilities bleiben: Der Start wechselt per gosu von root zum Nutzer postgres.
     security_opt: ['no-new-privileges:true']
     environment:
       POSTGRES_USER: preposaurus
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD fehlt in .env}
       POSTGRES_DB: preposaurus
-    # Ab PostgreSQL 18 liegt das Volume eine Ebene höher als bei 17 (Daten in 18/docker).
+    # Ab PostgreSQL 18 liegt das Volume eine Ebene höher als bei 17 (Daten in 19/docker). Eine neue
+    # Hauptversion legt ihren Ordner daneben an, der alte bleibt für den Weg zurück (INSTALLATION §12.1).
     volumes:
       - ./db:/var/lib/postgresql
     healthcheck:

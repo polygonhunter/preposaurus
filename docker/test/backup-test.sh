@@ -10,12 +10,6 @@ repo_dir=$(pwd)
 prepare_install_dir "$repo_dir"
 trap 'docker compose down --volumes > /dev/null 2>&1 || true' EXIT
 
-# Zeilenzahl je Tabelle, z. B. "kategorie=10,nutzer=1,…"
-ROW_COUNTS="select string_agg(table_schema || '.' || table_name || '=' || (xpath('/row/c/text()',
-  query_to_xml(format('select count(*) as c from %I.%I', table_schema, table_name), false, true, '')))[1]::text,
-  ',' order by table_schema, table_name)
-  from information_schema.tables where table_schema in ('public', 'drizzle') and table_type = 'BASE TABLE'"
-
 backup() {
   docker compose run --rm -T "$@"
 }

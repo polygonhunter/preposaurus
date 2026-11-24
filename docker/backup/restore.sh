@@ -62,10 +62,12 @@ ensure_no_connections() {
 }
 
 # Spielt einen Dump in eine frische Datenbank. Scheitert es, ist die Datenbank wieder weg.
+# Ohne Eigentümer und Rechte aus dem Dump: Ein Stand aus einer anderen Installation (z. B. vor dem
+# Umzug auf eine neue PostgreSQL-Version, #250) kennt andere Rollen.
 restore_into() {
   dropdb --maintenance-db=postgres --if-exists "$1"
   createdb --maintenance-db=postgres "$1"
-  if ! pg_restore --dbname="$1" --no-owner --exit-on-error --single-transaction "$2"; then
+  if ! pg_restore --dbname="$1" --no-owner --no-privileges --exit-on-error --single-transaction "$2"; then
     dropdb --maintenance-db=postgres --if-exists "$1"
     return 1
   fi

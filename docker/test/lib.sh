@@ -25,6 +25,13 @@ prepare_install_dir() {
   cd "$install_dir"
 }
 
+# Zeilenzahl je Tabelle, z. B. "kategorie=10,nutzer=1,…"
+# shellcheck disable=SC2034 # genutzt von den Tests, die diese Datei einbinden
+ROW_COUNTS="select string_agg(table_schema || '.' || table_name || '=' || (xpath('/row/c/text()',
+  query_to_xml(format('select count(*) as c from %I.%I', table_schema, table_name), false, true, '')))[1]::text,
+  ',' order by table_schema, table_name)
+  from information_schema.tables where table_schema in ('public', 'drizzle') and table_type = 'BASE TABLE'"
+
 wait_for_health() {
   for _ in $(seq 1 60); do
     if curl -fsS http://127.0.0.1:3000/api/health > /dev/null 2>&1; then return 0; fi

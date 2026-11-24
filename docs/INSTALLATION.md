@@ -18,6 +18,7 @@ Diese Anleitung führt Schritt für Schritt durch die Einrichtung von Preposauru
 10. [Backups](#10-backups)
 11. [Wiederherstellen](#11-wiederherstellen)
 12. [Updates und der Weg zurück](#12-updates-und-der-weg-zurück)
+    - [12.1 Umzug auf eine neue Hauptversion von PostgreSQL](#121-umzug-auf-eine-neue-hauptversion-von-postgresql)
 13. [Notfall-Befehle: Passwort vergessen, kein Admin, alle abmelden](#13-notfall-befehle-passwort-vergessen-kein-admin-alle-abmelden)
 14. [Fehlersuche](#14-fehlersuche)
 15. [Hinweise je NAS-Typ](#15-hinweise-je-nas-typ)
@@ -31,7 +32,7 @@ Preposaurus läuft als kleine Gruppe von Containern (Programmpaketen) mit Docker
 
 | Dienst | Aufgabe |
 |---|---|
-| `db` | Datenbank (PostgreSQL 18). Nur intern erreichbar |
+| `db` | Datenbank (PostgreSQL 19). Nur intern erreichbar |
 | `migrate` | richtet beim Start die Datenbank ein bzw. bringt sie auf den neuen Stand und beendet sich dann |
 | `web` | die App selbst |
 | `backup` | sichert jede Nacht Datenbank und Fotos |
@@ -50,7 +51,7 @@ Alle Daten liegen in drei sichtbaren Ordnern neben der Compose-Datei:
 
 | Ordner | Inhalt |
 |---|---|
-| `db` | die Datenbank |
+| `db` | die Datenbank, darin ein Unterordner je Hauptversion von PostgreSQL (z. B. `19`) |
 | `fotos` | die Fotos der Packungen |
 | `backups` | die nächtlichen Sicherungen |
 
@@ -309,7 +310,7 @@ Auf Android geht es in Chrome über das Menü (⋮) → **Zum Startbildschirm hi
 ### 10.1 Was automatisch passiert
 
 Der Dienst `backup` sichert jede Nacht um `BACKUP_TIME`:
-- die **Datenbank** mit `pg_dump` (Version 18, passend zur Datenbank) als Datei `datenbank.dump`
+- die **Datenbank** mit `pg_dump` (Version 19, passend zur Datenbank) als Datei `datenbank.dump`
 - die **Fotos** als vollständigen Ordner. Unveränderte Fotos sind feste Links auf den vorigen Stand und kosten keinen zusätzlichen Platz. Ein versehentlich gelöschtes Foto bleibt in älteren Ständen erhalten.
 
 Jeder Stand heißt nach seinem Zeitpunkt, mehrere am selben Tag überschreiben sich also nicht. Es gibt fünf Arten:
@@ -418,6 +419,40 @@ Neue Versionen stehen auf der [Release-Seite](https://github.com/polygonhunter/p
 
 Was zwischen Update und Rückweg erfasst wurde, ist danach weg (es steckt aber noch im Stand `vor-wiederherstellung/…`). Alte Stände unter `vor-update` löschst du selbst, wenn du sie nicht mehr brauchst: `rm -r backups/vor-update/<name>`.
 
+### 12.1 Umzug auf eine neue Hauptversion von PostgreSQL
+
+Steht in den Änderungen eines Releases **„neue Hauptversion von PostgreSQL“** (z. B. von 18 auf 19), reicht `pull` und `up -d` nicht. Die Daten einer Hauptversion lassen sich mit der nächsten nicht einfach weiter öffnen. Der Umzug geht über eine Sicherung: Die alte Version sichert, die neue startet mit einer leeren Datenbank, dann spielst du die Sicherung zurück. Bei den paar Megabyte eines Haushalts dauert das Einspielen Sekunden.
+
+Der Ordner `db` hat je Hauptversion einen eigenen Unterordner (`db/18`, `db/19`). Die neue Version legt ihren neben den alten, **der alte bleibt unverändert liegen**. Das ist dein Weg zurück.
+
+1. **Mit der alten Version sichern**, solange sie noch läuft:
+   ```bash
+   docker compose run --rm backup jetzt vor-update
+   ```
+   Den Namen aus der Ausgabe merken, z. B. `vor-update/2026-11-22_100512`.
+2. **Alles anhalten:** `docker compose down`
+3. **Neue Version eintragen und die neuen Dateien entpacken** wie oben in Schritt 2 und 3. Dann `docker compose pull`.
+4. **Nur die Datenbank starten:**
+   ```bash
+   docker compose up -d db
+   ```
+   Sie richtet sich beim ersten Start neu und leer ein (Ordner `db/19`). Warten, bis `docker compose ps` sie als `healthy` zeigt.
+5. **Die Sicherung zurückspielen** wie in Abschnitt 11, mit der Eingabe `ja`:
+   ```bash
+   docker compose run --rm backup wiederherstellen vor-update/2026-11-22_100512
+   ```
+   Erwartet: `Wiederhergestellt. …`
+6. **Alles starten und prüfen:** `docker compose up -d`, dann `docker compose ps -a` wie in Abschnitt 6 und die App öffnen. Vorrat, Mitglieder und Fotos sind wie vorher.
+
+Warum nicht `pg_upgrade`? Das Werkzeug von PostgreSQL bräuchte beide Versionen in einem Container und hängt an Einstellungen des Dateisystems. Der Weg über die Sicherung nutzt nur das, was ohnehin jede Nacht läuft und in der CI getestet ist (`docker/test/pg-upgrade-test.sh`), und lässt die alten Daten unangetastet.
+
+**Zurück zur alten Version:** `docker compose down`, alte Nummer in `PREPOSAURUS_VERSION`, die Dateien des alten Releases entpacken, `docker compose pull` und `docker compose up -d`. Die alte Datenbank startet wieder aus `db/18` mit dem Stand von vor dem Umzug. Was du danach erfasst hast, fehlt dort.
+
+**Aufräumen:** Läuft die neue Version ein paar Wochen ohne Probleme, den alten Ordner löschen. Er gehört dem Nutzer der Datenbank, deshalb mit `sudo`:
+```bash
+sudo rm -r db/18
+```
+
 ## 13. Notfall-Befehle: Passwort vergessen, kein Admin, alle abmelden
 
 Für Notfälle gibt es vier Befehle, die du auf dem NAS im Preposaurus-Ordner ausführst, während die App läuft. Jeder Befehl, der etwas ändert, hinterlässt eine Zeile im Log von `web` (`docker compose logs web`), nie mit Passwort.
@@ -500,6 +535,7 @@ docker compose logs tailscale        # Tailscale
 | `migrate` steht auf `Exited (1)` | `docker compose logs migrate` lesen. Oft ist die Datenbank nicht erreichbar oder `POSTGRES_PASSWORD` wurde nach dem ersten Start geändert. Altes Passwort wieder eintragen |
 | `db` meldet `password authentication failed` | `POSTGRES_PASSWORD` wurde nach dem ersten Start geändert. Die Datenbank behält das erste Passwort. Altes Passwort wieder eintragen |
 | `db` meldet etwas zu `/var/lib/postgresql/data` | Der Ordner `db` stammt von PostgreSQL 17 oder älter. Neu einrichten und ein Backup einspielen |
+| Nach einem Update ist die App leer und zeigt die Ersteinrichtung | Das Release hat eine neue Hauptversion von PostgreSQL, die Datenbank hat sich neu und leer eingerichtet. Die alten Daten liegen unverändert in `db/<alte Version>`. Nichts in der App einrichten. `docker compose stop web worker`, dann Abschnitt 12.1 ab Schritt 5. Ohne Stand `vor-update` nimm den letzten täglichen Stand von vor dem Update (`backup liste`) |
 | Fotos lassen sich nicht speichern, im Log `EACCES` | Der Ordner `fotos` gehört nicht dem Nutzer aus `PREPOSAURUS_UID`. Abschnitt 4.3 |
 | Browser findet die Adresse nicht | Tailscale auf dem Gerät verbunden? MagicDNS an (Abschnitt 3.1)? Erscheint das Gerät unter **Machines**? |
 | Zertifikatsfehler oder langer erster Aufruf | HTTPS-Zertifikate im Admin-Bereich eingeschaltet? Der erste Aufruf holt das Zertifikat und dauert etwas. `docker compose logs tailscale` zeigt Fehler |
