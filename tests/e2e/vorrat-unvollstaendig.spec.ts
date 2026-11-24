@@ -26,10 +26,10 @@ test('Chips tragen ihren Zähler im Namen, auch ohne Filter', async ({ page }) =
 
   await page.goto(INCOMPLETE_PATH)
   await expectCountedChips(page)
-  await expect(statusChips(page).filter({ hasText: 'Unvollständig' })).toHaveAttribute(
-    'aria-current',
-    'true',
-  )
+  const active = statusChips(page).filter({ hasText: 'Unvollständig' })
+  await expect(active).toHaveAttribute('aria-current', 'true')
+  // Der aktive Chip steht ganz rechts, die Reihe rollt ihn auch auf dem iPhone ins Bild (#96)
+  await expect(active).toBeInViewport({ ratio: 1 })
 })
 
 test('„Unvollständig“ nennt je Zeile den Grund', async ({ page }) => {

@@ -10,9 +10,11 @@ type ChipProps = Readonly<{
   onClick?: () => void
 }>
 
+// gap statt Leerzeichen: In einem Flex-Element fällt das Leerzeichen vor einem Zähler weg
+// („Im Vorrat22“), im Namen bleibt es stehen.
 function chipClasses(isActive: boolean): string {
   return cx(
-    'touch-target inline-flex shrink-0 items-center rounded-full px-3.5 py-1.5 text-callout whitespace-nowrap transition-colors duration-150 ease-out',
+    'touch-target inline-flex shrink-0 items-center gap-1 rounded-full px-3.5 py-1.5 text-callout whitespace-nowrap transition-colors duration-150 ease-out',
     // Ab „breit“ liegt der Inhalt selbst auf surface, dort braucht der Chip einen Rand
     isActive
       ? 'bg-fg text-bg'

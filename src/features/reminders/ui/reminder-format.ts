@@ -34,12 +34,12 @@ export function formatReminderSummary({ weeklySummary, isUrgentEnabled }: Remind
 
 const addressCount = (count: number) => (count === 1 ? '1 Adresse' : `${String(count)} Adressen`)
 
-/** Wert der Zeile „Mail“ unter „So kommen sie an“ */
+/** Wert der Zeile „Mail“ unter „Zustellung“ */
 export function formatMailDelivery(delivery: ReminderDelivery): string {
   return delivery.isMailConfigured ? addressCount(delivery.addressCount) : 'nicht eingerichtet'
 }
 
-/** Erklärung unter „So kommen sie an“, je nachdem, ob Mails gehen können */
+/** Erklärung unter „Zustellung“, je nachdem, ob Mails gehen können */
 export function describeDelivery(delivery: ReminderDelivery): string {
   const push = 'Push auf euren Geräten kommt in einem späteren Update.'
   if (!delivery.isMailConfigured) {

@@ -25,10 +25,11 @@ const literText = (ml: number) => `${formatGermanNumber(ml / ML_PER_LITER)} l`
 const countText = (count: number, one: string, many: string) =>
   `${formatGermanNumber(count)} ${count === 1 ? one : many}`
 
-/** „2 Erwachsene: je 2.300 kcal und 2,5 l Wasser am Tag“ */
+/** „2 Erwachsene: je 2.300 kcal und 2,5 l Wasser am Tag“, bei einer Person ohne „je“ */
 export function needLineText({ type, count, kcalPerDay, waterMlPerDay }: OverviewNeedLine): string {
   const { one, many } = MEMBER_WORDS[type]
-  return `${countText(count, one, many)}: je ${kcalText(kcalPerDay)} und ${literText(waterMlPerDay)} Wasser am Tag`
+  const each = count === 1 ? '' : 'je '
+  return `${countText(count, one, many)}: ${each}${kcalText(kcalPerDay)} und ${literText(waterMlPerDay)} Wasser am Tag`
 }
 
 /** Zusammen je Tag, dazu der Hinweis auf Babys, die im Bedarf noch nicht zählen. */

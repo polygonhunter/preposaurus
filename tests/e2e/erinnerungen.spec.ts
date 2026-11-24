@@ -35,7 +35,7 @@ for (const colorScheme of ['light', 'dark'] as const) {
     await expect(page.getByRole('heading', { level: 1, name: 'Erinnerungen' })).toBeVisible()
     await expect(page.getByRole('switch', { name: 'Wochenübersicht' })).toHaveCount(1)
     await expect(page.getByRole('switch', { name: /Push/ })).toHaveCount(0)
-    await expect(page.getByRole('list', { name: 'So kommen sie an' })).toContainText('kommt später')
+    await expect(page.getByRole('list', { name: 'Zustellung' })).toContainText('kommt später')
     await expectAccessibleLayout(page)
   })
 }
