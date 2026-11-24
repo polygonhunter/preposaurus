@@ -64,6 +64,33 @@ describe('Erklär-Blatt der Kennwerte im Detail', () => {
     expect(kcalOriginText(water)).toBeNull()
   })
 
+  it('zählt ein Getränk ohne kcal nicht als Wasser (#260)', () => {
+    const tea = totals({ kcal: 0, amounts: { g: 0, ml: 6000 }, energyDays: 0, waterDays: 0 })
+    expect(daysCalculation(tea, need)).toBe('0 kcal ÷ 6.000 kcal am Tag = 0 Tage')
+    expect(kcalText(tea)).toBe('Dieses Getränk zählt mit 0 kcal.')
+    expect(kcalOriginText(tea)).toBeNull()
+    const meaning = daysMeaningTexts(tea).join(' ')
+    expect(meaning).toContain('nur die Warengruppe Wasser')
+    expect(meaning).not.toContain('dieses Wasser')
+  })
+
+  it('nennt bei Wasser mit kcal die kcal statt „Wasser hat keine kcal“ (#260)', () => {
+    const flavoured = totals({ kcal: 300, amounts: { g: 0, ml: 6000 }, waterMl: 6000 })
+    expect(kcalText(flavoured)).toBe(
+      'Je Packung: Inhalt × kcal je 100 g bzw. ml ÷ 100. Zusammen 300 kcal.',
+    )
+  })
+
+  it('setzt „ca.“ in die Rechnung, wenn die Kachel „ca.“ trägt (#260)', () => {
+    const approximate = totals({ isApproximate: true })
+    expect(daysCalculation(approximate, need)).toBe(
+      'ca. 14.320 kcal ÷ 6.000 kcal am Tag = 2,3 Tage',
+    )
+    expect(detailTiles({ totals: approximate }).find((tile) => tile.label === 'kcal')?.value).toBe(
+      'ca. 14.320',
+    )
+  })
+
   it('zeigt ohne Bedarf keine Rechnung, sagt aber warum', () => {
     const noNeed = totals({ energyDays: null, waterDays: null })
     expect(daysCalculation(noNeed, { kcalPerDay: 0, waterMlPerDay: 0 })).toBeNull()

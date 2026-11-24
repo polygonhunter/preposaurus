@@ -2,6 +2,7 @@
 // im Schema `pgboss` an, außerhalb der Drizzle-Migrationen. Nur diese Datei kennt pg-boss.
 import 'server-only'
 import { PgBoss, type ConstructorOptions } from 'pg-boss'
+import { JOB_QUEUE_CONNECTION_NAME } from '@/server/db/connection-names'
 import type { Logger } from '@/shared/lib/logger'
 import { err, ok, type Result } from '@/shared/lib/result'
 import type { Job } from './job-definition'
@@ -20,12 +21,19 @@ const POOL_SIZE = 3
 const START_ATTEMPTS = 5
 const POSTGRES_URL = /^postgres(ql)?:\/\//
 
-export type JobDatabase = Pick<ConstructorOptions, 'connectionString' | 'db' | 'backend' | 'max'>
+export type JobDatabase = Pick<
+  ConstructorOptions,
+  'connectionString' | 'db' | 'backend' | 'max' | 'application_name'
+>
 
 /** pg-boss braucht PostgreSQL. PGlite gehört dem Webserver und lässt sich nicht teilen. */
 export function jobDatabaseFor(databaseUrl: string): Result<JobDatabase, 'needs-postgres'> {
   if (!POSTGRES_URL.test(databaseUrl)) return err('needs-postgres')
-  return ok({ connectionString: databaseUrl, max: POOL_SIZE })
+  return ok({
+    connectionString: databaseUrl,
+    max: POOL_SIZE,
+    application_name: JOB_QUEUE_CONNECTION_NAME,
+  })
 }
 
 export interface JobQueue {

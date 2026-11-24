@@ -11,11 +11,15 @@ function toPgliteDataDir(url: string): string | undefined {
 }
 
 // Die Treiber werden erst bei Bedarf geladen, damit der Container kein WASM von PGlite lädt.
-export async function connectDatabase(url: string): Promise<DatabaseConnection> {
+// Den Namen der Verbindung (`application_name`) kennt nur PostgreSQL, PGlite braucht keinen.
+export async function connectDatabase(
+  url: string,
+  applicationName?: string,
+): Promise<DatabaseConnection> {
   if (url.startsWith(PGLITE_PREFIX)) {
     const { connectPglite } = await import('./pglite-driver')
     return connectPglite(toPgliteDataDir(url))
   }
   const { connectPostgres } = await import('./postgres-driver')
-  return connectPostgres(url)
+  return connectPostgres(url, applicationName)
 }

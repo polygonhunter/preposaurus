@@ -1,7 +1,7 @@
 // Einstieg des Worker-Containers (UMSETZUNG M11-01): `preposaurus worker` im Image, lokal
 // `npm run worker`. Derselbe Code wie der Webserver, nur ein anderer Einstieg.
 import { noPush } from '@/features/reminders/application/reminder-push'
-import { closeDb } from '@/server/db/get-db'
+import { closeDb, openDb } from '@/server/db/get-db'
 import { jobDatabaseFor, startJobQueue, type JobDatabase } from '@/server/jobs/job-queue'
 import { createMailSender } from '@/server/notify/create-mail-sender'
 import { loadEnv, type Env } from '@/shared/config/env'
@@ -18,6 +18,8 @@ function fail(message: string, context?: Record<string, unknown>): void {
 }
 
 async function startWorker(database: JobDatabase, settings: Env): Promise<void> {
+  // Vor allen Jobs: So heißt auch die Verbindung der Jobs „preposaurus-worker“ (#261)
+  await openDb('worker')
   const mail = createMailSender(settings)
   // Push kommt mit M11-03 (#86). Bis dahin geht die Wochenübersicht nur als Mail.
   const jobs = createJobs({ mail, push: noPush, appUrl: settings.APP_URL ?? null })
