@@ -1,7 +1,8 @@
 // Speichern einer Erfassung (#51, UX §1 „Zwei Wege, ein Ergebnis“): Foto und manuell liefern
 // denselben Entwurf. Hier stehen die Fachregeln, bevor etwas in die DB geht:
 // - „Datum fehlt“ ist erlaubt (#116), ein Datum wird nie ergänzt.
-// - Eine Schätzung trägt immer das Kennzeichen und ist nie taggenau (#124: Monat oder Jahr).
+// - Eine Schätzung trägt immer das Kennzeichen, hat nur die Genauigkeit Monat (#124, #170) und
+//   ist nie ein Verbrauchsdatum (#180): Ein Verbrauchsdatum gilt nur, wenn es aufgedruckt ist.
 // - Nur Monat oder Jahr bekannt: Es gilt das Monats- bzw. Jahresende.
 // - Nährwerte ohne einen einzigen Wert gelten als „keine eigenen Werte“ (Richtwert beim Lesen, E-5).
 import type {
@@ -76,15 +77,23 @@ export interface StockPlan {
 
 export interface StockDraftError {
   kind: 'invalid'
-  issue: 'estimate-too-precise'
+  issue: 'estimate-too-precise' | 'estimate-too-coarse' | 'estimate-use-by'
 }
 
-function planBestBefore(bestBefore: BestBefore | null): Result<BestBefore | null, StockDraftError> {
+/** Was an einer Schätzung nicht stimmt, sonst null. */
+function estimateIssue({ bestBefore, kind }: UnitEntry): StockDraftError['issue'] | null {
+  if (bestBefore?.isEstimated !== true) return null
+  // Taggenau täuschte sie ein gelesenes Datum vor, ein Jahresende verlängerte sie (#170).
+  if (bestBefore.precision === 'day') return 'estimate-too-precise'
+  if (bestBefore.precision === 'year') return 'estimate-too-coarse'
+  return kind === 'use-by' ? 'estimate-use-by' : null
+}
+
+function planBestBefore(entry: UnitEntry): Result<BestBefore | null, StockDraftError> {
+  const issue = estimateIssue(entry)
+  if (issue !== null) return err({ kind: 'invalid', issue })
+  const { bestBefore } = entry
   if (bestBefore === null) return ok(null)
-  // Eine taggenaue Schätzung täuschte ein gelesenes Datum vor.
-  if (bestBefore.isEstimated && bestBefore.precision === 'day') {
-    return err({ kind: 'invalid', issue: 'estimate-too-precise' })
-  }
   return ok({ ...bestBefore, date: normalizeToPrecision(bestBefore.date, bestBefore.precision) })
 }
 
@@ -92,7 +101,7 @@ function planBestBefore(bestBefore: BestBefore | null): Result<BestBefore | null
 function expandUnits(entries: readonly UnitEntry[]): Result<PlannedUnit[], StockDraftError> {
   const planned: PlannedUnit[] = []
   for (const entry of entries) {
-    const bestBefore = planBestBefore(entry.bestBefore)
+    const bestBefore = planBestBefore(entry)
     if (!bestBefore.ok) return bestBefore
     for (let index = 0; index < entry.count; index += 1) {
       planned.push({ bestBefore: bestBefore.value, kind: entry.kind })

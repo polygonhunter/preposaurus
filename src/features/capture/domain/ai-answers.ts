@@ -44,7 +44,6 @@ export interface AiNutritionEstimateAnswer {
 /** MHD-Schätzung bei „Datum fehlt“ (#124): Haltbarkeit ab heute, nie ein Datum */
 export interface AiBestBeforeEstimateAnswer {
   haltbar_monate: number | null
-  genauigkeit: 'monat' | 'jahr'
   sicherheit: AiConfidence
 }
 

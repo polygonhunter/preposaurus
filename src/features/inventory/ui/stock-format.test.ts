@@ -163,12 +163,12 @@ describe('Kennwerte als Text', () => {
 })
 
 describe('Datum und Hinweise', () => {
-  it('zeigt das MHD wie aufgedruckt, eine Schätzung mit Vermerk', () => {
+  it('zeigt das MHD wie aufgedruckt, eine Schätzung mit „ca.“', () => {
     expect(formatDate({ date: '2027-09-30', precision: 'month', isEstimated: false })).toBe(
       '09/2027',
     )
-    expect(formatDate({ date: '2027-09-30', precision: 'day', isEstimated: true })).toBe(
-      '30.09.2027, geschätzt',
+    expect(formatDate({ date: '2027-09-30', precision: 'month', isEstimated: true })).toBe(
+      'ca. 09/2027',
     )
   })
 

@@ -32,7 +32,7 @@ interface EstimateRequest {
 }
 
 export interface EstimatedBestBefore {
-  /** Immer mit `isEstimated: true`, Genauigkeit Monat oder Jahr */
+  /** Immer mit `isEstimated: true` und Genauigkeit Monat (#170) */
   bestBefore: BestBefore
   confidence: Confidence
 }
