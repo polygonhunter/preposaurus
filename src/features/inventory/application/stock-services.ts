@@ -6,12 +6,13 @@ import { todayInBerlin, type CalendarDay } from '@/shared/lib/dates'
 import { createStockReadRepository } from '../data/stock-read-repository'
 import { createUnitWriteRepository } from '../data/unit-write-repository'
 import type { HistoryReader } from './get-food-type-history'
+import type { TakenOutReader } from './get-history'
 import type { StockReader } from './stock-reader'
 import type { UnitWriter } from './unit-writer'
 
 export interface StockServices {
   reader: StockReader
-  history: HistoryReader
+  history: HistoryReader & TakenOutReader
   writer: UnitWriter
   today: CalendarDay
   now: Date

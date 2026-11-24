@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from '../helpers/e2e-test'
+import { expectNotice, noticeBar } from '../helpers/notice-bar'
 import { E2E_MEMBER, signedOut, signInViaUi } from '../helpers/e2e-auth'
 import { expectAccessibleLayout, expectFocusNotObscured } from '../helpers/page-checks'
 
@@ -11,7 +12,6 @@ function onlyDesktop(projectName: string) {
   test.skip(projectName !== 'desktop', 'Ändert Daten, läuft nur auf Desktop')
 }
 
-const undoBar = (page: Page, text: string) => page.getByRole('status').filter({ hasText: text })
 const escape = (text: string) => text.replace(/[()]/g, '\\$&')
 
 type Food = Readonly<{ name: string; search: string }>
@@ -112,11 +112,11 @@ test('Erfassen aus Nachkaufen ist mit der Lebensmittelart vorbelegt', async ({ p
 
   // Entnehmen und auf die Liste setzen, dort abhaken und „Jetzt erfassen“ (#195, F5)
   await page.getByRole('button', { name: /^1 entnehmen · / }).click()
-  await undoBar(page, '1 Packung verbraucht').getByRole('button', { name: 'Nachkaufen' }).click()
-  await expect(undoBar(page, 'steht jetzt auf der Nachkaufen-Liste.')).toBeVisible()
+  await noticeBar(page, '1 Packung verbraucht').getByRole('button', { name: 'Nachkaufen' }).click()
+  await expectNotice(page, 'steht jetzt auf der Nachkaufen-Liste.')
   await page.goto('/nachkaufen')
   await page.getByRole('checkbox', { name: food.name }).click()
-  await undoBar(page, `${food.name} abgehakt.`)
+  await noticeBar(page, `${food.name} abgehakt.`)
     .getByRole('button', { name: 'Jetzt erfassen' })
     .click()
   await expect(page).toHaveURL(/\/neu\/manuell\?art=/, { timeout: 15_000 })

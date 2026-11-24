@@ -72,10 +72,9 @@ describe('matchesStatusFilter', () => {
     expect(matches).toEqual([true, true, false, false])
   })
 
-  it('trennt Vorrat, Verbraucht und Entsorgt nach gespeichertem Status', () => {
+  it('lässt verbrauchte und entsorgte Packungen aus jedem Filter heraus', () => {
     expect(matchesStatusFilter(consumed, 'in-stock', context)).toBe(false)
-    expect(matchesStatusFilter(consumed, 'consumed', context)).toBe(true)
-    expect(matchesStatusFilter(discarded, 'discarded', context)).toBe(true)
+    expect(matchesStatusFilter(consumed, 'due-soon', context)).toBe(false)
     expect(matchesStatusFilter(discarded, 'expired', context)).toBe(false)
   })
 })

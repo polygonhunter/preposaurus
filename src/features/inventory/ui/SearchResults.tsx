@@ -16,8 +16,6 @@ const MATCH_WORD: Record<StockFilter['status'], string | null> = {
   expired: 'abgelaufen',
   // Statt eines Worts steht der Grund (noteFor)
   incomplete: null,
-  consumed: 'verbraucht',
-  discarded: 'entsorgt',
 }
 
 // Unter „Unvollständig“ steht der Grund statt „2 Packungen unvollständig“ (#221)

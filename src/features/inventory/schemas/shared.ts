@@ -3,13 +3,13 @@
 // Datumswerte als ISO-Text (JJJJ-MM-TT).
 import { z } from 'zod'
 
-// Zustands-Filter im Vorrat, Quelle der Werte für URL und Zähler (#43). Gespiegelt als Typen
-// `InStockStatusFilter` und `StockStatusFilter` in inventory/domain/stock-filter.ts.
-const IN_STOCK_STATUS_FILTERS = ['in-stock', 'due-soon', 'expired', 'incomplete'] as const
-export const STOCK_STATUS_FILTERS = [...IN_STOCK_STATUS_FILTERS, 'consumed', 'discarded'] as const
+// Zustands-Filter im Vorrat, Quelle der Werte für URL und Zähler (#43). Gespiegelt als Typ
+// `StockStatusFilter` in inventory/domain/stock-filter.ts. Verbraucht und Entsorgt stehen im
+// Verlauf (#48, D7), siehe schemas/history.ts.
+export const STOCK_STATUS_FILTERS = ['in-stock', 'due-soon', 'expired', 'incomplete'] as const
 
 /** Zähler der Zustands-Chips in Packungen, auf jeder Seite mit Chips (#221) */
-export const inStockCountsSchema = z.record(z.enum(IN_STOCK_STATUS_FILTERS), z.number().int())
+export const inStockCountsSchema = z.record(z.enum(STOCK_STATUS_FILTERS), z.number().int())
 
 /** Gründe im Filter „Unvollständig“ (#221), gespiegelt als `IncompleteReason` (domain/incomplete.ts) */
 export const incompleteReasonSchema = z.enum([

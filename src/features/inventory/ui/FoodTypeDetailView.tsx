@@ -66,7 +66,7 @@ export function FoodTypeDetailView(props: FoodTypeDetailViewProps) {
       {hint === null ? null : (
         <p className="px-8 pt-3 text-footnote text-fg2 breit:px-10">{hint}</p>
       )}
-      <HistorySection entries={history} />
+      <HistorySection entries={history} target={detail.target} />
       {detail.fifoUnitId === null || fifoGroup === null ? null : (
         <TakeFifoBar
           name={detail.name}

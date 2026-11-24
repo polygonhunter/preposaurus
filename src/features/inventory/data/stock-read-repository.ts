@@ -1,4 +1,4 @@
-// Lese-Repository des Vorrats (#43). Jede Methode nimmt die haushalt_id und filtert darauf (#133).
+// Lese-Repository des Vorrats (#43) samt Verlauf (#48). Jede Methode nimmt die haushalt_id und filtert darauf (#133).
 // Die Use-Cases kennen nur den Port `StockReader`, Tests ersetzen ihn durch ein Fake.
 import 'server-only'
 import type { ProductFilter, UnitQuery } from '@/features/inventory/domain/stock-entry'
@@ -10,7 +10,8 @@ import {
   loadSupplyBasis,
 } from './household-read-query'
 import { loadProducts } from './stock-products-query'
-import { countUnitsByStatus, loadUnits } from './stock-units-query'
+import { countUnitsByStatus, loadUnits, type StatusCountQuery } from './stock-units-query'
+import { loadTakenOutUnits, type TakenOutQuery } from './taken-out-query'
 import { loadUnitHistory } from './unit-history-query'
 
 type HistoryQuery = Readonly<{ productIds: readonly string[]; limit: number }>
@@ -24,9 +25,11 @@ export function createStockReadRepository(db: Database) {
     loadProducts: (householdId: string, filter: ProductFilter) =>
       loadProducts(db, householdId, filter),
     loadUnits: (householdId: string, query: UnitQuery) => loadUnits(db, householdId, query),
-    countUnitsByStatus: (householdId: string, productIds: readonly string[]) =>
-      countUnitsByStatus(db, householdId, productIds),
+    countUnitsByStatus: (householdId: string, query: StatusCountQuery) =>
+      countUnitsByStatus(db, householdId, query),
     loadUnitHistory: (householdId: string, query: HistoryQuery) =>
       loadUnitHistory(db, householdId, query),
+    loadTakenOutUnits: (householdId: string, query: TakenOutQuery) =>
+      loadTakenOutUnits(db, householdId, query),
   }
 }

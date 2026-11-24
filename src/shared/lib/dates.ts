@@ -77,6 +77,17 @@ export function todayInBerlin(now: Date): CalendarDay {
   return toCalendarDay(`${pad(part('year'), 4)}-${pad(part('month'), 2)}-${pad(part('day'), 2)}`)
 }
 
+const HOUR_MS = 3_600_000
+
+/**
+ * Erster Augenblick eines Tages in Berlin, z. B. als untere Grenze für `timestamptz`-Spalten.
+ * Mitternacht liegt nie in der Umstellung (2 bzw. 3 Uhr): Es gilt UTC+2 im Sommer, sonst UTC+1.
+ */
+export function startOfDayInBerlin(day: CalendarDay): Date {
+  const summer = new Date(toUtcMillis(day) - 2 * HOUR_MS)
+  return todayInBerlin(summer) === day ? summer : new Date(toUtcMillis(day) - HOUR_MS)
+}
+
 /** Ganze Tage von `from` bis `to`, negativ, wenn `to` davor liegt. */
 export function daysBetween(from: CalendarDay, to: CalendarDay): number {
   return Math.round((toUtcMillis(to) - toUtcMillis(from)) / DAY_MS)
