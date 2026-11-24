@@ -5,8 +5,9 @@
 import 'server-only'
 import { err, ok, type Result } from '@/shared/lib/result'
 import { findNameConflict } from '../domain/catalog-name'
-import type { FoodTypeEntry } from '../domain/category'
+import { ownSiblingIds, type FoodTypeEntry } from '../domain/category'
 import { uniqueOwnKey } from '../domain/own-key'
+import { moveInOrder, type MoveDirection } from '../domain/sort-order'
 import type { FoodTypeInput } from '../schemas'
 import type { CatalogServices } from './catalog-services'
 import type { NameError } from './storage-locations'
@@ -84,4 +85,14 @@ export async function removeFoodType(
 ): Promise<Result<null, { kind: 'not-found' } | { kind: 'in-use' }>> {
   const outcome = await deps.foodTypes.remove(target.householdId, target.id)
   return outcome === 'removed' ? ok(null) : err({ kind: outcome })
+}
+
+/** Rückt eine eigene Art unter den eigenen Arten ihrer Kategorie eine Stelle weiter (#243). */
+export async function moveFoodType(
+  deps: Pick<Deps, 'foodTypes'>,
+  { householdId, id, direction }: Target & Readonly<{ direction: MoveDirection }>,
+): Promise<void> {
+  const siblings = ownSiblingIds(await deps.foodTypes.list(householdId), id)
+  const order = siblings === null ? null : moveInOrder(siblings, id, direction)
+  if (order !== null) await deps.foodTypes.saveOrder(householdId, order)
 }

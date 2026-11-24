@@ -5,6 +5,7 @@ import { moveStorageLocationAction } from '../actions/move-storage-location-acti
 import type { StorageLocation } from '../domain/storage-location'
 import { productCountLabel } from './catalog-labels'
 import { MoveButtons } from './MoveButtons'
+import { SortableArea } from './SortableArea'
 
 type StorageLocationListProps = Readonly<{
   locations: readonly StorageLocation[]
@@ -17,11 +18,12 @@ type StorageLocationListProps = Readonly<{
 // und ohne Knöpfe (nur lesen).
 export function StorageLocationList({ locations, labelledBy, canEdit }: StorageLocationListProps) {
   const lastIndex = locations.length - 1
-  return (
+  const list = (
     <Group labelledBy={labelledBy}>
       {locations.map((location, index) => (
         <Row
           key={location.id}
+          focusKey={location.id}
           title={location.name}
           subtitle={productCountLabel(location.productCount)}
           {...(canEdit
@@ -42,4 +44,5 @@ export function StorageLocationList({ locations, labelledBy, canEdit }: StorageL
       ))}
     </Group>
   )
+  return canEdit ? <SortableArea>{list}</SortableArea> : list
 }
