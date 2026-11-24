@@ -73,7 +73,7 @@ describe('Empfehlungsquelle BBK/BLE im Seed', () => {
       .innerJoin(sources, eq(sources.id, sourceVersions.sourceId))
       .where(eq(sources.key, 'bbk-ble'))
 
-  it('legt genau eine Fassung an, ungeprüft, mit Stand, Link und 10 Tagen, auch nach erneutem Seed', async () => {
+  it('legt genau eine Fassung an, geprüft (U3), mit Stand, Link und 10 Tagen, auch nach erneutem Seed', async () => {
     await seedMasterData(testDb.db)
 
     const found = await versions()
@@ -83,8 +83,20 @@ describe('Empfehlungsquelle BBK/BLE im Seed', () => {
       asOf: 'BBK 11/2025, BLE 2024',
       link: 'https://www.ernaehrungsvorsorge.de/private-vorsorge/notvorrat/vorratstabelle',
       defaultDays: 10,
-      isVerified: false,
+      isVerified: true,
     })
+  })
+
+  it('stellt eine ungeprüfte Fassung aus einer älteren Installation beim Seed auf geprüft um', async () => {
+    const [version] = await versions()
+    await testDb.db
+      .update(sourceVersions)
+      .set({ isVerified: false })
+      .where(eq(sourceVersions.id, version?.id ?? ''))
+
+    await seedMasterData(testDb.db)
+
+    expect(await versions()).toMatchObject([{ id: version?.id, isVerified: true }])
   })
 
   it('Mengen je Warengruppe ergeben × 10 Tage die Summen des Prüfblatts', async () => {
@@ -189,7 +201,7 @@ describe('Empfehlungsquelle BBK/BLE im Seed', () => {
     const overview = overviewSchema.parse(await getOverview(ports, { householdId, today }))
 
     // Bedarf: 3 × 2.200 = 6.600 kcal, 2 + 2 + 1,5 = 5,5 l Wasser je Tag
-    expect(overview.household.source).toMatchObject({ name: 'BBK/BLE', isVerified: false })
+    expect(overview.household.source).toMatchObject({ name: 'BBK/BLE', isVerified: true })
     expect(overview.supply).toMatchObject({
       energyDays: 2.7,
       waterDays: 3.2,
