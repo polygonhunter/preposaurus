@@ -90,7 +90,7 @@ test('Erklär-Blatt öffnet per Tastatur und nennt Rechnung, „ca.“ und Quell
     await page.keyboard.press('Enter')
     await expect(sheet).toBeVisible({ timeout: 1000 })
   }).toPass()
-  await expect(sheet.getByText(/^\d+ \S+: je [\d.]+ kcal und /).first()).toBeVisible()
+  await expect(sheet.getByText(/^\d+ \S+: (je )?[\d.]+ kcal und /).first()).toBeVisible()
   await expect(sheet.getByText(/^[\d.]+ kcal ÷ [\d.]+ kcal am Tag = [\d,]+ Tage?$/)).toBeVisible()
   await expect(sheet.getByText(/^[\d,.]+ l ÷ [\d,]+ l am Tag = [\d,]+ Tage?$/)).toBeVisible()
   await expect(

@@ -112,6 +112,18 @@ export function formatDate({ date, precision, isEstimated }: BestBeforeDto): str
   return isEstimated ? `${text}, geschätzt` : text
 }
 
+/**
+ * Datum hinter dem Zustandswort einer Zeile. Es gehört zur nächsten gültigen Packung. Lautet das
+ * Wort „abgelaufen“, gehört es zu einer anderen Packung, deshalb dann „nächstes MHD …“ (#208).
+ */
+export function nextDateLabel(
+  state: UnitStateDto | null,
+  next: BestBeforeDto | null,
+): string | null {
+  if (next === null) return null
+  return `${state === 'expired' ? 'nächstes MHD ' : ''}${formatDate(next)}`
+}
+
 /** Kein Vorrat: in keiner Warengruppe liegt eine Packung (auch keine abgelaufene). */
 export function isEmptyStock(groups: readonly Pick<GroupFigures, 'totals'>[]): boolean {
   return groups.every(({ totals }) => !hasStock(totals))

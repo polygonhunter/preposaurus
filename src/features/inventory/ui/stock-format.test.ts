@@ -10,6 +10,7 @@ import {
   groupCoverageText,
   groupSubtitle,
   isEmptyStock,
+  nextDateLabel,
   officialNameEyebrow,
   shelfLifeHint,
   stillGoodLabel,
@@ -140,6 +141,13 @@ describe('Datum und Hinweise', () => {
     expect(formatDate({ date: '2027-09-30', precision: 'day', isEstimated: true })).toBe(
       '30.09.2027, geschätzt',
     )
+  })
+
+  it('nennt das Datum hinter „abgelaufen“ als nächstes MHD einer anderen Packung', () => {
+    const next = { date: '2027-12-29', precision: 'day', isEstimated: false } as const
+    expect(nextDateLabel('soon', next)).toBe('29.12.2027')
+    expect(nextDateLabel('expired', next)).toBe('nächstes MHD 29.12.2027')
+    expect(nextDateLabel('expired', null)).toBeNull()
   })
 
   it('beruhigt beim abgelaufenen MHD und warnt klar beim Verbrauchsdatum', () => {
