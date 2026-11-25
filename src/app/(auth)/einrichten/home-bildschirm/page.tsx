@@ -3,7 +3,7 @@ import { requireSetupStepPage } from '@/features/auth/application/setup-step-req
 import { ContinueSetupButton } from '@/features/auth/ui/ContinueSetupButton'
 import { stepText } from '@/features/auth/ui/setup-step-text'
 import { SkipWhenInstalled } from '@/features/auth/ui/SkipWhenInstalled'
-import { SETUP_GOAL_PATH } from '@/shared/config/setup-paths'
+import { SETUP_RECOGNITION_PATH } from '@/shared/config/setup-paths'
 import { INSTALL_HINT_TEXT, INSTALL_HINT_TITLE } from '@/shared/lib/install-hint'
 import { Group } from '@/shared/ui/Group'
 import { GroupHeader } from '@/shared/ui/GroupHeader'
@@ -26,7 +26,7 @@ export default async function SetupHomeScreenPage() {
   return (
     <>
       <PageHeader
-        back={{ href: SETUP_GOAL_PATH, label: 'Zurück' }}
+        back={{ href: SETUP_RECOGNITION_PATH, label: 'Zurück' }}
         eyebrow={stepText(position)}
         title={INSTALL_HINT_TITLE}
         subtitle={INSTALL_HINT_TEXT}

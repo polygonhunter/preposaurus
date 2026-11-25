@@ -7,6 +7,7 @@ const STEP_PATHS = [
   '/einrichten/mitglieder',
   '/einrichten/mitglieder/neu',
   '/einrichten/ziel',
+  '/einrichten/foto-erkennung',
   '/einrichten/home-bildschirm',
 ]
 

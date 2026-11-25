@@ -53,3 +53,8 @@ export const ENV_CONNECTION_LABELS = {
   anthropic: 'Anthropic · aus Umgebungsvariable',
   fake: 'Test-Anbieter ohne Netz',
 } as const
+
+export const API_KEY_LABEL = 'API-Schlüssel von Anthropic'
+
+export const API_KEY_HINT =
+  'Beginnt mit „sk-ant-“. Nach dem Speichern zeigt Preposaurus nur noch die letzten vier Zeichen.'

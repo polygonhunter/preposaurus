@@ -160,7 +160,7 @@ Regeln:
 
 ```
 Anmelden
-Ersteinrichtung (Konto · Haushalt · Ziel · Home-Bildschirm)
+Ersteinrichtung (Konto · Haushalt · Ziel · Foto-Erkennung · Home-Bildschirm)
 
 Übersicht
 ├─ Erklär-Blatt „So wird gerechnet“ (Essen · Wasser · Ziel · Datenqualität)
@@ -401,7 +401,7 @@ Ist die Erkennung sicher und sind alle Felder gefüllt, geht die App nach Schrit
 | **Nachkaufen** | „Was nehme ich beim Einkauf mit?“ | 1 Fehlt bis zum Ziel (je Warengruppe in kg bzw. l, Wasser zuerst, mit Beispielen aus den Lebensmittelarten des Haushalts) · 2 Ersetzen (läuft vor dem Ziel ab, zuletzt verbraucht) · 3 Eigene Einträge · 4 Erledigt · 5 Ausgeblendet (Lücken, mit „Wieder zeigen“, #201) | Abhaken · „Gekauft und erfassen“ (öffnet Erfassen vorbelegt) · Eintrag ergänzen · Lücke ausblenden (kommt zurück, wenn sie um mehr als 10 % wächst, spätestens nach 30 Tagen) | *Leer:* „Nichts offen. Euer Ziel ist erreicht.“ bzw. „Setzt ein Ziel, dann rechnet die App die Lücken aus.“ |
 | **Statistik** | „Wie lief es über die Zeit?“ | 1 Abdeckung je Warengruppe in Prozent, auch über 100 % · 2 Verbraucht und entsorgt je Monat, mit Zeitraumwahl · 3 Verlauf „Tage versorgt“ (später) | Zeitraum wählen · Tipp auf einen Balken öffnet den Verlauf gefiltert | *Leer:* „Hier erscheint euer Verlauf, sobald ihr etwas verbraucht habt.“ *Nichts entsorgt:* „Nichts entsorgt. Schön so.“ |
 | **Einstellungen** | „Wo ändere ich das?“ | Liste der Bereiche mit aktuellem Wert rechts (z. B. „Ziel & Empfehlung · 10 Tage bis 01.03.“). Reihenfolge: Mein Konto, Haushalt, Nutzerverwaltung, Daten & System | Jede Zeile öffnet eine Unterseite, gespeichert wird je Feld sofort mit Rückgängig | Mitglied: Admin-Bereiche lesbar und gesperrt. Auf breit: Liste links, Bereich rechts |
-| **Ersteinrichtung** | „Wie komme ich in zwei Minuten zur ersten Zahl?“ | 1 Konto des Admins · 2 Haushalt (Personen mit Zählern, Details später) · 3 Ziel (10 Tage vorbelegt, Datum optional) · 4 Home-Bildschirm und Hinweis zu Push, überspringbar | Weiter · Zurück · Überspringen ab Schritt 3 | Bricht jemand ab, geht es beim nächsten Öffnen am selben Schritt weiter. Push wird hier nicht abgefragt, erst nach der ersten Erfassung mit MHD |
+| **Ersteinrichtung** | „Wie komme ich in zwei Minuten zur ersten Zahl?“ | 1 Konto des Admins · 2 Haushalt (Personen mit Zählern, Details später) · 3 Ziel (10 Tage vorbelegt, Datum optional) · 4 Foto-Erkennung: Schlüssel eintragen schaltet ein, mit dem Hinweis, wohin Fotos gehen und dass jedes etwas kostet; kommt die Verbindung aus der Umgebung, nur ein Satz und „Weiter“ (#314) · 5 Home-Bildschirm und Hinweis zu Push, überspringbar | Weiter · Zurück · Überspringen ab Schritt 3 („Später in den Einstellungen“ bei der Foto-Erkennung) | Bricht jemand ab, geht es beim nächsten Öffnen am selben Schritt weiter. Push wird hier nicht abgefragt, erst nach der ersten Erfassung mit MHD |
 | **Anmelden** | „Rein, ohne Hürde“ | E-Mail, Passwort, „Angemeldet bleiben“ ist Standard | Anmelden · „Passwort vergessen?“ zeigt „Ein Admin kann es zurücksetzen“ | Falsche Angaben: ein neutraler Satz, ohne zu verraten, welches Feld falsch war. NAS nicht erreichbar: Hinweis auf Tailscale |
 
 ## 9. Nutzerflüsse mit Tipp-Zählung

@@ -50,7 +50,9 @@
 | **5 Home-Bildschirm** | nur im iPhone- oder iPad-Browser, nicht wenn schon installiert: drei Bilder „Teilen → Zum Home-Bildschirm → Hinzufügen“ und der Satz „Dann öffnet Preposaurus wie eine App und kann euch Bescheid geben.“ | nein | – | Push geht auf dem iPhone nur so (PWA-01, PWA-02). Android und PC sehen den Schritt nicht, dort bietet der Browser das Installieren selbst an |
 | **Fertig** | „Alles bereit.“ Darunter die eine Zeile „Euer Ziel: 10 Tage für 2 Personen.“ und der Knopf „Zur Übersicht“ | – | – | Kein Konfetti. Die Übersicht ist der erste echte Screen |
 
-> **Umsetzung (#40, 2026-11-23):** Schritt 2 nutzt das Formular aus den Einstellungen (Name, Typ, Geburtsjahr) statt der Zähler, Schritt 4 (Foto-Erkennung) und die Seite „Fertig“ fehlen vorerst. Einzelheiten in `05_STATUS_ENTSCHEIDUNGEN.md`, Abschnitt „Festlegungen aus M3-09“.
+> **Umsetzung (#40, 2026-11-23):** Schritt 2 nutzt das Formular aus den Einstellungen (Name, Typ, Geburtsjahr) statt der Zähler, die Seite „Fertig“ fehlt vorerst. Einzelheiten in `05_STATUS_ENTSCHEIDUNGEN.md`, Abschnitt „Festlegungen aus M3-09“.
+>
+> **Umsetzung (#314, 2026-11-24):** Schritt 4 gibt es jetzt auch ohne Schlüssel in der `.env`: Dort trägt man den Schlüssel ein, das schaltet die Erkennung ein, „Später in den Einstellungen“ überspringt. Mit Verbindung aus der Umgebung nennt der Schritt sie nur und bietet „Weiter“, eingeschaltet wird dann unter Einstellungen → Foto-Erkennung. Einzelheiten in `05_STATUS_ENTSCHEIDUNGEN.md`, Abschnitt „Festlegungen aus #314“.
 
 **Nicht in der Einrichtung** (Standard steht, später in den Einstellungen): Haushaltsname („Unser Haushalt“), Namen, Geburtsjahre und Details der Personen, Ampel 90/28 Tage, „Noch gut“ aus, Wochenübersicht Sa 10:00, Lagerorte, weitere Nutzer, Push. Übernommen aus `SCHNITTSTELLEN.md` Nr. 7 und 9, mit zwei Fragen zur Ernährungsform und zur Foto-Erkennung (Fragen 3 und 4).
 
