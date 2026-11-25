@@ -3,7 +3,10 @@ import { GroupHeader } from '@/shared/ui/GroupHeader'
 import { Row } from '@/shared/ui/Row'
 
 const FACTS = [
-  { title: 'Fotos gehen an Anthropic', subtitle: 'Zur Erkennung, die Server stehen in den USA.' },
+  {
+    title: 'Fotos gehen an Anthropic',
+    subtitle: 'Zur Erkennung, Anthropic ist ein Anbieter aus den USA.',
+  },
   { title: 'Jedes Foto kostet etwas', subtitle: 'Einen kleinen Betrag, über euer Konto dort.' },
   { title: 'Nur Vorschläge', subtitle: 'Gespeichert wird erst, wenn ihr bestätigt.' },
 ] as const
